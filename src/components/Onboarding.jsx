@@ -41,7 +41,7 @@ export default function Onboarding({ onComplete }) {
   const inputStyle = {
     width: "100%", maxWidth: 320, background: "white", borderRadius: 16,
     padding: "16px 20px", color: T.textPrimary, fontSize: "1.15rem",
-    fontFamily: "'Plus Jakarta Sans',sans-serif", textAlign: "center",
+    fontFamily: "'Fredoka',sans-serif", textAlign: "center",
     outline: "none", fontWeight: 700, boxShadow: "0 4px 16px rgba(0,0,0,0.06)",
     minHeight: 48,
   };

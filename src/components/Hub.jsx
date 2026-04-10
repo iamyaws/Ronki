@@ -21,12 +21,12 @@ export default function Hub() {
   const catAllDone = state.catFed && state.catPetted && state.catPlayed;
 
   return (
-    <div className="view-enter" style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: "#FFF8F0" }}>
+    <div className="view-enter" style={{ background: "#FFF8F0" }}>
       <div style={{ padding: "env(safe-area-inset-top, 12px) 16px 0", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
         <img src={import.meta.env.BASE_URL + "ronki-egg.png"} alt="Ronki" style={{ height: 36, width: "auto" }} />
-        <button aria-label={pMode ? "Elternmodus deaktivieren" : "Elternmodus aktivieren"} onClick={() => pMode ? setPMode(false) : setPinShow(true)} style={{ background: "rgba(180,120,40,0.08)", border: "2px solid rgba(180,120,40,0.10)", borderRadius: 50, padding: "6px 12px", cursor: "pointer", color: T.textSecondary, fontSize: ".85rem", fontWeight: 700, minHeight: 44, minWidth: 44, display: "flex", alignItems: "center", justifyContent: "center" }}>{pMode ? "\uD83D\uDD13" : "\uD83D\uDD12"}</button>
+        <button aria-label={pMode ? "Elternmodus deaktivieren" : "Elternmodus aktivieren"} onClick={() => pMode ? setPMode(false) : setPinShow(true)} style={{ background: "rgba(180,120,40,0.08)", border: "2px solid rgba(180,120,40,0.10)", borderRadius: 50, padding: "6px 12px", cursor: "pointer", color: T.textSecondary, fontSize: ".95rem", fontWeight: 700, minHeight: 44, minWidth: 44, display: "flex", alignItems: "center", justifyContent: "center" }}>{pMode ? "\uD83D\uDD13" : "\uD83D\uDD12"}</button>
       </div>
-      <div style={{ flex: 1, padding: "0 16px 20px" }}>
+      <div style={{ padding: "0 16px 20px" }}>
         <ProfileCard state={state} level={level} mood={mood} weather={weather} wInfo={wInfo} todayDaily={todayDaily} actions={actions} onCompanionTap={() => ui.setView("companion")} />
         <LoginBonus claimed={state.loginBonusClaimed} onCollect={() => actions.collectLoginBonus()} />
 
@@ -35,7 +35,7 @@ export default function Hub() {
             <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
               <span style={{ fontSize: "1.6rem", flexShrink: 0, lineHeight: 1 }}>{tip.emoji}</span>
               <div>
-                <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: ".9rem", fontWeight: 800, color: "#B45309", textTransform: "uppercase", marginBottom: 4 }}>Helden-Tipp von {tip.char}</div>
+                <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: "1rem", fontWeight: 800, color: "#B45309", textTransform: "uppercase", marginBottom: 4 }}>Helden-Tipp von {tip.char}</div>
                 <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: "1.1rem", fontWeight: 600, color: T.textPrimary, lineHeight: 1.4 }}>{tip.tip}</div>
               </div>
             </div>
@@ -82,7 +82,7 @@ export default function Hub() {
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <span style={{ fontSize: "1.3rem" }}>{"\uD83C\uDF7D\uFE0F"}</span>
               <div>
-                <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: ".85rem", fontWeight: 800, color: T.textSecondary, textTransform: "uppercase" }}>Heute</div>
+                <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: ".95rem", fontWeight: 800, color: T.textSecondary, textTransform: "uppercase" }}>Heute</div>
                 <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: "1rem", fontWeight: 700, color: T.textPrimary }}>{lunch}</div>
               </div>
             </div>
@@ -91,7 +91,7 @@ export default function Hub() {
 
         {state.moodAM === null && (
           <div className="game-card" style={{ padding: 16, marginBottom: 12 }}>
-            <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: ".85rem", fontWeight: 800, color: T.textSecondary, textTransform: "uppercase", marginBottom: 10 }}>Wie startest du in den Tag? {"\uD83C\uDF05"}</div>
+            <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: ".95rem", fontWeight: 800, color: T.textSecondary, textTransform: "uppercase", marginBottom: 10 }}>Wie startest du in den Tag? {"\uD83C\uDF05"}</div>
             <div role="group" aria-label="Morgenstimmung w\u00E4hlen" style={{ display: "flex", justifyContent: "space-between", gap: 4 }}>
               {MOOD_EMOJIS.map((e, i) => (
                 <button key={i} aria-label={`Stimmung ${i + 1} von ${MOOD_EMOJIS.length}`} onClick={() => { SFX.play("pop"); actions.setMood("moodAM", i); setCeleb(true); }} style={{ fontSize: "2rem", background: "none", border: "none", cursor: "pointer", padding: "8px", borderRadius: 12, transition: "all .15s", minHeight: 52, minWidth: 52 }}>{e}</button>
@@ -104,10 +104,10 @@ export default function Hub() {
           <button key={mission.id} className="btn-tap game-card" onClick={() => actions.completeSpecialMission(mission.id)} style={{ width: "100%", padding: 14, marginBottom: 12, cursor: "pointer", background: "linear-gradient(135deg, rgba(251,191,36,0.1), rgba(245,158,11,0.05))", borderColor: "rgba(245,158,11,0.25)", display: "flex", alignItems: "center", gap: 12, textAlign: "left" }}>
             <span style={{ fontSize: "1.6rem", flexShrink: 0 }}>{mission.emoji}</span>
             <div style={{ flex: 1 }}>
-              <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: ".85rem", fontWeight: 800, color: "#B45309", textTransform: "uppercase" }}>Spezial-Mission</div>
+              <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: ".95rem", fontWeight: 800, color: "#B45309", textTransform: "uppercase" }}>Spezial-Mission</div>
               <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: "1rem", fontWeight: 700, color: T.textPrimary }}>{mission.name}</div>
             </div>
-            <div style={{ background: "linear-gradient(135deg, #FCD34D, #F59E0B)", borderRadius: 50, padding: "4px 12px", fontFamily: "'Fredoka',sans-serif", fontSize: ".85rem", fontWeight: 700, color: "white" }}>+{mission.hp} {"\u2B50"}</div>
+            <div style={{ background: "linear-gradient(135deg, #FCD34D, #F59E0B)", borderRadius: 50, padding: "4px 12px", fontFamily: "'Fredoka',sans-serif", fontSize: ".95rem", fontWeight: 700, color: "white" }}>+{mission.hp} {"\u2B50"}</div>
           </button>
         ))}
 
@@ -121,14 +121,14 @@ export default function Hub() {
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
                 <span style={{ fontSize: "1.4rem" }}>{chain.emoji}</span>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: ".85rem", fontWeight: 800, color: T.primary, textTransform: "uppercase" }}>Abenteuer-Kette</div>
+                  <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: ".95rem", fontWeight: 800, color: T.primary, textTransform: "uppercase" }}>Abenteuer-Kette</div>
                   <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: "1rem", fontWeight: 700, color: T.textPrimary }}>{chain.name}</div>
                 </div>
-                <div style={{ background: "linear-gradient(135deg, #FCD34D, #F59E0B)", borderRadius: 50, padding: "4px 12px", fontFamily: "'Fredoka',sans-serif", fontSize: ".85rem", fontWeight: 700, color: "white" }}>+{chain.hp} {"\u2B50"}</div>
+                <div style={{ background: "linear-gradient(135deg, #FCD34D, #F59E0B)", borderRadius: 50, padding: "4px 12px", fontFamily: "'Fredoka',sans-serif", fontSize: ".95rem", fontWeight: 700, color: "white" }}>+{chain.hp} {"\u2B50"}</div>
               </div>
               {daysLeft !== null && (
                 <div style={{
-                  fontSize: ".85rem", fontWeight: 800, marginBottom: 8,
+                  fontSize: ".95rem", fontWeight: 800, marginBottom: 8,
                   color: daysLeft <= 5 ? "#DC2626" : daysLeft <= 10 ? "#F59E0B" : T.textSecondary,
                 }}>
                   {"\uD83D\uDCC5"} {daysLeft > 0 ? `Noch ${daysLeft} Tage!` : daysLeft === 0 ? "Heute!" : "Abgelaufen"}
@@ -137,7 +137,7 @@ export default function Hub() {
               <div style={{ background: "rgba(109,40,217,0.08)", borderRadius: 50, height: 8, overflow: "hidden", marginBottom: 12 }}>
                 <div style={{ height: "100%", borderRadius: 50, width: `${(doneSteps / totalSteps) * 100}%`, background: "linear-gradient(90deg, #A78BFA, #7C3AED)", transition: "width .4s ease" }} />
               </div>
-              <div style={{ fontSize: ".85rem", fontWeight: 700, color: T.textSecondary, marginBottom: 8 }}>{doneSteps}/{totalSteps} Schritte</div>
+              <div style={{ fontSize: ".95rem", fontWeight: 700, color: T.textSecondary, marginBottom: 8 }}>{doneSteps}/{totalSteps} Schritte</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 {chain.steps.map((step, idx) => {
                   const isCurrent = idx === firstUndoneIdx;
@@ -163,9 +163,9 @@ export default function Hub() {
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
                 <span style={{ fontSize: "1.6rem", animation: "bossShake 0.6s ease-in-out infinite" }}>{bossData.icon}</span>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: ".85rem", fontWeight: 800, color: "#DC2626", textTransform: "uppercase", display: "flex", alignItems: "center", gap: 8 }}>
+                  <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: ".95rem", fontWeight: 800, color: "#DC2626", textTransform: "uppercase", display: "flex", alignItems: "center", gap: 8 }}>
                     Wochen-Boss
-                    {tierInfo && <span style={{ background: tierInfo.color + "20", color: tierInfo.color, borderRadius: 50, padding: "2px 10px", fontSize: ".85rem", fontWeight: 800, textTransform: "none" }}>{tierInfo.icon} {tierInfo.name}</span>}
+                    {tierInfo && <span style={{ background: tierInfo.color + "20", color: tierInfo.color, borderRadius: 50, padding: "2px 10px", fontSize: ".95rem", fontWeight: 800, textTransform: "none" }}>{tierInfo.icon} {tierInfo.name}</span>}
                   </div>
                   <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: "1rem", fontWeight: 700, color: T.textPrimary }}>{bossData.name}</div>
                 </div>
@@ -175,7 +175,7 @@ export default function Hub() {
               <div style={{ background: "rgba(239,68,68,0.08)", borderRadius: 50, height: 10, overflow: "hidden" }}>
                 <div style={{ height: "100%", borderRadius: 50, width: `${hpPct}%`, background: hpPct > 50 ? "linear-gradient(90deg, #EF4444, #F97316)" : hpPct > 25 ? "linear-gradient(90deg, #F59E0B, #FBBF24)" : "linear-gradient(90deg, #34D399, #6EE7B7)", transition: "width .6s ease" }} />
               </div>
-              <div style={{ fontSize: ".85rem", color: T.textLight, marginTop: 6, textAlign: "center" }}>Aufgaben abschlie\u00DFen, um den Boss anzugreifen!</div>
+              <div style={{ fontSize: ".95rem", color: T.textLight, marginTop: 6, textAlign: "center" }}>Aufgaben abschlie\u00DFen, um den Boss anzugreifen!</div>
             </div>
           );
         })()}
@@ -188,7 +188,7 @@ export default function Hub() {
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <span style={{ fontSize: "1.4rem" }}>{"\uD83C\uDFC6"}</span>
                 <div>
-                  <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 800, fontSize: ".9rem", color: T.successDark, textTransform: "uppercase" }}>Boss besiegt!</div>
+                  <div style={{ fontFamily: "'Fredoka',sans-serif", fontWeight: 800, fontSize: "1rem", color: T.successDark, textTransform: "uppercase" }}>Boss besiegt!</div>
                   <div style={{ fontSize: ".9rem", fontWeight: 700, color: T.textPrimary }}>{bossData.icon} {bossData.name} wurde besiegt!</div>
                 </div>
               </div>
@@ -206,7 +206,7 @@ export default function Hub() {
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
                 <span style={{ fontSize: "1.4rem" }}>{wm.icon}</span>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: ".85rem", fontWeight: 800, color: wmDone ? T.successDark : T.primary, textTransform: "uppercase" }}>{wmDone ? "\uD83D\uDCAA Geschafft!" : "Wochen-Mission"}</div>
+                  <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: ".95rem", fontWeight: 800, color: wmDone ? T.successDark : T.primary, textTransform: "uppercase" }}>{wmDone ? "\uD83D\uDCAA Geschafft!" : "Wochen-Mission"}</div>
                   <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: "1rem", fontWeight: 700, color: T.textPrimary }}>{wm.title}</div>
                 </div>
                 <div className="mission-reward"><span style={{ fontFamily: "'Fredoka',sans-serif", fontSize: "1rem", fontWeight: 700, color: wmDone ? T.success : T.primary }}>{Math.min(wp, wm.target)}/{wm.target}</span></div>

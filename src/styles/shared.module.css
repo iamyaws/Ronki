@@ -11,7 +11,7 @@
 
 /* ── Typography ── */
 .heading {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Fredoka', sans-serif;
   font-weight: 800;
   text-transform: uppercase;
 }
@@ -45,7 +45,7 @@
 
 /* ── Section label ── */
 .sectionTitle {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Fredoka', sans-serif;
   font-weight: 800;
   font-size: .8rem;
   color: #64748B;

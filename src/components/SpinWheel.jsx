@@ -25,7 +25,7 @@ export default function SpinWheel({ onResult }) {
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 9990, display: "flex", alignItems: "center", justifyContent: "center", animation: "fadeIn .3s ease" }}>
       <div style={{ background: "white", borderRadius: 28, padding: 24, textAlign: "center", maxWidth: 340, width: "90%", boxShadow: "0 24px 64px rgba(0,0,0,0.2)" }}>
-        <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: "1.3rem", fontWeight: 800, color: T.primary, textTransform: "uppercase", fontStyle: "italic", marginBottom: 4 }}>{"\u{1F3A1}"} Glücksrad!</div>
+        <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: "1.3rem", fontWeight: 800, color: T.primary, textTransform: "uppercase", fontStyle: "italic", marginBottom: 4 }}>{"\u{1F3A1}"} Glücksrad!</div>
         <div style={{ fontSize: ".8rem", color: T.textSecondary, marginBottom: 16 }}>Dein Einsatz hat sich gelohnt!</div>
         <div style={{ position: "relative", width: 220, height: 220, margin: "0 auto 16px" }}>
           <div style={{ position: "absolute", top: -8, left: "50%", transform: "translateX(-50%)", zIndex: 10, fontSize: "1.5rem" }}>{"\u25BC"}</div>
@@ -53,7 +53,7 @@ export default function SpinWheel({ onResult }) {
             border: "none", borderRadius: 50, padding: "16px 40px",
             color: "white", fontWeight: 800, fontSize: "1.05rem",
             cursor: spinning ? "default" : "pointer",
-            fontFamily: "'Plus Jakarta Sans',sans-serif",
+            fontFamily: "'Fredoka',sans-serif",
             opacity: spinning ? .6 : 1, boxShadow: `0 8px 24px ${T.primary}40`,
             minHeight: 48,
           }}>
@@ -62,12 +62,12 @@ export default function SpinWheel({ onResult }) {
         ) : (
           <div>
             <div style={{ fontSize: "2.5rem", marginBottom: 8 }}>{result.icon}</div>
-            <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 800, fontSize: "1.05rem", color: T.primary, marginBottom: 4 }}>{result.label}</div>
+            <div style={{ fontFamily: "'Fredoka',sans-serif", fontWeight: 800, fontSize: "1.05rem", color: T.primary, marginBottom: 4 }}>{result.label}</div>
             <button onClick={() => onResult(result)} style={{
               background: `linear-gradient(135deg,${T.success},${T.successDark})`,
               border: "none", borderRadius: 50, padding: "14px 36px",
               color: "white", fontWeight: 800, cursor: "pointer",
-              fontFamily: "'Plus Jakarta Sans',sans-serif", marginTop: 8, minHeight: 48,
+              fontFamily: "'Fredoka',sans-serif", marginTop: 8, minHeight: 48,
             }}>
               Einsammeln! {"\u2728"}
             </button>

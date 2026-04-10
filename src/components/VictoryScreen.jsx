@@ -83,7 +83,7 @@ export default function VictoryScreen({ onClose, onSpinWheel, onMemoryGame }) {
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
           <span style={{ fontSize: "2rem" }}>{"\u{1F33F}"}</span>
           <div style={{
-            fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: "1.8rem", fontWeight: 900,
+            fontFamily: "'Fredoka',sans-serif", fontSize: "1.8rem", fontWeight: 900,
             color: T.accent, textTransform: "uppercase", fontStyle: "italic",
             textShadow: "0 0 20px rgba(252,211,77,0.6), 0 2px 8px rgba(0,0,0,0.4)", letterSpacing: "-0.02em",
           }}>
@@ -133,7 +133,7 @@ export default function VictoryScreen({ onClose, onSpinWheel, onMemoryGame }) {
               background: `linear-gradient(135deg, ${T.accent}, ${T.accentDark})`,
               border: "none", borderRadius: 50, padding: "16px 36px",
               color: "white", fontWeight: 800, fontSize: "1.05rem", cursor: "pointer",
-              fontFamily: "'Plus Jakarta Sans',sans-serif",
+              fontFamily: "'Fredoka',sans-serif",
               boxShadow: "0 8px 24px rgba(252,211,77,0.4)",
               textTransform: "uppercase", minHeight: 52,
             }}>
@@ -145,7 +145,7 @@ export default function VictoryScreen({ onClose, onSpinWheel, onMemoryGame }) {
               background: `linear-gradient(135deg, #8B5CF6, #A78BFA)`,
               border: "none", borderRadius: 50, padding: "14px 36px",
               color: "white", fontWeight: 800, fontSize: ".95rem", cursor: "pointer",
-              fontFamily: "'Plus Jakarta Sans',sans-serif",
+              fontFamily: "'Fredoka',sans-serif",
               boxShadow: "0 8px 24px rgba(139,92,246,0.3)",
               minHeight: 48,
             }}>
@@ -156,7 +156,7 @@ export default function VictoryScreen({ onClose, onSpinWheel, onMemoryGame }) {
             background: state.wheelSpun ? `linear-gradient(135deg, ${T.primary}, ${T.primaryLight})` : "rgba(255,255,255,0.15)",
             border: "none", borderRadius: 50, padding: "14px 36px",
             color: "white", fontWeight: 800, fontSize: state.wheelSpun ? "1.05rem" : ".9rem",
-            cursor: "pointer", fontFamily: "'Plus Jakarta Sans',sans-serif",
+            cursor: "pointer", fontFamily: "'Fredoka',sans-serif",
             boxShadow: state.wheelSpun ? `0 8px 24px ${T.primary}40` : "none",
             minHeight: 48,
           }}>

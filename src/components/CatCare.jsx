@@ -41,7 +41,7 @@ export default function CatCare() {
     else if (action.key === "played") actions.playCat();
     setAnim(action.key);
     setMsg(action.msg);
-    setTimeout(() => { setAnim(null); setMsg(null); }, 3000);
+    setTimeout(() => { setAnim(null); setMsg(null); }, 4500);
   };
 
   const stats = [
@@ -59,7 +59,7 @@ export default function CatCare() {
         <div className="game-card" style={{ padding: 16, marginBottom: 14 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
             <div>
-              <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: ".85rem", fontWeight: 800, color: T.primary, textTransform: "uppercase" }}>Entwicklung</div>
+              <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: ".85rem", fontWeight: 800, color: T.primary, textTransform: "uppercase" }}>Entwicklung</div>
               <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: "1.2rem", fontWeight: 700, color: T.textPrimary }}>{stageInfo.emoji} {stageInfo.name}</div>
             </div>
             <div style={{ textAlign: "right" }}>
@@ -88,7 +88,7 @@ export default function CatCare() {
 
         {/* Stats */}
         <div className="game-card" style={{ padding: 16, marginBottom: 14 }}>
-          <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: ".9rem", fontWeight: 800, color: T.textSecondary, textTransform: "uppercase", marginBottom: 10 }}>Zustand</div>
+          <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: ".9rem", fontWeight: 800, color: T.textSecondary, textTransform: "uppercase", marginBottom: 10 }}>Zustand</div>
           {stats.map(s => (
             <div key={s.label} style={{ marginBottom: 10 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 3 }}>

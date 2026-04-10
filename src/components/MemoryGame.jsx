@@ -66,7 +66,7 @@ export default function MemoryGame({ onComplete }) {
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 9990, display: "flex", alignItems: "center", justifyContent: "center", animation: "fadeIn .3s ease" }}>
       <div style={{ background: "white", borderRadius: 28, padding: 24, textAlign: "center", maxWidth: 360, width: "92%", boxShadow: "0 24px 64px rgba(0,0,0,0.2)" }}>
-        <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: "1.3rem", fontWeight: 800, color: T.primary, textTransform: "uppercase", fontStyle: "italic", marginBottom: 4 }}>{"\u{1F9E0}"} Memo-Spiel!</div>
+        <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: "1.3rem", fontWeight: 800, color: T.primary, textTransform: "uppercase", fontStyle: "italic", marginBottom: 4 }}>{"\u{1F9E0}"} Memo-Spiel!</div>
         <div style={{ fontSize: ".8rem", color: T.textSecondary, marginBottom: 12 }}>
           {won ? `Geschafft in ${moves} Versuchen!` : "Finde alle Paare!"}
         </div>
@@ -115,7 +115,7 @@ export default function MemoryGame({ onComplete }) {
               background: `linear-gradient(135deg, ${T.success}, ${T.successDark})`,
               border: "none", borderRadius: 50, padding: "14px 36px",
               color: "white", fontWeight: 800, cursor: "pointer",
-              fontFamily: "'Plus Jakarta Sans',sans-serif", marginTop: 12, minHeight: 48,
+              fontFamily: "'Fredoka',sans-serif", marginTop: 12, minHeight: 48,
               fontSize: "1rem",
             }}>
               Einsammeln! {"\u2728"}

@@ -26,12 +26,34 @@ import BossChest from './components/BossChest';
 import EvolutionCelebration from './components/EvolutionCelebration';
 import ErrorBoundary from './components/ErrorBoundary';
 
+// ── SVG Tab Icons (consistent, themeable, cross-platform) ──
+const TabIconWeather = ({ active }) => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? "#B45309" : "#9C977E"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41m11.32-11.32l1.41-1.41"/>
+  </svg>
+);
+const TabIconTrophy = ({ active }) => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? "#B45309" : "#9C977E"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6m12 5h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20 7 22m10 0c0-2-.85-3.25-2.03-3.79A1.07 1.07 0 0 1 14 17v-2.34"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
+  </svg>
+);
+const TabIconHome = ({ active }) => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? "#B45309" : "#9C977E"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+  </svg>
+);
+const TabIconBox = ({ active }) => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? "#B45309" : "#9C977E"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/>
+  </svg>
+);
+
 const TABS = [
-  { id: "weather", label: "Wetter", icon: "\u2600\uFE0F" },
-  { id: "stats", label: "Erfolge", icon: "\u{1F3C6}" },
-  { id: "quest", label: "", icon: "\u2B50", isCta: true },
-  { id: "room", label: "Zimmer", icon: "\u{1F3E0}" },
-  { id: "shop", label: "Sammlung", icon: "\u{1F4E6}" },
+  { id: "weather", label: "Wetter", Icon: TabIconWeather },
+  { id: "stats", label: "Erfolge", Icon: TabIconTrophy },
+  { id: "quest", label: "", icon: null, isCta: true },
+  { id: "room", label: "Zimmer", Icon: TabIconHome },
+  { id: "shop", label: "Sammlung", Icon: TabIconBox },
 ];
 
 function BottomTabBar() {
@@ -50,7 +72,7 @@ function BottomTabBar() {
         const isActive = view === tab.id;
         return (
           <button key={tab.id} className={`tab-item ${isActive ? "tab-item-active" : ""}`} onClick={() => { SFX.play("tap"); setView(tab.id); }} aria-label={tab.label}>
-            <div className={`tab-icon ${isActive ? "tab-icon-active" : ""}`}>{tab.icon}</div>
+            <div className={`tab-icon ${isActive ? "tab-icon-active" : ""}`}><tab.Icon active={isActive} /></div>
             <span className={`tab-label ${isActive ? "tab-label-active" : ""}`}>{tab.label}</span>
           </button>
         );

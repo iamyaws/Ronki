@@ -60,7 +60,7 @@ export default function Weather() {
             <div style={{ fontSize: ".8rem", color: T.textSecondary, fontWeight: 600 }}>Fühlt sich an wie {current.feelsLike}°</div>
           </div>
           <div style={{ textAlign: "right" }}>
-            <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 800, fontSize: ".85rem", color: T.textPrimary }}>{currentInfo.label}</div>
+            <div style={{ fontFamily: "'Fredoka',sans-serif", fontWeight: 800, fontSize: ".85rem", color: T.textPrimary }}>{currentInfo.label}</div>
             <div style={{ fontSize: ".7rem", color: T.textSecondary, fontWeight: 600, marginTop: 2 }}>Unterföhring</div>
           </div>
         </div>
@@ -102,7 +102,7 @@ export default function Weather() {
 
       {/* ── What to Wear ── */}
       <div style={{ marginBottom: 8 }}>
-        <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 800, fontSize: ".85rem", color: "#1E1B4B", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
+        <div style={{ fontFamily: "'Fredoka',sans-serif", fontWeight: 800, fontSize: ".85rem", color: "#1E1B4B", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
           <span style={{ fontSize: "1.1rem" }}>{"\u{1F455}"}</span>
           Was soll ich heute anziehen?
         </div>

@@ -16,7 +16,7 @@ export default function PinModal({ pin, setPin, onSuccess, onClose }) {
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.4)", zIndex: 999, display: "flex", alignItems: "center", justifyContent: "center", animation: "fadeIn .2s ease" }} onClick={onClose}>
       <div onClick={e => e.stopPropagation()} style={{ background: "white", borderRadius: 28, padding: 28, textAlign: "center", boxShadow: "0 24px 64px rgba(0,0,0,0.15)", minWidth: 280 }}>
-        <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: "1.05rem", fontWeight: 800, marginBottom: 16 }}>Eltern-PIN</div>
+        <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: "1.05rem", fontWeight: 800, marginBottom: 16 }}>Eltern-PIN</div>
         <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 20 }}>
           {[0, 1, 2, 3].map(i => (
             <div key={i} style={{ width: 48, height: 56, borderRadius: 14, background: T.bg, border: "2px solid rgba(0,0,0,0.08)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.5rem", fontWeight: 800, color: T.primary }}>

@@ -26,7 +26,7 @@ export default class ErrorBoundary extends React.Component {
         }}>
           <div style={{ fontSize: "3rem", marginBottom: 16 }}>{"\u{1F431}"}</div>
           <h2 style={{
-            fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 800,
+            fontFamily: "'Fredoka',sans-serif", fontWeight: 800,
             fontSize: "1.2rem", marginBottom: 8,
           }}>
             Ups! Da ist etwas schiefgelaufen.
@@ -40,7 +40,7 @@ export default class ErrorBoundary extends React.Component {
               background: `linear-gradient(135deg,${T.primary},${T.primaryLight})`,
               border: "none", borderRadius: 50, padding: "14px 32px",
               color: "white", fontWeight: 800, fontSize: ".95rem", cursor: "pointer",
-              fontFamily: "'Plus Jakarta Sans',sans-serif", minHeight: 48,
+              fontFamily: "'Fredoka',sans-serif", minHeight: 48,
               boxShadow: `0 8px 24px ${T.primary}40`,
             }}
           >

@@ -79,7 +79,7 @@ export default function CompanionProfile() {
       </div>
 
       <div className="game-card" style={{ padding: 16, marginBottom: 14 }}>
-        <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: ".9rem", fontWeight: 800, color: T.primary, textTransform: "uppercase", marginBottom: 12 }}>Steckbrief</div>
+        <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: ".9rem", fontWeight: 800, color: T.primary, textTransform: "uppercase", marginBottom: 12 }}>Steckbrief</div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
           {[{ label: "Art", value: facts.species, icon: "\uD83D\uDCCB" }, { label: "Alter", value: `${ageDays} Tag${ageDays !== 1 ? "e" : ""}`, icon: "\uD83C\uDF82" }, { label: "Gr\u00f6\u00dfe", value: facts.heights[stage], icon: "\uD83D\uDCCF" }, { label: "Gewicht", value: facts.weights[stage], icon: "\u2696\uFE0F" }].map((s, i) => (
             <div key={i} style={{ background: "rgba(180,120,40,0.04)", borderRadius: 14, padding: "10px 12px", display: "flex", alignItems: "center", gap: 8 }}>
@@ -105,7 +105,7 @@ export default function CompanionProfile() {
       </div>
 
       <div className="game-card" style={{ padding: 16, marginBottom: 14 }}>
-        <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: ".9rem", fontWeight: 800, color: T.primary, textTransform: "uppercase", marginBottom: 12 }}>Zustand</div>
+        <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: ".9rem", fontWeight: 800, color: T.primary, textTransform: "uppercase", marginBottom: 12 }}>Zustand</div>
         {[{ label: "Hunger", value: hunger, color: "#F97316", icon: "\uD83C\uDF63" }, { label: "Gl\u00fcck", value: happy, color: "#EC4899", icon: "\uD83D\uDC9B" }, { label: "Energie", value: energy, color: "#3B82F6", icon: "\u26A1" }].map((s, i) => (
           <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
             <span style={{ fontSize: "1.1rem", width: 24, textAlign: "center" }}>{s.icon}</span>
@@ -117,12 +117,12 @@ export default function CompanionProfile() {
       </div>
 
       <div className="game-card" style={{ padding: 16, marginBottom: 14 }}>
-        <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: ".9rem", fontWeight: 800, color: T.primary, textTransform: "uppercase", marginBottom: 12 }}>Evolution</div>
+        <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: ".9rem", fontWeight: 800, color: T.primary, textTransform: "uppercase", marginBottom: 12 }}>Evolution</div>
         <EvolutionTracker catEvo={state.catEvo || 0} companionType={type} currentStage={stage} />
       </div>
 
       <div className="game-card" style={{ padding: 16, marginBottom: 14 }}>
-        <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: ".9rem", fontWeight: 800, color: T.primary, textTransform: "uppercase", marginBottom: 12 }}>Ausr\u00fcstung</div>
+        <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: ".9rem", fontWeight: 800, color: T.primary, textTransform: "uppercase", marginBottom: 12 }}>Ausr\u00fcstung</div>
         <GearSlots equippedGear={state.equippedGear || {}} purchased={state.purchased || []} onEquip={(slot, id) => actions.equipGear(slot, id)} onUnequip={(slot) => actions.unequipGear(slot)} />
       </div>
 

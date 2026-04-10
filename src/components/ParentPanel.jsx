@@ -22,7 +22,7 @@ export default function ParentPanel() {
 
   return (
     <div style={{ background: "white", borderRadius: 22, padding: 16, border: `3px solid rgba(109,40,217,0.1)`, marginTop: 8, boxShadow: "0 4px 16px rgba(0,0,0,0.04)" }}>
-      <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 800, fontSize: ".85rem", color: T.primary, marginBottom: 10, textTransform: "uppercase" }}>{"\u2699\uFE0F"} Eltern</div>
+      <div style={{ fontFamily: "'Fredoka',sans-serif", fontWeight: 800, fontSize: ".85rem", color: T.primary, marginBottom: 10, textTransform: "uppercase" }}>{"\u2699\uFE0F"} Eltern</div>
 
       <button onClick={actions.togVac} style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(180,120,40,0.04)", border: `2.5px solid ${state.vacMode ? T.success + "40" : "rgba(180,120,40,0.08)"}`, borderRadius: 16, padding: "12px 14px", cursor: "pointer", marginBottom: 12, fontFamily: "'Nunito',sans-serif", minHeight: 48 }}>
         <span style={{ fontWeight: 700, fontSize: ".85rem", color: state.vacMode ? T.successDark : T.textPrimary }}>{state.vacMode ? "\u{1F3D6}\uFE0F Ferienmodus" : "\u{1F4DA} Schulmodus"}</span>
@@ -36,7 +36,7 @@ export default function ParentPanel() {
           <input type="number" value={nq.xp} onChange={e => setNq(n => ({ ...n, xp: +e.target.value }))} style={{ width: 55, background: "rgba(180,120,40,0.04)", border: "2.5px solid rgba(180,120,40,0.08)", borderRadius: 12, padding: "8px", fontSize: ".85rem", textAlign: "center", minHeight: 40 }} placeholder="HP" />
           <input type="number" value={nq.minutes} onChange={e => setNq(n => ({ ...n, minutes: +e.target.value }))} style={{ width: 55, background: "rgba(180,120,40,0.04)", border: "2.5px solid rgba(180,120,40,0.08)", borderRadius: 12, padding: "8px", fontSize: ".85rem", textAlign: "center", minHeight: 40 }} placeholder="Min" />
         </div>
-        <button onClick={() => actions.addQuest(nq, () => setNq(n => ({ ...n, name: "" })))} style={{ background: `linear-gradient(135deg,${T.primary},${T.primaryLight})`, border: "none", borderRadius: 14, padding: "12px", color: "white", fontWeight: 800, cursor: "pointer", fontSize: ".85rem", fontFamily: "'Plus Jakarta Sans',sans-serif", minHeight: 44 }}>Erstellen</button>
+        <button onClick={() => actions.addQuest(nq, () => setNq(n => ({ ...n, name: "" })))} style={{ background: `linear-gradient(135deg,${T.primary},${T.primaryLight})`, border: "none", borderRadius: 14, padding: "12px", color: "white", fontWeight: 800, cursor: "pointer", fontSize: ".85rem", fontFamily: "'Fredoka',sans-serif", minHeight: 44 }}>Erstellen</button>
       </div>
 
       <div style={{ background: "rgba(180,120,40,0.04)", borderRadius: 16, padding: 12, marginTop: 10, border: "2.5px solid rgba(180,120,40,0.08)" }}>
@@ -64,7 +64,7 @@ export default function ParentPanel() {
       </div>
 
       <div className="game-card" style={{ padding: 16, marginTop: 12, border: "2.5px solid rgba(234,160,60,0.18)", background: "linear-gradient(135deg, #FFFBF2, #FFFFFF)" }}>
-        <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 800, fontSize: ".85rem", color: T.primary, marginBottom: 10, textTransform: "uppercase" }}>{"\uD83C\uDF7D\uFE0F Wochenmen\u00FC"}</div>
+        <div style={{ fontFamily: "'Fredoka',sans-serif", fontWeight: 800, fontSize: ".85rem", color: T.primary, marginBottom: 10, textTransform: "uppercase" }}>{"\uD83C\uDF7D\uFE0F Wochenmen\u00FC"}</div>
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {DAYS.map(day => (
             <div key={day} style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -73,11 +73,11 @@ export default function ParentPanel() {
             </div>
           ))}
         </div>
-        <button onClick={() => actions.updateWeeklyLunch(lunchDraft)} style={{ width: "100%", marginTop: 10, background: `linear-gradient(135deg,${T.primary},${T.primaryLight})`, border: "none", borderRadius: 14, padding: "12px", color: "white", fontWeight: 800, cursor: "pointer", fontSize: ".85rem", fontFamily: "'Plus Jakarta Sans',sans-serif", minHeight: 44 }}>{"\uD83D\uDCBE"} Speichern</button>
+        <button onClick={() => actions.updateWeeklyLunch(lunchDraft)} style={{ width: "100%", marginTop: 10, background: `linear-gradient(135deg,${T.primary},${T.primaryLight})`, border: "none", borderRadius: 14, padding: "12px", color: "white", fontWeight: 800, cursor: "pointer", fontSize: ".85rem", fontFamily: "'Fredoka',sans-serif", minHeight: 44 }}>{"\uD83D\uDCBE"} Speichern</button>
       </div>
 
       <div className="game-card" style={{ padding: 16, marginTop: 12, border: "2.5px solid rgba(109,40,217,0.12)", background: "linear-gradient(135deg, #F9F5FF, #FFFFFF)" }}>
-        <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 800, fontSize: ".85rem", color: T.primary, marginBottom: 10, textTransform: "uppercase" }}>{"\uD83C\uDFAF"} Spezial-Mission erstellen</div>
+        <div style={{ fontFamily: "'Fredoka',sans-serif", fontWeight: 800, fontSize: ".85rem", color: T.primary, marginBottom: 10, textTransform: "uppercase" }}>{"\uD83C\uDFAF"} Spezial-Mission erstellen</div>
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           <input value={smName} onChange={e => setSmName(e.target.value)} placeholder="z.B. Zahnarzt besuchen" style={{ background: "rgba(180,120,40,0.04)", border: "2.5px solid rgba(180,120,40,0.08)", borderRadius: 14, padding: "10px 14px", fontSize: ".95rem", fontFamily: "'Nunito',sans-serif", outline: "none", fontWeight: 600, minHeight: 44 }} />
           <div>
@@ -92,7 +92,7 @@ export default function ParentPanel() {
             <span style={{ fontSize: ".85rem", fontWeight: 700, color: T.textSecondary, whiteSpace: "nowrap" }}>HP Belohnung:</span>
             <input type="number" value={smHp} onChange={e => setSmHp(+e.target.value)} style={{ width: 70, background: "rgba(180,120,40,0.04)", border: "2.5px solid rgba(180,120,40,0.08)", borderRadius: 12, padding: "8px", fontSize: ".9rem", textAlign: "center", fontFamily: "'Fredoka',sans-serif", fontWeight: 600, minHeight: 44 }} />
           </div>
-          <button onClick={() => { if (smName.trim()) { actions.addSpecialMission({ name: smName.trim(), emoji: smEmoji, hp: smHp }); setSmName(""); setSmEmoji("\uD83C\uDF81"); setSmHp(30); } }} style={{ background: `linear-gradient(135deg,${T.primary},${T.primaryLight})`, border: "none", borderRadius: 14, padding: "12px", color: "white", fontWeight: 800, cursor: "pointer", fontSize: ".85rem", fontFamily: "'Plus Jakarta Sans',sans-serif", minHeight: 44 }}>Erstellen</button>
+          <button onClick={() => { if (smName.trim()) { actions.addSpecialMission({ name: smName.trim(), emoji: smEmoji, hp: smHp }); setSmName(""); setSmEmoji("\uD83C\uDF81"); setSmHp(30); } }} style={{ background: `linear-gradient(135deg,${T.primary},${T.primaryLight})`, border: "none", borderRadius: 14, padding: "12px", color: "white", fontWeight: 800, cursor: "pointer", fontSize: ".85rem", fontFamily: "'Fredoka',sans-serif", minHeight: 44 }}>Erstellen</button>
         </div>
         {(state.specialMissions || []).length > 0 && <div style={{ marginTop: 12 }}>
           <div style={{ fontSize: ".85rem", fontWeight: 800, color: T.textSecondary, textTransform: "uppercase", marginBottom: 6 }}>Aktive Spezial-Missionen</div>

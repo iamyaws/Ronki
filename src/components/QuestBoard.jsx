@@ -29,7 +29,7 @@ export default function QuestBoard() {
     if (navigator.vibrate) navigator.vibrate(80);
     const msg = COMPANION_MESSAGES[Math.floor(Math.random() * COMPANION_MESSAGES.length)];
     setCompanionMsg(`${companionName} ${msg}`);
-    setTimeout(() => setCompanionMsg(null), 2500);
+    setTimeout(() => setCompanionMsg(null), 4500);
   };
 
   function getClothingHint(temp) {
@@ -63,7 +63,7 @@ export default function QuestBoard() {
           <div style={{ width: 44, height: 5, borderRadius: 3, background: "rgba(180,120,40,0.14)", margin: "0 auto 8px" }} />
           <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "0 4px" }}>
             <button aria-label="Aufgaben schließen" onClick={() => { setQuestOpen(false); window.scrollTo(0, 0); }} className="btn-tap" style={{ background: "white", border: "2.5px solid rgba(180,120,40,0.10)", borderRadius: 14, padding: "8px 14px", cursor: "pointer", fontSize: ".9rem", fontWeight: 800, color: T.textSecondary, boxShadow: "0 2px 8px rgba(0,0,0,0.06)", display: "flex", alignItems: "center", gap: 4, minHeight: 44 }}>{"\u2190"} Zurück</button>
-            <div style={{ flex: 1, fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: "1rem", fontWeight: 800, color: T.primary, textTransform: "uppercase" }}>{"\u2B50"} Helden-Aufgaben</div>
+            <div style={{ flex: 1, fontFamily: "'Fredoka',sans-serif", fontSize: "1.1rem", fontWeight: 800, color: T.primary, textTransform: "uppercase" }}>{"\u2B50"} Helden-Aufgaben</div>
           </div>
         </div>
 
@@ -97,14 +97,14 @@ export default function QuestBoard() {
         {state.comebackActive && <div className="mission-card" style={{ marginBottom: 14, background: "linear-gradient(135deg, #FFF7ED, #FFFBF5)", borderColor: "#F9731630" }}>
           <div style={{ width: 48, height: 48, borderRadius: 14, background: "#FED7AA", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.5rem", flexShrink: 0 }}>{"\u{1F431}"}</div>
           <div style={{ flex: 1 }}>
-            <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: ".85rem", fontWeight: 800, color: "#EA580C", textTransform: "uppercase" }}>Willkommen zurück!</div>
+            <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: ".95rem", fontWeight: 800, color: "#EA580C", textTransform: "uppercase" }}>Willkommen zurück!</div>
             <div style={{ fontSize: ".85rem", color: T.textSecondary, fontWeight: 600 }}>Deine Katze hat auf dich gewartet!</div>
             <button className="btn-tap" onClick={actions.completeComeback} style={{
               width: "100%", marginTop: 8,
               background: "linear-gradient(135deg, #F97316, #FCD34D)",
               border: "none", borderRadius: 14, padding: "10px",
               color: "white", fontWeight: 800, fontSize: ".85rem", cursor: "pointer",
-              fontFamily: "'Plus Jakarta Sans',sans-serif", minHeight: 44,
+              fontFamily: "'Fredoka',sans-serif", minHeight: 44,
             }}>{"\u{1F43E}"} Ich bin wieder da! (+15 {"\u2B50"})</button>
           </div>
         </div>}
@@ -112,7 +112,7 @@ export default function QuestBoard() {
         {/* Overall progress */}
         <div className="game-card" style={{ padding: 16, marginBottom: 14, background: allDone ? "linear-gradient(135deg, rgba(52,211,153,0.06), rgba(52,211,153,0.02))" : "white", borderColor: allDone ? `${T.success}40` : undefined }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-            <span style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: ".85rem", fontWeight: 800, color: allDone ? T.successDark : T.textPrimary, textTransform: "uppercase" }}>{allDone ? "\u{1F4AA} Durchgehalten!" : `${done}/${total} Aufgaben`}</span>
+            <span style={{ fontFamily: "'Fredoka',sans-serif", fontSize: ".95rem", fontWeight: 800, color: allDone ? T.successDark : T.textPrimary, textTransform: "uppercase" }}>{allDone ? "\u{1F4AA} Durchgehalten!" : `${done}/${total} Aufgaben`}</span>
             <span style={{ fontFamily: "'Fredoka',sans-serif", fontSize: ".85rem", fontWeight: 700, color: T.primary }}>+{state.dt} Min</span>
           </div>
           <div className="mission-progress-track"><div className="mission-progress-fill" style={{ width: `${pct * 100}%`, background: allDone ? `linear-gradient(90deg,${T.success},#6EE7B7)` : `linear-gradient(90deg,${T.primary},${T.primaryLight})` }} /></div>
@@ -121,7 +121,7 @@ export default function QuestBoard() {
         {/* Rainbow */}
         <div className="game-card" style={{ padding: 14, marginBottom: 14 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-            <span style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: ".85rem", fontWeight: 800, color: T.textPrimary, textTransform: "uppercase" }}>{"\u{1F308}"} Iss den Regenbogen</span>
+            <span style={{ fontFamily: "'Fredoka',sans-serif", fontSize: ".95rem", fontWeight: 800, color: T.textPrimary, textTransform: "uppercase" }}>{"\u{1F308}"} Iss den Regenbogen</span>
             {(state.rainbow || []).every(Boolean) && <span style={{ fontSize: ".85rem", fontWeight: 800, color: T.success }}>+25 {"\u2B50"}! {"\u{1F389}"}</span>}
           </div>
           <div style={{ display: "flex", gap: 6, justifyContent: "space-between" }}>{RAINBOW.map((emoji, i) => {
@@ -135,7 +135,7 @@ export default function QuestBoard() {
 
         {/* Evening mood */}
         {allDone && state.moodPM === null && <div className="game-card" style={{ padding: 16, marginBottom: 14, background: "linear-gradient(135deg, rgba(109,40,217,0.04), rgba(252,211,77,0.04))" }}>
-          <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: ".85rem", fontWeight: 800, color: T.primary, textTransform: "uppercase", marginBottom: 10 }}>{"\u{1F319}"} Worauf bist du heute stolz?</div>
+          <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: ".95rem", fontWeight: 800, color: T.primary, textTransform: "uppercase", marginBottom: 10 }}>{"\u{1F319}"} Worauf bist du heute stolz?</div>
           <div role="group" aria-label="Abendstimmung wählen" style={{ display: "flex", justifyContent: "space-between", gap: 4, marginBottom: 12 }}>{MOOD_EMOJIS.map((e, i) => <button key={i} aria-label={`Stimmung ${i + 1} von 6`} onClick={() => actions.setMood("moodPM", i)} style={{ fontSize: "1.8rem", background: state.moodPM === i ? `${T.primary}15` : "none", border: state.moodPM === i ? `2px solid ${T.primary}` : "none", cursor: "pointer", padding: "6px", borderRadius: 10, minHeight: 48, minWidth: 44 }}>{e}</button>)}</div>
         </div>}
 
@@ -175,7 +175,7 @@ export default function QuestBoard() {
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
                 <div style={{ background: `${m.col}15`, borderRadius: 50, padding: "5px 14px", display: "inline-flex", alignItems: "center", gap: 6 }}>
                   <span style={{ fontSize: "1rem" }}>{m.icon}</span>
-                  <span style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: ".85rem", fontWeight: 800, color: m.col, textTransform: "uppercase", letterSpacing: ".06em" }}>{m.label}</span>
+                  <span style={{ fontFamily: "'Fredoka',sans-serif", fontSize: ".95rem", fontWeight: 800, color: m.col, textTransform: "uppercase", letterSpacing: ".06em" }}>{m.label}</span>
                 </div>
                 {secDone && <span style={{ fontSize: ".85rem", color: T.success, fontWeight: 800 }}>{"\u2713"} Geschafft!</span>}
               </div>
@@ -294,7 +294,7 @@ export default function QuestBoard() {
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
                 <div style={{ background: "rgba(245,158,11,0.12)", borderRadius: 50, padding: "5px 14px", display: "inline-flex", alignItems: "center", gap: 6 }}>
                   <span style={{ fontSize: "1rem" }}>{"\u2B50"}</span>
-                  <span style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: ".85rem", fontWeight: 800, color: "#D97706", textTransform: "uppercase", letterSpacing: ".06em" }}>Bonus-Aufgaben</span>
+                  <span style={{ fontFamily: "'Fredoka',sans-serif", fontSize: ".95rem", fontWeight: 800, color: "#D97706", textTransform: "uppercase", letterSpacing: ".06em" }}>Bonus-Aufgaben</span>
                 </div>
                 <span style={{ fontSize: ".85rem", fontWeight: 700, color: T.textLight }}>Optional</span>
               </div>
@@ -372,7 +372,7 @@ export default function QuestBoard() {
         {/* ── Quest Chain Creator + Manager (parent mode) ── */}
         {pMode && (state.questChains || []).length > 0 && (
           <div className="game-card" style={{ padding: 16, marginBottom: 14, border: "2.5px solid rgba(109,40,217,0.12)", background: "linear-gradient(135deg, #F9F5FF, #FFFFFF)" }}>
-            <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 800, fontSize: ".85rem", color: T.primary, marginBottom: 10, textTransform: "uppercase" }}>{"\uD83D\uDD17"} Abenteuer-Ketten</div>
+            <div style={{ fontFamily: "'Fredoka',sans-serif", fontWeight: 800, fontSize: ".85rem", color: T.primary, marginBottom: 10, textTransform: "uppercase" }}>{"\uD83D\uDD17"} Abenteuer-Ketten</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               {(state.questChains || []).map(c => (
                 <div key={c.id} style={{ display: "flex", alignItems: "center", gap: 10, background: c.completed ? `${T.success}08` : "rgba(180,120,40,0.04)", border: `2px solid ${c.completed ? T.success + "30" : "rgba(180,120,40,0.08)"}`, borderRadius: 14, padding: "10px 12px" }}>
@@ -394,7 +394,7 @@ export default function QuestBoard() {
 
         {/* Parent panel */}
         {pMode && <div style={{ background: "white", borderRadius: 22, padding: 16, border: `3px solid rgba(109,40,217,0.1)`, marginTop: 8, boxShadow: "0 4px 16px rgba(0,0,0,0.04)" }}>
-          <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 800, fontSize: ".85rem", color: T.primary, marginBottom: 10, textTransform: "uppercase" }}>{"\u2699\uFE0F"} Eltern</div>
+          <div style={{ fontFamily: "'Fredoka',sans-serif", fontWeight: 800, fontSize: ".85rem", color: T.primary, marginBottom: 10, textTransform: "uppercase" }}>{"\u2699\uFE0F"} Eltern</div>
           <button onClick={actions.togVac} style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(180,120,40,0.04)", border: `2.5px solid ${state.vacMode ? T.success + "40" : "rgba(180,120,40,0.08)"}`, borderRadius: 16, padding: "12px 14px", cursor: "pointer", marginBottom: 12, fontFamily: "'Nunito',sans-serif", minHeight: 48 }}>
             <span style={{ fontWeight: 700, fontSize: ".85rem", color: state.vacMode ? T.successDark : T.textPrimary }}>{state.vacMode ? "\u{1F3D6}\uFE0F Ferienmodus" : "\u{1F4DA} Schulmodus"}</span>
             <div style={{ width: 44, height: 24, borderRadius: 12, background: state.vacMode ? T.success : "rgba(0,0,0,0.12)", position: "relative", transition: "all .3s" }}><div style={{ width: 18, height: 18, borderRadius: 9, background: "white", position: "absolute", top: 3, left: state.vacMode ? 23 : 3, transition: "all .3s", boxShadow: "0 1px 4px rgba(0,0,0,0.2)" }} /></div>
@@ -406,7 +406,7 @@ export default function QuestBoard() {
               <input type="number" value={nq.xp} onChange={e => setNq(n => ({ ...n, xp: +e.target.value }))} style={{ width: 55, background: "rgba(180,120,40,0.04)", border: "2.5px solid rgba(180,120,40,0.08)", borderRadius: 12, padding: "8px", fontSize: ".85rem", textAlign: "center", minHeight: 40 }} placeholder="HP" />
               <input type="number" value={nq.minutes} onChange={e => setNq(n => ({ ...n, minutes: +e.target.value }))} style={{ width: 55, background: "rgba(180,120,40,0.04)", border: "2.5px solid rgba(180,120,40,0.08)", borderRadius: 12, padding: "8px", fontSize: ".85rem", textAlign: "center", minHeight: 40 }} placeholder="Min" />
             </div>
-            <button onClick={() => actions.addQuest(nq, () => setNq(n => ({ ...n, name: "" })))} style={{ background: `linear-gradient(135deg,${T.primary},${T.primaryLight})`, border: "none", borderRadius: 14, padding: "12px", color: "white", fontWeight: 800, cursor: "pointer", fontSize: ".85rem", fontFamily: "'Plus Jakarta Sans',sans-serif", minHeight: 44 }}>Erstellen</button>
+            <button onClick={() => actions.addQuest(nq, () => setNq(n => ({ ...n, name: "" })))} style={{ background: `linear-gradient(135deg,${T.primary},${T.primaryLight})`, border: "none", borderRadius: 14, padding: "12px", color: "white", fontWeight: 800, cursor: "pointer", fontSize: ".85rem", fontFamily: "'Fredoka',sans-serif", minHeight: 44 }}>Erstellen</button>
           </div>
           {/* Summary */}
           <div style={{ background: "rgba(180,120,40,0.04)", borderRadius: 16, padding: 12, marginTop: 10, border: "2.5px solid rgba(180,120,40,0.08)" }}>
@@ -436,7 +436,7 @@ export default function QuestBoard() {
 
           {/* Weekly Lunch Entry */}
           <div className="game-card" style={{ padding: 16, marginTop: 12, border: "2.5px solid rgba(234,160,60,0.18)", background: "linear-gradient(135deg, #FFFBF2, #FFFFFF)" }}>
-            <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 800, fontSize: ".85rem", color: T.primary, marginBottom: 10, textTransform: "uppercase" }}>{"\uD83C\uDF7D\uFE0F Wochenmenü"}</div>
+            <div style={{ fontFamily: "'Fredoka',sans-serif", fontWeight: 800, fontSize: ".85rem", color: T.primary, marginBottom: 10, textTransform: "uppercase" }}>{"\uD83C\uDF7D\uFE0F Wochenmenü"}</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {DAYS.map(day => (
                 <div key={day} style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -452,13 +452,13 @@ export default function QuestBoard() {
             </div>
             <button
               onClick={() => actions.updateWeeklyLunch(lunchDraft)}
-              style={{ width: "100%", marginTop: 10, background: `linear-gradient(135deg,${T.primary},${T.primaryLight})`, border: "none", borderRadius: 14, padding: "12px", color: "white", fontWeight: 800, cursor: "pointer", fontSize: ".85rem", fontFamily: "'Plus Jakarta Sans',sans-serif", minHeight: 44 }}
+              style={{ width: "100%", marginTop: 10, background: `linear-gradient(135deg,${T.primary},${T.primaryLight})`, border: "none", borderRadius: 14, padding: "12px", color: "white", fontWeight: 800, cursor: "pointer", fontSize: ".85rem", fontFamily: "'Fredoka',sans-serif", minHeight: 44 }}
             >{"\uD83D\uDCBE"} Speichern</button>
           </div>
 
           {/* Special Mission Creator */}
           <div className="game-card" style={{ padding: 16, marginTop: 12, border: "2.5px solid rgba(109,40,217,0.12)", background: "linear-gradient(135deg, #F9F5FF, #FFFFFF)" }}>
-            <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 800, fontSize: ".85rem", color: T.primary, marginBottom: 10, textTransform: "uppercase" }}>{"\uD83C\uDFAF"} Spezial-Mission erstellen</div>
+            <div style={{ fontFamily: "'Fredoka',sans-serif", fontWeight: 800, fontSize: ".85rem", color: T.primary, marginBottom: 10, textTransform: "uppercase" }}>{"\uD83C\uDFAF"} Spezial-Mission erstellen</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               <input
                 value={smName}
@@ -490,7 +490,7 @@ export default function QuestBoard() {
               </div>
               <button
                 onClick={() => { if (smName.trim()) { actions.addSpecialMission({ name: smName.trim(), emoji: smEmoji, hp: smHp }); setSmName(""); setSmEmoji("\uD83C\uDF81"); setSmHp(30); } }}
-                style={{ background: `linear-gradient(135deg,${T.primary},${T.primaryLight})`, border: "none", borderRadius: 14, padding: "12px", color: "white", fontWeight: 800, cursor: "pointer", fontSize: ".85rem", fontFamily: "'Plus Jakarta Sans',sans-serif", minHeight: 44 }}
+                style={{ background: `linear-gradient(135deg,${T.primary},${T.primaryLight})`, border: "none", borderRadius: 14, padding: "12px", color: "white", fontWeight: 800, cursor: "pointer", fontSize: ".85rem", fontFamily: "'Fredoka',sans-serif", minHeight: 44 }}
               >Erstellen</button>
             </div>
             {/* Active special missions list */}

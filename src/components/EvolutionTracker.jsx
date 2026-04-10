@@ -25,7 +25,7 @@ export default function EvolutionTracker({ catEvo = 0, companionType = "cat", cu
     <div className="game-card" style={{ padding: 16, marginBottom: 14 }}>
       {/* Header */}
       <div style={{
-        fontFamily: "'Plus Jakarta Sans',sans-serif",
+        fontFamily: "'Fredoka',sans-serif",
         fontSize: ".85rem", fontWeight: 800,
         color: T.primary, textTransform: "uppercase", marginBottom: 12,
       }}>

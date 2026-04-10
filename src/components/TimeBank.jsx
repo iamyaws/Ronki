@@ -105,7 +105,7 @@ export default function TimeBank() {
             fontWeight: 800,
             color: T.primary,
             cursor: "pointer",
-            fontFamily: "'Plus Jakarta Sans', sans-serif",
+            fontFamily: "'Fredoka', sans-serif",
             minHeight: 48,
           }}>
             Bearbeiten
@@ -162,7 +162,7 @@ export default function TimeBank() {
 
       {/* ── Section label ── */}
       <div style={{
-        fontFamily: "'Plus Jakarta Sans', sans-serif",
+        fontFamily: "'Fredoka', sans-serif",
         fontWeight: 800,
         fontSize: ".85rem",
         color: T.textSecondary,
@@ -267,7 +267,7 @@ export default function TimeBank() {
                   borderRadius: 50, padding: "8px 14px",
                   fontSize: ".8rem", fontWeight: 800, cursor: "pointer",
                   color: bel.active ? T.successDark : T.danger,
-                  fontFamily: "'Plus Jakarta Sans', sans-serif",
+                  fontFamily: "'Fredoka', sans-serif",
                   minHeight: 44,
                 }}>
                   {bel.active ? "Aktiv" : "Aus"}
@@ -299,7 +299,7 @@ export default function TimeBank() {
             fontSize: ".95rem",
             fontWeight: 800,
             color: T.primary,
-            fontFamily: "'Plus Jakarta Sans', sans-serif",
+            fontFamily: "'Fredoka', sans-serif",
             minHeight: 56,
           }}>
             + Neue Belohnung
@@ -317,7 +317,7 @@ export default function TimeBank() {
               fontWeight: 800,
               color: T.textSecondary,
               cursor: "pointer",
-              fontFamily: "'Plus Jakarta Sans', sans-serif",
+              fontFamily: "'Fredoka', sans-serif",
               minHeight: 52,
             }}>
               Abbrechen
@@ -332,7 +332,7 @@ export default function TimeBank() {
               fontWeight: 800,
               color: "white",
               cursor: "pointer",
-              fontFamily: "'Plus Jakarta Sans', sans-serif",
+              fontFamily: "'Fredoka', sans-serif",
               boxShadow: `0 6px 20px ${T.success}40`,
               minHeight: 52,
             }}>
@@ -434,7 +434,7 @@ export default function TimeBank() {
                       padding: "10px 14px",
                       fontSize: ".8rem", fontWeight: 800,
                       color: T.textSecondary, cursor: "pointer",
-                      fontFamily: "'Plus Jakarta Sans', sans-serif",
+                      fontFamily: "'Fredoka', sans-serif",
                       minHeight: 44,
                     }}>
                       Nein
@@ -445,7 +445,7 @@ export default function TimeBank() {
                       padding: "10px 16px",
                       fontSize: ".8rem", fontWeight: 800,
                       color: "white", cursor: "pointer",
-                      fontFamily: "'Plus Jakarta Sans', sans-serif",
+                      fontFamily: "'Fredoka', sans-serif",
                       boxShadow: `0 4px 12px ${T.success}30`,
                       minHeight: 44,
                     }}>
@@ -468,7 +468,7 @@ export default function TimeBank() {
                       fontWeight: 800,
                       color: canRedeem && !isPMode ? "white" : T.textLight,
                       cursor: canRedeem && !isPMode ? "pointer" : "default",
-                      fontFamily: "'Plus Jakarta Sans', sans-serif",
+                      fontFamily: "'Fredoka', sans-serif",
                       opacity: !canRedeem ? 0.5 : 1,
                       boxShadow: canRedeem && !isPMode ? `0 4px 12px ${T.primary}30` : "none",
                       minHeight: 48,
@@ -488,7 +488,7 @@ export default function TimeBank() {
       {!isEditing && log.length > 0 && (
         <div style={{ marginTop: 28 }}>
           <div style={{
-            fontFamily: "'Plus Jakarta Sans', sans-serif",
+            fontFamily: "'Fredoka', sans-serif",
             fontWeight: 800,
             fontSize: ".85rem",
             color: T.textSecondary,

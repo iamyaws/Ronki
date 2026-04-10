@@ -151,7 +151,7 @@ export default function Familienregeln() {
             {section.wish && (
               <div style={{ marginBottom: section.worry ? 14 : 0 }}>
                 <div style={{
-                  fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: ".9rem", fontWeight: 800,
+                  fontFamily: "'Fredoka',sans-serif", fontSize: ".9rem", fontWeight: 800,
                   color: "#059669", textTransform: "uppercase", marginBottom: 8,
                 }}>
                   {"\uD83D\uDE0A"} Das macht uns stolz:
@@ -175,7 +175,7 @@ export default function Familienregeln() {
             {section.worry && (
               <div>
                 <div style={{
-                  fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: ".9rem", fontWeight: 800,
+                  fontFamily: "'Fredoka',sans-serif", fontSize: ".9rem", fontWeight: 800,
                   color: "#B45309", textTransform: "uppercase", marginBottom: 8,
                 }}>
                   {"\uD83D\uDE1F"} Das macht uns Sorgen:

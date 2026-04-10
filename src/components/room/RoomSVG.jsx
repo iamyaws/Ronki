@@ -67,12 +67,12 @@ export default function RoomSVG({
     const showHero = () => {
       const lines = HERO_LINES[mood] || HERO_LINES.neutral;
       setHeroBubble(lines[Math.floor(Math.random() * lines.length)]);
-      setTimeout(() => setHeroBubble(null), 3000);
+      setTimeout(() => setHeroBubble(null), 4500);
     };
     const showCat = () => {
       const lines = CAT_LINES[mood] || CAT_LINES.neutral;
       setCatBubble(lines[Math.floor(Math.random() * lines.length)]);
-      setTimeout(() => setCatBubble(null), 2500);
+      setTimeout(() => setCatBubble(null), 4500);
     };
     setTimeout(showHero, 600);
     setTimeout(showCat, 2000);
@@ -326,7 +326,7 @@ export default function RoomSVG({
             <div style={{ animation: "heroFloat 3s ease-in-out infinite", cursor: "pointer" }}
               onClick={() => {
                 setHeroBubble(heroLines[Math.floor(Math.random() * heroLines.length)]);
-                setTimeout(() => setHeroBubble(null), 3000);
+                setTimeout(() => setHeroBubble(null), 4500);
               }}>
               <HeroSprite shape={state.hero.shape} color={state.hero.color} eyes={state.hero.eyes} hair={state.hero.hair} size={90} level={level} />
             </div>

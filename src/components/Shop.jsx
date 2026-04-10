@@ -62,7 +62,7 @@ export default function Shop() {
               borderRadius: 18,
               padding: '12px 8px',
               cursor: 'pointer',
-              fontFamily: "'Plus Jakarta Sans',sans-serif",
+              fontFamily: "'Fredoka',sans-serif",
               fontWeight: 800,
               fontSize: '.85rem',
               color: shopTab === t.id ? t.col : '#64748B',
@@ -88,7 +88,7 @@ export default function Shop() {
         fontWeight: 800,
         fontSize: '1.05rem',
         color: activeCol,
-        fontFamily: "'Plus Jakarta Sans',sans-serif",
+        fontFamily: "'Fredoka',sans-serif",
       }}>
         {unlocked.length} / {items.length} freigeschaltet
       </div>
