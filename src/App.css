@@ -12,8 +12,9 @@ body { background: #FFF8F0; font-family: 'Be Vietnam Pro', 'Nunito', sans-serif;
   border: 3px solid rgba(0,0,0,0.05);
   border-radius: 22px;
   box-shadow: 0 4px 16px rgba(0,40,120,0.10), 0 1px 3px rgba(0,0,0,0.06);
-  transition: box-shadow .2s ease;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
 }
+.game-card:active { transform: scale(0.985); }
 
 /* ── Nav pill (legacy, kept for compatibility) ── */
 .nav-pill {
@@ -75,6 +76,7 @@ body { background: #FFF8F0; font-family: 'Be Vietnam Pro', 'Nunito', sans-serif;
 }
 
 .tab-item-active {}
+.tab-item:active { transform: scale(0.93); transition: transform 0.1s; }
 
 .tab-icon {
   width: 44px;
@@ -199,7 +201,7 @@ body { background: #FFF8F0; font-family: 'Be Vietnam Pro', 'Nunito', sans-serif;
 
 /* ── Cat / Boss animations ── */
 @keyframes catBounce { 0% { transform: scale(1); } 30% { transform: scale(1.15) translateY(-8px); } 60% { transform: scale(0.95); } 100% { transform: scale(1); } }
-@keyframes bossShake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-4px); } 40% { transform: translateX(4px); } 60% { transform: translateX(-3px); } 80% { transform: translateX(3px); } }
+@keyframes bossShake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-6px); } 40% { transform: translateX(6px); } 60% { transform: translateX(-3px); } 80% { transform: translateX(3px); } }
 @keyframes bossDefeatFade { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.5; } 100% { transform: scale(0.8); opacity: 0; } }
 
 /* ── Login bonus ── */

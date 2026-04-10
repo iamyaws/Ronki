@@ -60,7 +60,7 @@ export default function CatCare() {
             </div>
             <div style={{ textAlign: "right" }}>
               <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: "1rem", fontWeight: 700, color: T.accent }}>{state.catEvo || 0} EP</div>
-              {!prog.maxStage && <div style={{ fontSize: ".8rem", color: T.textLight }}>{prog.cur}/{prog.need} bis {nextStage?.name}</div>}
+              {!prog.maxStage && <div style={{ fontSize: ".85rem", color: T.textLight }}>{prog.cur}/{prog.need} bis {nextStage?.name}</div>}
             </div>
           </div>
           <div style={{ background: "rgba(180,120,40,0.08)", borderRadius: 50, height: 8, overflow: "hidden" }}>
@@ -119,8 +119,8 @@ export default function CatCare() {
               }}>
                 <span style={{ fontSize: "1.8rem" }}>{a.icon}</span>
                 <span style={{ fontSize: ".95rem", fontWeight: 800 }}>{a.label}</span>
-                {done && <span style={{ fontSize: ".8rem", fontWeight: 700 }}>{"\u2705"}</span>}
-                {!done && <span style={{ fontSize: ".75rem", fontWeight: 700, opacity: 0.8 }}>+5 {"\u2B50"}</span>}
+                {done && <span style={{ fontSize: ".85rem", fontWeight: 700 }}>{"\u2705"}</span>}
+                {!done && <span style={{ fontSize: ".85rem", fontWeight: 700, opacity: 0.8 }}>+5 {"\u2B50"}</span>}
               </button>
             );
           })}
@@ -132,7 +132,7 @@ export default function CatCare() {
           <div style={{ display: "flex", gap: 4, justifyContent: "center", flexWrap: "wrap" }}>
             {CAT_STAGES.map((cs, i) => (
               <div key={i} style={{
-                padding: "6px 10px", borderRadius: 12, fontSize: ".8rem", fontWeight: 700,
+                padding: "6px 10px", borderRadius: 12, fontSize: ".85rem", fontWeight: 700,
                 background: i <= stage ? `${T.primary}15` : "rgba(180,120,40,0.05)",
                 color: i <= stage ? T.primary : T.textLight,
                 border: i === stage ? `2px solid ${T.primary}` : "2px solid transparent",

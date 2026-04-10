@@ -85,7 +85,7 @@ export default function VictoryScreen({ onClose, onSpinWheel, onMemoryGame }) {
           <div style={{
             fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: "1.8rem", fontWeight: 900,
             color: T.accent, textTransform: "uppercase", fontStyle: "italic",
-            textShadow: "0 4px 16px rgba(252,211,77,0.4)", letterSpacing: "-0.02em",
+            textShadow: "0 0 20px rgba(252,211,77,0.6), 0 2px 8px rgba(0,0,0,0.4)", letterSpacing: "-0.02em",
           }}>
             Du hast durchgehalten!
           </div>
@@ -104,7 +104,7 @@ export default function VictoryScreen({ onClose, onSpinWheel, onMemoryGame }) {
           borderRadius: 24, padding: 20, width: "100%", maxWidth: 340,
           border: "1px solid rgba(255,255,255,0.15)", marginBottom: 24,
         }}>
-          <div style={{ fontSize: ".7rem", fontWeight: 800, color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 12, textAlign: "center" }}>Tagesübersicht</div>
+          <div style={{ fontSize: ".85rem", fontWeight: 800, color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 12, textAlign: "center" }}>Tagesübersicht</div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
             {[
               { label: "Aufgaben", value: `${done}/${total}`, icon: "\u2694\uFE0F" },
@@ -114,13 +114,13 @@ export default function VictoryScreen({ onClose, onSpinWheel, onMemoryGame }) {
               <div key={i} style={{ textAlign: "center" }}>
                 <div style={{ fontSize: "1.5rem", marginBottom: 4 }}>{s.icon}</div>
                 <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: "1.2rem", fontWeight: 700, color: "white" }}>{s.value}</div>
-                <div style={{ fontSize: ".6rem", color: "rgba(255,255,255,0.5)", fontWeight: 600 }}>{s.label}</div>
+                <div style={{ fontSize: ".85rem", color: "rgba(255,255,255,0.5)", fontWeight: 600 }}>{s.label}</div>
               </div>
             ))}
           </div>
           <div style={{ display: "flex", gap: 8, marginTop: 12, justifyContent: "center" }}>
-            <div style={{ background: `${T.primary}30`, borderRadius: 50, padding: "4px 12px", fontSize: ".7rem", fontWeight: 800, color: T.primaryLight }}>Lvl {level} {"\u26A1"} {state.xp} HP</div>
-            <div style={{ background: `${T.accent}30`, borderRadius: 50, padding: "4px 12px", fontSize: ".7rem", fontWeight: 800, color: T.accent }}>{"\u2B50"} {state.coins}</div>
+            <div style={{ background: `${T.primary}30`, borderRadius: 50, padding: "4px 12px", fontSize: ".85rem", fontWeight: 800, color: T.primaryLight }}>Lvl {level} {"\u26A1"} {state.xp} HP</div>
+            <div style={{ background: `${T.accent}30`, borderRadius: 50, padding: "4px 12px", fontSize: ".85rem", fontWeight: 800, color: T.accent }}>{"\u2B50"} {state.coins}</div>
           </div>
         </div>
       )}

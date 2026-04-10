@@ -4,6 +4,7 @@ import { getTimeLabel, getCatStage, getCatMood } from '../utils/helpers';
 import HeroSprite from './HeroSprite';
 import Companion from './Companion';
 import Egg from './Egg';
+import SFX from '../utils/sfx';
 import { useGame } from '../context/GameContext';
 import useWeather, { getWeatherInfo } from '../hooks/useWeather';
 import LoginBonus from './LoginBonus';
@@ -125,7 +126,7 @@ export default function Hub() {
                   <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: "1.2rem", fontWeight: 700, color: "#D97706" }}>
                     {(state.coins || 0).toLocaleString("de-DE")}
                   </div>
-                  <div style={{ fontSize: ".75rem", fontWeight: 700, color: T.textLight }}>HP</div>
+                  <div style={{ fontSize: ".85rem", fontWeight: 700, color: T.textLight }}>HP</div>
                 </div>
               </div>
               {/* Streak */}
@@ -138,7 +139,7 @@ export default function Hub() {
                   <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: "1.2rem", fontWeight: 700, color: "#EA580C" }}>
                     {state.sd || 0}
                   </div>
-                  <div style={{ fontSize: ".75rem", fontWeight: 700, color: T.textLight }}>Tage</div>
+                  <div style={{ fontSize: ".85rem", fontWeight: 700, color: T.textLight }}>Tage</div>
                 </div>
               </div>
               {/* Weather — min/max */}
@@ -293,7 +294,7 @@ export default function Hub() {
               <span style={{ fontSize: "1.3rem" }}>{"\uD83C\uDF7D\uFE0F"}</span>
               <div>
                 <div style={{
-                  fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: ".8rem", fontWeight: 800,
+                  fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: ".85rem", fontWeight: 800,
                   color: T.textSecondary, textTransform: "uppercase",
                 }}>
                   Heute
@@ -327,7 +328,7 @@ export default function Hub() {
                 <button
                   key={i}
                   aria-label={`Stimmung ${i + 1} von ${MOOD_EMOJIS.length}`}
-                  onClick={() => { actions.setMood("moodAM", i); setCeleb(true); }}
+                  onClick={() => { SFX.play("pop"); actions.setMood("moodAM", i); setCeleb(true); }}
                   style={{
                     fontSize: "2rem", background: "none", border: "none",
                     cursor: "pointer", padding: "8px", borderRadius: 12,
@@ -357,7 +358,7 @@ export default function Hub() {
             <span style={{ fontSize: "1.6rem", flexShrink: 0 }}>{mission.emoji}</span>
             <div style={{ flex: 1 }}>
               <div style={{
-                fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: ".8rem", fontWeight: 800,
+                fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: ".85rem", fontWeight: 800,
                 color: "#B45309", textTransform: "uppercase",
               }}>
                 Spezial-Mission
