@@ -103,7 +103,7 @@ export default function Room() {
           color: "white", textTransform: "uppercase", fontStyle: "italic",
           textShadow: "0 2px 8px rgba(0,0,0,0.3)",
         }}>{state.hero.name}'s Zimmer</div>
-        <div style={{ background: "rgba(255,255,255,0.15)", borderRadius: 50, padding: "6px 12px", fontSize: ".7rem", fontWeight: 800, color: "#FCD34D", backdropFilter: "blur(8px)" }}>Lvl {roomLevel}</div>
+        <div style={{ background: "rgba(255,255,255,0.15)", borderRadius: 50, padding: "6px 12px", fontSize: ".85rem", fontWeight: 800, color: "#FCD34D", backdropFilter: "blur(8px)" }}>Lvl {roomLevel}</div>
       </div>
 
       {/* Isometric Room */}
@@ -206,8 +206,8 @@ export default function Room() {
             return (
               <g key={`badge${i}`} onClick={() => b.u && tap(`badge_${i}`)} style={{ cursor: b.u ? "pointer" : "default" }}>
                 {bounce(`badge_${i}`)}
-                <circle cx={bx} cy={by} r={8} fill={b.u ? "rgba(255,255,255,0.9)" : wallR} stroke={b.u ? wood : "none"} strokeWidth={b.u ? 1 : 0} opacity={b.u ? 1 : 0.3} />
-                <text x={bx} y={by + 4} fontSize={b.u ? "10" : "7"} textAnchor="middle" opacity={b.u ? 1 : 0.25}>
+                <circle cx={bx} cy={by} r={8} fill={b.u ? "rgba(255,255,255,0.9)" : wallR} stroke={b.u ? wood : "none"} strokeWidth={b.u ? 1 : 0} opacity={b.u ? 1 : 0.45} />
+                <text x={bx} y={by + 4} fontSize={b.u ? "10" : "7"} textAnchor="middle" opacity={b.u ? 1 : 0.45}>
                   {b.u ? b.i : "?"}
                 </text>
               </g>
@@ -325,7 +325,7 @@ export default function Room() {
               <div style={{
                 position: "absolute", bottom: "100%", left: "50%", transform: "translateX(-50%)",
                 background: "white", borderRadius: 14, padding: "6px 12px", marginBottom: 8,
-                fontSize: ".7rem", fontWeight: 700, color: T.textPrimary, whiteSpace: "nowrap",
+                fontSize: ".85rem", fontWeight: 700, color: T.textPrimary, whiteSpace: "nowrap",
                 boxShadow: "0 4px 12px rgba(0,0,0,0.15)", animation: "fadeIn 0.3s ease",
                 fontFamily: "'Nunito',sans-serif",
               }}>
@@ -353,7 +353,7 @@ export default function Room() {
               <div style={{
                 position: "absolute", bottom: "100%", left: "50%", transform: "translateX(-50%)",
                 background: "white", borderRadius: 14, padding: "5px 10px", marginBottom: 6,
-                fontSize: ".65rem", fontWeight: 700, color: T.textPrimary, whiteSpace: "nowrap",
+                fontSize: ".85rem", fontWeight: 700, color: T.textPrimary, whiteSpace: "nowrap",
                 boxShadow: "0 4px 12px rgba(0,0,0,0.15)", animation: "fadeIn 0.3s ease",
                 fontFamily: "'Nunito',sans-serif",
               }}>
@@ -389,10 +389,10 @@ export default function Room() {
           ))}
         </div>
         <div style={{
-          fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: ".75rem", fontWeight: 800,
+          fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: ".85rem", fontWeight: 800,
           color: "rgba(255,255,255,0.6)", textTransform: "uppercase", letterSpacing: ".05em",
         }}>Zimmer Level {roomLevel}</div>
-        <div style={{ fontSize: ".7rem", color: "rgba(255,255,255,0.45)", marginTop: 2 }}>
+        <div style={{ fontSize: ".85rem", color: "rgba(255,255,255,0.45)", marginTop: 2 }}>
           {roomItems} / {SHOP_ITEMS.room.length} Items {"\u00B7"} {badgeCount} / 9 Badges
         </div>
         <button className="btn-tap" onClick={() => { SFX.play("tap"); setView("shop"); setShopTab("room"); }} style={{
