@@ -19,7 +19,7 @@ jobs:
           node-version: 20
           cache: npm
 
-      - run: npm ci
+      - run: npm install
 
       - name: Build with /Ronki/dev/ base path
         run: npx vite build --base /Ronki/dev/ --outDir dist-dev
