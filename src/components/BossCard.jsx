@@ -28,7 +28,7 @@ export default function BossCard({ boss }) {
   const hpPct = Math.round((boss.hp / boss.maxHp) * 100);
 
   return (
-    <div className="bg-surface-container-lowest p-6 rounded-lg border border-outline-variant/20 shadow-sm relative overflow-hidden">
+    <div className="mm-card p-6 relative overflow-hidden">
       {/* Boss header */}
       <div className="flex items-center gap-4 mb-4">
         <div className="w-12 h-12 rounded-full bg-error-container/20 flex items-center justify-center shrink-0">
