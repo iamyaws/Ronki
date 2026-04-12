@@ -101,27 +101,28 @@
 }
 
 /* ── Card component ── */
-/* Visible card container with white bg, subtle border, and soft shadow */
+/* Visible card container with white bg, border, and shadow */
 .mm-card {
   background: #ffffff;
-  border: 1.5px solid rgba(0, 0, 0, 0.06);
+  border: 1.5px solid rgba(0, 0, 0, 0.12);
   border-radius: 1.25rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 0 0 0.5px rgba(0, 0, 0, 0.02);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 /* Elevated card variant for emphasis */
 .mm-card-elevated {
   background: #ffffff;
-  border: 1.5px solid rgba(0, 0, 0, 0.06);
+  border: 1.5px solid rgba(0, 0, 0, 0.12);
   border-radius: 1.25rem;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.10), 0 2px 6px rgba(0, 0, 0, 0.06);
 }
 
 /* Tinted card variant (for tips, alerts, special content) */
 .mm-card-tint {
+  background: #ffffff;
   border-radius: 1.25rem;
-  border: 1.5px solid rgba(0, 0, 0, 0.04);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  border: 1.5px solid rgba(0, 0, 0, 0.10);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 /* ── Section label ── */

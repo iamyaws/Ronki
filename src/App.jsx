@@ -29,7 +29,7 @@ import MysticNavBar from './components/MysticNavBar';
 function AppContent() {
   const { state, boarding, computed, actions, onBoard, ui } = useGame();
   if (boarding === null) return <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", background: "#FFF8F0", color: "#1E1B4B", fontFamily: "'Nunito',sans-serif", fontSize: "1.2rem", fontWeight: 700 }}>Laden...</div>;
-  if (boarding) return <Onboarding onComplete={onBoard} />;
+  if (boarding) return <div className="max-w-lg mx-auto"><Onboarding onComplete={onBoard} /></div>;
   if (!state) return null;
   const showChrome = !boarding && state;
   return (
