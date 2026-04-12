@@ -34,7 +34,7 @@ export default function MysticNavBar() {
 
   return (
     <nav className="fixed bottom-0 left-0 w-full z-50 bg-surface/80 backdrop-blur-xl rounded-t-[2rem] shadow-[0_-8px_24px_rgba(30,27,23,0.04)]">
-      <div className="flex justify-around items-end px-4 pb-6 pt-2"
+      <div className="flex justify-around items-end px-4 pb-6 pt-3"
            style={{ paddingBottom: `max(1.5rem, env(safe-area-inset-bottom, 1.5rem))` }}>
         {TABS.map(tab => {
           const isActive = getIsActive(tab.id);
@@ -43,14 +43,14 @@ export default function MysticNavBar() {
               key={tab.id}
               onClick={() => handleClick(tab.id)}
               aria-label={tab.label}
-              className={`flex flex-col items-center justify-center p-2 transition-all duration-300 ${
+              className={`flex flex-col items-center justify-center transition-all duration-300 ${
                 isActive
-                  ? 'bg-primary-container text-white rounded-full p-3 transform scale-110 -translate-y-2'
-                  : 'text-on-surface/50 hover:text-primary'
+                  ? 'bg-primary-container text-white rounded-full p-3 transform scale-110 -translate-y-3 shadow-lg shadow-primary/20'
+                  : 'text-on-surface/50 hover:text-primary p-2'
               }`}
             >
               <span
-                className="material-symbols-outlined"
+                className="material-symbols-outlined text-2xl"
                 style={isActive ? { fontVariationSettings: "'FILL' 1" } : undefined}
               >
                 {tab.icon}

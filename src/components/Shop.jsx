@@ -31,32 +31,32 @@ export default function Shop() {
   return (
     <div className="lotus-pattern px-6 pb-32 space-y-6">
       {/* ── Header ── */}
-      <section className="space-y-2">
+      <section className="space-y-3">
         <h2 className="text-3xl font-bold font-headline text-on-surface">Sammlung</h2>
-        <p className="text-on-surface-variant font-body text-base">
+        <p className="text-on-surface-variant font-body text-lg">
           Schalte Gegenstände durch Aufgaben und Abenteuer frei!
         </p>
       </section>
 
       {/* ── Tabs ── */}
-      <div className="flex gap-3">
+      <div className="flex gap-4">
         {tabs.map(t => (
           <button key={t.id} onClick={() => setShopTab(t.id)}
-            className={`btn-tap flex-1 flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl font-label font-bold text-xs uppercase tracking-wider transition-all ${
+            className={`btn-tap flex-1 flex flex-col items-center gap-2 py-4 px-3 rounded-xl font-label font-bold text-sm uppercase tracking-wider transition-all ${
               shopTab === t.id
                 ? `bg-surface-container-lowest border-2 border-primary/10 shadow-md ${t.col}`
                 : 'bg-surface-container border-2 border-transparent text-on-surface-variant'
             }`}
-            style={{ minHeight: 56 }}>
-            <span className="material-symbols-outlined text-xl">{t.icon}</span>
+            style={{ minHeight: 64 }}>
+            <span className="material-symbols-outlined text-2xl">{t.icon}</span>
             {t.l}
           </button>
         ))}
       </div>
 
       {/* ── Counter ── */}
-      <div className="text-center py-2 px-4 bg-primary/5 rounded-lg">
-        <span className="font-headline font-bold text-base text-primary">
+      <div className="text-center py-3 px-5 bg-primary/5 rounded-lg">
+        <span className="font-headline font-bold text-lg text-primary">
           {unlocked.length} / {items.length} freigeschaltet
         </span>
       </div>
@@ -78,7 +78,7 @@ export default function Shop() {
       )}
 
       {/* ── Item Cards ── */}
-      <div className="space-y-3">
+      <div className="space-y-4">
         {items.map(item => {
           const owned = (state.purchased || []).includes(item.id);
           const cond = UNLOCK_CONDITIONS[item.id];
@@ -87,36 +87,36 @@ export default function Shop() {
 
           return (
             <div key={item.id}
-              className={`mm-card p-4 flex items-center gap-4 transition-all ${
+              className={`mm-card p-5 flex items-center gap-5 transition-all ${
                 owned ? 'border border-emerald/20' : 'opacity-70'
               }`}>
               {/* Icon */}
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl shrink-0 ${
+              <div className={`w-16 h-16 rounded-xl flex items-center justify-center text-3xl shrink-0 ${
                 owned ? 'bg-emerald/10' : 'bg-surface-container grayscale-[50%]'
               }`}>
                 {owned ? item.icon : (
-                  <span className="material-symbols-outlined text-outline text-xl">lock</span>
+                  <span className="material-symbols-outlined text-outline text-2xl">lock</span>
                 )}
               </div>
 
               {/* Content */}
               <div className="flex-1 min-w-0">
-                <h4 className="font-label font-bold text-sm text-on-surface">{item.name}</h4>
+                <h4 className="font-label font-bold text-base text-on-surface">{item.name}</h4>
 
                 {owned ? (
-                  <p className="font-label text-xs font-bold text-emerald-dark">Freigeschaltet!</p>
+                  <p className="font-label text-sm font-bold text-emerald-dark mt-1">Freigeschaltet!</p>
                 ) : cond ? (
                   <>
-                    <p className="font-body text-xs text-on-surface-variant mb-2">
+                    <p className="font-body text-sm text-on-surface-variant mb-2 mt-1">
                       {cond.icon} {cond.label}
                     </p>
-                    <div className="h-2 bg-surface-container rounded-full overflow-hidden">
+                    <div className="h-2.5 bg-surface-container rounded-full overflow-hidden">
                       <div className="h-full rounded-full transition-all duration-400" style={{
                         width: `${pct * 100}%`,
                         background: pct >= 1 ? 'linear-gradient(90deg, #34D399, #059669)' : 'linear-gradient(90deg, #5300b7, #6d28d9)',
                       }} />
                     </div>
-                    <p className="font-label text-[10px] font-bold text-on-surface-variant text-right mt-1">
+                    <p className="font-label text-xs font-bold text-on-surface-variant text-right mt-1">
                       {prog.current} / {prog.target}
                     </p>
                   </>
@@ -125,7 +125,7 @@ export default function Shop() {
 
               {/* Status */}
               {owned && (
-                <span className="material-symbols-outlined text-emerald text-xl shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>
+                <span className="material-symbols-outlined text-emerald text-2xl shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>
                   check_circle
                 </span>
               )}

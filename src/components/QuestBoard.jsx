@@ -235,13 +235,13 @@ export default function QuestBoard() {
               <details key={a} className="group mm-card overflow-hidden border border-primary/5" open={!secDone}>
                 <summary className="p-5 cursor-pointer list-none lotus-pattern">
                   <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl"
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl"
                            style={{ background: `${m.col}15` }}>
                         {m.icon}
                       </div>
                       <div>
-                        <h3 className="font-headline text-lg font-bold text-on-surface">{m.label}</h3>
+                        <h3 className="font-headline text-xl font-bold text-on-surface">{m.label}</h3>
                         <p className="font-label text-sm font-medium text-on-surface/60">
                           {secDone ? 'Geschafft! ✓' : `Noch ${qs.length - doneCount} Aufgaben`}
                         </p>
@@ -311,20 +311,20 @@ export default function QuestBoard() {
 
                         {/* Quest card */}
                         <button
-                          className={`btn-tap flex-1 flex items-center gap-3 p-4 rounded-xl transition-all ${
+                          className={`btn-tap flex-1 flex items-center gap-4 p-5 rounded-xl transition-all ${
                             fullyDone
                               ? 'bg-surface-container-low/50 opacity-60'
                               : isNext && canTap
-                                ? 'bg-surface-container-lowest border border-primary/10 shadow-sm'
+                                ? 'bg-surface-container-lowest border-2 border-primary/10 shadow-sm'
                                 : 'bg-surface-container-lowest'
                           }`}
                           onClick={() => canTap && !pMode && handleComplete(q.id)}
                           disabled={!canTap && !pMode}
-                          style={{ minHeight: 56 }}
+                          style={{ minHeight: 64 }}
                         >
-                          <span className="text-lg">{q.icon}</span>
+                          <span className="text-xl">{q.icon}</span>
                           <div className="flex-1 text-left">
-                            <p className={`font-label font-bold text-base ${fullyDone ? 'line-through text-on-surface/40' : 'text-on-surface'}`}>
+                            <p className={`font-label font-bold text-lg ${fullyDone ? 'line-through text-on-surface/40' : 'text-on-surface'}`}>
                               {q.name}
                             </p>
                             {/* Weather hint for Anziehen */}
@@ -339,7 +339,7 @@ export default function QuestBoard() {
                             })()}
                             {/* Rewards row */}
                             <div className="flex gap-2 mt-1 items-center flex-wrap">
-                              <span className={`font-label text-xs font-bold ${fullyDone ? 'text-emerald-dark' : 'text-primary'}`}>+{q.xp} XP</span>
+                              <span className={`font-label text-sm font-bold ${fullyDone ? 'text-emerald-dark' : 'text-primary'}`}>+{q.xp} XP</span>
                               {q.streak > 0 && <span className="font-label text-xs font-bold text-tertiary">🔥{q.streak}</span>}
                               {isRepeatable && (
                                 <span className={`font-label text-[10px] font-bold px-2 py-0.5 rounded-full ${atTarget ? 'bg-emerald/10 text-emerald-dark' : 'bg-primary/10 text-primary'}`}>

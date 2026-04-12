@@ -22,7 +22,7 @@ export default function Hub() {
   const catAllDone = state.catFed && state.catPetted && state.catPlayed;
 
   return (
-    <div className="lotus-pattern px-6 pb-8 space-y-5">
+    <div className="lotus-pattern px-6 pb-8 space-y-6">
 
       {/* ── Parent mode toggle (floating) ── */}
       <div className="flex justify-end">
@@ -45,7 +45,7 @@ export default function Hub() {
 
       {/* ── Hero Tip ── */}
       {tip && (
-        <div className="bg-secondary-fixed/20 border-l-4 border-secondary rounded-r-lg p-4">
+        <div className="mm-card-tint bg-secondary-fixed/20 border-l-4 border-l-secondary p-4">
           <div className="flex items-start gap-3">
             <span className="text-2xl shrink-0">{tip.emoji}</span>
             <div>
@@ -62,7 +62,7 @@ export default function Hub() {
 
       {/* ── Yesterday's commitment ── */}
       {state.yesterdayCommitment && (
-        <div className="bg-primary-fixed/30 rounded-lg p-4 flex items-center gap-3 border border-primary/10">
+        <div className="mm-card p-4 flex items-center gap-3">
           <span className="material-symbols-outlined text-primary">assignment</span>
           <div>
             <p className="font-label font-bold text-xs text-primary">Gestern vorgenommen:</p>
@@ -73,16 +73,16 @@ export default function Hub() {
 
       {/* ── Morning Mood (if not set) ── */}
       {state.moodAM === null && (
-        <div className="mm-card p-5">
-          <p className="font-label font-bold text-xs uppercase tracking-widest text-on-surface-variant mb-4">
-            Wie startest du in den Tag? 🌅
+        <div className="mm-card p-6">
+          <p className="font-label font-bold text-sm uppercase tracking-widest text-on-surface-variant mb-5">
+            Wie startest du in den Tag?
           </p>
-          <div role="group" aria-label="Morgenstimmung wählen" className="flex justify-between gap-1">
+          <div role="group" aria-label="Morgenstimmung wählen" className="flex justify-between gap-2">
             {MOOD_EMOJIS.map((e, i) => (
               <button key={i} aria-label={`Stimmung ${i + 1}`}
                 onClick={() => { SFX.play("pop"); actions.setMood("moodAM", i); setCeleb(true); }}
-                className="btn-tap text-3xl p-2 rounded-full hover:bg-surface-container transition-all"
-                style={{ minHeight: 52, minWidth: 48 }}>
+                className="btn-tap text-4xl p-3 rounded-full hover:bg-surface-container transition-all"
+                style={{ minHeight: 64, minWidth: 56 }}>
                 {e}
               </button>
             ))}
@@ -91,43 +91,43 @@ export default function Hub() {
       )}
 
       {/* ── Quick Habit Buttons ── */}
-      <div className="grid grid-cols-3 gap-3">
-        <button className="btn-tap mm-card p-3 flex flex-col items-center gap-2 transition-all"
+      <div className="grid grid-cols-3 gap-4">
+        <button className="btn-tap mm-card p-4 flex flex-col items-center gap-3 transition-all"
           onClick={() => { if (!state.dailyVitaminD) { actions.completeHabit("vitaminD"); if (navigator.vibrate) navigator.vibrate(50); } }}
           style={{
             background: state.dailyVitaminD ? 'rgba(52,211,153,0.1)' : undefined,
             borderColor: state.dailyVitaminD ? 'rgba(52,211,153,0.3)' : undefined,
-            minHeight: 80,
+            minHeight: 96,
           }}>
-          <span className="text-xl">{state.dailyVitaminD ? "✅" : "💊"}</span>
-          <span className="font-label font-bold text-sm text-on-surface">Vitamin D</span>
-          {!state.dailyVitaminD && <span className="font-label text-xs font-bold text-secondary">+5 ⭐</span>}
+          <span className="text-2xl">{state.dailyVitaminD ? "✅" : "💊"}</span>
+          <span className="font-label font-bold text-base text-on-surface">Vitamin D</span>
+          {!state.dailyVitaminD && <span className="font-label text-sm font-bold text-secondary">+5 HP</span>}
         </button>
 
-        <button className="btn-tap mm-card p-3 flex flex-col items-center gap-2 transition-all"
+        <button className="btn-tap mm-card p-4 flex flex-col items-center gap-3 transition-all"
           onClick={() => { if (!state.dailyBrother) { actions.completeHabit("brother"); if (navigator.vibrate) navigator.vibrate(50); } }}
           style={{
             background: state.dailyBrother ? 'rgba(52,211,153,0.1)' : undefined,
             borderColor: state.dailyBrother ? 'rgba(52,211,153,0.3)' : undefined,
-            minHeight: 80,
+            minHeight: 96,
           }}>
-          <span className="text-xl">{state.dailyBrother ? "✅" : "👶"}</span>
-          <span className="font-label font-bold text-sm text-on-surface">Liam</span>
-          {!state.dailyBrother && <span className="font-label text-xs font-bold text-secondary">+10 ⭐</span>}
+          <span className="text-2xl">{state.dailyBrother ? "✅" : "👶"}</span>
+          <span className="font-label font-bold text-base text-on-surface">Liam</span>
+          {!state.dailyBrother && <span className="font-label text-sm font-bold text-secondary">+10 HP</span>}
         </button>
 
-        <button className="btn-tap mm-card p-3 flex flex-col items-center gap-2 transition-all relative"
+        <button className="btn-tap mm-card p-4 flex flex-col items-center gap-3 transition-all relative"
           onClick={() => ui.setView("cat")}
           style={{
             background: catAllDone ? 'rgba(52,211,153,0.1)' : undefined,
             borderColor: catAllDone ? 'rgba(52,211,153,0.3)' : undefined,
-            minHeight: 80,
+            minHeight: 96,
           }}>
-          <span className="text-xl">🐱</span>
-          {catAllDone && <span className="absolute top-1 right-1 text-sm">✅</span>}
-          <span className="font-label font-bold text-sm text-on-surface">{state.catName || "Katze"}</span>
+          <span className="text-2xl">🐱</span>
+          {catAllDone && <span className="absolute top-1 right-1 text-base">✅</span>}
+          <span className="font-label font-bold text-base text-on-surface">{state.catName || "Katze"}</span>
           {!catAllDone && (
-            <span className="font-label text-xs text-on-surface-variant">
+            <span className="font-label text-sm text-on-surface-variant">
               {[!state.catFed && "🍣", !state.catPetted && "🤍", !state.catPlayed && "🧶"].filter(Boolean).join(" ")}
             </span>
           )}
@@ -136,7 +136,7 @@ export default function Hub() {
 
       {/* All habits done celebration */}
       {state.dailyVitaminD && state.dailyBrother && catAllDone && (
-        <div className="bg-emerald/5 border border-emerald/20 rounded-lg p-4 text-center">
+        <div className="mm-card-tint bg-emerald/5 p-4 text-center">
           <span className="text-xl">🎉</span>
           <p className="font-headline text-sm font-bold text-emerald-dark mt-1">
             Alle Gewohnheiten erledigt! Super!
@@ -145,16 +145,16 @@ export default function Hub() {
       )}
 
       {/* ── Water Tracker ── */}
-      <div className="mm-card p-4">
-        <div className="flex items-center gap-2 mb-3">
-          <span className="material-symbols-outlined text-primary text-lg">water_drop</span>
-          <span className="font-label font-bold text-sm text-primary">
+      <div className="mm-card p-5">
+        <div className="flex items-center gap-2 mb-4">
+          <span className="material-symbols-outlined text-primary text-xl">water_drop</span>
+          <span className="font-label font-bold text-base text-primary">
             Wasser trinken ({state.dailyWaterCount || 0}/6)
           </span>
         </div>
         <div className="flex gap-2">
           {[0,1,2,3,4,5].map(i => (
-            <button key={i} className="btn-tap flex-1 h-8 rounded-lg transition-all"
+            <button key={i} className="btn-tap flex-1 h-10 rounded-lg transition-all"
               onClick={() => i === (state.dailyWaterCount || 0) && actions.drinkWater()}
               style={{
                 background: i < (state.dailyWaterCount || 0) ? 'linear-gradient(180deg, #3B82F6, #60A5FA)' : 'rgba(59,130,246,0.06)',
@@ -288,15 +288,17 @@ export default function Hub() {
       })()}
 
       {/* ── Bottom Quick Links ── */}
-      <div className="flex gap-3">
-        <button className="btn-tap flex-1 mm-card p-4 flex items-center justify-center gap-2 font-label font-bold text-sm text-on-surface"
-          onClick={() => ui.setView("journal")}>
-          <span className="material-symbols-outlined text-primary text-lg">menu_book</span>
+      <div className="flex gap-4">
+        <button className="btn-tap flex-1 mm-card p-5 flex items-center justify-center gap-3 font-label font-bold text-base text-on-surface"
+          onClick={() => ui.setView("journal")}
+          style={{ minHeight: 60 }}>
+          <span className="material-symbols-outlined text-primary text-2xl">menu_book</span>
           Tagebuch
         </button>
-        <button className="btn-tap flex-1 mm-card p-4 flex items-center justify-center gap-2 font-label font-bold text-sm text-on-surface"
-          onClick={() => ui.setView("time")}>
-          <span className="material-symbols-outlined text-secondary text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>stars</span>
+        <button className="btn-tap flex-1 mm-card p-5 flex items-center justify-center gap-3 font-label font-bold text-base text-on-surface"
+          onClick={() => ui.setView("time")}
+          style={{ minHeight: 60 }}>
+          <span className="material-symbols-outlined text-secondary text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>stars</span>
           Belohnungen
         </button>
       </div>
