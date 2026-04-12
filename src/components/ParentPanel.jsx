@@ -30,7 +30,7 @@ export default function ParentPanel() {
       {/* ── Bento Stats Grid ── */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Mood History Card */}
-        <div className="md:col-span-2 bg-surface-container-lowest rounded-lg p-6 relative overflow-hidden">
+        <div className="md:col-span-2 mm-card p-6 relative overflow-hidden">
           <div className="flex justify-between items-start mb-6">
             <div>
               <h2 className="font-label text-lg font-bold text-on-surface">Stimmungsverlauf</h2>
@@ -86,7 +86,7 @@ export default function ParentPanel() {
           </div>
 
           {/* New quest creator */}
-          <div className="bg-surface-container-lowest rounded-lg p-4 space-y-2">
+          <div className="mm-card p-4 space-y-2">
             <input ref={nqRef} value={nq.name} onChange={e => setNq(n => ({ ...n, name: e.target.value }))}
               placeholder="Neue Aufgabe..."
               className="w-full bg-surface-container-low border border-outline-variant/20 rounded-lg px-3 py-2.5 font-body text-sm outline-none focus:border-primary/40" style={{ minHeight: 44 }} />
@@ -137,7 +137,7 @@ export default function ParentPanel() {
                 { v: (state.graduated || []).length, l: "Gemeistert 🎓", c: "text-secondary" },
                 { v: `Lvl ${level}`, l: `${state.xp} HP`, c: "text-primary" },
               ].map((s, i) => (
-                <div key={i} className="bg-surface-container-lowest rounded-lg p-3 text-center">
+                <div key={i} className="mm-card p-3 text-center">
                   <div className={`font-headline text-lg font-bold ${s.c}`}>{s.v}</div>
                   <div className="font-body text-xs text-on-surface-variant">{s.l}</div>
                 </div>
@@ -204,7 +204,7 @@ export default function ParentPanel() {
           </button>
 
           {/* Weekly Lunch */}
-          <div className="bg-surface-container-lowest rounded-lg p-4">
+          <div className="mm-card p-4">
             <p className="font-label font-bold text-xs uppercase tracking-widest text-primary mb-3">🍽️ Wochenmenü</p>
             <div className="space-y-2">
               {DAYS.map(day => (
@@ -223,7 +223,7 @@ export default function ParentPanel() {
           </div>
 
           {/* Special Mission Creator */}
-          <div className="bg-surface-container-lowest rounded-lg p-4">
+          <div className="mm-card p-4">
             <p className="font-label font-bold text-xs uppercase tracking-widest text-primary mb-3">🎯 Spezial-Mission</p>
             <div className="space-y-2">
               <input value={smName} onChange={e => setSmName(e.target.value)} placeholder="z.B. Zahnarzt besuchen"

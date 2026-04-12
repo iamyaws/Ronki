@@ -107,7 +107,7 @@ export default function QuestBoard() {
 
           {/* ── Comeback Quest ── */}
           {state.comebackActive && (
-            <div className="bg-surface-container-lowest rounded-lg p-5 border border-tertiary-fixed-dim/30">
+            <div className="mm-card p-5 border border-tertiary-fixed-dim/30">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-tertiary-fixed flex items-center justify-center">
                   <span className="text-xl">🐱</span>
@@ -158,7 +158,7 @@ export default function QuestBoard() {
 
           {/* ── Evening mood ── */}
           {allDone && state.moodPM === null && (
-            <div className="bg-surface-container-lowest rounded-lg p-5">
+            <div className="mm-card p-5">
               <p className="font-label font-bold text-xs uppercase tracking-widest text-primary mb-4">
                 🌙 Worauf bist du heute stolz?
               </p>
@@ -181,7 +181,7 @@ export default function QuestBoard() {
           )}
 
           {/* ── Rainbow ── */}
-          <div className="bg-surface-container-lowest rounded-lg p-5">
+          <div className="mm-card p-5">
             <div className="flex justify-between items-center mb-3">
               <span className="font-label font-bold text-xs uppercase tracking-widest text-on-surface-variant">
                 🌈 Iss den Regenbogen
@@ -232,7 +232,7 @@ export default function QuestBoard() {
             const firstUndoneIdx = qs.findIndex(q => !q.done);
 
             return (
-              <details key={a} className="group bg-surface-container-lowest rounded-lg overflow-hidden border border-primary/5" open={!secDone}>
+              <details key={a} className="group mm-card overflow-hidden border border-primary/5" open={!secDone}>
                 <summary className="p-5 cursor-pointer list-none lotus-pattern">
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-3">
@@ -437,7 +437,7 @@ export default function QuestBoard() {
 
           {/* ── Quest Chain Manager (parent mode) ── */}
           {pMode && (state.questChains || []).length > 0 && (
-            <div className="bg-surface-container-lowest rounded-lg p-5 border border-primary/10">
+            <div className="mm-card p-5 border border-primary/10">
               <h3 className="font-label font-bold text-xs uppercase tracking-widest text-primary mb-4">🔗 Abenteuer-Ketten</h3>
               <div className="space-y-2">
                 {(state.questChains || []).map(c => (
@@ -456,7 +456,7 @@ export default function QuestBoard() {
 
           {/* ── Parent Panel ── */}
           {pMode && (
-            <div className="bg-surface-container-lowest rounded-lg p-6 border border-primary/10 space-y-4">
+            <div className="mm-card p-6 border border-primary/10 space-y-4">
               <h3 className="font-label font-bold text-xs uppercase tracking-widest text-primary">⚙️ Eltern</h3>
 
               {/* Vacation toggle */}
@@ -495,7 +495,7 @@ export default function QuestBoard() {
                     { v: (state.graduated || []).length, l: "Gemeistert 🎓", c: "text-secondary" },
                     { v: `Lvl ${level}`, l: `${state.xp} HP`, c: "text-primary" },
                   ].map((s, i) => (
-                    <div key={i} className="bg-surface-container-lowest rounded-lg p-3 text-center">
+                    <div key={i} className="mm-card p-3 text-center">
                       <div className={`font-headline text-lg font-bold ${s.c}`}>{s.v}</div>
                       <div className="font-body text-xs text-on-surface-variant">{s.l}</div>
                     </div>

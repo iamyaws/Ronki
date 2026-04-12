@@ -63,7 +63,7 @@ export default function Shop() {
 
       {/* ── Gear Slots (hero tab) ── */}
       {shopTab === 'hero' && (
-        <div className="bg-surface-container-lowest rounded-lg p-5">
+        <div className="mm-card p-5">
           <div className="text-center mb-4">
             <h3 className="font-headline text-base font-bold text-primary">Rüste deinen Begleiter aus!</h3>
             <p className="font-body text-xs text-on-surface-variant mt-1">Schalte Gegenstände frei und rüste sie aus.</p>
@@ -87,7 +87,7 @@ export default function Shop() {
 
           return (
             <div key={item.id}
-              className={`bg-surface-container-lowest rounded-lg p-4 flex items-center gap-4 transition-all ${
+              className={`mm-card p-4 flex items-center gap-4 transition-all ${
                 owned ? 'border border-emerald/20' : 'opacity-70'
               }`}>
               {/* Icon */}

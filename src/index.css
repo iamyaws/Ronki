@@ -100,6 +100,40 @@
   background: linear-gradient(180deg, #fff8f1 0%, #f4ede5 100%);
 }
 
+/* ── Card component ── */
+/* Visible card container with white bg, subtle border, and soft shadow */
+.mm-card {
+  background: #ffffff;
+  border: 1.5px solid rgba(0, 0, 0, 0.06);
+  border-radius: 1.25rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 0 0 0.5px rgba(0, 0, 0, 0.02);
+}
+
+/* Elevated card variant for emphasis */
+.mm-card-elevated {
+  background: #ffffff;
+  border: 1.5px solid rgba(0, 0, 0, 0.06);
+  border-radius: 1.25rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+/* Tinted card variant (for tips, alerts, special content) */
+.mm-card-tint {
+  border-radius: 1.25rem;
+  border: 1.5px solid rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+/* ── Section label ── */
+.mm-section-label {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #7b7486;
+}
+
 /* ── Tap feedback (preserved from existing app) ── */
 .btn-tap {
   transition: transform 0.12s ease;

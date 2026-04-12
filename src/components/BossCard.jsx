@@ -8,7 +8,7 @@ export default function BossCard({ boss }) {
 
   if (boss.hp <= 0) {
     return (
-      <div className="bg-surface-container-lowest rounded-lg p-5 border border-emerald/20">
+      <div className="mm-card p-5 border border-emerald/20">
         <div className="flex items-center gap-3">
           <span className="material-symbols-outlined text-3xl text-secondary" style={{ fontVariationSettings: "'FILL' 1" }}>
             military_tech
@@ -28,7 +28,7 @@ export default function BossCard({ boss }) {
   const hpPct = Math.round((boss.hp / boss.maxHp) * 100);
 
   return (
-    <div className="bg-surface-container-lowest rounded-lg p-5 relative overflow-hidden">
+    <div className="mm-card p-5 relative overflow-hidden">
       {/* Boss header */}
       <div className="flex items-center gap-3 mb-3">
         <span className="text-3xl" style={{ animation: "bossShake 0.6s ease-in-out infinite" }}>

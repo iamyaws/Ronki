@@ -5,7 +5,7 @@ export default function LoginBonus({ onCollect, claimed }) {
 
   return (
     <button
-      className="btn-tap w-full bg-secondary-fixed/20 border border-secondary-container/30 rounded-lg p-4 mb-4 flex items-center gap-4 text-left transition-all hover:shadow-md"
+      className="btn-tap w-full mm-card-tint bg-secondary-fixed/20 border-secondary-container/30 p-4 mb-4 flex items-center gap-4 text-left transition-all hover:shadow-md"
       onClick={onCollect}
       style={{ animation: "loginPulse 2s ease-in-out infinite" }}
     >

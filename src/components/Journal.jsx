@@ -124,7 +124,7 @@ export default function Journal() {
       </div>
 
       {/* ── Rainbow Progress ── */}
-      <section className="bg-surface-container-lowest rounded-lg p-6">
+      <section className="mm-card p-6">
         <div className="flex justify-between items-center mb-4">
           <h3 className="font-label font-bold uppercase tracking-widest text-xs text-outline/80">
             🌈 Regenbogen heute
@@ -152,7 +152,7 @@ export default function Journal() {
       {JOURNAL_QUESTIONS.map(q => {
         const ans = (state.jAnswers || {})[q.id];
         return (
-          <section key={q.id} className="bg-surface-container-lowest rounded-lg p-6">
+          <section key={q.id} className="mm-card p-6">
             <h3 className="font-label font-bold text-sm text-on-surface-variant mb-4">{q.q}</h3>
             <div className="flex flex-wrap gap-2">
               {q.opts.map(o => (
@@ -179,7 +179,7 @@ export default function Journal() {
 
       {/* ── Evening Mood (if not set) ── */}
       {state.moodPM === null && (
-        <section className="bg-surface-container-lowest rounded-lg p-6">
+        <section className="mm-card p-6">
           <h3 className="font-label font-bold text-xs uppercase tracking-widest text-primary mb-4">
             🌙 Abendstimmung
           </h3>

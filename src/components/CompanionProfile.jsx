@@ -86,7 +86,7 @@ export default function CompanionProfile() {
       {/* ── Stats Grid (Bento Style) ── */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Bond Level Card */}
-        <div className="bg-surface-container-lowest rounded-lg p-6 relative overflow-hidden group">
+        <div className="mm-card p-6 relative overflow-hidden group">
           <div className="absolute -right-4 -top-4 opacity-5 text-on-surface group-hover:rotate-12 transition-transform duration-500">
             <span className="material-symbols-outlined text-8xl">favorite</span>
           </div>
@@ -111,7 +111,7 @@ export default function CompanionProfile() {
         </div>
 
         {/* Happiness Card */}
-        <div className="bg-surface-container-lowest rounded-lg p-6 relative overflow-hidden group">
+        <div className="mm-card p-6 relative overflow-hidden group">
           <div className="absolute -right-4 -top-4 opacity-5 text-on-surface group-hover:-rotate-12 transition-transform duration-500">
             <span className="material-symbols-outlined text-8xl">sentiment_very_satisfied</span>
           </div>
@@ -137,7 +137,7 @@ export default function CompanionProfile() {
       </div>
 
       {/* ── Condition Bars ── */}
-      <div className="bg-surface-container-lowest rounded-lg p-6">
+      <div className="mm-card p-6">
         <h3 className="font-label font-bold text-xs uppercase tracking-widest text-on-surface-variant mb-4">Zustand</h3>
         {[
           { label: "Hunger", value: hunger, color: "#F97316", icon: "restaurant" },
@@ -211,7 +211,7 @@ export default function CompanionProfile() {
       </section>
 
       {/* ── Gear Slots ── */}
-      <div className="bg-surface-container-lowest rounded-lg p-6">
+      <div className="mm-card p-6">
         <h3 className="font-label font-bold text-xs uppercase tracking-widest text-on-surface-variant mb-4">Ausrüstung</h3>
         <GearSlots
           equippedGear={state.equippedGear || {}}
@@ -248,7 +248,7 @@ export default function CompanionProfile() {
       </div>
 
       {/* ── Fun Facts Card ── */}
-      <div className="bg-surface-container-lowest rounded-lg p-6">
+      <div className="mm-card p-6">
         <h3 className="font-label font-bold text-xs uppercase tracking-widest text-on-surface-variant mb-4">Steckbrief</h3>
         <div className="space-y-3">
           {[

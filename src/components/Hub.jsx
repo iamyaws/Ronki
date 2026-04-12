@@ -73,7 +73,7 @@ export default function Hub() {
 
       {/* ── Morning Mood (if not set) ── */}
       {state.moodAM === null && (
-        <div className="bg-surface-container-lowest rounded-lg p-5">
+        <div className="mm-card p-5">
           <p className="font-label font-bold text-xs uppercase tracking-widest text-on-surface-variant mb-4">
             Wie startest du in den Tag? 🌅
           </p>
@@ -92,11 +92,11 @@ export default function Hub() {
 
       {/* ── Quick Habit Buttons ── */}
       <div className="grid grid-cols-3 gap-3">
-        <button className="btn-tap rounded-xl p-3 flex flex-col items-center gap-2 transition-all"
+        <button className="btn-tap mm-card p-3 flex flex-col items-center gap-2 transition-all"
           onClick={() => { if (!state.dailyVitaminD) { actions.completeHabit("vitaminD"); if (navigator.vibrate) navigator.vibrate(50); } }}
           style={{
-            background: state.dailyVitaminD ? 'rgba(52,211,153,0.1)' : 'white',
-            border: `2px solid ${state.dailyVitaminD ? 'rgba(52,211,153,0.3)' : 'transparent'}`,
+            background: state.dailyVitaminD ? 'rgba(52,211,153,0.1)' : undefined,
+            borderColor: state.dailyVitaminD ? 'rgba(52,211,153,0.3)' : undefined,
             minHeight: 80,
           }}>
           <span className="text-xl">{state.dailyVitaminD ? "✅" : "💊"}</span>
@@ -104,11 +104,11 @@ export default function Hub() {
           {!state.dailyVitaminD && <span className="font-label text-xs font-bold text-secondary">+5 ⭐</span>}
         </button>
 
-        <button className="btn-tap rounded-xl p-3 flex flex-col items-center gap-2 transition-all"
+        <button className="btn-tap mm-card p-3 flex flex-col items-center gap-2 transition-all"
           onClick={() => { if (!state.dailyBrother) { actions.completeHabit("brother"); if (navigator.vibrate) navigator.vibrate(50); } }}
           style={{
-            background: state.dailyBrother ? 'rgba(52,211,153,0.1)' : 'white',
-            border: `2px solid ${state.dailyBrother ? 'rgba(52,211,153,0.3)' : 'transparent'}`,
+            background: state.dailyBrother ? 'rgba(52,211,153,0.1)' : undefined,
+            borderColor: state.dailyBrother ? 'rgba(52,211,153,0.3)' : undefined,
             minHeight: 80,
           }}>
           <span className="text-xl">{state.dailyBrother ? "✅" : "👶"}</span>
@@ -116,11 +116,11 @@ export default function Hub() {
           {!state.dailyBrother && <span className="font-label text-xs font-bold text-secondary">+10 ⭐</span>}
         </button>
 
-        <button className="btn-tap rounded-xl p-3 flex flex-col items-center gap-2 transition-all relative"
+        <button className="btn-tap mm-card p-3 flex flex-col items-center gap-2 transition-all relative"
           onClick={() => ui.setView("cat")}
           style={{
-            background: catAllDone ? 'rgba(52,211,153,0.1)' : 'white',
-            border: `2px solid ${catAllDone ? 'rgba(52,211,153,0.3)' : 'transparent'}`,
+            background: catAllDone ? 'rgba(52,211,153,0.1)' : undefined,
+            borderColor: catAllDone ? 'rgba(52,211,153,0.3)' : undefined,
             minHeight: 80,
           }}>
           <span className="text-xl">🐱</span>
@@ -145,7 +145,7 @@ export default function Hub() {
       )}
 
       {/* ── Water Tracker ── */}
-      <div className="bg-surface-container-lowest rounded-lg p-4">
+      <div className="mm-card p-4">
         <div className="flex items-center gap-2 mb-3">
           <span className="material-symbols-outlined text-primary text-lg">water_drop</span>
           <span className="font-label font-bold text-sm text-primary">
@@ -170,7 +170,7 @@ export default function Hub() {
 
       {/* ── Lunch ── */}
       {lunch && (
-        <div className="bg-surface-container-lowest rounded-lg p-4 flex items-center gap-3">
+        <div className="mm-card p-4 flex items-center gap-3">
           <span className="material-symbols-outlined text-secondary">restaurant</span>
           <div>
             <p className="font-label font-bold text-xs uppercase tracking-wider text-on-surface-variant">Heute</p>
@@ -180,7 +180,7 @@ export default function Hub() {
       )}
 
       {/* ── Helden-Kodex ── */}
-      <button className="btn-tap w-full bg-surface-container-lowest rounded-lg p-4 flex items-center justify-center gap-2 font-label font-bold text-sm text-secondary"
+      <button className="btn-tap w-full mm-card p-4 flex items-center justify-center gap-2 font-label font-bold text-sm text-secondary"
         onClick={() => ui.setView("regeln")}>
         <span className="material-symbols-outlined text-secondary">shield</span>
         Helden-Kodex
@@ -208,7 +208,7 @@ export default function Hub() {
         const firstUndoneIdx = chain.steps.findIndex(s => !s.done);
         const daysLeft = chain.deadline ? Math.ceil((new Date(chain.deadline) - new Date()) / (1000 * 60 * 60 * 24)) : null;
         return (
-          <div key={chain.id} className="bg-surface-container-lowest rounded-lg p-5 border border-primary/10">
+          <div key={chain.id} className="mm-card p-5 border border-primary/10">
             <div className="flex items-center gap-3 mb-3">
               <span className="text-xl">{chain.emoji}</span>
               <div className="flex-1">
@@ -262,7 +262,7 @@ export default function Hub() {
         const wp = state.weeklyProgress || 0;
         const wmDone = wp >= wm.target;
         return (
-          <div className={`bg-surface-container-lowest rounded-lg p-5 ${wmDone ? 'border border-emerald/20' : ''}`}>
+          <div className={`mm-card p-5 ${wmDone ? 'border border-emerald/20' : ''}`}>
             <div className="flex items-center gap-3 mb-3">
               <span className="text-xl">{wm.icon}</span>
               <div className="flex-1">
@@ -289,12 +289,12 @@ export default function Hub() {
 
       {/* ── Bottom Quick Links ── */}
       <div className="flex gap-3">
-        <button className="btn-tap flex-1 bg-surface-container-lowest rounded-lg p-4 flex items-center justify-center gap-2 font-label font-bold text-sm text-on-surface"
+        <button className="btn-tap flex-1 mm-card p-4 flex items-center justify-center gap-2 font-label font-bold text-sm text-on-surface"
           onClick={() => ui.setView("journal")}>
           <span className="material-symbols-outlined text-primary text-lg">menu_book</span>
           Tagebuch
         </button>
-        <button className="btn-tap flex-1 bg-surface-container-lowest rounded-lg p-4 flex items-center justify-center gap-2 font-label font-bold text-sm text-on-surface"
+        <button className="btn-tap flex-1 mm-card p-4 flex items-center justify-center gap-2 font-label font-bold text-sm text-on-surface"
           onClick={() => ui.setView("time")}>
           <span className="material-symbols-outlined text-secondary text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>stars</span>
           Belohnungen

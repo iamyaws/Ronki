@@ -115,7 +115,7 @@ export default function Room() {
         {/* ── Sidebar ── */}
         <div className="lg:col-span-4 space-y-4">
           {/* Unlocked furniture */}
-          <div className="bg-surface-container-lowest rounded-lg p-5 shadow-sm">
+          <div className="mm-card p-5 shadow-sm">
             <h3 className="font-label font-bold uppercase tracking-widest text-xs text-on-surface-variant mb-4">
               Freigeschaltete Möbel
             </h3>

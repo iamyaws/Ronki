@@ -15,7 +15,7 @@ export default function Achievements() {
   return (
     <div className="lotus-pattern px-6 pb-32 space-y-6">
       {/* Hero card */}
-      <div className="bg-surface-container-lowest rounded-lg p-5 flex items-center gap-4">
+      <div className="mm-card p-5 flex items-center gap-4">
         <HeroSprite shape={state.hero?.shape} color={state.hero?.color} eyes={state.hero?.eyes} hair={state.hero?.hair} size={80} level={level} skinTone={state.hero?.skinTone} hairColor={state.hero?.hairColor} />
         <div>
           <h2 className="font-headline text-lg font-bold text-on-surface">{state.hero?.name}</h2>
@@ -42,7 +42,7 @@ export default function Achievements() {
         <h3 className="font-label font-bold text-xs uppercase tracking-widest text-on-surface-variant mb-3 px-1">Badges</h3>
         <div className="grid grid-cols-3 gap-3">
           {badges.map((b, i) => (
-            <div key={i} className={`bg-surface-container-lowest rounded-lg p-4 text-center transition-all ${
+            <div key={i} className={`mm-card p-4 text-center transition-all ${
               b.u ? 'border border-primary/10 shadow-sm' : 'opacity-35'
             }`}>
               <div className="text-3xl mb-1">{b.i}</div>
@@ -63,7 +63,7 @@ export default function Achievements() {
             { l: "Streak", v: state.sd + "d", icon: "local_fire_department" },
             { l: "Level", v: level, icon: "trending_up" },
           ].map((s, i) => (
-            <div key={i} className="bg-surface-container-lowest rounded-lg px-4 py-3 flex items-center justify-between">
+            <div key={i} className="mm-card px-4 py-3 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <span className="material-symbols-outlined text-primary text-lg">{s.icon}</span>
                 <span className="font-label font-bold text-sm text-on-surface">{s.l}</span>

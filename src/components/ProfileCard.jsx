@@ -17,7 +17,7 @@ export default function ProfileCard({ state, level, mood, weather, wInfo, todayD
   })();
 
   return (
-    <div className="bg-surface-container-lowest rounded-lg p-5 mb-4">
+    <div className="mm-card p-5 mb-4">
       <div className="flex gap-4 items-start">
         {/* Companion + hero avatar */}
         <div className="flex flex-col items-center shrink-0 gap-2" style={{ minWidth: 120 }}>

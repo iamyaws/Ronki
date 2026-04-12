@@ -115,7 +115,7 @@ export default function TimeBank() {
           </h3>
 
           {editDraft.map(bel => (
-            <div key={bel.id} className={`bg-surface-container-lowest rounded-lg p-5 space-y-3 border ${bel.active ? 'border-primary/10' : 'border-error/20 opacity-60'}`}>
+            <div key={bel.id} className={`mm-card p-5 space-y-3 border ${bel.active ? 'border-primary/10' : 'border-error/20 opacity-60'}`}>
               <div className="flex items-center gap-3">
                 <button onClick={() => setEmojiPicker(emojiPicker === bel.id ? null : bel.id)}
                   className="btn-tap w-12 h-12 rounded-lg bg-primary-fixed flex items-center justify-center text-2xl border border-primary/20">
@@ -177,7 +177,7 @@ export default function TimeBank() {
           </h3>
 
           {activeRewards.length === 0 && (
-            <div className="bg-surface-container-lowest rounded-lg p-8 text-center text-on-surface-variant font-body">
+            <div className="mm-card p-8 text-center text-on-surface-variant font-body">
               {isPMode ? 'Noch keine Belohnungen. Tippe "Bearbeiten"!' : "Keine Belohnungen verfügbar."}
             </div>
           )}
@@ -194,7 +194,7 @@ export default function TimeBank() {
             const isConfirming = confirmRedeem === bel.id;
 
             return (
-              <div key={bel.id} className={`bg-surface-container-lowest rounded-lg p-5 flex items-center justify-between group transition-all duration-300 ${canRedeem ? 'hover:shadow-[0_8px_24px_rgba(30,27,23,0.06)]' : ''} ${!available || !canAfford ? 'opacity-60' : ''}`}>
+              <div key={bel.id} className={`mm-card p-5 flex items-center justify-between group transition-all duration-300 ${canRedeem ? 'hover:shadow-[0_8px_24px_rgba(30,27,23,0.06)]' : ''} ${!available || !canAfford ? 'opacity-60' : ''}`}>
                 <div className="flex items-center gap-4">
                   <div className="w-14 h-14 rounded-lg bg-surface-container-low flex items-center justify-center">
                     <span className="text-3xl">{bel.emoji}</span>
@@ -275,7 +275,7 @@ export default function TimeBank() {
           <h3 className="font-label font-bold text-sm uppercase tracking-widest text-on-surface/40 px-1 mb-3">
             Letzte Einlösungen
           </h3>
-          <div className="bg-surface-container-lowest rounded-lg p-4 divide-y divide-outline-variant/10">
+          <div className="mm-card p-4 divide-y divide-outline-variant/10">
             {log.slice(-5).reverse().map((entry, i) => (
               <div key={i} className="flex items-center justify-between py-3">
                 <span className="font-label font-bold text-sm text-on-surface">{resolveRewardName(entry.id)}</span>
