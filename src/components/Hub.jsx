@@ -26,7 +26,7 @@ export default function Hub() {
   const companionMood = mood;
 
   return (
-    <div className="px-6 pb-8 space-y-6">
+    <div className="px-6 pb-8 space-y-8">
 
       {/* ── Companion / Egg Hero Section ── */}
       <section className="relative py-6 flex flex-col items-center justify-center">
@@ -65,7 +65,7 @@ export default function Hub() {
       <LoginBonus claimed={state.loginBonusClaimed} onCollect={() => actions.collectLoginBonus()} />
 
       {/* ── Daily Summary Card ── */}
-      <section className="bg-surface-container-lowest p-5 rounded-lg relative overflow-hidden border border-outline-variant/10 shadow-sm">
+      <section className="bg-surface-container-lowest p-6 rounded-lg relative overflow-hidden border border-outline-variant/10 shadow-sm">
         <div className="flex justify-between items-center relative z-10">
           <div className="space-y-1">
             <h3 className="font-headline font-bold text-lg text-on-surface">
@@ -92,9 +92,9 @@ export default function Hub() {
       </section>
 
       {/* ── Quick Stats Grid: Mood + Water ── */}
-      <section className="grid grid-cols-2 gap-4">
+      <section className="grid grid-cols-2 gap-5">
         {/* Mood Card */}
-        <div className="bg-surface-container-low p-5 rounded-lg flex flex-col items-center justify-center space-y-2 text-center border border-outline-variant/5">
+        <div className="bg-surface-container-low p-6 rounded-lg flex flex-col items-center justify-center space-y-3 text-center border border-outline-variant/5" style={{ minHeight: 160 }}>
           {state.moodAM !== null ? (
             <>
               <div className="w-14 h-14 rounded-full bg-white flex items-center justify-center text-3xl shadow-sm border border-outline-variant/10">
@@ -122,7 +122,7 @@ export default function Hub() {
         </div>
 
         {/* Water Tracker Card */}
-        <div className="bg-surface-container-low p-5 rounded-lg flex flex-col justify-between border border-outline-variant/5">
+        <div className="bg-surface-container-low p-6 rounded-lg flex flex-col justify-between border border-outline-variant/5" style={{ minHeight: 160 }}>
           <div className="flex justify-between items-center mb-3">
             <p className="font-label font-bold text-[10px] text-on-surface-variant uppercase tracking-widest">Wasser</p>
             <span className="material-symbols-outlined text-primary text-lg">water_drop</span>
@@ -156,7 +156,7 @@ export default function Hub() {
         const wp = state.weeklyProgress || 0;
         const wmDone = wp >= wm.target;
         return (
-          <div className={`p-5 rounded-lg border border-dashed ${wmDone ? 'border-emerald/30 bg-emerald/5' : 'border-primary/30 bg-white/40'}`}>
+          <div className={`p-6 rounded-lg border-2 border-dashed ${wmDone ? 'border-emerald/30 bg-emerald/5' : 'border-primary/20 bg-white/40'}`}>
             <div className="flex justify-between items-start mb-2">
               <div className="flex items-center gap-2">
                 <span className="text-xl">{wm.icon}</span>
