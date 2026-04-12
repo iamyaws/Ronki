@@ -8,7 +8,7 @@ export default function TopAppBar() {
 
   return (
     <header className="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-xl">
-      <div className="flex justify-between items-center px-6 py-4 w-full max-w-md mx-auto">
+      <div className="flex justify-between items-center px-6 py-4 w-full max-w-lg mx-auto">
         {/* Left: Avatar + Brand */}
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center overflow-hidden">

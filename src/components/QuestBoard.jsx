@@ -63,7 +63,7 @@ export default function QuestBoard() {
       />
 
       {/* Sheet */}
-      <div className="flex-1 w-full max-w-md bg-surface rounded-t-[2rem] overflow-auto relative"
+      <div className="flex-1 w-full max-w-lg bg-surface rounded-t-[2rem] overflow-auto relative"
            style={{ animation: "slideUp .3s ease", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", paddingBottom: 100 }}>
 
         {/* ── Sticky Header ── */}

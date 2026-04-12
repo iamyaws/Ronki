@@ -52,7 +52,7 @@ function AppContent() {
         />
       )}
       {showChrome && <TopAppBar />}
-      <div className="min-h-screen bg-surface font-body text-on-surface max-w-md mx-auto" style={{ paddingTop: showChrome ? 72 : 0, paddingBottom: showChrome ? 96 : 0 }}>
+      <div className="min-h-screen bg-surface font-body text-on-surface max-w-lg mx-auto" style={{ paddingTop: showChrome ? 72 : 0, paddingBottom: showChrome ? 96 : 0 }}>
         {ui.view === "hub" && <Hub />}
         {ui.view === "time" && <TimeBank />}
         {ui.view === "stats" && <Achievements />}
