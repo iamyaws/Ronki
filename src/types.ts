@@ -15,6 +15,7 @@ export interface Quest {
   name: string;
   icon: string;
   anchor: 'morning' | 'evening';
+  group?: string;  // visual sub-group: "school_prep", "bedtime", etc.
   xp: number;
   minutes: number;
   done: boolean;
@@ -255,4 +256,5 @@ export interface ComputedState {
   mood: CatMood;
   dayN: string;
   byA: Record<string, Quest[]>;
+  byGroup: Record<string, Quest[]>;
 }

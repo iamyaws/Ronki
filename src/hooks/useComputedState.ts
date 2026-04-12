@@ -27,14 +27,20 @@ export default function useComputedState(state: GameState | null): ComputedState
     }).length;
 
     const byA: Record<string, Quest[]> = {};
+    const byGroup: Record<string, Quest[]> = {};
     state.quests.forEach(q => {
       const anchor = (q.anchor === 'afternoon' as string) ? 'morning' : q.anchor;
       if (!byA[anchor]) byA[anchor] = [];
       byA[anchor].push(q);
+      // Group by quest group (for epic quest sections)
+      const group = q.group || anchor;
+      if (!byGroup[group]) byGroup[group] = [];
+      byGroup[group].push(q);
     });
     // Sort each group by order
     Object.values(byA).forEach(arr => arr.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)));
+    Object.values(byGroup).forEach(arr => arr.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)));
 
-    return { level, xpP, done, total, allDone, pct, mood, dayN, byA };
+    return { level, xpP, done, total, allDone, pct, mood, dayN, byA, byGroup };
   }, [state]);
 }

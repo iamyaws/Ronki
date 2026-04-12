@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { T, ANCHORS, RAINBOW, RAINBOW_LABELS, MOOD_EMOJIS, SCHOOL_QUESTS, VACATION_QUESTS, COMPANION_TYPES } from '../constants';
+import { T, ANCHORS, QUEST_GROUPS, RAINBOW, RAINBOW_LABELS, MOOD_EMOJIS, SCHOOL_QUESTS, VACATION_QUESTS, COMPANION_TYPES } from '../constants';
 import SFX from '../utils/sfx';
 import { useGame } from '../context/GameContext';
 import useWeather, { getWeatherInfo } from '../hooks/useWeather';
@@ -15,7 +15,7 @@ const COMPANION_MESSAGES = [
 
 export default function QuestBoard() {
   const { state, computed, actions, ui } = useGame();
-  const { allDone, done, total, pct, byA, level } = computed;
+  const { allDone, done, total, pct, byA, byGroup, level } = computed;
   const { pMode, setQuestOpen, nq, setNq } = ui;
   const nqRef = useRef(null);
   const fileRef = useRef(null);
@@ -163,9 +163,9 @@ export default function QuestBoard() {
           </div>
         )}
 
-        {/* ── Quest groups (sequential questline) ── */}
-        {Object.entries(ANCHORS).map(([a, m]) => {
-          const qs = (byA[a] || []).filter(q => !q.sideQuest);
+        {/* ── Epic Quest groups (3 sequences: morning, school_prep, bedtime) ── */}
+        {Object.entries(QUEST_GROUPS).map(([a, m]) => {
+          const qs = (byGroup?.[a] || []).filter(q => !q.sideQuest);
           if (!qs.length) return null;
           const secDone = qs.every(q => q.done);
           // Find the first undone quest index for "next step" highlight
