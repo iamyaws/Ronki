@@ -33,43 +33,36 @@ export const CAT_VARIANTS: Record<string, { name: string; col: string; ear: stri
 // ── Questlines: sequential morning + evening routines, all 10 HP ──
 
 export const SCHOOL_QUESTS: Omit<Quest, 'done' | 'streak'>[] = [
-  // Morning: "Bereit f\u00FCr den Tag"
+  // Morning: "Bereit f\u00FCr den Tag" (4 core steps — personal hygiene only)
   { id: "s1", name: "Gesicht waschen", icon: "\u{1F9FC}", anchor: "morning", xp: 10, minutes: 3, order: 1 },
   { id: "s3", name: "Z\u00E4hne putzen", icon: "\u{1FAA5}", anchor: "morning", xp: 10, minutes: 3, order: 2 },
   { id: "s4", name: "Anziehen", icon: "\u{1F455}", anchor: "morning", xp: 10, minutes: 3, order: 3 },
   { id: "s2", name: "Bett machen", icon: "\u{1F6CF}\uFE0F", anchor: "morning", xp: 10, minutes: 4, order: 4 },
-  { id: "s5", name: "Schultasche packen", icon: "\u{1F392}", anchor: "morning", xp: 10, minutes: 4, order: 5 },
-  { id: "s6b", name: "Sonnencreme auftragen", icon: "\u2600\uFE0F", anchor: "morning", xp: 10, minutes: 2, order: 6 },
-  // Evening: "Gute Nacht Routine" (school prep + hygiene)
-  { id: "s_lunchbox", name: "Brotdose auswaschen", icon: "\u{1F371}", anchor: "evening", xp: 10, minutes: 3, order: 0 },
-  { id: "s_packcheck", name: "Schultasche checken", icon: "\u{1F392}", anchor: "evening", xp: 10, minutes: 3, order: 0 },
-  { id: "s7", name: "Hausaufgaben", icon: "\u{1F4DA}", anchor: "evening", xp: 10, minutes: 8, order: 2 },
-  { id: "s8", name: "5 Min lesen", icon: "\u{1F4D6}", anchor: "evening", xp: 10, minutes: 5, order: 3 },
-  { id: "s9", name: "Zimmer aufr\u00E4umen", icon: "\u{1F9F9}", anchor: "evening", xp: 10, minutes: 6, order: 4 },
-  { id: "s12", name: "Z\u00E4hne putzen", icon: "\u{1FAA5}", anchor: "evening", xp: 10, minutes: 3, order: 5 },
-  { id: "s13", name: "Gesicht reinigen", icon: "\u{1F9F4}", anchor: "evening", xp: 10, minutes: 3, order: 6 },
-  { id: "s14", name: "Creme auftragen", icon: "\u2728", anchor: "evening", xp: 10, minutes: 2, order: 7 },
-  { id: "s15", name: "Pyjama anziehen", icon: "\u{1F319}", anchor: "evening", xp: 10, minutes: 2, order: 8 },
-  // Repeatable: Geschirr (2x required, 3rd optional bonus)
-  { id: "geschirr", name: "Geschirr einr\u00E4umen", icon: "\u{1F37D}\uFE0F", anchor: "morning", xp: 10, minutes: 2, order: 99, target: 2, bonus: 3 },
+  // Evening: "Gute Nacht Routine" (school prep + homework + hygiene)
+  { id: "s7", name: "Hausaufgaben", icon: "\u{1F4DA}", anchor: "evening", xp: 10, minutes: 8, order: 1 },
+  { id: "s8", name: "5 Min lesen", icon: "\u{1F4D6}", anchor: "evening", xp: 10, minutes: 5, order: 2 },
+  { id: "s9", name: "Zimmer aufr\u00E4umen", icon: "\u{1F9F9}", anchor: "evening", xp: 10, minutes: 6, order: 3 },
+  { id: "s_lunchbox", name: "Brotdose auswaschen", icon: "\u{1F371}", anchor: "evening", xp: 10, minutes: 3, order: 4 },
+  { id: "s5", name: "Schultasche packen", icon: "\u{1F392}", anchor: "evening", xp: 10, minutes: 4, order: 5 },
+  { id: "s12", name: "Z\u00E4hne putzen", icon: "\u{1FAA5}", anchor: "evening", xp: 10, minutes: 3, order: 6 },
+  { id: "s13", name: "Gesicht reinigen", icon: "\u{1F9F4}", anchor: "evening", xp: 10, minutes: 3, order: 7 },
+  { id: "s14", name: "Creme auftragen", icon: "\u2728", anchor: "evening", xp: 10, minutes: 2, order: 8 },
+  { id: "s15", name: "Pyjama anziehen", icon: "\u{1F319}", anchor: "evening", xp: 10, minutes: 2, order: 9 },
 ];
 
 export const VACATION_QUESTS: Omit<Quest, 'done' | 'streak'>[] = [
-  // Morning
+  // Morning (4 core — no school bag during vacation)
   { id: "v1", name: "Gesicht waschen", icon: "\u{1F9FC}", anchor: "morning", xp: 10, minutes: 3, order: 1 },
   { id: "v3", name: "Z\u00E4hne putzen", icon: "\u{1FAA5}", anchor: "morning", xp: 10, minutes: 3, order: 2 },
   { id: "v4", name: "Anziehen", icon: "\u{1F455}", anchor: "morning", xp: 10, minutes: 3, order: 3 },
   { id: "v2", name: "Bett machen", icon: "\u{1F6CF}\uFE0F", anchor: "morning", xp: 10, minutes: 4, order: 4 },
-  { id: "v5b", name: "Sonnencreme auftragen", icon: "\u2600\uFE0F", anchor: "morning", xp: 10, minutes: 2, order: 5 },
-  // Evening
+  // Evening (no school prep, just hygiene + wind-down)
   { id: "v6", name: "5 Min lesen", icon: "\u{1F4D6}", anchor: "evening", xp: 10, minutes: 5, order: 1 },
   { id: "v7", name: "Zimmer aufr\u00E4umen", icon: "\u{1F9F9}", anchor: "evening", xp: 10, minutes: 5, order: 2 },
   { id: "v10", name: "Z\u00E4hne putzen", icon: "\u{1FAA5}", anchor: "evening", xp: 10, minutes: 3, order: 3 },
   { id: "v11", name: "Gesicht reinigen", icon: "\u{1F9F4}", anchor: "evening", xp: 10, minutes: 3, order: 4 },
   { id: "v12", name: "Creme auftragen", icon: "\u2728", anchor: "evening", xp: 10, minutes: 2, order: 5 },
   { id: "v13", name: "Pyjama anziehen", icon: "\u{1F319}", anchor: "evening", xp: 10, minutes: 2, order: 6 },
-  // Repeatable: Geschirr
-  { id: "geschirr", name: "Geschirr einr\u00E4umen", icon: "\u{1F37D}\uFE0F", anchor: "morning", xp: 10, minutes: 2, order: 99, target: 2, bonus: 3 },
 ];
 
 export const FOOTBALL: Omit<Quest, 'done' | 'streak'> = { id: "ft", name: "Fu\u00DFball Training", icon: "\u26BD", anchor: "evening", xp: 10, minutes: 10, order: 0, target: 2 };
@@ -473,10 +466,11 @@ export const BIRTHDAY_QUEST_CHAIN: QuestChain = {
 // ═══ Side-Quests (optional bonus quests) ═══
 
 export const SIDE_QUESTS: Omit<Quest, 'done' | 'streak'>[] = [
-  { id: "sq1", name: "Liam eine Geschichte vorlesen", icon: "\uD83D\uDCD6", anchor: "evening", xp: 15, minutes: 10, order: 90 },
-  { id: "sq2", name: "Etwas Kreatives machen", icon: "\uD83C\uDFA8", anchor: "evening", xp: 15, minutes: 15, order: 91 },
-  { id: "sq3", name: "Jemandem helfen", icon: "\uD83E\uDD1D", anchor: "morning", xp: 15, minutes: 5, order: 91 },
-  { id: "sq4", name: "Drau\u00DFen spielen", icon: "\u26BD", anchor: "morning", xp: 15, minutes: 15, order: 92 },
-  { id: "sq5", name: "Etwas Neues lernen", icon: "\uD83D\uDCA1", anchor: "evening", xp: 15, minutes: 10, order: 93 },
-  { id: "sq6", name: "Zimmer extra aufr\u00E4umen", icon: "\u2728", anchor: "evening", xp: 20, minutes: 10, order: 94 },
+  { id: "sq_geschirr", name: "Geschirr einr\u00E4umen", icon: "\u{1F37D}\uFE0F", anchor: "morning", xp: 15, minutes: 2, order: 90 },
+  { id: "sq_sonne", name: "Sonnencreme auftragen", icon: "\u2600\uFE0F", anchor: "morning", xp: 10, minutes: 2, order: 91 },
+  { id: "sq1", name: "Liam eine Geschichte vorlesen", icon: "\uD83D\uDCD6", anchor: "evening", xp: 15, minutes: 10, order: 92 },
+  { id: "sq2", name: "Etwas Kreatives machen", icon: "\uD83C\uDFA8", anchor: "evening", xp: 15, minutes: 15, order: 93 },
+  { id: "sq3", name: "Jemandem helfen", icon: "\uD83E\uDD1D", anchor: "morning", xp: 15, minutes: 5, order: 94 },
+  { id: "sq4", name: "Drau\u00DFen spielen", icon: "\u26BD", anchor: "morning", xp: 15, minutes: 15, order: 95 },
+  { id: "sq5", name: "Etwas Neues lernen", icon: "\uD83D\uDCA1", anchor: "evening", xp: 15, minutes: 10, order: 96 },
 ];
