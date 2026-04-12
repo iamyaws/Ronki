@@ -1,54 +1,28 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { T, CAT_STAGES, COMPANION_STAGES, COMPANION_TYPES } from '../constants';
 import { getCatStage, getCatStageProg, getCatMood } from '../utils/helpers';
-import { ViewHeader } from './ui';
 import Companion from './Companion';
 import GearSlots from './GearSlots';
-import EvolutionTracker from './EvolutionTracker';
 import { useGame } from '../context/GameContext';
 
+const CARE_ACTIONS = [
+  { key: "fed", icon: "restaurant", label: "Füttern", msg: "Mmmh, lecker! *mampf*", color: "#F97316" },
+  { key: "petted", icon: "favorite", label: "Streicheln", msg: "Schnurrr... das ist schön!", color: "#EC4899" },
+  { key: "played", icon: "sports_esports", label: "Spielen", msg: "Miau! Fang mich!", color: "#6D28D9" },
+];
+
 const FUN_FACTS = {
-  cat: {
-    species: "Hauskatze",
-    likes: "Sonnenstrahlen, Fisch, Streicheleinheiten",
-    dislikes: "Regen, laute Geräusche",
-    talent: "Kann im Schlaf schnurren",
-    motto: "Schnurr... das Leben ist schön!",
-    heights: ["15 cm", "22 cm", "30 cm", "38 cm", "45 cm"],
-    weights: ["0.8 kg", "2.5 kg", "4 kg", "5.5 kg", "7 kg"],
-  },
-  dragon: {
-    species: "Vietnamesischer Rồng",
-    likes: "Feuer, Flüge, Abenteuer",
-    dislikes: "Kälte, Langeweile",
-    talent: "Kann kleine Flammen pusten",
-    motto: "Mut ist stärker als Feuer!",
-    heights: ["20 cm", "45 cm", "80 cm", "1.2 m", "2 m"],
-    weights: ["1 kg", "5 kg", "15 kg", "40 kg", "100 kg"],
-  },
-  wolf: {
-    species: "Grauer Wolf",
-    likes: "Mondschein, Teamwork, Rennen",
-    dislikes: "Einsamkeit, Hitze",
-    talent: "Spürt Gefühle anderer",
-    motto: "Zusammen sind wir stark!",
-    heights: ["25 cm", "40 cm", "65 cm", "80 cm", "95 cm"],
-    weights: ["2 kg", "8 kg", "20 kg", "35 kg", "50 kg"],
-  },
-  phoenix: {
-    species: "Feuerphönix",
-    likes: "Sonnenaufgänge, Musik, Wärme",
-    dislikes: "Dunkelheit, Ketten",
-    talent: "Leuchtet im Dunkeln",
-    motto: "Aus der Asche wird Licht!",
-    heights: ["12 cm", "25 cm", "50 cm", "75 cm", "1 m"],
-    weights: ["0.3 kg", "1.5 kg", "4 kg", "8 kg", "15 kg"],
-  },
+  cat: { species: "Hauskatze", likes: "Sonnenstrahlen, Fisch", dislikes: "Regen, laute Geräusche", talent: "Kann im Schlaf schnurren", motto: "Schnurr... das Leben ist schön!" },
+  dragon: { species: "Vietnamesischer Rồng", likes: "Feuer, Flüge, Abenteuer", dislikes: "Kälte, Langeweile", talent: "Kann kleine Flammen pusten", motto: "Mut ist stärker als Feuer!" },
+  wolf: { species: "Grauer Wolf", likes: "Mondschein, Teamwork", dislikes: "Einsamkeit, Hitze", talent: "Spürt Gefühle anderer", motto: "Zusammen sind wir stark!" },
+  phoenix: { species: "Feuerphönix", likes: "Sonnenaufgänge, Musik", dislikes: "Dunkelheit, Ketten", talent: "Leuchtet im Dunkeln", motto: "Aus der Asche wird Licht!" },
 };
 
 export default function CompanionProfile() {
   const { state, actions, ui, computed } = useGame();
   const { mood } = computed;
+  const [careMsg, setCareMsg] = useState(null);
+
   const type = state.companionType || "cat";
   const stage = getCatStage(state.catEvo || 0);
   const stageNames = COMPANION_STAGES[type] || COMPANION_STAGES.cat;
@@ -56,79 +30,254 @@ export default function CompanionProfile() {
   const typeInfo = COMPANION_TYPES[type] || COMPANION_TYPES.cat;
   const facts = FUN_FACTS[type] || FUN_FACTS.cat;
   const companionMood = getCatMood(state.catHunger, state.catHappy, state.catEnergy);
+
   const hunger = state.catHunger ?? 100;
   const happy = state.catHappy ?? 100;
   const energy = state.catEnergy ?? 100;
-  const createdDate = state.hist?.[0]?.d;
-  const ageDays = createdDate ? Math.max(1, Math.floor((Date.now() - createdDate) / 86400000)) : 1;
+  const avg = Math.round((hunger + happy + energy) / 3);
+
+  const prog = getCatStageProg(state.catEvo || 0);
+
+  const doCare = (action) => {
+    const doneKey = `cat${action.key.charAt(0).toUpperCase() + action.key.slice(1)}`;
+    if (state[doneKey]) return;
+    if (action.key === "fed") actions.feedCat();
+    else if (action.key === "petted") actions.petCat();
+    else if (action.key === "played") actions.playCat();
+    setCareMsg(action.msg);
+    setTimeout(() => setCareMsg(null), 4500);
+  };
 
   return (
-    <div className="view-enter" style={{ minHeight: "100vh", padding: "12px 16px 100px", background: "#FFF8F0" }}>
-      <ViewHeader onBack={() => ui.setView("hub")} title={`${state.catName || typeInfo.name}`} icon={typeInfo.emoji} />
-      <div style={{ textAlign: "center", marginBottom: 16 }}>
-        <div style={{ width: 180, height: 180, margin: "0 auto", borderRadius: "50%", background: "radial-gradient(circle, rgba(252,211,77,0.15) 0%, transparent 70%)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <div style={{ animation: "heroFloat 3s ease-in-out infinite" }}>
-            <Companion type={type} variant={state.catVariant} mood={companionMood === "sleepy" ? "sleepy" : mood} size={150} stage={stage} gear={state.equippedGear} />
+    <div className="lotus-pattern px-6 pb-32 space-y-8">
+
+      {/* ── Hero Section: The Companion ── */}
+      <section className="flex flex-col items-center">
+        <div className="relative w-full aspect-square max-w-[280px] mx-auto">
+          {/* Decorative glow */}
+          <div className="absolute inset-0 bg-secondary-container opacity-20 blur-3xl rounded-full scale-75" />
+          {/* Companion render */}
+          <div className="relative z-10 w-full h-full flex items-center justify-center p-8">
+            <div style={{ animation: "heroFloat 3s ease-in-out infinite" }}>
+              <Companion type={type} variant={state.catVariant} mood={companionMood === "sleepy" ? "sleepy" : mood} size={180} stage={stage} gear={state.equippedGear} />
+            </div>
           </div>
         </div>
-        <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: "1.4rem", fontWeight: 700, color: T.textPrimary, marginTop: 8 }}>{state.catName || typeInfo.name}</div>
-        <div style={{ display: "inline-flex", alignItems: "center", gap: 6, marginTop: 4, background: "linear-gradient(135deg, rgba(251,191,36,0.15), rgba(245,158,11,0.08))", border: "1.5px solid rgba(245,158,11,0.2)", borderRadius: 50, padding: "4px 14px" }}>
-          <span style={{ fontSize: "1rem" }}>{stageInfo?.emoji}</span>
-          <span style={{ fontFamily: "'Fredoka',sans-serif", fontSize: ".95rem", fontWeight: 700, color: "#B45309" }}>{stageInfo?.name}</span>
+        {/* Name & species */}
+        <div className="text-center mt-4">
+          <span className="font-label text-xs font-extrabold uppercase tracking-[0.2em] text-primary/60">
+            {facts.species}
+          </span>
+          <h2 className="text-4xl font-headline font-bold text-on-surface mt-1">
+            {state.catName || typeInfo.name}
+          </h2>
         </div>
-      </div>
+      </section>
 
-      <div className="game-card" style={{ padding: 16, marginBottom: 14 }}>
-        <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: ".9rem", fontWeight: 800, color: T.primary, textTransform: "uppercase", marginBottom: 12 }}>Steckbrief</div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-          {[{ label: "Art", value: facts.species, icon: "\uD83D\uDCCB" }, { label: "Alter", value: `${ageDays} Tag${ageDays !== 1 ? "e" : ""}`, icon: "\uD83C\uDF82" }, { label: "Gr\u00f6\u00dfe", value: facts.heights[stage], icon: "\uD83D\uDCCF" }, { label: "Gewicht", value: facts.weights[stage], icon: "\u2696\uFE0F" }].map((s, i) => (
-            <div key={i} style={{ background: "rgba(180,120,40,0.04)", borderRadius: 14, padding: "10px 12px", display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontSize: "1.1rem" }}>{s.icon}</span>
-              <div>
-                <div style={{ fontSize: ".75rem", fontWeight: 700, color: T.textLight, textTransform: "uppercase" }}>{s.label}</div>
-                <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: "1rem", fontWeight: 700, color: T.textPrimary }}>{s.value}</div>
+      {/* ── Care feedback message ── */}
+      {careMsg && (
+        <div className="flex items-center justify-center gap-2 px-4 py-3 rounded-full bg-secondary-container/20 border border-secondary-container/30 mx-auto max-w-xs"
+             style={{ animation: "celebText 2.5s ease-out forwards" }}>
+          <span className="text-lg">{typeInfo.emoji}</span>
+          <span className="font-headline text-sm font-bold text-secondary">{careMsg}</span>
+        </div>
+      )}
+
+      {/* ── Stats Grid (Bento Style) ── */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Bond Level Card */}
+        <div className="bg-surface-container-lowest rounded-lg p-6 relative overflow-hidden group">
+          <div className="absolute -right-4 -top-4 opacity-5 text-on-surface group-hover:rotate-12 transition-transform duration-500">
+            <span className="material-symbols-outlined text-8xl">favorite</span>
+          </div>
+          <h3 className="font-label font-bold text-base text-on-surface-variant flex items-center gap-2">
+            <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>favorite</span>
+            Bindungslevel
+          </h3>
+          <p className="font-body text-sm text-on-surface/60 mt-1">
+            {avg >= 75 ? "Unzertrennlich!" : avg >= 50 ? "Gute Freunde" : "Braucht mehr Liebe"}
+          </p>
+          <div className="mt-6 flex items-end gap-4">
+            <span className="text-5xl font-headline text-primary">Lv. {stage + 1}</span>
+            <div className="flex-1 mb-3">
+              <div className="h-2 w-full bg-surface-container rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-primary rounded-full transition-all duration-600"
+                  style={{ width: `${prog.maxStage ? 100 : Math.min(100, (prog.cur / prog.need) * 100)}%` }}
+                />
               </div>
             </div>
-          ))}
+          </div>
         </div>
-        <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 6 }}>
-          {[{ label: "Mag", value: facts.likes, icon: "\u2764\uFE0F" }, { label: "Mag nicht", value: facts.dislikes, icon: "\uD83D\uDE45" }, { label: "Talent", value: facts.talent, icon: "\u2B50" }].map((s, i) => (
-            <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8, padding: "6px 0" }}>
-              <span style={{ fontSize: "1rem", flexShrink: 0 }}>{s.icon}</span>
-              <div><span style={{ fontSize: ".8rem", fontWeight: 800, color: T.textSecondary }}>{s.label}: </span><span style={{ fontSize: ".9rem", fontWeight: 600, color: T.textPrimary }}>{s.value}</span></div>
+
+        {/* Happiness Card */}
+        <div className="bg-surface-container-lowest rounded-lg p-6 relative overflow-hidden group">
+          <div className="absolute -right-4 -top-4 opacity-5 text-on-surface group-hover:-rotate-12 transition-transform duration-500">
+            <span className="material-symbols-outlined text-8xl">sentiment_very_satisfied</span>
+          </div>
+          <h3 className="font-label font-bold text-base text-on-surface-variant flex items-center gap-2">
+            <span className="material-symbols-outlined text-secondary" style={{ fontVariationSettings: "'FILL' 1" }}>sunny</span>
+            Zufriedenheit
+          </h3>
+          <p className="font-body text-sm text-on-surface/60 mt-1">
+            {avg >= 75 ? "Strahlt förmlich!" : avg >= 50 ? "Zufrieden" : avg >= 25 ? "Etwas traurig" : "Braucht Hilfe!"}
+          </p>
+          <div className="mt-6">
+            <div className="flex items-center gap-3">
+              <span className="text-3xl font-headline text-on-surface">{avg}%</span>
+              <div className="flex gap-1">
+                {[hunger, happy, energy, avg, 100 - avg].map((v, i) => (
+                  <span key={i} className={`w-1.5 rounded-full ${i < 4 ? 'bg-secondary-container' : 'bg-surface-container'}`}
+                        style={{ height: `${Math.max(16, v * 0.48)}px` }} />
+                ))}
+              </div>
             </div>
-          ))}
-        </div>
-        <div style={{ marginTop: 12, padding: "10px 14px", background: "linear-gradient(135deg, rgba(109,40,217,0.06), rgba(167,139,250,0.04))", borderRadius: 14, border: "1.5px solid rgba(109,40,217,0.1)", fontFamily: "'Fredoka',sans-serif", fontSize: "1rem", fontWeight: 600, color: T.primary, fontStyle: "italic", textAlign: "center" }}>
-          {"\u201E"}{facts.motto}{"\u201C"}
+          </div>
         </div>
       </div>
 
-      <div className="game-card" style={{ padding: 16, marginBottom: 14 }}>
-        <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: ".9rem", fontWeight: 800, color: T.primary, textTransform: "uppercase", marginBottom: 12 }}>Zustand</div>
-        {[{ label: "Hunger", value: hunger, color: "#F97316", icon: "\uD83C\uDF63" }, { label: "Gl\u00fcck", value: happy, color: "#EC4899", icon: "\uD83D\uDC9B" }, { label: "Energie", value: energy, color: "#3B82F6", icon: "\u26A1" }].map((s, i) => (
-          <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-            <span style={{ fontSize: "1.1rem", width: 24, textAlign: "center" }}>{s.icon}</span>
-            <div style={{ fontSize: ".85rem", fontWeight: 700, color: T.textSecondary, width: 55 }}>{s.label}</div>
-            <div style={{ flex: 1, height: 10, background: "rgba(0,0,0,0.06)", borderRadius: 50, overflow: "hidden" }}><div style={{ height: "100%", borderRadius: 50, width: `${s.value}%`, background: `linear-gradient(90deg, ${s.color}, ${s.color}88)`, transition: "width .4s ease" }} /></div>
-            <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: ".9rem", fontWeight: 700, color: s.color, width: 36, textAlign: "right" }}>{s.value}%</div>
+      {/* ── Condition Bars ── */}
+      <div className="bg-surface-container-lowest rounded-lg p-6">
+        <h3 className="font-label font-bold text-xs uppercase tracking-widest text-on-surface-variant mb-4">Zustand</h3>
+        {[
+          { label: "Hunger", value: hunger, color: "#F97316", icon: "restaurant" },
+          { label: "Glück", value: happy, color: "#EC4899", icon: "favorite" },
+          { label: "Energie", value: energy, color: "#3B82F6", icon: "bolt" },
+        ].map(s => (
+          <div key={s.label} className="flex items-center gap-3 mb-3">
+            <span className="material-symbols-outlined text-on-surface-variant text-lg" style={{ color: s.color }}>{s.icon}</span>
+            <span className="font-label text-sm font-bold text-on-surface-variant w-14">{s.label}</span>
+            <div className="flex-1 h-2 bg-surface-container rounded-full overflow-hidden">
+              <div className="h-full rounded-full transition-all duration-400" style={{ width: `${s.value}%`, background: s.color }} />
+            </div>
+            <span className="font-headline text-sm font-bold w-10 text-right" style={{ color: s.color }}>{s.value}%</span>
           </div>
         ))}
       </div>
 
-      <div className="game-card" style={{ padding: 16, marginBottom: 14 }}>
-        <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: ".9rem", fontWeight: 800, color: T.primary, textTransform: "uppercase", marginBottom: 12 }}>Evolution</div>
-        <EvolutionTracker catEvo={state.catEvo || 0} companionType={type} currentStage={stage} />
+      {/* ── Evolution Tracker ── */}
+      <section className="bg-surface-container-low rounded-lg p-6">
+        <h3 className="font-label font-bold text-base text-on-surface mb-6 text-center">Evolutionspfad</h3>
+        <div className="relative">
+          {/* Connection Line */}
+          <div className="absolute top-8 left-[10%] right-[10%] h-0.5 bg-outline-variant/30 hidden md:block" />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 relative z-10">
+            {stageNames.map((s, i) => {
+              const isCompleted = i < stage;
+              const isCurrent = i === stage;
+              const isFuture = i > stage;
+              return (
+                <div key={i} className={`flex flex-col items-center gap-3 ${isFuture ? 'opacity-40' : ''}`}>
+                  <div className={`w-14 h-14 rounded-full flex items-center justify-center shadow-sm transition-transform ${
+                    isCurrent ? 'bg-primary-container text-white scale-110 shadow-lg' : isCompleted ? 'bg-secondary-container text-on-secondary-container' : 'bg-surface-container-highest text-on-surface-variant'
+                  }`}>
+                    {isCompleted ? (
+                      <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                    ) : (
+                      <span className="text-xl">{s.emoji}</span>
+                    )}
+                  </div>
+                  <div className="text-center">
+                    <p className={`font-label font-bold text-sm ${isCurrent ? 'text-primary' : ''}`}>{s.name}</p>
+                    {isCurrent && <p className="text-[10px] uppercase tracking-widest text-primary/60 font-bold">Aktuell</p>}
+                    {isFuture && <p className="text-[10px] uppercase tracking-widest text-on-surface/40 font-bold">Locked</p>}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Progress to next */}
+        {!prog.maxStage && stageNames[stage + 1] && (
+          <div className="mt-6">
+            <div className="flex justify-between items-center mb-2">
+              <span className="font-label text-xs font-bold text-on-surface-variant">
+                {stageInfo.name} → {stageNames[stage + 1].name}
+              </span>
+              <span className="font-headline text-sm font-bold text-secondary">
+                {prog.cur}/{prog.need} EP
+              </span>
+            </div>
+            <div className="h-2 bg-surface-container rounded-full overflow-hidden">
+              <div className="h-full rounded-full bg-primary transition-all duration-600"
+                   style={{ width: `${Math.max(2, (prog.cur / prog.need) * 100)}%` }} />
+            </div>
+          </div>
+        )}
+        {prog.maxStage && (
+          <p className="text-center font-headline text-sm font-bold text-emerald-dark mt-4">⭐ Maximale Stufe erreicht!</p>
+        )}
+      </section>
+
+      {/* ── Gear Slots ── */}
+      <div className="bg-surface-container-lowest rounded-lg p-6">
+        <h3 className="font-label font-bold text-xs uppercase tracking-widest text-on-surface-variant mb-4">Ausrüstung</h3>
+        <GearSlots
+          equippedGear={state.equippedGear || {}}
+          purchased={state.purchased || []}
+          onEquip={(slot, id) => actions.equipGear(slot, id)}
+          onUnequip={(slot) => actions.unequipGear(slot)}
+        />
       </div>
 
-      <div className="game-card" style={{ padding: 16, marginBottom: 14 }}>
-        <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: ".9rem", fontWeight: 800, color: T.primary, textTransform: "uppercase", marginBottom: 12 }}>Ausrüstung</div>
-        <GearSlots equippedGear={state.equippedGear || {}} purchased={state.purchased || []} onEquip={(slot, id) => actions.equipGear(slot, id)} onUnequip={(slot) => actions.unequipGear(slot)} />
+      {/* ── Care Actions ── */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        {CARE_ACTIONS.map(a => {
+          const doneKey = `cat${a.key.charAt(0).toUpperCase() + a.key.slice(1)}`;
+          const done = state[doneKey];
+          return (
+            <button
+              key={a.key}
+              onClick={() => doCare(a)}
+              disabled={done}
+              className={`btn-tap flex-1 rounded-full px-6 py-4 font-label font-bold flex items-center justify-center gap-2 transition-all duration-200 ${
+                done
+                  ? 'bg-surface-container text-on-surface-variant opacity-50 cursor-default'
+                  : 'bg-primary-container text-white hover:opacity-90 active:scale-95'
+              }`}
+              style={!done ? { background: a.color } : undefined}
+            >
+              <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>{a.icon}</span>
+              {a.label}
+              {done && <span className="material-symbols-outlined text-emerald-dark text-lg">check</span>}
+              {!done && <span className="text-xs opacity-80">+5 ⭐</span>}
+            </button>
+          );
+        })}
       </div>
 
-      <button className="btn-tap" onClick={() => ui.setView("cat")} style={{ width: "100%", padding: "16px", background: `linear-gradient(135deg, ${T.primary}, ${T.primaryLight})`, border: "none", borderRadius: 18, cursor: "pointer", fontFamily: "'Fredoka',sans-serif", fontSize: "1.1rem", fontWeight: 700, color: "white", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, minHeight: 56, boxShadow: `0 6px 20px ${T.primary}30` }}>
-        {typeInfo.emoji} {state.catName} pflegen
-      </button>
+      {/* ── Fun Facts Card ── */}
+      <div className="bg-surface-container-lowest rounded-lg p-6">
+        <h3 className="font-label font-bold text-xs uppercase tracking-widest text-on-surface-variant mb-4">Steckbrief</h3>
+        <div className="space-y-3">
+          {[
+            { label: "Mag", value: facts.likes, icon: "favorite" },
+            { label: "Mag nicht", value: facts.dislikes, icon: "block" },
+            { label: "Talent", value: facts.talent, icon: "auto_awesome" },
+          ].map((s, i) => (
+            <div key={i} className="flex items-start gap-3">
+              <span className="material-symbols-outlined text-primary text-lg mt-0.5">{s.icon}</span>
+              <div>
+                <span className="font-label text-xs font-bold text-on-surface-variant">{s.label}: </span>
+                <span className="font-body text-sm text-on-surface">{s.value}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-4 px-4 py-3 bg-primary-fixed/30 rounded-lg border border-primary/10 text-center">
+          <p className="font-headline text-sm font-semibold text-primary italic">
+            „{facts.motto}"
+          </p>
+        </div>
+      </div>
+
+      {/* Bodhi leaf divider */}
+      <div className="flex justify-center py-2 opacity-10">
+        <svg width="40" height="40" viewBox="0 0 120 120" fill="none">
+          <path d="M60 10C60 10 75 40 110 40C110 40 80 55 80 90C80 90 60 110 60 110C60 110 40 90 40 90C40 90 10 55 10 40C10 40 45 40 60 10Z" fill="#5300b7" />
+        </svg>
+      </div>
     </div>
   );
 }

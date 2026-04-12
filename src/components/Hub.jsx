@@ -6,6 +6,7 @@ import { useGame } from '../context/GameContext';
 import useWeather, { getWeatherInfo } from '../hooks/useWeather';
 import LoginBonus from './LoginBonus';
 import ProfileCard from './ProfileCard';
+import BossCard from './BossCard';
 
 export default function Hub() {
   const { state, computed, actions, ui } = useGame();
@@ -21,249 +22,309 @@ export default function Hub() {
   const catAllDone = state.catFed && state.catPetted && state.catPlayed;
 
   return (
-    <div className="view-enter" style={{ background: "#FFF8F0" }}>
-      <div style={{ padding: "env(safe-area-inset-top, 12px) 16px 0", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-        <img src={import.meta.env.BASE_URL + "ronki-egg.png"} alt="Ronki" style={{ height: 36, width: "auto" }} />
-        <button aria-label={pMode ? "Elternmodus deaktivieren" : "Elternmodus aktivieren"} onClick={() => pMode ? setPMode(false) : setPinShow(true)} style={{ background: "rgba(180,120,40,0.08)", border: "2px solid rgba(180,120,40,0.10)", borderRadius: 50, padding: "6px 12px", cursor: "pointer", color: T.textSecondary, fontSize: ".95rem", fontWeight: 700, minHeight: 44, minWidth: 44, display: "flex", alignItems: "center", justifyContent: "center" }}>{pMode ? "\uD83D\uDD13" : "\uD83D\uDD12"}</button>
+    <div className="lotus-pattern px-6 pb-8 space-y-5">
+
+      {/* ── Parent mode toggle (floating) ── */}
+      <div className="flex justify-end">
+        <button
+          aria-label={pMode ? "Elternmodus deaktivieren" : "Elternmodus aktivieren"}
+          onClick={() => pMode ? setPMode(false) : setPinShow(true)}
+          className="btn-tap w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center text-on-surface-variant hover:bg-surface-container transition-colors"
+        >
+          <span className="material-symbols-outlined text-lg">
+            {pMode ? 'lock_open' : 'lock'}
+          </span>
+        </button>
       </div>
-      <div style={{ padding: "0 16px 20px" }}>
-        <ProfileCard state={state} level={level} mood={mood} weather={weather} wInfo={wInfo} todayDaily={todayDaily} actions={actions} onCompanionTap={() => ui.setView("companion")} />
-        <LoginBonus claimed={state.loginBonusClaimed} onCollect={() => actions.collectLoginBonus()} />
 
-        {tip && (
-          <div className="game-card" style={{ padding: 14, marginBottom: 12, background: "linear-gradient(135deg, rgba(251,191,36,0.12), rgba(245,158,11,0.06))", borderColor: "rgba(245,158,11,0.2)" }}>
-            <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-              <span style={{ fontSize: "1.6rem", flexShrink: 0, lineHeight: 1 }}>{tip.emoji}</span>
-              <div>
-                <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: ".9rem", fontWeight: 800, color: "#B45309", textTransform: "uppercase", marginBottom: 4 }}>Helden-Tipp von {tip.char}</div>
-                <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: "1.1rem", fontWeight: 600, color: T.textPrimary, lineHeight: 1.4 }}>{tip.tip}</div>
-              </div>
+      {/* ── Profile Card (kept as-is, migrated later) ── */}
+      <ProfileCard state={state} level={level} mood={mood} weather={weather} wInfo={wInfo} todayDaily={todayDaily} actions={actions} onCompanionTap={() => ui.setView("companion")} />
+
+      {/* ── Login Bonus ── */}
+      <LoginBonus claimed={state.loginBonusClaimed} onCollect={() => actions.collectLoginBonus()} />
+
+      {/* ── Hero Tip ── */}
+      {tip && (
+        <div className="bg-secondary-fixed/20 border-l-4 border-secondary rounded-r-lg p-4">
+          <div className="flex items-start gap-3">
+            <span className="text-2xl shrink-0">{tip.emoji}</span>
+            <div>
+              <p className="font-label font-bold text-xs uppercase tracking-wider text-secondary">
+                Helden-Tipp von {tip.char}
+              </p>
+              <p className="font-headline text-base font-semibold text-on-surface mt-1 leading-snug">
+                {tip.tip}
+              </p>
             </div>
           </div>
-        )}
-
-        {state.yesterdayCommitment && (
-          <div className="game-card" style={{ padding: 14, marginBottom: 12, background: "linear-gradient(135deg, rgba(109,40,217,0.06), rgba(167,139,250,0.04))" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <span style={{ fontSize: "1.3rem" }}>{"\uD83D\uDCCB"}</span>
-              <div>
-                <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: ".9rem", fontWeight: 700, color: T.primary }}>Gestern vorgenommen:</div>
-                <div style={{ fontSize: "1rem", fontWeight: 700, color: T.textPrimary }}>{state.yesterdayCommitment.text}</div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
-          <button className="btn-tap" onClick={() => { if (!state.dailyVitaminD) { actions.completeHabit("vitaminD"); if (navigator.vibrate) navigator.vibrate(50); } }} style={{ flex: 1, background: state.dailyVitaminD ? "rgba(52,211,153,0.1)" : "white", border: `2.5px solid ${state.dailyVitaminD ? "rgba(52,211,153,0.3)" : "rgba(180,120,40,0.10)"}`, borderRadius: 18, padding: "12px 6px", cursor: state.dailyVitaminD ? "default" : "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 4, minHeight: 48, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
-            <span style={{ fontSize: "1.4rem" }}>{state.dailyVitaminD ? "\u2705" : "\uD83D\uDC8A"}</span>
-            <span style={{ fontFamily: "'Fredoka',sans-serif", fontSize: "1rem", fontWeight: 700, color: state.dailyVitaminD ? "#059669" : T.textPrimary }}>Vitamin D</span>
-            {!state.dailyVitaminD && <span style={{ fontSize: ".9rem", fontWeight: 700, color: "#D97706" }}>+5 {"\u2B50"}</span>}
-          </button>
-          <button className="btn-tap" onClick={() => { if (!state.dailyBrother) { actions.completeHabit("brother"); if (navigator.vibrate) navigator.vibrate(50); } }} style={{ flex: 1, background: state.dailyBrother ? "rgba(52,211,153,0.1)" : "white", border: `2.5px solid ${state.dailyBrother ? "rgba(52,211,153,0.3)" : "rgba(180,120,40,0.10)"}`, borderRadius: 18, padding: "12px 6px", cursor: state.dailyBrother ? "default" : "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 4, minHeight: 48, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
-            <span style={{ fontSize: "1.4rem" }}>{state.dailyBrother ? "\u2705" : "\uD83D\uDC76"}</span>
-            <span style={{ fontFamily: "'Fredoka',sans-serif", fontSize: "1rem", fontWeight: 700, color: state.dailyBrother ? "#059669" : T.textPrimary }}>Liam</span>
-            {!state.dailyBrother && <span style={{ fontSize: ".9rem", fontWeight: 700, color: "#D97706" }}>+10 {"\u2B50"}</span>}
-          </button>
-          <button className="btn-tap" onClick={() => ui.setView("cat")} style={{ flex: 1, background: catAllDone ? "rgba(52,211,153,0.1)" : "white", border: `2.5px solid ${catAllDone ? "rgba(52,211,153,0.3)" : "rgba(180,120,40,0.10)"}`, borderRadius: 18, padding: "12px 6px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 4, minHeight: 48, boxShadow: "0 2px 8px rgba(0,0,0,0.04)", position: "relative" }}>
-            <span style={{ fontSize: "1.6rem" }}>{"\uD83D\uDC31"}</span>
-            {catAllDone && <span style={{ position: "absolute", top: 4, right: 4, fontSize: ".9rem" }}>{"\u2705"}</span>}
-            <span style={{ fontFamily: "'Fredoka',sans-serif", fontSize: "1rem", fontWeight: 700, color: T.textPrimary }}>{state.catName || "Katze"}</span>
-            {!catAllDone && <span style={{ fontSize: ".9rem", fontWeight: 700, color: T.textLight }}>{[!state.catFed && "\uD83C\uDF63", !state.catPetted && "\uD83E\uDD0D", !state.catPlayed && "\uD83E\uDDF6"].filter(Boolean).join(" ")}</span>}
-          </button>
         </div>
+      )}
 
-        {state.dailyVitaminD && state.dailyBrother && state.catFed && state.catPetted && state.catPlayed && (
-          <div className="game-card" style={{
-            padding: 14, marginBottom: 12,
-            background: "linear-gradient(135deg, rgba(52,211,153,0.12), rgba(52,211,153,0.06))",
-            borderColor: "rgba(52,211,153,0.25)",
-            textAlign: "center",
-          }}>
-            <span style={{ fontSize: "1.4rem" }}>{"\u{1F389}"}</span>
-            <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: "1rem", fontWeight: 700, color: "#059669", marginTop: 4 }}>
-              Alle Gewohnheiten erledigt! Super gemacht!
-            </div>
+      {/* ── Yesterday's commitment ── */}
+      {state.yesterdayCommitment && (
+        <div className="bg-primary-fixed/30 rounded-lg p-4 flex items-center gap-3 border border-primary/10">
+          <span className="material-symbols-outlined text-primary">assignment</span>
+          <div>
+            <p className="font-label font-bold text-xs text-primary">Gestern vorgenommen:</p>
+            <p className="font-body font-bold text-sm text-on-surface">{state.yesterdayCommitment.text}</p>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Water tracker */}
-        <div className="game-card" style={{ padding: 12, marginBottom: 12 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-            <span style={{ fontSize: "1.2rem" }}>{"\uD83D\uDCA7"}</span>
-            <span style={{ fontFamily: "'Fredoka',sans-serif", fontSize: ".95rem", fontWeight: 700, color: T.primary }}>
-              Wasser trinken ({state.dailyWaterCount || 0}/6)
-            </span>
-          </div>
-          <div style={{ display: "flex", gap: 6 }}>
-            {[0,1,2,3,4,5].map(i => (
-              <button key={i} className="btn-tap" onClick={() => i === (state.dailyWaterCount || 0) && actions.drinkWater()}
-                style={{
-                  flex: 1, height: 36, borderRadius: 10, border: "2px solid rgba(59,130,246,0.15)",
-                  background: i < (state.dailyWaterCount || 0) ? "linear-gradient(180deg, #3B82F6, #60A5FA)" : "rgba(59,130,246,0.06)",
-                  cursor: i === (state.dailyWaterCount || 0) ? "pointer" : "default",
-                  opacity: i < (state.dailyWaterCount || 0) ? 1 : i === (state.dailyWaterCount || 0) ? 0.7 : 0.3,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: i < (state.dailyWaterCount || 0) ? "1rem" : ".85rem",
-                  transition: "all .2s",
-                }}>
-                {i < (state.dailyWaterCount || 0) ? "\uD83D\uDCA7" : ""}
+      {/* ── Morning Mood (if not set) ── */}
+      {state.moodAM === null && (
+        <div className="bg-surface-container-lowest rounded-lg p-5">
+          <p className="font-label font-bold text-xs uppercase tracking-widest text-on-surface-variant mb-4">
+            Wie startest du in den Tag? 🌅
+          </p>
+          <div role="group" aria-label="Morgenstimmung wählen" className="flex justify-between gap-1">
+            {MOOD_EMOJIS.map((e, i) => (
+              <button key={i} aria-label={`Stimmung ${i + 1}`}
+                onClick={() => { SFX.play("pop"); actions.setMood("moodAM", i); setCeleb(true); }}
+                className="btn-tap text-3xl p-2 rounded-full hover:bg-surface-container transition-all"
+                style={{ minHeight: 52, minWidth: 48 }}>
+                {e}
               </button>
             ))}
           </div>
         </div>
+      )}
 
-        <button className="btn-tap" onClick={() => ui.setView("regeln")} style={{ width: "100%", background: "linear-gradient(135deg, rgba(251,191,36,0.08), rgba(245,158,11,0.04))", border: "2.5px solid rgba(245,158,11,0.15)", borderRadius: 18, padding: "14px 12px", cursor: "pointer", fontFamily: "'Fredoka',sans-serif", fontWeight: 700, fontSize: ".95rem", color: "#B45309", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, minHeight: 52, boxShadow: "0 2px 8px rgba(0,0,0,0.04)", marginBottom: 12 }}>{"\uD83D\uDEE1\uFE0F"} Helden-Kodex</button>
+      {/* ── Quick Habit Buttons ── */}
+      <div className="grid grid-cols-3 gap-3">
+        <button className="btn-tap rounded-xl p-3 flex flex-col items-center gap-2 transition-all"
+          onClick={() => { if (!state.dailyVitaminD) { actions.completeHabit("vitaminD"); if (navigator.vibrate) navigator.vibrate(50); } }}
+          style={{
+            background: state.dailyVitaminD ? 'rgba(52,211,153,0.1)' : 'white',
+            border: `2px solid ${state.dailyVitaminD ? 'rgba(52,211,153,0.3)' : 'transparent'}`,
+            minHeight: 80,
+          }}>
+          <span className="text-xl">{state.dailyVitaminD ? "✅" : "💊"}</span>
+          <span className="font-label font-bold text-sm text-on-surface">Vitamin D</span>
+          {!state.dailyVitaminD && <span className="font-label text-xs font-bold text-secondary">+5 ⭐</span>}
+        </button>
 
-        {lunch && (
-          <div className="game-card" style={{ padding: 12, marginBottom: 12 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <span style={{ fontSize: "1.3rem" }}>{"\uD83C\uDF7D\uFE0F"}</span>
-              <div>
-                <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: ".95rem", fontWeight: 800, color: T.textSecondary, textTransform: "uppercase" }}>Heute</div>
-                <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: "1rem", fontWeight: 700, color: T.textPrimary }}>{lunch}</div>
-              </div>
-            </div>
-          </div>
-        )}
+        <button className="btn-tap rounded-xl p-3 flex flex-col items-center gap-2 transition-all"
+          onClick={() => { if (!state.dailyBrother) { actions.completeHabit("brother"); if (navigator.vibrate) navigator.vibrate(50); } }}
+          style={{
+            background: state.dailyBrother ? 'rgba(52,211,153,0.1)' : 'white',
+            border: `2px solid ${state.dailyBrother ? 'rgba(52,211,153,0.3)' : 'transparent'}`,
+            minHeight: 80,
+          }}>
+          <span className="text-xl">{state.dailyBrother ? "✅" : "👶"}</span>
+          <span className="font-label font-bold text-sm text-on-surface">Liam</span>
+          {!state.dailyBrother && <span className="font-label text-xs font-bold text-secondary">+10 ⭐</span>}
+        </button>
 
-        {state.moodAM === null && (
-          <div className="game-card" style={{ padding: 16, marginBottom: 12 }}>
-            <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: ".95rem", fontWeight: 800, color: T.textSecondary, textTransform: "uppercase", marginBottom: 10 }}>Wie startest du in den Tag? {"\uD83C\uDF05"}</div>
-            <div role="group" aria-label="Morgenstimmung w\u00E4hlen" style={{ display: "flex", justifyContent: "space-between", gap: 4 }}>
-              {MOOD_EMOJIS.map((e, i) => (
-                <button key={i} aria-label={`Stimmung ${i + 1} von ${MOOD_EMOJIS.length}`} onClick={() => { SFX.play("pop"); actions.setMood("moodAM", i); setCeleb(true); }} style={{ fontSize: "2rem", background: "none", border: "none", cursor: "pointer", padding: "8px", borderRadius: 12, transition: "all .15s", minHeight: 52, minWidth: 52 }}>{e}</button>
-              ))}
-            </div>
-          </div>
-        )}
+        <button className="btn-tap rounded-xl p-3 flex flex-col items-center gap-2 transition-all relative"
+          onClick={() => ui.setView("cat")}
+          style={{
+            background: catAllDone ? 'rgba(52,211,153,0.1)' : 'white',
+            border: `2px solid ${catAllDone ? 'rgba(52,211,153,0.3)' : 'transparent'}`,
+            minHeight: 80,
+          }}>
+          <span className="text-xl">🐱</span>
+          {catAllDone && <span className="absolute top-1 right-1 text-sm">✅</span>}
+          <span className="font-label font-bold text-sm text-on-surface">{state.catName || "Katze"}</span>
+          {!catAllDone && (
+            <span className="font-label text-xs text-on-surface-variant">
+              {[!state.catFed && "🍣", !state.catPetted && "🤍", !state.catPlayed && "🧶"].filter(Boolean).join(" ")}
+            </span>
+          )}
+        </button>
+      </div>
 
-        {state.specialMissions?.filter(m => !m.done).map(mission => (
-          <button key={mission.id} className="btn-tap game-card" onClick={() => actions.completeSpecialMission(mission.id)} style={{ width: "100%", padding: 14, marginBottom: 12, cursor: "pointer", background: "linear-gradient(135deg, rgba(251,191,36,0.1), rgba(245,158,11,0.05))", borderColor: "rgba(245,158,11,0.25)", display: "flex", alignItems: "center", gap: 12, textAlign: "left" }}>
-            <span style={{ fontSize: "1.6rem", flexShrink: 0 }}>{mission.emoji}</span>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: ".95rem", fontWeight: 800, color: "#B45309", textTransform: "uppercase" }}>Spezial-Mission</div>
-              <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: "1rem", fontWeight: 700, color: T.textPrimary }}>{mission.name}</div>
-            </div>
-            <div style={{ background: "linear-gradient(135deg, #FCD34D, #F59E0B)", borderRadius: 50, padding: "4px 12px", fontFamily: "'Fredoka',sans-serif", fontSize: ".95rem", fontWeight: 700, color: "white" }}>+{mission.hp} {"\u2B50"}</div>
-          </button>
-        ))}
+      {/* All habits done celebration */}
+      {state.dailyVitaminD && state.dailyBrother && catAllDone && (
+        <div className="bg-emerald/5 border border-emerald/20 rounded-lg p-4 text-center">
+          <span className="text-xl">🎉</span>
+          <p className="font-headline text-sm font-bold text-emerald-dark mt-1">
+            Alle Gewohnheiten erledigt! Super!
+          </p>
+        </div>
+      )}
 
-        {(state.questChains || []).filter(c => !c.completed).map(chain => {
-          const doneSteps = chain.steps.filter(s => s.done).length;
-          const totalSteps = chain.steps.length;
-          const firstUndoneIdx = chain.steps.findIndex(s => !s.done);
-          const daysLeft = chain.deadline ? Math.ceil((new Date(chain.deadline) - new Date()) / (1000 * 60 * 60 * 24)) : null;
-          return (
-            <div key={chain.id} className="game-card" style={{ padding: 16, marginBottom: 12, background: "linear-gradient(135deg, rgba(109,40,217,0.04), rgba(252,211,77,0.04))", borderColor: "rgba(109,40,217,0.15)" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-                <span style={{ fontSize: "1.4rem" }}>{chain.emoji}</span>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: ".95rem", fontWeight: 800, color: T.primary, textTransform: "uppercase" }}>Abenteuer-Kette</div>
-                  <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: "1rem", fontWeight: 700, color: T.textPrimary }}>{chain.name}</div>
-                </div>
-                <div style={{ background: "linear-gradient(135deg, #FCD34D, #F59E0B)", borderRadius: 50, padding: "4px 12px", fontFamily: "'Fredoka',sans-serif", fontSize: ".95rem", fontWeight: 700, color: "white" }}>+{chain.hp} {"\u2B50"}</div>
-              </div>
-              {daysLeft !== null && (
-                <div style={{
-                  fontSize: ".95rem", fontWeight: 800, marginBottom: 8,
-                  color: daysLeft <= 5 ? "#DC2626" : daysLeft <= 10 ? "#F59E0B" : T.textSecondary,
-                }}>
-                  {"\uD83D\uDCC5"} {daysLeft > 0 ? `Noch ${daysLeft} Tage!` : daysLeft === 0 ? "Heute!" : "Abgelaufen"}
-                </div>
-              )}
-              <div style={{ background: "rgba(109,40,217,0.08)", borderRadius: 50, height: 8, overflow: "hidden", marginBottom: 12 }}>
-                <div style={{ height: "100%", borderRadius: 50, width: `${(doneSteps / totalSteps) * 100}%`, background: "linear-gradient(90deg, #A78BFA, #7C3AED)", transition: "width .4s ease" }} />
-              </div>
-              <div style={{ fontSize: ".95rem", fontWeight: 700, color: T.textSecondary, marginBottom: 8 }}>{doneSteps}/{totalSteps} Schritte</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                {chain.steps.map((step, idx) => {
-                  const isCurrent = idx === firstUndoneIdx;
-                  return (
-                    <button key={step.id} className={!step.done && isCurrent ? "btn-tap" : ""} onClick={() => !step.done && actions.completeChainStep(chain.id, step.id)} style={{ display: "flex", alignItems: "center", gap: 10, background: step.done ? "rgba(52,211,153,0.06)" : isCurrent ? "rgba(252,211,77,0.1)" : "rgba(0,0,0,0.02)", border: `2px solid ${step.done ? "rgba(52,211,153,0.2)" : isCurrent ? "rgba(252,211,77,0.4)" : "rgba(0,0,0,0.05)"}`, borderRadius: 14, padding: "10px 12px", cursor: step.done ? "default" : "pointer", width: "100%", textAlign: "left", opacity: step.done ? 0.7 : !isCurrent ? 0.5 : 1, transition: "all .15s", boxShadow: isCurrent ? "0 2px 8px rgba(252,211,77,0.2)" : "none", minHeight: 44 }}>
-                      <div style={{ width: 24, height: 24, borderRadius: "50%", background: step.done ? "#34D399" : isCurrent ? "#FCD34D" : "#E5E7EB", display: "flex", alignItems: "center", justifyContent: "center", fontSize: ".75rem", fontWeight: 800, color: step.done ? "white" : "#1E1B4B", flexShrink: 0 }}>{step.done ? "\u2713" : idx + 1}</div>
-                      <span style={{ fontFamily: "'Fredoka',sans-serif", fontSize: ".95rem", fontWeight: 700, color: step.done ? "#059669" : T.textPrimary, textDecoration: step.done ? "line-through" : "none" }}>{step.name}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })}
-
-        {state.boss && state.boss.hp > 0 && (() => {
-          const bossData = BOSSES.find(b => b.id === state.boss.id);
-          if (!bossData) return null;
-          const hpPct = Math.round((state.boss.hp / state.boss.maxHp) * 100);
-          const tierInfo = BOSS_TIERS?.find(t => t.id === bossData?.tier);
-          return (
-            <div className="game-card" style={{ padding: 16, marginBottom: 12, background: "linear-gradient(135deg, rgba(239,68,68,0.06), rgba(249,115,22,0.04))", borderColor: "rgba(239,68,68,0.15)" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-                <span style={{ fontSize: "1.6rem", animation: "bossShake 0.6s ease-in-out infinite" }}>{bossData.icon}</span>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: ".95rem", fontWeight: 800, color: "#DC2626", textTransform: "uppercase", display: "flex", alignItems: "center", gap: 8 }}>
-                    Tages-Boss
-                    {tierInfo && <span style={{ background: tierInfo.color + "20", color: tierInfo.color, borderRadius: 50, padding: "2px 10px", fontSize: ".95rem", fontWeight: 800, textTransform: "none" }}>{tierInfo.icon} {tierInfo.name}</span>}
-                  </div>
-                  <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: "1rem", fontWeight: 700, color: T.textPrimary }}>{bossData.name}</div>
-                </div>
-                <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: ".9rem", fontWeight: 700, color: hpPct > 50 ? "#DC2626" : hpPct > 25 ? T.accentDark : T.success }}>{state.boss.hp}/{state.boss.maxHp} HP</div>
-              </div>
-              <div style={{ fontSize: ".9rem", color: T.textSecondary, marginBottom: 8 }}>{bossData.desc}</div>
-              <div style={{ background: "rgba(239,68,68,0.08)", borderRadius: 50, height: 10, overflow: "hidden" }}>
-                <div style={{ height: "100%", borderRadius: 50, width: `${hpPct}%`, background: hpPct > 50 ? "linear-gradient(90deg, #EF4444, #F97316)" : hpPct > 25 ? "linear-gradient(90deg, #F59E0B, #FBBF24)" : "linear-gradient(90deg, #34D399, #6EE7B7)", transition: "width .6s ease" }} />
-              </div>
-              <div style={{ fontSize: ".95rem", color: T.textLight, marginTop: 6, textAlign: "center" }}>Aufgaben abschließen, um den Boss anzugreifen!</div>
-            </div>
-          );
-        })()}
-
-        {state.boss && state.boss.hp <= 0 && (() => {
-          const bossData = BOSSES.find(b => b.id === state.boss.id);
-          if (!bossData) return null;
-          return (
-            <div className="game-card" style={{ padding: 16, marginBottom: 12, background: "linear-gradient(135deg, rgba(52,211,153,0.08), rgba(252,211,77,0.06))", borderColor: `${T.success}40` }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <span style={{ fontSize: "1.4rem" }}>{"\uD83C\uDFC6"}</span>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontFamily: "'Fredoka',sans-serif", fontWeight: 800, fontSize: ".9rem", color: T.successDark, textTransform: "uppercase" }}>Boss besiegt!</div>
-                  <div style={{ fontSize: ".9rem", fontWeight: 700, color: T.textPrimary }}>{bossData.icon} {bossData.name} wurde besiegt!</div>
-                </div>
-                <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: ".85rem", fontWeight: 700, color: T.primary, background: `${T.primaryPale}`, borderRadius: 50, padding: "4px 12px" }}>
-                  Neuer Boss morgen! {"\uD83D\uDD50"}
-                </div>
-              </div>
-            </div>
-          );
-        })()}
-
-        {(() => {
-          const wm = WEEKLY_MISSIONS.find(m => m.id === state.weeklyMission);
-          if (!wm) return null;
-          const wp = state.weeklyProgress || 0;
-          const wmDone = wp >= wm.target;
-          return (
-            <div className="game-card" style={{ padding: 16, marginBottom: 12, background: wmDone ? "linear-gradient(135deg, rgba(52,211,153,0.08), rgba(52,211,153,0.03))" : undefined, borderColor: wmDone ? `${T.success}40` : undefined }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-                <span style={{ fontSize: "1.4rem" }}>{wm.icon}</span>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: ".95rem", fontWeight: 800, color: wmDone ? T.successDark : T.primary, textTransform: "uppercase" }}>{wmDone ? "\uD83D\uDCAA Geschafft!" : "Wochen-Mission"}</div>
-                  <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: "1rem", fontWeight: 700, color: T.textPrimary }}>{wm.title}</div>
-                </div>
-                <div className="mission-reward"><span style={{ fontFamily: "'Fredoka',sans-serif", fontSize: "1rem", fontWeight: 700, color: wmDone ? T.success : T.primary }}>{Math.min(wp, wm.target)}/{wm.target}</span></div>
-              </div>
-              <div style={{ fontSize: ".9rem", color: T.textSecondary, marginBottom: 8 }}>{wm.story}</div>
-              <div className="mission-progress-track"><div className="mission-progress-fill" style={{ width: `${Math.min(100, (wp / wm.target) * 100)}%`, background: wmDone ? `linear-gradient(90deg,${T.success},#6EE7B7)` : `linear-gradient(90deg,${T.primary},${T.primaryLight})` }} /></div>
-              {wmDone && <div style={{ fontSize: ".9rem", color: T.success, fontWeight: 700, marginTop: 6, textAlign: "center" }}>{"\uD83C\uDF89"} +{wm.reward.amount} Heldenpunkte erhalten!</div>}
-            </div>
-          );
-        })()}
-
-        <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
-          <button className="btn-tap" onClick={() => ui.setView("journal")} style={{ flex: 1, background: "white", border: "2.5px solid rgba(180,120,40,0.08)", borderRadius: 18, padding: "14px 12px", cursor: "pointer", fontFamily: "'Fredoka',sans-serif", fontWeight: 700, fontSize: ".95rem", color: T.textPrimary, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, minHeight: 52, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>{"\uD83D\uDCD3"} Tagebuch</button>
-          <button className="btn-tap" onClick={() => ui.setView("time")} style={{ flex: 1, background: "white", border: "2.5px solid rgba(180,120,40,0.08)", borderRadius: 18, padding: "14px 12px", cursor: "pointer", fontFamily: "'Fredoka',sans-serif", fontWeight: 700, fontSize: ".95rem", color: T.textPrimary, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, minHeight: 52, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>{"\u2B50"} Belohnungen</button>
+      {/* ── Water Tracker ── */}
+      <div className="bg-surface-container-lowest rounded-lg p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="material-symbols-outlined text-primary text-lg">water_drop</span>
+          <span className="font-label font-bold text-sm text-primary">
+            Wasser trinken ({state.dailyWaterCount || 0}/6)
+          </span>
+        </div>
+        <div className="flex gap-2">
+          {[0,1,2,3,4,5].map(i => (
+            <button key={i} className="btn-tap flex-1 h-8 rounded-lg transition-all"
+              onClick={() => i === (state.dailyWaterCount || 0) && actions.drinkWater()}
+              style={{
+                background: i < (state.dailyWaterCount || 0) ? 'linear-gradient(180deg, #3B82F6, #60A5FA)' : 'rgba(59,130,246,0.06)',
+                border: '2px solid rgba(59,130,246,0.15)',
+                opacity: i < (state.dailyWaterCount || 0) ? 1 : i === (state.dailyWaterCount || 0) ? 0.7 : 0.3,
+                cursor: i === (state.dailyWaterCount || 0) ? 'pointer' : 'default',
+              }}>
+              {i < (state.dailyWaterCount || 0) && <span className="text-white text-sm">💧</span>}
+            </button>
+          ))}
         </div>
       </div>
+
+      {/* ── Lunch ── */}
+      {lunch && (
+        <div className="bg-surface-container-lowest rounded-lg p-4 flex items-center gap-3">
+          <span className="material-symbols-outlined text-secondary">restaurant</span>
+          <div>
+            <p className="font-label font-bold text-xs uppercase tracking-wider text-on-surface-variant">Heute</p>
+            <p className="font-body font-bold text-sm text-on-surface">{lunch}</p>
+          </div>
+        </div>
+      )}
+
+      {/* ── Helden-Kodex ── */}
+      <button className="btn-tap w-full bg-surface-container-lowest rounded-lg p-4 flex items-center justify-center gap-2 font-label font-bold text-sm text-secondary"
+        onClick={() => ui.setView("regeln")}>
+        <span className="material-symbols-outlined text-secondary">shield</span>
+        Helden-Kodex
+      </button>
+
+      {/* ── Special Missions ── */}
+      {state.specialMissions?.filter(m => !m.done).map(mission => (
+        <button key={mission.id} className="btn-tap w-full bg-secondary-fixed/20 border border-secondary-container/30 rounded-lg p-4 flex items-center gap-3 text-left"
+          onClick={() => actions.completeSpecialMission(mission.id)}>
+          <span className="text-2xl shrink-0">{mission.emoji}</span>
+          <div className="flex-1">
+            <p className="font-label font-bold text-xs uppercase tracking-wider text-secondary">Spezial-Mission</p>
+            <p className="font-body font-bold text-sm text-on-surface">{mission.name}</p>
+          </div>
+          <span className="bg-secondary-container text-on-secondary-container rounded-full px-3 py-1 font-label font-bold text-xs">
+            +{mission.hp} ⭐
+          </span>
+        </button>
+      ))}
+
+      {/* ── Quest Chains ── */}
+      {(state.questChains || []).filter(c => !c.completed).map(chain => {
+        const doneSteps = chain.steps.filter(s => s.done).length;
+        const totalSteps = chain.steps.length;
+        const firstUndoneIdx = chain.steps.findIndex(s => !s.done);
+        const daysLeft = chain.deadline ? Math.ceil((new Date(chain.deadline) - new Date()) / (1000 * 60 * 60 * 24)) : null;
+        return (
+          <div key={chain.id} className="bg-surface-container-lowest rounded-lg p-5 border border-primary/10">
+            <div className="flex items-center gap-3 mb-3">
+              <span className="text-xl">{chain.emoji}</span>
+              <div className="flex-1">
+                <p className="font-label font-bold text-xs uppercase tracking-wider text-primary">Abenteuer-Kette</p>
+                <p className="font-body font-bold text-sm text-on-surface">{chain.name}</p>
+              </div>
+              <span className="bg-secondary-container text-on-secondary-container rounded-full px-3 py-1 font-label font-bold text-xs">
+                +{chain.hp} ⭐
+              </span>
+            </div>
+            {daysLeft !== null && (
+              <p className={`font-label font-bold text-xs mb-2 ${daysLeft <= 5 ? 'text-error' : daysLeft <= 10 ? 'text-secondary' : 'text-on-surface-variant'}`}>
+                📅 {daysLeft > 0 ? `Noch ${daysLeft} Tage!` : daysLeft === 0 ? "Heute!" : "Abgelaufen"}
+              </p>
+            )}
+            <div className="h-2 bg-surface-container rounded-full overflow-hidden mb-3">
+              <div className="h-full rounded-full bg-primary transition-all duration-400" style={{ width: `${(doneSteps / totalSteps) * 100}%` }} />
+            </div>
+            <p className="font-label text-xs font-bold text-on-surface-variant mb-3">{doneSteps}/{totalSteps} Schritte</p>
+            <div className="space-y-2">
+              {chain.steps.map((step, idx) => {
+                const isCurrent = idx === firstUndoneIdx;
+                return (
+                  <button key={step.id} className={`btn-tap w-full flex items-center gap-3 p-3 rounded-lg text-left transition-all ${
+                    step.done ? 'bg-emerald/5 opacity-60' : isCurrent ? 'bg-secondary-fixed/20 border border-secondary-container/30' : 'bg-surface-container opacity-40'
+                  }`} onClick={() => !step.done && actions.completeChainStep(chain.id, step.id)}
+                    style={{ minHeight: 44 }}>
+                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
+                      step.done ? 'bg-emerald text-white' : isCurrent ? 'bg-secondary-container text-on-secondary-container' : 'bg-surface-container-highest text-on-surface-variant'
+                    }`}>
+                      {step.done ? "✓" : idx + 1}
+                    </div>
+                    <span className={`font-label font-bold text-sm ${step.done ? 'line-through text-on-surface/40' : 'text-on-surface'}`}>
+                      {step.name}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+
+      {/* ── Boss Card ── */}
+      {state.boss && <BossCard boss={state.boss} />}
+
+      {/* ── Weekly Mission ── */}
+      {(() => {
+        const wm = WEEKLY_MISSIONS.find(m => m.id === state.weeklyMission);
+        if (!wm) return null;
+        const wp = state.weeklyProgress || 0;
+        const wmDone = wp >= wm.target;
+        return (
+          <div className={`bg-surface-container-lowest rounded-lg p-5 ${wmDone ? 'border border-emerald/20' : ''}`}>
+            <div className="flex items-center gap-3 mb-3">
+              <span className="text-xl">{wm.icon}</span>
+              <div className="flex-1">
+                <p className={`font-label font-bold text-xs uppercase tracking-wider ${wmDone ? 'text-emerald-dark' : 'text-primary'}`}>
+                  {wmDone ? "💪 Geschafft!" : "Wochen-Mission"}
+                </p>
+                <p className="font-body font-bold text-sm text-on-surface">{wm.title}</p>
+              </div>
+              <span className={`font-headline text-base font-bold ${wmDone ? 'text-emerald-dark' : 'text-primary'}`}>
+                {Math.min(wp, wm.target)}/{wm.target}
+              </span>
+            </div>
+            <p className="font-body text-xs text-on-surface-variant mb-3">{wm.story}</p>
+            <div className="h-2 bg-surface-container rounded-full overflow-hidden">
+              <div className="h-full rounded-full transition-all duration-600" style={{
+                width: `${Math.min(100, (wp / wm.target) * 100)}%`,
+                background: wmDone ? 'linear-gradient(90deg, #34D399, #6EE7B7)' : 'linear-gradient(90deg, #5300b7, #6d28d9)',
+              }} />
+            </div>
+            {wmDone && <p className="text-center font-label text-xs font-bold text-emerald-dark mt-3">🎉 +{wm.reward.amount} Heldenpunkte erhalten!</p>}
+          </div>
+        );
+      })()}
+
+      {/* ── Bottom Quick Links ── */}
+      <div className="flex gap-3">
+        <button className="btn-tap flex-1 bg-surface-container-lowest rounded-lg p-4 flex items-center justify-center gap-2 font-label font-bold text-sm text-on-surface"
+          onClick={() => ui.setView("journal")}>
+          <span className="material-symbols-outlined text-primary text-lg">menu_book</span>
+          Tagebuch
+        </button>
+        <button className="btn-tap flex-1 bg-surface-container-lowest rounded-lg p-4 flex items-center justify-center gap-2 font-label font-bold text-sm text-on-surface"
+          onClick={() => ui.setView("time")}>
+          <span className="material-symbols-outlined text-secondary text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>stars</span>
+          Belohnungen
+        </button>
+      </div>
+
+      {/* ── Parent Panel (inline when parent mode active) ── */}
+      {pMode && (
+        <div className="mt-4">
+          <div className="bg-surface-container-high rounded-lg p-4 mb-4 flex items-center gap-3">
+            <span className="material-symbols-outlined text-primary">shield_person</span>
+            <div>
+              <p className="font-headline font-bold text-lg text-primary">Eltern-Bereich</p>
+              <p className="font-label text-xs text-on-surface-variant uppercase tracking-wider">PIN-Geschützt</p>
+            </div>
+          </div>
+          {/* Import the existing ParentPanel component */}
+          <ParentPanelInline />
+        </div>
+      )}
     </div>
+  );
+}
+
+// Lazy inline import to avoid circular deps
+function ParentPanelInline() {
+  const ParentPanel = React.lazy(() => import('./ParentPanel'));
+  return (
+    <React.Suspense fallback={<div className="text-center p-4 font-body text-on-surface-variant">Laden...</div>}>
+      <ParentPanel />
+    </React.Suspense>
   );
 }

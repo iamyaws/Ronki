@@ -1,89 +1,219 @@
 import React, { useRef } from 'react';
 import { T, RAINBOW, RAINBOW_LABELS, MOOD_EMOJIS, JOURNAL_QUESTIONS } from '../constants';
-import { ViewHeader } from './ui';
 import { useGame } from '../context/GameContext';
+
+const MOOD_LABELS = ["Traurig", "Besorgt", "Okay", "Gut", "Magisch", "Müde"];
+const MOOD_BG_CLASSES = [
+  "bg-blue-50/50", "bg-amber-50/50", "bg-surface-container-low",
+  "bg-primary", "bg-purple-50/50", "bg-surface-container-low",
+];
 
 export default function Journal() {
   const { state, computed, actions, ui } = useGame();
   const { done, total } = computed;
   const journalRef = useRef(null);
 
+  const today = new Date();
+  const dayOfWeek = today.getDay(); // 0=Sun, 1=Mon...
+  const germanDays = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
+
   return (
-    <div className="view-enter" style={{ minHeight: "100vh", padding: "12px 16px 100px", background: "#EFF3FB" }}>
-      <ViewHeader onBack={() => ui.setView("hub")} title="Tagebuch" />
+    <div className="lotus-pattern px-6 pb-32 space-y-8">
 
-      <div style={{ textAlign: "center", marginBottom: 16 }}>
-        <div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: "1.2rem", fontWeight: 700, color: "#1E1B4B" }}>{new Date().toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "long" })}</div>
-      </div>
+      {/* ── Header ── */}
+      <section className="space-y-2">
+        <h2 className="text-4xl font-bold font-headline text-on-surface">Mein Journal</h2>
+        <p className="text-on-surface-variant font-body text-lg leading-relaxed">
+          Wie fühlst du dich heute in deiner mystischen Wiese?
+        </p>
+      </section>
 
-      {/* Mood summary */}
-      <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
-        <div className="game-card" style={{ flex: 1, padding: 14, textAlign: "center" }}>
-          <div style={{ fontSize: ".85rem", fontWeight: 800, color: T.textSecondary, textTransform: "uppercase", marginBottom: 6 }}>{"\u{1F305}"} Morgens</div>
-          <div style={{ fontSize: "2.2rem" }}>{state.moodAM !== null ? MOOD_EMOJIS[state.moodAM] : "\u2014"}</div>
+      {/* ── Mood Selector — Tactile Floating Bubbles ── */}
+      <section className="space-y-6">
+        <h3 className="font-label font-bold uppercase tracking-widest text-xs text-outline/80">
+          Aktuelle Stimmung
+        </h3>
+        <div className="flex justify-between items-end px-1">
+          {MOOD_EMOJIS.map((emoji, i) => {
+            const isSelected = state.moodAM === i;
+            return (
+              <button
+                key={i}
+                aria-label={`Stimmung: ${MOOD_LABELS[i] || `${i+1}`}`}
+                onClick={() => actions.setMood("moodAM", i)}
+                className={`btn-tap flex flex-col items-center gap-3 rounded-full transition-all duration-300 ${
+                  isSelected
+                    ? 'bg-primary text-white p-5 scale-110 -translate-y-2 shadow-xl shadow-primary/30'
+                    : 'bg-surface-container-low p-4 hover:bg-surface-container group'
+                }`}
+              >
+                <span className={`${isSelected ? 'text-5xl' : 'text-4xl'} transition-all`}>
+                  {emoji}
+                </span>
+                <span className={`font-label text-[10px] font-bold uppercase tracking-wider ${
+                  isSelected ? '' : 'text-outline/60'
+                }`}>
+                  {MOOD_LABELS[i] || ""}
+                </span>
+              </button>
+            );
+          })}
         </div>
-        <div className="game-card" style={{ flex: 1, padding: 14, textAlign: "center" }}>
-          <div style={{ fontSize: ".85rem", fontWeight: 800, color: T.textSecondary, textTransform: "uppercase", marginBottom: 6 }}>{"\u{1F319}"} Abends</div>
-          <div style={{ fontSize: "2.2rem" }}>{state.moodPM !== null ? MOOD_EMOJIS[state.moodPM] : "\u2014"}</div>
-          {state.moodPM === null && <div role="group" aria-label="Abendstimmung wählen" style={{ display: "flex", justifyContent: "center", gap: 2, marginTop: 6 }}>{MOOD_EMOJIS.map((e, i) => <button key={i} aria-label={`Stimmung ${i + 1} von 6`} onClick={() => actions.setMood("moodPM", i)} style={{ fontSize: "1.3rem", background: "none", border: "none", cursor: "pointer", padding: "3px", minHeight: 36, minWidth: 36 }}>{e}</button>)}</div>}
+      </section>
+
+      {/* ── Bento Layout: Weekly Calendar + Thought Box ── */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        {/* Weekly Calendar — Gemstone Dots */}
+        <section className="bg-white/60 backdrop-blur-sm p-6 rounded-lg border border-white/40 shadow-sm relative overflow-hidden min-h-[280px]">
+          <h3 className="font-label font-bold uppercase tracking-widest text-xs text-outline/80 mb-6">
+            Wochenübersicht
+          </h3>
+          <div className="space-y-4">
+            {["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"].map((day, i) => {
+              const dayIdx = i + 1 > 6 ? 0 : i + 1; // Mo=1...Sa=6, So=0
+              const isToday = dayIdx === dayOfWeek;
+              const isPast = dayIdx < dayOfWeek || (dayOfWeek === 0 && dayIdx > 0);
+              return (
+                <div key={day} className="flex justify-between items-center">
+                  <span className={`font-label text-sm ${isToday ? 'font-bold text-primary' : 'font-semibold text-outline/60'}`}>
+                    {day}
+                  </span>
+                  <div className="flex gap-1.5">
+                    {isPast || isToday ? (
+                      <div className={`w-3.5 h-3.5 rounded-full ${isToday ? 'bg-primary ring-4 ring-primary/10' : 'bg-secondary-container'}`}
+                           style={{ boxShadow: 'inset -1px -1px 2px rgba(0,0,0,0.1), inset 1px 1px 1px rgba(255,255,255,0.8)' }} />
+                    ) : (
+                      <div className="w-3.5 h-3.5 rounded-full bg-surface-container"
+                           style={{ boxShadow: 'inset -1px -1px 2px rgba(0,0,0,0.1), inset 1px 1px 1px rgba(255,255,255,0.8)' }} />
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Daily Reflection — Journal Paper Feel */}
+        <section className="bg-white p-6 rounded-lg border border-surface-variant/30 shadow-md flex flex-col min-h-[280px]">
+          <h3 className="font-label font-bold uppercase tracking-widest text-xs text-outline/80 mb-4">
+            Gedanken heute
+          </h3>
+          <div className="flex-grow relative">
+            <textarea
+              ref={journalRef}
+              value={state.journal || ""}
+              onChange={e => actions.setJournal(e.target.value)}
+              placeholder="Was beschäftigt deinen Geist?"
+              className="w-full h-full bg-transparent border-none focus:ring-0 p-0 text-on-surface font-body text-base resize-none placeholder:text-outline/30 outline-none"
+              style={{
+                backgroundImage: 'linear-gradient(#e5e7eb 1px, transparent 1px)',
+                backgroundSize: '100% 2rem',
+                lineHeight: '2rem',
+                minHeight: 120,
+              }}
+            />
+          </div>
+          <div className="mt-4 flex justify-end">
+            <button className="btn-tap bg-secondary-container text-on-secondary-container px-6 py-3 rounded-full font-label font-bold text-sm flex items-center gap-2 hover:shadow-lg transition-all">
+              Speichern
+              <span className="material-symbols-outlined text-lg">auto_awesome</span>
+            </button>
+          </div>
+        </section>
+      </div>
+
+      {/* ── Rainbow Progress ── */}
+      <section className="bg-surface-container-lowest rounded-lg p-6">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="font-label font-bold uppercase tracking-widest text-xs text-outline/80">
+            🌈 Regenbogen heute
+          </h3>
+          {(state.rainbow || []).every(Boolean) && (
+            <span className="font-label font-bold text-xs text-emerald-dark">🎉 +25 ⭐</span>
+          )}
         </div>
-      </div>
+        <div className="flex gap-3 justify-center">
+          {RAINBOW.map((e, i) => {
+            const d = (state.rainbow || [])[i];
+            return (
+              <div key={i} className="text-center">
+                <div className={`text-2xl transition-opacity ${d ? 'opacity-100' : 'opacity-25'}`}>{e}</div>
+                <div className={`font-label text-[10px] font-bold mt-1 ${d ? 'text-emerald-dark' : 'text-outline/40'}`}>
+                  {d ? "✓" : RAINBOW_LABELS[i]}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
 
-      {/* Rainbow */}
-      <div className="game-card" style={{ padding: 14, marginBottom: 16 }}>
-        <div style={{ fontSize: ".85rem", fontWeight: 800, color: T.textSecondary, textTransform: "uppercase", marginBottom: 8 }}>{"\u{1F308}"} Regenbogen heute</div>
-        <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>{RAINBOW.map((e, i) => {
-          const d = (state.rainbow || [])[i];
-          return <div key={i} style={{ textAlign: "center" }}>
-            <div style={{ fontSize: "1.5rem", opacity: d ? 1 : 0.25 }}>{e}</div>
-            <div style={{ fontSize: ".85rem", fontWeight: 700, color: d ? T.successDark : T.textLight, marginTop: 2 }}>{d ? "\u2713" : RAINBOW_LABELS[i]}</div>
-          </div>;
-        })}</div>
-        {(state.rainbow || []).every(Boolean) && <div style={{ textAlign: "center", fontSize: ".85rem", fontWeight: 800, color: T.success, marginTop: 8 }}>{"\u{1F389}"} Alle Farben geschafft! +25 {"\u2B50"}</div>}
-      </div>
-
-      {/* Guided Journal */}
+      {/* ── Guided Questions ── */}
       {JOURNAL_QUESTIONS.map(q => {
         const ans = (state.jAnswers || {})[q.id];
         return (
-          <div key={q.id} className="game-card" style={{ padding: 14, marginBottom: 12 }}>
-            <div style={{ fontSize: ".85rem", fontWeight: 800, color: T.textSecondary, textTransform: "uppercase", marginBottom: 10 }}>{q.q}</div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+          <section key={q.id} className="bg-surface-container-lowest rounded-lg p-6">
+            <h3 className="font-label font-bold text-sm text-on-surface-variant mb-4">{q.q}</h3>
+            <div className="flex flex-wrap gap-2">
               {q.opts.map(o => (
-                <button key={o.v} onClick={() => { actions.setJAnswer(q.id, o.v); if (q.id === "tomorrow") actions.commitTomorrow({ type: o.v, text: o.l }); }} style={{
-                  background: ans === o.v ? `${T.primary}10` : "rgba(180,120,40,0.04)",
-                  border: ans === o.v ? `2.5px solid ${T.primary}40` : "2.5px solid rgba(180,120,40,0.08)",
-                  borderRadius: 50, padding: "8px 16px", cursor: "pointer",
-                  fontFamily: "'Nunito',sans-serif", fontWeight: 700, fontSize: ".85rem",
-                  color: ans === o.v ? T.primary : T.textPrimary,
-                  transition: "all .15s", minHeight: 40,
-                }}>{o.l}</button>
+                <button
+                  key={o.v}
+                  onClick={() => {
+                    actions.setJAnswer(q.id, o.v);
+                    if (q.id === "tomorrow") actions.commitTomorrow({ type: o.v, text: o.l });
+                  }}
+                  className={`btn-tap rounded-full px-4 py-2 font-body text-sm font-bold transition-all ${
+                    ans === o.v
+                      ? 'bg-primary/10 border-2 border-primary/40 text-primary'
+                      : 'bg-surface-container border-2 border-transparent text-on-surface hover:border-outline-variant/30'
+                  }`}
+                  style={{ minHeight: 40 }}
+                >
+                  {o.l}
+                </button>
               ))}
             </div>
-          </div>
+          </section>
         );
       })}
 
-      {/* Free text */}
-      <div className="game-card" style={{ padding: 14 }}>
-        <div style={{ fontSize: ".85rem", fontWeight: 800, color: T.textSecondary, textTransform: "uppercase", marginBottom: 10 }}>{"\u270F\uFE0F"} Noch etwas? (Optional)</div>
-        <textarea
-          ref={journalRef}
-          value={state.journal || ""}
-          onChange={e => actions.setJournal(e.target.value)}
-          placeholder="Was dich bewegt, was passiert ist, ein Highlight..."
-          style={{ width: "100%", minHeight: 100, background: "rgba(180,120,40,0.04)", border: "2.5px solid rgba(180,120,40,0.08)", borderRadius: 16, padding: "14px 16px", color: T.textPrimary, fontSize: ".9rem", fontFamily: "'Nunito',sans-serif", outline: "none", fontWeight: 600, resize: "vertical", lineHeight: 1.6 }}
-        />
+      {/* ── Evening Mood (if not set) ── */}
+      {state.moodPM === null && (
+        <section className="bg-surface-container-lowest rounded-lg p-6">
+          <h3 className="font-label font-bold text-xs uppercase tracking-widest text-primary mb-4">
+            🌙 Abendstimmung
+          </h3>
+          <div role="group" aria-label="Abendstimmung wählen" className="flex justify-center gap-2">
+            {MOOD_EMOJIS.map((e, i) => (
+              <button
+                key={i}
+                aria-label={`Stimmung ${i + 1}`}
+                onClick={() => actions.setMood("moodPM", i)}
+                className={`btn-tap text-2xl p-2 rounded-full transition-all ${
+                  state.moodPM === i ? 'bg-primary-container scale-110' : 'hover:bg-surface-container'
+                }`}
+                style={{ minHeight: 44, minWidth: 44 }}
+              >
+                {e}
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ── Privacy Badge ── */}
+      <div className="flex justify-center items-center gap-2 text-outline/40 pt-2">
+        <span className="material-symbols-outlined text-sm">lock</span>
+        <span className="font-label text-[10px] font-bold uppercase tracking-widest">
+          Ende-zu-Ende verschlüsselt
+        </span>
       </div>
 
-      {/* Today stats */}
-      <div className="game-card" style={{ padding: 14, marginTop: 16 }}>
-        <div style={{ fontSize: ".85rem", fontWeight: 800, color: T.primary, textTransform: "uppercase", marginBottom: 8 }}>{"\u{1F4CA}"} Heute</div>
-        <div style={{ display: "flex", justifyContent: "space-around", textAlign: "center" }}>
-          <div><div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: "1.25rem", fontWeight: 700, color: T.primary }}>{done}/{total}</div><div style={{ fontSize: ".85rem", color: T.textSecondary }}>Aufgaben</div></div>
-          <div><div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: "1.25rem", fontWeight: 700, color: T.accentDark }}>+{state.dt}min</div><div style={{ fontSize: ".85rem", color: T.textSecondary }}>Verdient</div></div>
-          <div><div style={{ fontFamily: "'Fredoka',sans-serif", fontSize: "1.25rem", fontWeight: 700, color: T.success }}>{(state.rainbow || []).filter(Boolean).length}/6</div><div style={{ fontSize: ".85rem", color: T.textSecondary }}>Farben</div></div>
-        </div>
+      {/* Bodhi leaf */}
+      <div className="flex justify-center py-2 opacity-10">
+        <svg width="40" height="40" viewBox="0 0 120 120" fill="none">
+          <path d="M60 10C60 10 75 40 110 40C110 40 80 55 80 90C80 90 60 110 60 110C60 110 40 90 40 90C40 90 10 55 10 40C10 40 45 40 60 10Z" fill="#5300b7" />
+        </svg>
       </div>
     </div>
   );

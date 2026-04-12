@@ -1,15 +1,11 @@
 import React, { useState } from 'react';
 import { T } from '../constants';
-import { ViewHeader } from './ui';
 import { useGame } from '../context/GameContext';
 
-// ── Belohnungsbank (Reward Bank) ──
-// Louis spends his Heldenpunkte on real-world rewards configured by parents.
-
 const EMOJI_PICKS = [
-  "\u{1F3AE}", "\u{1F4FA}", "\u{1F36C}", "\u{1F3AC}", "\u{1F3A2}", "\u{1F354}",
-  "\u{1F3B5}", "\u{1F6B2}", "\u26BD", "\u{1F3A8}", "\u{1F4D6}", "\u{1F9E9}",
-  "\u{1F355}", "\u{1F366}", "\u{1F382}", "\u{1F381}", "\u{1F3A0}", "\u{1F3D6}\uFE0F",
+  "🎮", "📺", "🍬", "🎬", "🎢", "🍔",
+  "🎵", "🚲", "⚽", "🎨", "📖", "🧩",
+  "🍕", "🍦", "🎂", "🎁", "🎠", "🏖️",
 ];
 
 function generateId() {
@@ -23,7 +19,6 @@ export default function TimeBank() {
   const coins = state.coins || 0;
   const isPMode = ui.pMode;
 
-  // ── Weekend/vacation & time-of-day logic ──
   const isWeekend = new Date().getDay() === 0 || new Date().getDay() === 6;
   const isFreeDay = isWeekend || state.vacMode;
 
@@ -35,361 +30,162 @@ export default function TimeBank() {
     return now.getHours() > h || (now.getHours() === h && now.getMinutes() >= m);
   }
 
-  // ── Parent edit state ──
-  const [editDraft, setEditDraft] = useState(null); // null = not editing, array = working copy
-  const [emojiPicker, setEmojiPicker] = useState(null); // id of reward showing picker
-  const [confirmRedeem, setConfirmRedeem] = useState(null); // id of reward being confirmed
+  const [editDraft, setEditDraft] = useState(null);
+  const [emojiPicker, setEmojiPicker] = useState(null);
+  const [confirmRedeem, setConfirmRedeem] = useState(null);
 
   const activeRewards = isPMode ? belohnungen : belohnungen.filter(b => b.active);
 
-  // ── Start editing ──
   const startEdit = () => setEditDraft(belohnungen.map(b => ({ ...b })));
   const cancelEdit = () => { setEditDraft(null); setEmojiPicker(null); };
   const saveEdit = () => {
-    if (editDraft) {
-      const cleaned = editDraft.filter(b => b.name.trim().length > 0);
-      actions.updateBelohnungen(cleaned);
-    }
-    setEditDraft(null);
-    setEmojiPicker(null);
+    if (editDraft) actions.updateBelohnungen(editDraft.filter(b => b.name.trim().length > 0));
+    setEditDraft(null); setEmojiPicker(null);
   };
-
-  const updateDraft = (id, field, value) => {
-    setEditDraft(prev => prev.map(b => b.id === id ? { ...b, [field]: value } : b));
-  };
+  const updateDraft = (id, field, value) => setEditDraft(prev => prev.map(b => b.id === id ? { ...b, [field]: value } : b));
   const removeDraft = (id) => setEditDraft(prev => prev.filter(b => b.id !== id));
-  const addDraft = () => {
-    setEditDraft(prev => [...prev, { id: generateId(), name: "", emoji: "\u2B50", cost: 20, active: true }]);
-  };
+  const addDraft = () => setEditDraft(prev => [...prev, { id: generateId(), name: "", emoji: "⭐", cost: 20, active: true }]);
 
-  // ── Redeem flow ──
-  const handleRedeem = (belId) => {
-    actions.redeemReward(belId);
-    setConfirmRedeem(null);
-  };
-
-  // ── Resolve reward name from log entries ──
-  const resolveRewardName = (belId) => {
-    const found = belohnungen.find(b => b.id === belId);
-    return found ? `${found.emoji} ${found.name}` : belId;
-  };
-
-  // ── Format date for log ──
-  const formatDate = (iso) => {
-    try {
-      const d = new Date(iso);
-      return d.toLocaleDateString("de-DE", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
-    } catch { return ""; }
-  };
+  const handleRedeem = (belId) => { actions.redeemReward(belId); setConfirmRedeem(null); };
+  const resolveRewardName = (belId) => { const f = belohnungen.find(b => b.id === belId); return f ? `${f.emoji} ${f.name}` : belId; };
+  const formatDate = (iso) => { try { return new Date(iso).toLocaleDateString("de-DE", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }); } catch { return ""; } };
 
   const isEditing = editDraft !== null;
 
   return (
-    <div className="view-enter" style={{
-      minHeight: "100vh",
-      padding: "12px 16px 100px",
-      background: T.bg,
-      fontFamily: "'Nunito', sans-serif",
-    }}>
-      {/* Header */}
-      <ViewHeader
-        onBack={() => ui.setView("hub")}
-        title={"\u2B50 Belohnungsbank"}
-        right={isPMode && !isEditing ? (
-          <button className="btn-tap" onClick={startEdit} style={{
-            background: `${T.primary}14`,
-            border: `2px solid ${T.primary}30`,
-            borderRadius: 50,
-            padding: "8px 16px",
-            fontSize: ".85rem",
-            fontWeight: 800,
-            color: T.primary,
-            cursor: "pointer",
-            fontFamily: "'Fredoka', sans-serif",
-            minHeight: 48,
-          }}>
-            Bearbeiten
-          </button>
-        ) : undefined}
-      />
+    <div className="lotus-pattern px-6 pb-32 space-y-6">
 
-      {/* ── Balance display ── */}
-      <div style={{ display: "flex", gap: 10, marginBottom: 24 }}>
-        <div className="game-card" style={{
-          flex: 1,
-          padding: "20px 16px",
-          textAlign: "center",
-          background: `linear-gradient(135deg, ${T.accent}18, ${T.accent}08)`,
-          borderColor: `${T.accent}40`,
-        }}>
-          <div style={{ fontSize: "2rem", marginBottom: 4 }}>{"\u2B50"}</div>
-          <div style={{
-            fontFamily: "'Fredoka', sans-serif",
-            fontSize: "2.2rem",
-            fontWeight: 700,
-            color: T.accentDark,
-            lineHeight: 1.1,
-          }}>
-            {coins}
+      {/* ── Header ── */}
+      <section className="space-y-2">
+        <div className="flex justify-between items-start">
+          <div>
+            <h2 className="text-3xl font-bold font-headline text-on-surface">Belohnungsbank</h2>
+            <p className="text-on-surface-variant font-body text-base mt-1">
+              Wandle deine Heldenpunkte in tolle Belohnungen um!
+            </p>
           </div>
-          <div style={{
-            fontSize: ".85rem",
-            color: T.textSecondary,
-            fontWeight: 700,
-            marginTop: 4,
-            letterSpacing: ".02em",
-          }}>
-            Heldenpunkte
+          {isPMode && !isEditing && (
+            <button onClick={startEdit} className="btn-tap bg-primary/10 border border-primary/20 rounded-full px-4 py-2 font-label font-bold text-sm text-primary">
+              Bearbeiten
+            </button>
+          )}
+        </div>
+      </section>
+
+      {/* ── Balance Card ── */}
+      <div className="relative overflow-hidden bg-primary text-white p-6 rounded-lg bodhi-pattern flex justify-between items-center group transition-all">
+        <div className="relative z-10">
+          <p className="font-label font-bold uppercase tracking-widest text-xs text-white/60 mb-1">Dein Guthaben</p>
+          <div className="flex items-baseline gap-2">
+            <span className="text-5xl font-headline font-bold">{coins}</span>
+            <span className="text-xl font-label font-bold opacity-80">HP</span>
           </div>
         </div>
-        <div className="game-card" style={{
-          flex: 1,
-          padding: "20px 16px",
-          textAlign: "center",
-          background: "linear-gradient(135deg, rgba(146,64,14,0.08), rgba(146,64,14,0.03))",
-          borderColor: "rgba(146,64,14,0.2)",
-        }}>
-          <div style={{ fontSize: "2rem", marginBottom: 4 }}>{"\u{1F95A}"}</div>
-          <div style={{
-            fontFamily: "'Fredoka', sans-serif",
-            fontSize: "2.2rem",
-            fontWeight: 700,
-            color: "#92400E",
-            lineHeight: 1.1,
-          }}>
-            {state.drachenEier || 0}
-          </div>
-          <div style={{
-            fontSize: ".85rem",
-            color: T.textSecondary,
-            fontWeight: 700,
-            marginTop: 4,
-            letterSpacing: ".02em",
-          }}>
-            Drachen-Eier
-          </div>
+        <div className="relative z-10 bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/20">
+          <span className="material-symbols-outlined text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+            account_balance_wallet
+          </span>
+        </div>
+        <div className="absolute -bottom-8 -right-8 opacity-10 group-hover:scale-110 transition-transform duration-500">
+          <span className="material-symbols-outlined text-9xl">filter_vintage</span>
         </div>
       </div>
 
-      {/* ── Weekend discount badge ── */}
-      {isFreeDay && !isEditing && (
-        <div style={{
-          background: "linear-gradient(135deg, #059669, #10b981)",
-          borderRadius: 14,
-          padding: "10px 18px",
-          marginBottom: 12,
-          textAlign: "center",
-          color: "white",
-          fontWeight: 800,
-          fontSize: "1rem",
-          fontFamily: "'Fredoka', sans-serif",
-          boxShadow: "0 4px 14px rgba(5,150,105,0.25)",
-        }}>
-          {"\u{1F3D6}\uFE0F"} {state.vacMode ? "Ferien" : "Wochenend"}-Rabatt!
+      {/* Dragon eggs secondary balance */}
+      {(state.drachenEier || 0) > 0 && (
+        <div className="flex items-center gap-3 px-4 py-3 bg-tertiary-fixed/30 rounded-lg border border-tertiary-fixed-dim/20">
+          <span className="text-2xl">🥚</span>
+          <span className="font-headline text-lg font-bold text-tertiary">{state.drachenEier || 0}</span>
+          <span className="font-label text-sm font-bold text-on-surface-variant">Drachen-Eier</span>
         </div>
       )}
 
-      {/* ── Section label ── */}
-      <div style={{
-        fontFamily: "'Fredoka', sans-serif",
-        fontWeight: 800,
-        fontSize: ".85rem",
-        color: T.textSecondary,
-        textTransform: "uppercase",
-        letterSpacing: ".08em",
-        marginBottom: 12,
-      }}>
-        {isEditing ? "Belohnungen bearbeiten" : "Belohnungen"}
-      </div>
+      {/* ── Weekend discount ── */}
+      {isFreeDay && !isEditing && (
+        <div className="bg-emerald text-white rounded-lg px-4 py-3 text-center font-headline font-bold text-sm">
+          🏖️ {state.vacMode ? "Ferien" : "Wochenend"}-Rabatt aktiv!
+        </div>
+      )}
 
       {/* ── EDIT MODE ── */}
       {isEditing ? (
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          {editDraft.map((bel) => (
-            <div key={bel.id} className="game-card" style={{
-              padding: "16px 14px",
-              display: "flex",
-              flexDirection: "column",
-              gap: 10,
-              borderColor: bel.active ? `${T.primary}30` : `${T.danger}20`,
-              opacity: bel.active ? 1 : 0.6,
-            }}>
-              {/* Row 1: Emoji + name */}
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <button className="btn-tap" onClick={() => setEmojiPicker(emojiPicker === bel.id ? null : bel.id)} style={{
-                  width: 52, height: 52, borderRadius: 14,
-                  background: T.primaryPale,
-                  border: `2px solid ${T.primary}30`,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: "1.6rem", cursor: "pointer",
-                  minHeight: 48, minWidth: 48,
-                }}>
+        <div className="space-y-4">
+          <h3 className="font-label font-bold text-sm uppercase tracking-widest text-on-surface/40 px-1">
+            Belohnungen bearbeiten
+          </h3>
+
+          {editDraft.map(bel => (
+            <div key={bel.id} className={`bg-surface-container-lowest rounded-lg p-5 space-y-3 border ${bel.active ? 'border-primary/10' : 'border-error/20 opacity-60'}`}>
+              <div className="flex items-center gap-3">
+                <button onClick={() => setEmojiPicker(emojiPicker === bel.id ? null : bel.id)}
+                  className="btn-tap w-12 h-12 rounded-lg bg-primary-fixed flex items-center justify-center text-2xl border border-primary/20">
                   {bel.emoji}
                 </button>
-                <input
-                  type="text"
-                  value={bel.name}
-                  onChange={e => updateDraft(bel.id, "name", e.target.value)}
+                <input type="text" value={bel.name} onChange={e => updateDraft(bel.id, "name", e.target.value)}
                   placeholder="Name der Belohnung..."
-                  style={{
-                    flex: 1, border: `2px solid ${T.primary}20`,
-                    borderRadius: 12, padding: "10px 14px",
-                    fontSize: ".95rem", fontWeight: 700,
-                    fontFamily: "'Nunito', sans-serif",
-                    color: T.textPrimary,
-                    background: "white",
-                    outline: "none",
-                    minHeight: 48,
-                  }}
-                />
+                  className="flex-1 bg-surface-container-low border border-outline-variant/20 rounded-lg px-3 py-2.5 font-body text-sm outline-none focus:border-primary/40"
+                  style={{ minHeight: 44 }} />
               </div>
 
-              {/* Emoji picker (collapsible) */}
               {emojiPicker === bel.id && (
-                <div style={{
-                  display: "flex", flexWrap: "wrap", gap: 6,
-                  padding: "8px 4px",
-                  background: `${T.primaryPale}60`,
-                  borderRadius: 12,
-                }}>
+                <div className="flex flex-wrap gap-2 p-3 bg-primary-fixed/30 rounded-lg">
                   {EMOJI_PICKS.map(em => (
-                    <button key={em} className="btn-tap" onClick={() => { updateDraft(bel.id, "emoji", em); setEmojiPicker(null); }} style={{
-                      width: 44, height: 44, borderRadius: 10,
-                      border: bel.emoji === em ? `2px solid ${T.primary}` : "2px solid transparent",
-                      background: bel.emoji === em ? "white" : "transparent",
-                      fontSize: "1.3rem", cursor: "pointer",
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                    }}>
+                    <button key={em} onClick={() => { updateDraft(bel.id, "emoji", em); setEmojiPicker(null); }}
+                      className={`btn-tap w-10 h-10 rounded-lg text-xl flex items-center justify-center ${bel.emoji === em ? 'bg-white border-2 border-primary' : 'border-2 border-transparent'}`}>
                       {em}
                     </button>
                   ))}
                 </div>
               )}
 
-              {/* Row 2: Cost + active toggle + delete */}
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 6, flex: 1 }}>
-                  <span style={{ fontSize: ".85rem", fontWeight: 700, color: T.textSecondary }}>{"\u2B50"}</span>
-                  <input
-                    type="number"
-                    value={bel.cost}
-                    onChange={e => updateDraft(bel.id, "cost", Math.max(1, parseInt(e.target.value) || 1))}
-                    min={1}
-                    style={{
-                      width: 72, border: `2px solid ${T.primary}20`,
-                      borderRadius: 10, padding: "8px 10px",
-                      fontSize: ".9rem", fontWeight: 700, textAlign: "center",
-                      fontFamily: "'Nunito', sans-serif",
-                      color: T.textPrimary,
-                      background: "white",
-                      outline: "none",
-                      minHeight: 44,
-                    }}
-                  />
-                  <span style={{ fontSize: ".8rem", fontWeight: 600, color: T.textLight }}>HP</span>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 flex-1">
+                  <span className="material-symbols-outlined text-secondary text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>stars</span>
+                  <input type="number" value={bel.cost} onChange={e => updateDraft(bel.id, "cost", Math.max(1, parseInt(e.target.value) || 1))} min={1}
+                    className="w-16 bg-surface-container-low border border-outline-variant/20 rounded-lg px-2 py-2 font-label text-sm text-center outline-none" style={{ minHeight: 40 }} />
+                  <span className="font-label text-xs text-on-surface-variant">HP</span>
                 </div>
-
-                {/* Active toggle */}
-                <button className="btn-tap" onClick={() => updateDraft(bel.id, "active", !bel.active)} style={{
-                  background: bel.active ? `${T.success}15` : `${T.danger}10`,
-                  border: `2px solid ${bel.active ? T.success : T.danger}30`,
-                  borderRadius: 50, padding: "8px 14px",
-                  fontSize: ".8rem", fontWeight: 800, cursor: "pointer",
-                  color: bel.active ? T.successDark : T.danger,
-                  fontFamily: "'Fredoka', sans-serif",
-                  minHeight: 44,
-                }}>
+                <button onClick={() => updateDraft(bel.id, "active", !bel.active)}
+                  className={`btn-tap rounded-full px-3 py-1.5 font-label text-xs font-bold ${bel.active ? 'bg-emerald/10 text-emerald-dark border border-emerald/30' : 'bg-error-container/50 text-error border border-error/30'}`}>
                   {bel.active ? "Aktiv" : "Aus"}
                 </button>
-
-                {/* Delete */}
-                <button className="btn-tap" onClick={() => removeDraft(bel.id)} style={{
-                  width: 44, height: 44, borderRadius: 12,
-                  background: `${T.danger}10`,
-                  border: `2px solid ${T.danger}20`,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: "1.1rem", cursor: "pointer",
-                  color: T.danger,
-                }}>
-                  {"\u2716"}
+                <button onClick={() => removeDraft(bel.id)} className="btn-tap w-10 h-10 rounded-lg bg-error-container/50 border border-error/20 flex items-center justify-center text-error">
+                  <span className="material-symbols-outlined text-lg">delete</span>
                 </button>
               </div>
             </div>
           ))}
 
-          {/* Add new reward button */}
-          <button className="btn-tap" onClick={addDraft} style={{
-            background: `${T.primary}08`,
-            border: `2.5px dashed ${T.primary}30`,
-            borderRadius: 18,
-            padding: "18px 16px",
-            textAlign: "center",
-            cursor: "pointer",
-            fontSize: ".95rem",
-            fontWeight: 800,
-            color: T.primary,
-            fontFamily: "'Fredoka', sans-serif",
-            minHeight: 56,
-          }}>
+          <button onClick={addDraft} className="btn-tap w-full border-2 border-dashed border-primary/30 rounded-lg py-4 text-center font-label font-bold text-sm text-primary bg-primary/5 hover:bg-primary/10 transition-colors">
             + Neue Belohnung
           </button>
 
-          {/* Save / Cancel buttons */}
-          <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
-            <button className="btn-tap" onClick={cancelEdit} style={{
-              flex: 1,
-              background: "rgba(0,0,0,0.04)",
-              border: "2px solid rgba(0,0,0,0.08)",
-              borderRadius: 50,
-              padding: "14px 20px",
-              fontSize: ".9rem",
-              fontWeight: 800,
-              color: T.textSecondary,
-              cursor: "pointer",
-              fontFamily: "'Fredoka', sans-serif",
-              minHeight: 52,
-            }}>
+          <div className="flex gap-3 pt-2">
+            <button onClick={cancelEdit} className="btn-tap flex-1 bg-surface-container text-on-surface-variant rounded-full py-3.5 font-label font-bold text-sm">
               Abbrechen
             </button>
-            <button className="btn-tap" onClick={saveEdit} style={{
-              flex: 1,
-              background: `linear-gradient(135deg, ${T.success}, ${T.successDark})`,
-              border: "none",
-              borderRadius: 50,
-              padding: "14px 20px",
-              fontSize: ".9rem",
-              fontWeight: 800,
-              color: "white",
-              cursor: "pointer",
-              fontFamily: "'Fredoka', sans-serif",
-              boxShadow: `0 6px 20px ${T.success}40`,
-              minHeight: 52,
-            }}>
+            <button onClick={saveEdit} className="btn-tap flex-1 bg-emerald text-white rounded-full py-3.5 font-label font-bold text-sm shadow-lg shadow-emerald/30">
               Speichern
             </button>
           </div>
         </div>
       ) : (
-        /* ── NORMAL MODE: reward cards ── */
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        /* ── NORMAL MODE ── */
+        <div className="space-y-4">
+          <h3 className="font-label font-bold text-sm uppercase tracking-widest text-on-surface/40 px-1">
+            Verfügbare Belohnungen
+          </h3>
+
           {activeRewards.length === 0 && (
-            <div className="game-card" style={{
-              padding: "32px 20px",
-              textAlign: "center",
-              color: T.textLight,
-              fontSize: ".95rem",
-              fontWeight: 600,
-            }}>
-              {isPMode
-                ? 'Noch keine Belohnungen. Tippe "Bearbeiten" um welche hinzuzuf\u00FCgen!'
-                : "Keine Belohnungen verf\u00FCgbar."}
+            <div className="bg-surface-container-lowest rounded-lg p-8 text-center text-on-surface-variant font-body">
+              {isPMode ? 'Noch keine Belohnungen. Tippe "Bearbeiten"!' : "Keine Belohnungen verfügbar."}
             </div>
           )}
 
           {activeRewards.map(bel => {
             const effectiveCost = (isFreeDay && bel.weekendCost) ? bel.weekendCost : bel.cost;
             const available = isAvailableNow(bel);
-            const currencyEmoji = bel.currency === "eggs" ? "\u{1F95A}" : "\u2B50";
+            const currencyEmoji = bel.currency === "eggs" ? "🥚" : "⭐";
             const balance = bel.currency === "eggs" ? (state.drachenEier || 0) : coins;
             const canAfford = balance >= effectiveCost;
             const gameRemaining = bel.id === "bel_game20" ? Math.max(0, 2 - (state.dailyGameRedemptions || 0)) : null;
@@ -398,127 +194,58 @@ export default function TimeBank() {
             const isConfirming = confirmRedeem === bel.id;
 
             return (
-              <div key={bel.id} className="game-card" style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 14,
-                padding: "16px 18px",
-                opacity: !available ? 0.7 : canAfford ? 1 : 0.5,
-                borderColor: canRedeem ? `${T.accent}40` : undefined,
-                boxShadow: canRedeem ? `0 4px 16px ${T.accent}12` : undefined,
-                transition: "all .25s ease",
-              }}>
-                {/* Emoji icon */}
-                <div style={{
-                  width: 56, height: 56,
-                  borderRadius: 16,
-                  background: canRedeem ? `${T.accent}18` : "rgba(180,120,40,0.06)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: "1.8rem",
-                  flexShrink: 0,
-                }}>
-                  {bel.emoji}
-                </div>
-
-                {/* Name + cost */}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{
-                    fontWeight: 700,
-                    fontSize: "1rem",
-                    color: T.textPrimary,
-                    marginBottom: 2,
-                  }}>
-                    {bel.name}
+              <div key={bel.id} className={`bg-surface-container-lowest rounded-lg p-5 flex items-center justify-between group transition-all duration-300 ${canRedeem ? 'hover:shadow-[0_8px_24px_rgba(30,27,23,0.06)]' : ''} ${!available || !canAfford ? 'opacity-60' : ''}`}>
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-lg bg-surface-container-low flex items-center justify-center">
+                    <span className="text-3xl">{bel.emoji}</span>
                   </div>
-                  <div style={{
-                    fontSize: ".85rem",
-                    color: canAfford ? (bel.currency === "eggs" ? "#92400E" : T.accentDark) : T.textLight,
-                    fontWeight: 700,
-                  }}>
-                    {currencyEmoji}{" "}
-                    {isFreeDay && bel.weekendCost && bel.weekendCost < bel.cost ? (
-                      <>
-                        <span style={{ textDecoration: "line-through", opacity: 0.5, marginRight: 4 }}>{bel.cost}</span>
-                        <span style={{ color: "#DC2626", fontWeight: 800 }}>{bel.weekendCost} {bel.currency === "eggs" ? "Eier" : "HP"}</span>
-                      </>
-                    ) : (
-                      <span>{effectiveCost} {bel.currency === "eggs" ? "Eier" : "HP"}</span>
+                  <div>
+                    <h4 className="font-label font-bold text-base text-on-surface">{bel.name}</h4>
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <span className="material-symbols-outlined text-secondary text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>stars</span>
+                      {isFreeDay && bel.weekendCost && bel.weekendCost < bel.cost ? (
+                        <span className="text-secondary font-bold font-label text-sm">
+                          <span className="line-through opacity-50 mr-1">{bel.cost}</span>
+                          <span className="text-error font-extrabold">{bel.weekendCost} HP</span>
+                        </span>
+                      ) : (
+                        <span className="text-secondary font-bold font-label text-sm">{effectiveCost} {bel.currency === "eggs" ? "Eier" : "HP"}</span>
+                      )}
+                    </div>
+                    {!available && bel.availableAfter && (
+                      <p className="font-label text-xs text-on-surface-variant mt-0.5">
+                        🔒 Ab {isFreeDay ? (bel.availableAfterFree || bel.availableAfter) : bel.availableAfter} Uhr
+                      </p>
                     )}
-                    {!available && " \u{1F512}"}
+                    {gameRemaining !== null && (
+                      <p className={`font-label text-xs font-bold mt-0.5 ${gameLocked ? 'text-error' : 'text-emerald-dark'}`}>
+                        {gameLocked ? "🔒 Heute ausgeschöpft" : `Noch ${gameRemaining} übrig`}
+                      </p>
+                    )}
                   </div>
-                  {!available && bel.availableAfter && (
-                    <div style={{
-                      fontSize: ".78rem",
-                      color: T.textLight,
-                      fontWeight: 600,
-                      marginTop: 2,
-                    }}>
-                      Ab {isFreeDay ? (bel.availableAfterFree || bel.availableAfter) : bel.availableAfter} Uhr
-                    </div>
-                  )}
-                  {gameRemaining !== null && (
-                    <div style={{
-                      fontSize: ".78rem",
-                      color: gameLocked ? T.danger : T.success,
-                      fontWeight: 700,
-                      marginTop: 2,
-                    }}>
-                      {gameLocked ? "\u{1F512} Heute ausgesch\u00F6pft" : `Noch ${gameRemaining} \u00FCbrig`}
-                    </div>
-                  )}
                 </div>
 
-                {/* Redeem button / lock icon */}
                 {isConfirming ? (
-                  <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
-                    <button className="btn-tap" onClick={() => setConfirmRedeem(null)} style={{
-                      background: "rgba(0,0,0,0.05)",
-                      border: "none", borderRadius: 50,
-                      padding: "10px 14px",
-                      fontSize: ".8rem", fontWeight: 800,
-                      color: T.textSecondary, cursor: "pointer",
-                      fontFamily: "'Fredoka', sans-serif",
-                      minHeight: 44,
-                    }}>
+                  <div className="flex gap-2 shrink-0">
+                    <button onClick={() => setConfirmRedeem(null)} className="btn-tap bg-surface-container text-on-surface-variant rounded-full px-4 py-2.5 font-label font-bold text-xs" style={{ minHeight: 44 }}>
                       Nein
                     </button>
-                    <button className="btn-tap" onClick={() => handleRedeem(bel.id)} style={{
-                      background: `linear-gradient(135deg, ${T.success}, ${T.successDark})`,
-                      border: "none", borderRadius: 50,
-                      padding: "10px 16px",
-                      fontSize: ".8rem", fontWeight: 800,
-                      color: "white", cursor: "pointer",
-                      fontFamily: "'Fredoka', sans-serif",
-                      boxShadow: `0 4px 12px ${T.success}30`,
-                      minHeight: 44,
-                    }}>
+                    <button onClick={() => handleRedeem(bel.id)} className="btn-tap bg-emerald text-white rounded-full px-4 py-2.5 font-label font-bold text-xs shadow-md" style={{ minHeight: 44 }}>
                       Ja!
                     </button>
                   </div>
                 ) : (
                   <button
-                    className="btn-tap"
                     onClick={() => canRedeem && !isPMode && setConfirmRedeem(bel.id)}
                     disabled={!canRedeem || isPMode}
-                    style={{
-                      background: canRedeem && !isPMode
-                        ? `linear-gradient(135deg, ${T.primary}, ${T.primaryLight})`
-                        : "rgba(0,0,0,0.04)",
-                      border: "none",
-                      borderRadius: 50,
-                      padding: "10px 20px",
-                      fontSize: ".85rem",
-                      fontWeight: 800,
-                      color: canRedeem && !isPMode ? "white" : T.textLight,
-                      cursor: canRedeem && !isPMode ? "pointer" : "default",
-                      fontFamily: "'Fredoka', sans-serif",
-                      opacity: !canRedeem ? 0.5 : 1,
-                      boxShadow: canRedeem && !isPMode ? `0 4px 12px ${T.primary}30` : "none",
-                      minHeight: 48,
-                      flexShrink: 0,
-                    }}
+                    className={`btn-tap rounded-full px-5 py-2.5 font-label font-bold text-sm shrink-0 transition-all ${
+                      canRedeem && !isPMode
+                        ? 'bg-secondary-container text-on-secondary-container hover:opacity-90'
+                        : 'bg-surface-variant text-outline cursor-not-allowed'
+                    }`}
+                    style={{ minHeight: 44 }}
                   >
-                    {canRedeem ? "Einl\u00F6sen" : "\u{1F512}"}
+                    {canRedeem ? "Einlösen" : "Zu wenig HP"}
                   </button>
                 )}
               </div>
@@ -527,62 +254,51 @@ export default function TimeBank() {
         </div>
       )}
 
-      {/* ── Redemption history ── */}
-      {!isEditing && log.length > 0 && (
-        <div style={{ marginTop: 28 }}>
-          <div style={{
-            fontFamily: "'Fredoka', sans-serif",
-            fontWeight: 800,
-            fontSize: ".85rem",
-            color: T.textSecondary,
-            textTransform: "uppercase",
-            letterSpacing: ".08em",
-            marginBottom: 10,
-          }}>
-            Letzte Einl\u00F6sungen
+      {/* ── Info Card ── */}
+      {!isEditing && (
+        <div className="bg-secondary-fixed/20 border-l-4 border-secondary p-5 rounded-r-lg">
+          <div className="flex gap-3">
+            <span className="material-symbols-outlined text-secondary">lightbulb</span>
+            <div>
+              <h5 className="font-label font-bold text-secondary text-sm">So funktioniert's</h5>
+              <p className="font-body text-sm text-on-surface-variant mt-1 leading-relaxed">
+                Wenn du eine Belohnung einlöst, zeige den Bestätigungscode deinen Eltern. Sie helfen dir dann dabei, deine Belohnung zu erhalten!
+              </p>
+            </div>
           </div>
-          <div className="game-card" style={{ padding: "12px 16px" }}>
+        </div>
+      )}
+
+      {/* ── Redemption History ── */}
+      {!isEditing && log.length > 0 && (
+        <div>
+          <h3 className="font-label font-bold text-sm uppercase tracking-widest text-on-surface/40 px-1 mb-3">
+            Letzte Einlösungen
+          </h3>
+          <div className="bg-surface-container-lowest rounded-lg p-4 divide-y divide-outline-variant/10">
             {log.slice(-5).reverse().map((entry, i) => (
-              <div key={i} style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: "8px 0",
-                borderBottom: i < Math.min(log.length, 5) - 1 ? "1px solid rgba(0,0,0,0.05)" : "none",
-              }}>
-                <div style={{
-                  fontSize: ".9rem",
-                  fontWeight: 700,
-                  color: T.textPrimary,
-                }}>
-                  {resolveRewardName(entry.id)}
-                </div>
-                <div style={{
-                  fontSize: ".8rem",
-                  fontWeight: 600,
-                  color: T.textLight,
-                }}>
-                  {formatDate(entry.date)}
-                </div>
+              <div key={i} className="flex items-center justify-between py-3">
+                <span className="font-label font-bold text-sm text-on-surface">{resolveRewardName(entry.id)}</span>
+                <span className="font-label text-xs text-on-surface-variant">{formatDate(entry.date)}</span>
               </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* ── Parent mode hint (when not editing) ── */}
+      {/* ── Parent mode hint ── */}
       {isPMode && !isEditing && (
-        <div style={{
-          marginTop: 20,
-          textAlign: "center",
-          fontSize: ".85rem",
-          fontWeight: 600,
-          color: T.textLight,
-          fontStyle: "italic",
-        }}>
-          Elternmodus aktiv &mdash; Einl&ouml;sen deaktiviert
-        </div>
+        <p className="text-center font-body text-sm text-on-surface-variant italic">
+          Elternmodus aktiv — Einlösen deaktiviert
+        </p>
       )}
+
+      {/* Bodhi leaf */}
+      <div className="flex justify-center py-2 opacity-10">
+        <svg width="40" height="40" viewBox="0 0 120 120" fill="none">
+          <path d="M60 10C60 10 75 40 110 40C110 40 80 55 80 90C80 90 60 110 60 110C60 110 40 90 40 90C40 90 10 55 10 40C10 40 45 40 60 10Z" fill="#5300b7" />
+        </svg>
+      </div>
     </div>
   );
 }
