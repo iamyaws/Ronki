@@ -5,7 +5,7 @@ export default function LoginBonus({ onCollect, claimed }) {
 
   return (
     <button
-      className="btn-tap w-full mm-card-tint bg-secondary-fixed/20 border-secondary-container/30 p-4 mb-4 flex items-center gap-4 text-left transition-all hover:shadow-md"
+      className="btn-tap w-full mm-card p-5 flex items-center gap-4 text-left transition-all hover:shadow-md"
       onClick={onCollect}
       style={{ animation: "loginPulse 2s ease-in-out infinite" }}
     >
@@ -15,11 +15,11 @@ export default function LoginBonus({ onCollect, claimed }) {
           Willkommen zurück, Held!
         </p>
         <p className="font-body text-sm text-on-surface-variant mt-0.5">
-          Tippe für deinen täglichen Heldenpunkt ⭐
+          Tippe für deinen täglichen Heldenpunkt
         </p>
       </div>
       <span className="bg-secondary-container text-on-secondary-container rounded-full px-3 py-1.5 font-label font-bold text-xs whitespace-nowrap">
-        +5 ⭐
+        +5 HP
       </span>
     </button>
   );

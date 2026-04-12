@@ -26,7 +26,7 @@ export default function Hub() {
   const companionMood = mood;
 
   return (
-    <div className="lotus-pattern px-6 pb-8 space-y-6">
+    <div className="lotus-pattern px-5 pb-8 flex flex-col gap-5">
 
       {/* ── Companion / Egg Hero Section ── */}
       <section className="relative py-8 flex flex-col items-center justify-center">

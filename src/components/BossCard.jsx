@@ -37,7 +37,7 @@ export default function BossCard({ boss }) {
         <div className="flex-1">
           <div className="flex justify-between items-center">
             <p className="font-label font-bold text-[10px] text-error uppercase tracking-widest">Boss-Kampf</p>
-            <p className="font-label font-bold text-xs" style={{
+            <p className="font-label font-bold text-xs whitespace-nowrap" style={{
               color: hpPct > 50 ? '#DC2626' : hpPct > 25 ? '#F59E0B' : '#34D399'
             }}>
               {boss.hp}/{boss.maxHp} HP
