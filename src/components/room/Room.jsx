@@ -57,10 +57,10 @@ export default function Room() {
 
   return (
     <div className="bodhi-pattern min-h-screen pb-32">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 px-6 items-start">
+      <div className="mx-auto grid grid-cols-1 gap-6 px-6 items-start">
 
         {/* ── Room View (main area) ── */}
-        <div className="lg:col-span-8 space-y-4">
+        <div className="space-y-4">
           <div className="relative bg-surface-container-low rounded-xl overflow-hidden"
                style={{ minHeight: 500 }}>
             {/* Room header overlay */}
@@ -113,7 +113,7 @@ export default function Room() {
         </div>
 
         {/* ── Sidebar ── */}
-        <div className="lg:col-span-4 space-y-4">
+        <div className="space-y-4">
           {/* Unlocked furniture */}
           <div className="mm-card p-5 shadow-sm">
             <h3 className="font-label font-bold uppercase tracking-widest text-xs text-on-surface-variant mb-4">
