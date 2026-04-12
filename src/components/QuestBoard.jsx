@@ -55,15 +55,15 @@ export default function QuestBoard() {
   const SM_EMOJIS = ["🎁", "🦷", "🏥", "⚽", "🎵", "📝", "🧹", "🎨"];
 
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col">
+    <div className="fixed inset-0 z-[100] flex flex-col items-center">
       {/* Backdrop */}
       <div
-        className="flex-none h-[50px] bg-black/40 backdrop-blur-sm cursor-pointer"
+        className="flex-none h-[50px] w-full bg-black/40 backdrop-blur-sm cursor-pointer"
         onClick={() => { setQuestOpen(false); window.scrollTo(0, 0); }}
       />
 
       {/* Sheet */}
-      <div className="flex-1 bg-surface rounded-t-[2rem] overflow-auto relative"
+      <div className="flex-1 w-full max-w-md bg-surface rounded-t-[2rem] overflow-auto relative"
            style={{ animation: "slideUp .3s ease", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", paddingBottom: 100 }}>
 
         {/* ── Sticky Header ── */}
