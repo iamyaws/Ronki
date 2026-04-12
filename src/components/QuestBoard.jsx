@@ -255,7 +255,14 @@ export default function QuestBoard() {
                                   background: atTarget ? `${T.success}18` : `${T.primary}12`,
                                   color: atTarget ? T.successDark : T.primary,
                                 }}>
-                                  {curCompletions}/{q.target}{atTarget ? " \u2705" : ""}
+                                  {q.id === "ft" ? (
+                                    // Football: show filled/empty balls
+                                    Array.from({ length: q.target || 2 }, (_, fi) => (
+                                      <span key={fi} style={{ opacity: fi < curCompletions ? 1 : 0.3 }}>{"\u26BD"}</span>
+                                    ))
+                                  ) : (
+                                    <>{curCompletions}/{q.target}{atTarget ? " \u2705" : ""}</>
+                                  )}
                                 </span>
                               )}
                               {/* Bonus badge */}
