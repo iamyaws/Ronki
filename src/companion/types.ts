@@ -28,7 +28,22 @@ export type Trigger =
   | 'witness_invite_season'   // seasonal sensory beat
   | 'journey_reflection'      // rare elder beat — sets up Wave-3 fade-out
   | 'onboarding_kid_intro'    // parent-first Phase 1: kid's first beat
-  | 'lagerfeuer_arrival';     // parent-first Phase 6: post-hatch arrival
+  | 'lagerfeuer_arrival'      // parent-first Phase 6: post-hatch arrival
+  // ── Character-pass additions (2026-04-27) — fills silent surfaces
+  //    found in the prod audit. Text-bubble first; audio gen pending.
+  //    (LoginBonus skipped — surface retired per northstar / retention-bait.)
+  | 'reward_approved'         // parent tapped "Genehmigt!" in BelohnungRedeemModal
+  | 'gefuehl_pick_gut'        // Gefühlsecke picker — kid picked 😊
+  | 'gefuehl_pick_wuetend'    //                       — kid picked 😤
+  | 'gefuehl_pick_traurig'    //                       — kid picked 😢
+  | 'gefuehl_pick_aengstlich' //                       — kid picked 😰
+  | 'gefuehl_pick_muede'      //                       — kid picked 😴
+  | 'gefuehl_done_gut'        // Gefühlsecke tool wrap — gut flow finished
+  | 'gefuehl_done_wuetend'    //                       — wütend flow finished
+  | 'gefuehl_done_traurig'    //                       — traurig flow finished
+  | 'gefuehl_done_aengstlich' //                       — ängstlich flow finished
+  | 'gefuehl_done_muede'      //                       — müde flow finished
+  | 'evolution_reveal';       // EvolutionCelebration Phase 3 reveal
 export type CareAction = 'fed' | 'petted' | 'played';
 
 export interface VoiceContext {

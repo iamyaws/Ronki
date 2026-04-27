@@ -74,4 +74,30 @@ export const linesEn: VoiceLine[] = [
   { id: 'en_arc_cooldown_02', text: 'Phew, that was something. I need a little nap.', triggers: ['hub_open'], arcPhase: 'cooldown' },
   { id: 'en_arc_active_01',   text: 'We’re in the middle of an adventure! Look up top.', triggers: ['hub_open'], arcPhase: 'active' },
   { id: 'en_arc_active_02',   text: 'Our adventure is waiting! I’m so excited.', triggers: ['hub_open'], arcPhase: 'active' },
+
+  // ── Character pass (2026-04-27) — symmetric mirror of new DE entries.
+  //    Fills silent surfaces from the prod audit. Text-bubble first,
+  //    MP3s pending. Tone: warm, short, kid-friendly.
+  //    (LoginBonus skipped — surface retired per northstar / retention-bait.)
+  // Reward approved
+  { id: 'en_reward_approved_01', text: 'You earned this. Go enjoy it.', triggers: ['reward_approved'] },
+  { id: 'en_reward_approved_02', text: 'Off your stars go. Have fun.',  triggers: ['reward_approved'] },
+
+  // Gefühlsecke picker
+  { id: 'en_gefuehl_pick_gut_01',        text: 'Glad you’re feeling good.',           triggers: ['gefuehl_pick_gut'] },
+  { id: 'en_gefuehl_pick_wuetend_01',    text: 'Angry is okay. Let’s breathe.',       triggers: ['gefuehl_pick_wuetend'] },
+  { id: 'en_gefuehl_pick_traurig_01',    text: 'That’s allowed. I’m listening.',      triggers: ['gefuehl_pick_traurig'] },
+  { id: 'en_gefuehl_pick_aengstlich_01', text: 'Everyone gets scared. Me too.',       triggers: ['gefuehl_pick_aengstlich'] },
+  { id: 'en_gefuehl_pick_muede_01',      text: 'Tired is smart. Rest a bit.',         triggers: ['gefuehl_pick_muede'] },
+
+  // Gefühlsecke tool wrap
+  { id: 'en_gefuehl_done_gut_01',        text: 'You’re shining. It rubs off on me too.', triggers: ['gefuehl_done_gut'] },
+  { id: 'en_gefuehl_done_wuetend_01',    text: 'Good breathing. You’ve got this now.',   triggers: ['gefuehl_done_wuetend'] },
+  { id: 'en_gefuehl_done_traurig_01',    text: 'Thank you for showing me.',              triggers: ['gefuehl_done_traurig'] },
+  { id: 'en_gefuehl_done_aengstlich_01', text: 'Strong and still. Like a tree.',         triggers: ['gefuehl_done_aengstlich'] },
+  { id: 'en_gefuehl_done_muede_01',      text: 'Sleep well. See you tomorrow.',          triggers: ['gefuehl_done_muede'] },
+
+  // Evolution reveal
+  { id: 'en_evolution_reveal_01', text: 'Look! I look different!',                   triggers: ['evolution_reveal'] },
+  { id: 'en_evolution_reveal_02', text: 'I got bigger. Still feels the same inside.', triggers: ['evolution_reveal'] },
 ];

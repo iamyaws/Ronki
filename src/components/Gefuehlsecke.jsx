@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTask } from '../context/TaskContext';
+import { useVoice } from '../companion/useVoice';
+import VoiceBubble from './VoiceBubble';
 import BaumPoseBeat from './BaumPoseBeat';
 import SFX from '../utils/sfx';
 
@@ -34,6 +36,7 @@ const FEELINGS = [
 
 export default function Gefuehlsecke({ onClose }) {
   const { actions } = useTask();
+  const voice = useVoice();
   const [mode, setMode] = useState('picker'); // 'picker' | 'tool'
   const [feeling, setFeeling] = useState(null);
 
@@ -49,6 +52,19 @@ export default function Gefuehlsecke({ onClose }) {
     actions.logFeeling(id);
     setFeeling(id);
     setMode('tool');
+    // Mood-mirrored Ronki ack — fires per-feeling so the kid feels seen
+    // before the regulation tool even starts. See docs/ronki-voicelines.md
+    // (gefuehl_pick_* triggers added in the 2026-04-27 character pass).
+    voice.say(`gefuehl_pick_${id}`);
+  };
+
+  // Happy-path completion handler. Fires the matching gefuehl_done_*
+  // trigger so Ronki wraps the moment with warmth, then closes the
+  // modal. Bail/escape paths route through onClose directly so the
+  // closer voice line only fires when the kid actually finished.
+  const handleSuccess = () => {
+    if (feeling) voice.say(`gefuehl_done_${feeling}`);
+    onClose?.();
   };
 
   const handleBackdrop = (e) => {
@@ -79,12 +95,22 @@ export default function Gefuehlsecke({ onClose }) {
           <span className="material-symbols-outlined text-xl text-primary">close</span>
         </button>
 
+        {/* Voice bubble — chip-variant inside the modal, top-of-content
+            so the kid sees Ronki's reaction without it eating much
+            real estate. Lives outside the per-flow components so the
+            same bubble renders across picker → tool transitions. */}
+        {voice.line && (
+          <div className="px-6 pt-4">
+            <VoiceBubble line={voice.line} onDismiss={voice.dismiss} variant="chip" />
+          </div>
+        )}
+
         {mode === 'picker' && <Picker onPick={handlePick} />}
-        {mode === 'tool' && feeling === 'gut' && <GutFlow onClose={onClose} />}
-        {mode === 'tool' && feeling === 'wuetend' && <WuetendFlow onClose={onClose} />}
-        {mode === 'tool' && feeling === 'traurig' && <TraurigFlow onClose={onClose} />}
-        {mode === 'tool' && feeling === 'aengstlich' && <AengstlichFlow onClose={onClose} />}
-        {mode === 'tool' && feeling === 'muede' && <MuedeFlow onClose={onClose} />}
+        {mode === 'tool' && feeling === 'gut' && <GutFlow onClose={onClose} onSuccess={handleSuccess} />}
+        {mode === 'tool' && feeling === 'wuetend' && <WuetendFlow onClose={onClose} onSuccess={handleSuccess} />}
+        {mode === 'tool' && feeling === 'traurig' && <TraurigFlow onClose={onClose} onSuccess={handleSuccess} />}
+        {mode === 'tool' && feeling === 'aengstlich' && <AengstlichFlow onClose={onClose} onSuccess={handleSuccess} />}
+        {mode === 'tool' && feeling === 'muede' && <MuedeFlow onClose={onClose} onSuccess={handleSuccess} />}
       </div>
     </div>
   );
@@ -144,7 +170,7 @@ function Picker({ onPick }) {
 }
 
 // ── Mode 2a: Gut — tiny celebration ──
-function GutFlow({ onClose }) {
+function GutFlow({ onClose, onSuccess }) {
   return (
     <div className="px-6 pt-12 pb-8 flex flex-col items-center text-center relative overflow-hidden">
       {/* Sparkle dots */}
@@ -164,7 +190,7 @@ function GutFlow({ onClose }) {
       </p>
 
       <button
-        onClick={onClose}
+        onClick={onSuccess || onClose}
         className="mt-10 px-10 py-4 rounded-full font-label font-bold text-base min-h-[48px] active:scale-95 transition-transform relative z-10"
         style={{ background: '#34d399', color: 'white', boxShadow: '0 6px 18px rgba(52,211,153,0.35)' }}
       >
@@ -193,7 +219,7 @@ function SparkleDots() {
 }
 
 // ── Mode 2b: Wütend — Box-Atmung (4-4-4-4, 2 cycles ≈ 32s) ──
-function WuetendFlow({ onClose }) {
+function WuetendFlow({ onClose, onSuccess }) {
   const { actions } = useTask();
   const [started, setStarted] = useState(false);
   const [done, setDone] = useState(false);
@@ -316,7 +342,7 @@ function WuetendFlow({ onClose }) {
 
       {done && (
         <button
-          onClick={onClose}
+          onClick={onSuccess || onClose}
           className="mt-10 px-10 py-4 rounded-full font-label font-bold text-base min-h-[48px] active:scale-95 transition-transform"
           style={{ background: '#fcd34d', color: '#725b00', boxShadow: '0 6px 18px rgba(252,211,77,0.4)' }}
         >
@@ -328,7 +354,7 @@ function WuetendFlow({ onClose }) {
 }
 
 // ── Mode 2c: Traurig — simple journal entry ──
-function TraurigFlow({ onClose }) {
+function TraurigFlow({ onClose, onSuccess }) {
   const { actions, state } = useTask();
   const [note, setNote] = useState('');
   const [saved, setSaved] = useState(false);
@@ -354,7 +380,7 @@ function TraurigFlow({ onClose }) {
     const gratitude = state?.journalGratitude || [];
     actions.patchState({ journalGratitude: [...gratitude, trimmed] });
     setSaved(true);
-    setTimeout(() => onClose?.(), 1400);
+    setTimeout(() => (onSuccess || onClose)?.(), 1400);
   };
 
   return (
@@ -416,7 +442,7 @@ function TraurigFlow({ onClose }) {
 }
 
 // ── Mode 2d: Ängstlich — BaumPoseBeat (30s tree pose) ──
-function AengstlichFlow({ onClose }) {
+function AengstlichFlow({ onClose, onSuccess }) {
   return (
     <div className="px-2 pt-8 pb-4">
       <p
@@ -428,13 +454,13 @@ function AengstlichFlow({ onClose }) {
       <p className="font-body text-base text-on-surface-variant text-center mt-2 px-6">
         Werde zu einem Baum. Fest und ruhig.
       </p>
-      <BaumPoseBeat onComplete={onClose} />
+      <BaumPoseBeat onComplete={onSuccess || onClose} />
     </div>
   );
 }
 
 // ── Mode 2e: Müde — static rest card ──
-function MuedeFlow({ onClose }) {
+function MuedeFlow({ onClose, onSuccess }) {
   const suggestions = [
     { icon: '📖', text: 'Schau ein Buch an' },
     { icon: '🪟', text: 'Hör dem Fenster zu' },
@@ -473,7 +499,7 @@ function MuedeFlow({ onClose }) {
       </div>
 
       <button
-        onClick={onClose}
+        onClick={onSuccess || onClose}
         className="mt-8 px-10 py-4 rounded-full font-label font-bold text-base min-h-[48px] active:scale-95 transition-transform"
         style={{ background: '#fcd34d', color: '#725b00', boxShadow: '0 6px 18px rgba(252,211,77,0.4)' }}
       >

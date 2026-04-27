@@ -22,6 +22,8 @@ Single source of truth for Ronki's voice across all surfaces, restructured aroun
 - Time-to-independence > time-on-device.
 - Real UTF-8 umlauts (ä/ö/ü/ß) in source. No emojis in audio text — TTS reads them literally.
 
+**Character pass (2026-04-27, +14 entries):** Audited prod for silent surfaces. Added Quipper-tier daily moments (`reward_approved` × 2, `gefuehl_pick_*` × 5, `gefuehl_done_*` × 5) and Storyteller-tier `evolution_reveal` × 2 — fills the BelohnungRedeemModal, Gefühlsecke (picker + tool wrap), and EvolutionCelebration silences. Skipped LoginBonus (surface retired per northstar / retention-bait). Text-bubble first; MP3 generation pending Marc review. Northstar respected: no streak/FOMO language, recognition over fireworks, mood-mirror over mood-fix.
+
 **What this rewrite cleaned up vs. the previous draft:**
 1. **Toned down 6 Dikka-amped lines** (`de_alldone_01/02`, `de_freund_met_01`, `de_quest_streak_01`, `de_w_snow_01`, `de_identity_01`) — caps-shouting + "gerockt" / "nicht zu stoppen" / "EIN NEUER FREUND!" tipped into engagement-theater. Same warmth, less performance.
 2. **Cut paused-feature audio** — `de_egg_found` + `de_egg_hatch` (floating egg system paused per `App.jsx`). No regen waste.
@@ -66,7 +68,7 @@ Single source of truth for Ronki's voice across all surfaces, restructured aroun
 
 ---
 
-## Lines (57)
+## Lines (71)
 
 ```json
 [
@@ -559,6 +561,119 @@ Single source of truth for Ronki's voice across all surfaces, restructured aroun
     "text": "Willkommen, kleiner Held. Dein Drache wartet auf dich.",
     "direct_play": true,
     "notes": "Onboarding step 1 — adapt or remove depending on parent-first onboarding choreography"
+  },
+
+  {
+    "id": "de_reward_approved_01",
+    "character": "ronki",
+    "tier": "quipper",
+    "text": "Das hast du verdient. Hol's dir.",
+    "triggers": ["reward_approved"],
+    "notes": "BelohnungRedeemModal — fires when parent taps 'Genehmigt!'. Recognition over fireworks."
+  },
+  {
+    "id": "de_reward_approved_02",
+    "character": "ronki",
+    "tier": "quipper",
+    "text": "Schau, deine Sterne wandern los.",
+    "triggers": ["reward_approved"],
+    "notes": "Variant — reframes the deduction as a journey, not a loss."
+  },
+  {
+    "id": "de_gefuehl_pick_gut_01",
+    "character": "ronki",
+    "tier": "quipper",
+    "text": "Schön, dass es dir gut geht.",
+    "triggers": ["gefuehl_pick_gut"],
+    "notes": "Gefühlsecke picker — 😊 tapped. Ronki mirrors, doesn't fix."
+  },
+  {
+    "id": "de_gefuehl_pick_wuetend_01",
+    "character": "ronki",
+    "tier": "quipper",
+    "text": "Wütend ist okay. Lass uns atmen.",
+    "triggers": ["gefuehl_pick_wuetend"],
+    "notes": "Gefühlsecke picker — 😤 tapped. Validates + bridges to Box-Atmung."
+  },
+  {
+    "id": "de_gefuehl_pick_traurig_01",
+    "character": "ronki",
+    "tier": "quipper",
+    "text": "Das darf sein. Ich hör zu.",
+    "triggers": ["gefuehl_pick_traurig"],
+    "notes": "Gefühlsecke picker — 😢 tapped. Permission-giving, not problem-solving."
+  },
+  {
+    "id": "de_gefuehl_pick_aengstlich_01",
+    "character": "ronki",
+    "tier": "quipper",
+    "text": "Angst kennt jeder. Ich auch.",
+    "triggers": ["gefuehl_pick_aengstlich"],
+    "notes": "Gefühlsecke picker — 😰 tapped. Normalises with companion-vulnerability."
+  },
+  {
+    "id": "de_gefuehl_pick_muede_01",
+    "character": "ronki",
+    "tier": "quipper",
+    "text": "Müde ist klug. Ruh dich aus.",
+    "triggers": ["gefuehl_pick_muede"],
+    "notes": "Gefühlsecke picker — 😴 tapped. Reframes tired as wisdom-signal."
+  },
+  {
+    "id": "de_gefuehl_done_gut_01",
+    "character": "ronki",
+    "tier": "quipper",
+    "text": "Du strahlst. Das tut mir auch gut.",
+    "triggers": ["gefuehl_done_gut"],
+    "notes": "Gefühlsecke gut-flow wrap. Reciprocal warmth."
+  },
+  {
+    "id": "de_gefuehl_done_wuetend_01",
+    "character": "ronki",
+    "tier": "quipper",
+    "text": "Stark geatmet. Das kannst du jetzt.",
+    "triggers": ["gefuehl_done_wuetend"],
+    "notes": "Box-Atmung complete. Identity-language ('das kannst du')."
+  },
+  {
+    "id": "de_gefuehl_done_traurig_01",
+    "character": "ronki",
+    "tier": "quipper",
+    "text": "Danke, dass du's mir gezeigt hast.",
+    "triggers": ["gefuehl_done_traurig"],
+    "notes": "Traurig journal saved. Honors the disclosure."
+  },
+  {
+    "id": "de_gefuehl_done_aengstlich_01",
+    "character": "ronki",
+    "tier": "quipper",
+    "text": "Fest und ruhig. Wie ein Baum.",
+    "triggers": ["gefuehl_done_aengstlich"],
+    "notes": "Baum-Pose finished. Echo of the pose metaphor."
+  },
+  {
+    "id": "de_gefuehl_done_muede_01",
+    "character": "ronki",
+    "tier": "quipper",
+    "text": "Schlaf gut. Bis morgen.",
+    "triggers": ["gefuehl_done_muede"],
+    "notes": "Müde rest-card close. Gentle goodbye, no pressure to do anything."
+  },
+  {
+    "id": "de_evolution_reveal_01",
+    "character": "ronki",
+    "tier": "storyteller",
+    "text": "Schau! Ich seh anders aus!",
+    "triggers": ["evolution_reveal"],
+    "notes": "EvolutionCelebration Phase 3. Self-aware reveal — Ronki notices himself, kid is the witness."
+  },
+  {
+    "id": "de_evolution_reveal_02",
+    "character": "ronki",
+    "tier": "storyteller",
+    "text": "Größer geworden. Fühlt sich aber gleich an.",
+    "triggers": ["evolution_reveal"],
+    "notes": "Variant — inside-out framing. The form changed; the bond didn't."
   }
 ]
 ```

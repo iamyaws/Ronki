@@ -127,4 +127,41 @@ export const linesDe: VoiceLine[] = [
   { id: 'de_arc_cool_02',   text: 'Puh! Das war aufregend. Ich brauch ein Schläfchen.', triggers: ['hub_open'], arcPhase: 'cooldown' },
   { id: 'de_arc_active_01', text: 'Wir haben ein Abenteuer! Schau mal oben!', triggers: ['hub_open'], arcPhase: 'active' },
   { id: 'de_arc_active_02', text: 'Unser Abenteuer wartet! Ich bin so gespannt!', triggers: ['hub_open'], arcPhase: 'active' },
+
+  // ═══════════════════════════════════════
+  // CHARACTER PASS (2026-04-27) — fills silent prod surfaces.
+  // Text-bubble first; MP3 gen pending. Surfaces wired in their own
+  // components: BelohnungRedeemModal, Gefühlsecke (picker + tool flows),
+  // EvolutionCelebration. (LoginBonus skipped — surface retired per
+  // northstar / retention-bait.) Tone follows northstar: Quipper-light
+  // for daily moments, Storyteller-witness for evo.
+  // First-grader copy rule: short concrete sentences, kid words.
+  // ═══════════════════════════════════════
+  // Reward approved — parent tapped "Genehmigt!" in the modal. Warm,
+  // not hyped. The kid earned a real-world thing; northstar says
+  // recognition over fireworks.
+  { id: 'de_reward_approved_01', text: 'Das hast du verdient. Hol\'s dir.', triggers: ['reward_approved'] },
+  { id: 'de_reward_approved_02', text: 'Schau, deine Sterne wandern los.', triggers: ['reward_approved'] },
+
+  // Gefühlsecke picker — Ronki mirrors the picked feeling, doesn't fix it.
+  // One line per emotion. Distinct triggers (instead of mood-filtering)
+  // because feelingsLog uses a different vocabulary than VoiceContext.mood.
+  { id: 'de_gefuehl_pick_gut_01',        text: 'Schön, dass es dir gut geht.',     triggers: ['gefuehl_pick_gut'] },
+  { id: 'de_gefuehl_pick_wuetend_01',    text: 'Wütend ist okay. Lass uns atmen.', triggers: ['gefuehl_pick_wuetend'] },
+  { id: 'de_gefuehl_pick_traurig_01',    text: 'Das darf sein. Ich hör zu.',       triggers: ['gefuehl_pick_traurig'] },
+  { id: 'de_gefuehl_pick_aengstlich_01', text: 'Angst kennt jeder. Ich auch.',     triggers: ['gefuehl_pick_aengstlich'] },
+  { id: 'de_gefuehl_pick_muede_01',      text: 'Müde ist klug. Ruh dich aus.',     triggers: ['gefuehl_pick_muede'] },
+
+  // Gefühlsecke tool wrap — calm closer after each flow.
+  { id: 'de_gefuehl_done_gut_01',        text: 'Du strahlst. Das tut mir auch gut.',    triggers: ['gefuehl_done_gut'] },
+  { id: 'de_gefuehl_done_wuetend_01',    text: 'Stark geatmet. Das kannst du jetzt.',   triggers: ['gefuehl_done_wuetend'] },
+  { id: 'de_gefuehl_done_traurig_01',    text: 'Danke, dass du\'s mir gezeigt hast.',   triggers: ['gefuehl_done_traurig'] },
+  { id: 'de_gefuehl_done_aengstlich_01', text: 'Fest und ruhig. Wie ein Baum.',         triggers: ['gefuehl_done_aengstlich'] },
+  { id: 'de_gefuehl_done_muede_01',      text: 'Schlaf gut. Bis morgen.',               triggers: ['gefuehl_done_muede'] },
+
+  // Evolution reveal — Storyteller tier, Phase 3 of the celebration.
+  // Self-aware, inside-out framing: Ronki notices himself, kid is the
+  // witness. Replaces the silent 5-second epic.
+  { id: 'de_evolution_reveal_01', text: 'Schau! Ich seh anders aus!',                triggers: ['evolution_reveal'] },
+  { id: 'de_evolution_reveal_02', text: 'Größer geworden. Fühlt sich aber gleich an.', triggers: ['evolution_reveal'] },
 ];

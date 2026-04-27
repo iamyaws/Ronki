@@ -2,7 +2,9 @@ import React, { useState, useRef } from 'react';
 import { DEFAULT_BELOHNUNGEN } from '../constants';
 import { useTask } from '../context/TaskContext';
 import { useTranslation } from '../i18n/LanguageContext';
+import { useVoice } from '../companion/useVoice';
 import { Pearl, Hourglass } from './CurrencyIcons';
+import VoiceBubble from './VoiceBubble';
 import BelohnungRedeemModal from './BelohnungRedeemModal';
 import FunkelzeitParentConfirm from './FunkelzeitParentConfirm';
 import TopBar from './TopBar';
@@ -17,6 +19,7 @@ const ICON_MAP = {
 export default function Belohnungsbank({ onNavigate, onStartTimer, timerActive, onOpenParental }) {
   const { t } = useTranslation();
   const { state, actions } = useTask();
+  const voice = useVoice();
   const hp = state?.hp || 0;
   const screenMin = state?.drachenEier || 0; // Screen minutes (repurposed from eggs)
 
@@ -250,6 +253,15 @@ export default function Belohnungsbank({ onNavigate, onStartTimer, timerActive, 
       {/* TopBar sits ABOVE the hero card on the sky backdrop. */}
       <TopBar onNavigate={onNavigate} view="shop" onOpenParental={onOpenParental} />
 
+      {/* Ronki bubble — warm reaction when a reward is approved. Sits
+          under the TopBar so it lands in the kid's eye-line as the
+          redeem modal fades out. Chip-variant matches Hub pattern. */}
+      {voice.line && (
+        <div className="w-full max-w-md mx-auto px-4 mt-2">
+          <VoiceBubble line={voice.line} onDismiss={voice.dismiss} variant="chip" />
+        </div>
+      )}
+
       {/* ── Gilded hero card — cream→amber→gold radial gradient matching
              Polish .bb-hero. Eyebrow now distinct from h1 (per audit) and
              three twinkling sparks live in the portrait corner. ── */}
@@ -478,11 +490,16 @@ export default function Belohnungsbank({ onNavigate, onStartTimer, timerActive, 
            is the single entry point per Polish spec. Audit call-out #12:
            duplicate bottom button was redundant. */}
 
-      {/* ── HP Reward approval modal ── */}
+      {/* ── HP Reward approval modal ──
+            Fires voice.say('reward_approved') alongside the redeem so a
+            warm Ronki bubble lands as the modal fades out. Surface
+            wired in the Apr 2026 character pass — see
+            docs/ronki-voicelines.md (Lines 71). */}
       {redeemTarget && (
         <BelohnungRedeemModal
           reward={redeemTarget}
           onApprove={() => {
+            voice.say('reward_approved');
             actions.redeemReward('hp', redeemTarget.cost);
             setRedeemTarget(null);
           }}

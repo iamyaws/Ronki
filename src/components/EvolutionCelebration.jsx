@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Companion from './Companion';
+import VoiceBubble from './VoiceBubble';
+import { useVoice } from '../companion/useVoice';
 import { T, COMPANION_STAGES, CAT_STAGES } from '../constants';
 import { getCompanionStageName } from '../utils/helpers';
 
@@ -29,6 +31,7 @@ export default function EvolutionCelebration({
   onClose,
 }) {
   const [phase, setPhase] = useState(1);
+  const voice = useVoice();
 
   // Resolve stage name from props or constants
   const stageInfo = getCompanionStageName(companionType, newStage);
@@ -52,6 +55,14 @@ export default function EvolutionCelebration({
     const t2 = setTimeout(() => setPhase(3), 3500);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, []);
+
+  // Fire the Storyteller-tier reveal line once Phase 3 lands. Self-aware
+  // beat — Ronki notices himself, kid is the witness. See
+  // docs/ronki-voicelines.md (evolution_reveal trigger added 2026-04-27).
+  useEffect(() => {
+    if (phase === 3) voice.say('evolution_reveal');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase]);
 
   return (
     <>
@@ -239,13 +250,22 @@ export default function EvolutionCelebration({
               fontSize: "1rem",
               color: "rgba(255,255,255,0.7)",
               textAlign: "center",
-              marginBottom: newBossTier ? 16 : 32,
+              marginBottom: 16,
               animation: "evo-name-in 0.5s 0.15s ease-out both",
             }}>
               {COMPANION_STAGES[companionType]?.[newStage]?.desc
                 || CAT_STAGES[newStage]?.desc
                 || "Eine neue Stufe!"}
             </div>
+
+            {/* Ronki self-reveal bubble — Storyteller tier. Fires once
+                Phase 3 mounts. Chip-variant so it sits inline below the
+                subtitle without breaking the floating-companion focus. */}
+            {voice.line && (
+              <div style={{ marginBottom: newBossTier ? 16 : 24, animation: "evo-name-in 0.45s 0.25s ease-out both" }}>
+                <VoiceBubble line={voice.line} onDismiss={voice.dismiss} variant="chip" />
+              </div>
+            )}
 
             {/* Boss tier unlock notification */}
             {newBossTier && (
