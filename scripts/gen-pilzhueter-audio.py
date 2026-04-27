@@ -1,6 +1,8 @@
 """Generate 4 Drachenmutter narrator audio lines for the Pilzhüter arc via ElevenLabs.
 
-Voice: Bella (hpp4J3VqNfWAUOO0d1Us), model eleven_multilingual_v2.
+Voice: Eleonore | Reflective & Gentle Guide (jO00l6thH9mRUIF1vSux),
+locked 2026-04-27 (replaced Bella → Charlotte → Eleonore as the
+Drachenmutter voice). German-native, slow narrator settings.
 Uses real UTF-8 umlauts (not "ae" substitutes) for proper German pronunciation.
 """
 import os
@@ -14,15 +16,15 @@ import json
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8')
 
-VOICE_ID = 'hpp4J3VqNfWAUOO0d1Us'  # Bella = Drachenmutter
+VOICE_ID = 'jO00l6thH9mRUIF1vSux'  # Eleonore | Reflective & Gentle Guide (Drachenmutter)
 MODEL_ID = 'eleven_multilingual_v2'
 OUTPUT_DIR = r'C:\Users\öööö\louis-quest\public\audio\narrator'
 ENV_PATH = r'C:\Users\öööö\louis-quest\.env.local'
 
 VOICE_SETTINGS = {
     'stability': 0.75,
-    'similarity_boost': 0.65,
-    'style': 0.30,
+    'similarity_boost': 0.75,
+    'style': 0.20,
     'use_speaker_boost': True,
 }
 
@@ -58,10 +60,11 @@ def load_api_key():
 
 
 def generate_audio(api_key, voice_id, text, filename):
+    """Always overwrite — this script's job is to (re)generate the bank.
+    Skip-existing was the previous behaviour; removed during the 27 Apr 2026
+    Drachenmutter recast since old Bella audio needed replacement.
+    """
     out_path = os.path.join(OUTPUT_DIR, filename)
-    if os.path.exists(out_path) and os.path.getsize(out_path) > 1024:
-        print(f'SKIP: {filename} already exists ({os.path.getsize(out_path)} bytes)')
-        return
 
     url = f'https://api.elevenlabs.io/v1/text-to-speech/{voice_id}'
     body = {

@@ -24,9 +24,15 @@ let delayTimer: ReturnType<typeof setTimeout> | null = null;
 
 function readNarratorMuted(): boolean {
   if (typeof localStorage === 'undefined') return true;
-  // Default is muted. Explicit '0' = unmuted. Keeps the rollout safe: any
-  // device without the key gets the new quiet behaviour automatically.
-  return localStorage.getItem(NARRATOR_MUTE_KEY) !== '0';
+  // Default flipped to UNMUTED on 2026-04-27 — Eleonore's locked
+  // Drachenmutter catalogue (German-native, replaced Charlotte after
+  // recast — see basic-memory reference_voice_casting.md) + Harry's
+  // locked Ronki bank both shipped and are above quality bar.
+  // Explicit '1' = muted by parental choice (toggle in dashboard).
+  // Pre-flip users may have null / any-non-'1' value; treat anything
+  // that isn't a literal '1' as unmuted so they hear the new takes
+  // without re-onboarding.
+  return localStorage.getItem(NARRATOR_MUTE_KEY) === '1';
 }
 
 /**
