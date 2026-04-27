@@ -133,6 +133,30 @@ EN_LINES = {
     'en_arc_cooldown_02': 'Phew, that was something. I need a little nap.',
     'en_arc_active_01':   'We’re in the middle of an adventure! Look up top.',
     'en_arc_active_02':   'Our adventure is waiting! I’m so excited.',
+
+    # ── Character pass (2026-04-27) — fills silent prod surfaces.
+    #    Mirrors the new DE entries; same triggers, kid-friendly EN.
+    # Reward approved
+    'en_reward_approved_01': 'You earned this. Go enjoy it.',
+    'en_reward_approved_02': 'Off your stars go. Have fun.',
+
+    # Gefühlsecke picker
+    'en_gefuehl_pick_gut_01':        'Glad you’re feeling good.',
+    'en_gefuehl_pick_wuetend_01':    'Angry is okay. Let’s breathe.',
+    'en_gefuehl_pick_traurig_01':    'That’s allowed. I’m listening.',
+    'en_gefuehl_pick_aengstlich_01': 'Everyone gets scared. Me too.',
+    'en_gefuehl_pick_muede_01':      'Tired is smart. Rest a bit.',
+
+    # Gefühlsecke tool wrap
+    'en_gefuehl_done_gut_01':        'You’re shining. It rubs off on me too.',
+    'en_gefuehl_done_wuetend_01':    'Good breathing. You’ve got this now.',
+    'en_gefuehl_done_traurig_01':    'Thank you for showing me.',
+    'en_gefuehl_done_aengstlich_01': 'Strong and still. Like a tree.',
+    'en_gefuehl_done_muede_01':      'Sleep well. See you tomorrow.',
+
+    # Evolution reveal
+    'en_evolution_reveal_01': 'Look! I look different!',
+    'en_evolution_reveal_02': 'I got bigger. Still feels the same inside.',
 }
 
 # Direct-play lines — played from feature code by ID, not via engine pick.
