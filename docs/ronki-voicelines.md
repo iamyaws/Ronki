@@ -53,13 +53,13 @@ Single source of truth for Ronki's voice across all surfaces, restructured aroun
     }
   },
   "drachenmutter": {
-    "voice_id": "XB0fDUnXU5powFXDhCwa",
-    "voice_name": "Charlotte (locked 2026-04-26 — mature gentle narrator, storytelling cadence)",
+    "voice_id": "jO00l6thH9mRUIF1vSux",
+    "voice_name": "Eleonore | Reflective & Gentle Guide (locked 2026-04-27 — German-native, tender guide register, replaces Charlotte after recast)",
     "output_dir": "public/audio/narrator",
     "settings": {
-      "stability": 0.70,
-      "similarity_boost": 0.72,
-      "style": 0.30,
+      "stability": 0.75,
+      "similarity_boost": 0.75,
+      "style": 0.20,
       "use_speaker_boost": true
     }
   }
