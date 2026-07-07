@@ -235,4 +235,41 @@ Return beat, Feuer meter, expedition appointment timing, story pool 8 → 30 wit
 
 ---
 
+## 11. Addendum: Ferienmodus (added 7 July 2026)
+
+School breaks remove the day structure the whole v2 loop assumes. No school means no expedition window, no fixed morning shape, and six weeks of summer would stall the Abenteuertage momentum the school year builds. At the same time the parent pain shifts: the vacation problem is not "get through the morning," it's the daily "mir ist langweilig" followed by requests for screens. Ferienmodus answers both with one reframe.
+
+### 11.1 The guardrail comes first
+
+Ferienmodus is **not screen-time bargaining**. "Do your tasks, then you may ask for free time" is the Funkelzeit mechanic this product already cut, and it stays dead. Ronki never gates, meters, or unlocks screen time. The contract about screens stays between parent and kid, outside the app. Ronki's job is to make the alternative attractive enough that the asking starts later.
+
+### 11.2 The reframe
+
+Boredom is Ronki's problem too. In the v2 frame the kid's day and the dragon's day are the same day, so when school stops, Ronki loses his structure with the kid. The Ferien morning beat is Ronki asking: **"Keine Schule heute. Was machen wir zwei?"** The kid picks the day's adventures from an idea board. The app's answer to boredom is a dragon with ideas, not a chore list and not a screen unlock.
+
+### 11.3 Mechanics (all existing systems bend, none break)
+
+| v2 school loop | Ferien variant |
+|---|---|
+| Fixed morning routine fills the Feuer | Light morning anchor stays (anziehen, Zähne), then the kid picks 2 to 3 activities from an idea board; picks and completions fill the Feuer |
+| Ronki adventures alone during school | Ronki and the kid adventure together: the chosen activities are the shared expedition of the day |
+| Return with story at evening-routine time | The evening beat retells the day the kid actually had, in Ronki's voice; the memento matches the activity type |
+| TonightRitual with tomorrow's hook | Unchanged; the hook references tomorrow's fresh card hand ("Morgen ziehen wir neue Karten") |
+| Abenteuertage count school days | Ferien days count identically; the growth arc never pauses over summer |
+
+**The idea board** is the one new piece. A hand of 5 to 6 illustrated activity cards each morning, drawn from a pool: sensible defaults (draußen spielen, etwas bauen, malen, ein Buch anschauen, jemandem helfen) plus parent-added household cards in the dashboard (Trampolin, Fahrrad, LEGO, backen). Each card is a scene illustration, no reading required. Ronki presents them as things he wants to do. The hand rotates daily so the board stays generative (the Joon lesson: a thin fantasy layer collapses back into a list).
+
+### 11.4 UI: a mode, not a new app
+
+- Parent toggles Ferienmodus in the dashboard, or sets a date range (German school holidays vary by Bundesland).
+- RonkisTag keeps its comic-strip shape: Morgen and Abend panels stay, the school-time middle block swaps to the card board and the shared-adventure scene.
+- Cave, Feuer meter, TonightRitual, evolution, and the Abenteuertage counter carry over untouched.
+- Dashboard shows the parent "heute gewählt: bauen + draußen," so enforcement of family agreements happens with the parent, not in the kid's UI.
+
+### 11.5 Sequencing
+
+Ferienmodus is a candidate to ship **before** v2 Phase 2: it reuses every existing surface, the only new component is the card board, and summer break starts within weeks of this addendum. Shipping it makes Louis the live tester for the picker mechanic before it informs the school-year loop. If it ships first, its funnel events ride on the Phase 1 instrumentation work.
+
+---
+
 _Sources: codebase audit 7 Jul 2026 (this repo, branch experiment/drachennest); competitor research 7 Jul 2026 (Deconstructor of Fun on Finch, Finch wiki, Finch help center, joonapp.io, brili.com, gotimo.com, playpokpok.com, D4CR guide via Joan Ganz Cooney Center, 5Rights "Disrupted Childhood", The Conversation on kids' hook mechanics, Sesame Workshop preschool tablet best practices, Budge Studios onboarding on Android Developers blog). Prior art: docs/strategy/NORTHSTAR.md (25 Apr 2026), docs/strategy/PATH.md, docs/strategy/strategic-synthesis-2026-04-27.md._
