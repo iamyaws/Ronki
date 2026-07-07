@@ -1220,7 +1220,7 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
       // profile with a profile token so the parent can share the URL
       // with another device and land on the same profile. No-op for
       // first-time visitors (their token gets assigned at parent-
-      // setup completion in Phase 2). See docs/qr-profile-auth.md.
+      // setup completion in Phase 2). See docs/specs/qr-profile-auth.md.
       try {
         const onboarded = !!(raw && (raw as any).onboardingDone);
         ensureTokenForExistingProfile(onboarded);

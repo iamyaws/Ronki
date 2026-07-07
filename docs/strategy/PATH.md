@@ -91,7 +91,7 @@ The audit said "ship more BeiRonkiSein-quality writing." That's true but vague. 
 - Drachenmutter: dedicated mature feminine voice (Bella placeholder → real cast)
 - Each Freund: distinct voice (7 freunde × 50-100 lines each = ~700 voice lines)
 - Narrator (for stories, expedition descriptions): warm, slow, kid-pacing
-- *Already specced in `docs/voice-lines-audit-2026-04-19.md`. ~1 week of cast + record + edit if Marc directs the session.*
+- *Already specced in `docs/voice/voice-lines-audit-2026-04-19.md`. ~1 week of cast + record + edit if Marc directs the session.*
 
 ### A3 — Time-of-day shifts
 The cave at 8am, noon, sunset, and night should look meaningfully different. Just lighting and mood. Cheap to implement (CSS gradient swaps based on `new Date().getHours()`), huge for "world feels alive."

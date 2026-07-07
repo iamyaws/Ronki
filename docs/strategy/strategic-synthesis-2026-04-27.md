@@ -222,5 +222,5 @@ sections 1–3 of this doc accordingly. Sections 4 and 5 should hold.
 
 ---
 
-_Saved at `docs/strategic-synthesis-2026-04-27.md`. Last revised:
+_Saved at `docs/strategy/strategic-synthesis-2026-04-27.md`. Last revised:
 27 April 2026._

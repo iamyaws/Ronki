@@ -1076,7 +1076,7 @@ function SettingsTab({ lang, setLang, t, actions, state, onOpenFeedback }) {
   // share the URL/code so parent can sync between devices via the
   // built-in URL. Phase 2 (deferred): Supabase profiles table for
   // cross-device cloud-load by token, QR rendering, PDF print, camera
-  // scan flow. See docs/qr-profile-auth.md.
+  // scan flow. See docs/specs/qr-profile-auth.md.
   const [profileToken, setProfileTokenState] = useState(() => getActiveToken());
   const [shareCopied, setShareCopied] = useState(false);
   const handleShareLink = async () => {
@@ -1138,7 +1138,7 @@ function SettingsTab({ lang, setLang, t, actions, state, onOpenFeedback }) {
   // Off by default. When on, a soft cave-ambient pad plays under the
   // app and ducks during voicelines. Currently driven by an in-code
   // synthesizer placeholder until Marc picks a real mp3 — see
-  // docs/voice-music-engine.md.
+  // docs/voice/voice-music-engine.md.
   const [musicOn, setMusicOnState] = useState(BackgroundMusic.isEnabled());
   const toggleMusic = (next) => {
     BackgroundMusic.setEnabled(next);
@@ -1672,7 +1672,7 @@ function SettingsTab({ lang, setLang, t, actions, state, onOpenFeedback }) {
 
         {/* Hintergrundmusik toggle — soft cave-ambient pad. Currently
             an in-code synth placeholder; swaps to a real mp3 once Marc
-            picks one (see docs/voice-music-engine.md). Ducks during
+            picks one (see docs/voice/voice-music-engine.md). Ducks during
             any voiceline. */}
         <div className="flex items-center justify-between p-4 rounded-2xl"
              style={{ background: 'rgba(14,165,233,0.06)', border: '1px solid rgba(14,165,233,0.20)' }}>

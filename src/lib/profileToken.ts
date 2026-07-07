@@ -4,7 +4,7 @@
  * Marc 27 Apr 2026: "learn from the beyblade arena project where we
  * added a QR code for the kids to be thrown into the app instead of
  * a login flow that feels more natural." Full design:
- * docs/qr-profile-auth.md.
+ * docs/specs/qr-profile-auth.md.
  *
  * Phase 1 (this file): token generation, URL detection, localStorage
  * persistence. The token is generated once per profile, lives in

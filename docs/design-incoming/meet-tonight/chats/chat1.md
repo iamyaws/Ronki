@@ -1997,7 +1997,7 @@ _[tool: local_ls]_
 
 _[tool: local_ls]_
 
-The user mentioned `docs/NORTHSTAR.md` and `docs/path.md` but they don't exist directly in docs. Let me search.
+The user mentioned `docs/strategy/NORTHSTAR.md` and `docs/path.md` but they don't exist directly in docs. Let me search.
 
 _[tool: local_grep]_
 

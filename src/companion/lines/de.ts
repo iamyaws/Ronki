@@ -3,7 +3,7 @@ import type { VoiceLine } from '../types';
 /**
  * Ronki's voice — engine-routed line bank, German.
  *
- * Source of truth for content + tone: docs/ronki-voicelines.md (the northstar
+ * Source of truth for content + tone: docs/voice/ronki-voicelines.md (the northstar
  * voice rewrite, 2026-04-26). This file is the React-engine-readable version
  * of the engine-routed subset of that doc — direct-play lines (stamina,
  * teeth, screen, journal, garden, witness, elder, onboarding, narrator) live

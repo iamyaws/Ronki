@@ -8,7 +8,7 @@
  *   · 'synth' (CURRENT) — Web Audio oscillator graph synthesizes a
  *     cave-ambient pad in code. No asset file. Quality bar: a believable
  *     ambient drone, not a composed track. Used as a placeholder until
- *     Marc picks a real mp3 (see docs/voice-music-engine.md sourcing
+ *     Marc picks a real mp3 (see docs/voice/voice-music-engine.md sourcing
  *     section). Loops infinitely while the audio context is alive.
  *   · 'file' (FUTURE) — plays public/audio/music/<id>.mp3 via an
  *     <audio loop> element. Activated by setSource(path). Same duck

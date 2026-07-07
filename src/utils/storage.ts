@@ -153,7 +153,7 @@ const storage = {
   // profile. RLS allows anon SELECT/INSERT/UPDATE filtered by token
   // shape; security relies on token entropy (128 bits, unguessable).
   // See migrations create_profiles_table_for_qr_auth +
-  // harden_profiles_function_and_rls + docs/qr-profile-auth.md.
+  // harden_profiles_function_and_rls + docs/specs/qr-profile-auth.md.
   async cloudLoadByToken(token: string): Promise<GameState | null> {
     if (!token || !/^[a-f0-9]{32}$/.test(token)) return null;
     try {

@@ -26,7 +26,7 @@ import MoodChibi from '../MoodChibi';
  * Voice + lines align with the BeiRonkiSein bar (soft, hedge-y,
  * no em-dashes, kid-readable). ElevenLabs audio shipped 2026-04-27
  * (Eleonore for Drachenmutter — German-native tender guide; Harry for
- * Ronki) — see docs/ronki-voicelines.md narrator_meet_* + de_meet_*.
+ * Ronki) — see docs/voice/ronki-voicelines.md narrator_meet_* + de_meet_*.
  *
  * Based on: docs/design-incoming/meet-tonight/project/src/hifi-meet.jsx
  */
@@ -69,7 +69,7 @@ export default function MeetRonki({ onComplete }) {
   // stops the audio if phase shifts mid-playback. Symmetric structure
   // (every branch returns a cleanup) keeps the contract obvious for
   // future-you. Audio files: narrator_meet_* (Drachenmutter, Charlotte)
-  // and de_meet_*_01 (Ronki, Harry) — see docs/ronki-voicelines.md.
+  // and de_meet_*_01 (Ronki, Harry) — see docs/voice/ronki-voicelines.md.
   useEffect(() => {
     if (phase === 'approach') {
       // Pre-hatch: silent, on-screen text only. Ronki can't speak yet.
@@ -105,7 +105,7 @@ export default function MeetRonki({ onComplete }) {
     if (phase === 'close') {
       // Was Drachenmutter narrator_meet_close ("Er bleibt hier...");
       // now Ronki saying his own goodbye. Voice file de_meet_close_01
-      // is queued in docs/ronki-voicelines.md for the next gen pass —
+      // is queued in docs/voice/ronki-voicelines.md for the next gen pass —
       // until that lands, playLocalized fails silently and the on-
       // screen "Bis morgen. Versprochen." text carries the moment.
       VoiceAudio.playLocalized('meet_close_01', 600);
