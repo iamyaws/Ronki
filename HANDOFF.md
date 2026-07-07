@@ -1,4 +1,4 @@
-# Ronki — HANDOFF
+# Ronki HANDOFF
 
 _Single source of truth: done, in flight, backlog. Update before any /compact and at session end. Created 7 July 2026._
 
