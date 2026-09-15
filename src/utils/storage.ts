@@ -235,6 +235,17 @@ const storage = {
     ]);
 
     if (cloud && local) {
+      // A card created on the website arrives as a cloud seed with the
+      // parent's name, PIN and parentOnboardingDone, but without lastDate.
+      // The app has usually booted once before the scan and saved a
+      // pristine local state dated today. Without this guard that empty
+      // local state wins on date and overwrites the parent's seed.
+      const localPristine = !(local as any).onboardingDone && !(local as any).parentOnboardingDone;
+      const cloudFurther = !!(cloud as any).onboardingDone || !!(cloud as any).parentOnboardingDone;
+      if (localPristine && cloudFurther) {
+        this.save(cloud);
+        return cloud;
+      }
       const cloudDate = (cloud as any).lastDate || '';
       const localDate = (local as any).lastDate || '';
       if (localDate > cloudDate) {

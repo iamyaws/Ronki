@@ -958,6 +958,12 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
             ? await storage.syncLoad(user.id)
             : await storage.load()
         ) as (GameState & TaskState) | null;
+        // A website card seed carries the parent's setup but no quests.
+        // Give it today's quests so it takes the normal rehydration path
+        // below instead of being treated as a fresh start and overwritten.
+        if (raw && !raw.quests && (raw as any).parentOnboardingDone) {
+          raw = { ...raw, quests: buildDay(false) } as GameState & TaskState;
+        }
       } catch (err) {
         // eslint-disable-next-line no-console
         console.warn('[storage] load failed, booting fresh:', err);
@@ -1418,7 +1424,7 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
       bossDmgToday: 0,
       gamesPlayedToday: [],
       // Day transition: refill stamina to the parent-configured max.
-      ronkiStamina: prev.minigameStaminaMax ?? 10,
+      ronkiStamina: s.minigameStaminaMax ?? 10,
       ronkiStaminaUpdatedAt: new Date().toISOString(),
       dreamHighlights,
       bossKilledToday: false,

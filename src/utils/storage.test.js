@@ -141,3 +141,76 @@ describe('storage cloud sync by token', () => {
     await expect(storage.cloudSaveByToken(TOKEN, { hero: {} })).resolves.toBeUndefined();
   });
 });
+
+// A card made on the website is a cloud seed: parent name, PIN and
+// parentOnboardingDone, no quests, no lastDate. The kid's tablet has usually
+// booted the app once before scanning, so a pristine local state dated today
+// already exists. These tests pin that the seed survives that first scan.
+describe('storage syncLoadByToken with a website card seed', () => {
+  const TOKEN = 'b84f0a5000841a92696787c969bcfab7';
+  const seed = {
+    parentOnboardingDone: true,
+    parentHandoffBackSeen: true,
+    parentPin: null,
+    parentPinIsDefault: true,
+    analyticsEnabled: false,
+    familyConfig: { childName: 'Testkind', siblings: [] },
+    kidIntroSeen: false,
+    onboardingDone: false,
+  };
+
+  beforeEach(async () => {
+    // syncLoadByToken caches the winning state with a save() it does not
+    // await. Let that write land first, then start from empty stores, so
+    // one test's cache write cannot leak into the next test's local state.
+    await new Promise((resolve) => setTimeout(resolve, 25));
+    Object.keys(mockStore).forEach((k) => delete mockStore[k]);
+    localStorage.clear();
+    rpcMock.mockReset();
+  });
+
+  it('lets the parent seed win over a pristine local state dated today', async () => {
+    mockStore['hdx2_drachennest'] = {
+      quests: [],
+      lastDate: '2026-09-15',
+      onboardingDone: false,
+      parentOnboardingDone: false,
+      familyConfig: { childName: '' },
+    };
+    rpcMock.mockImplementation((fn) =>
+      fn === 'profile_get'
+        ? Promise.resolve({ data: { state: seed, updated_at: '2026-09-15T08:00:00Z' }, error: null })
+        : Promise.resolve({ data: { updated_at: '2026-09-15T08:00:01Z' }, error: null }),
+    );
+
+    const result = await storage.syncLoadByToken(TOKEN);
+
+    expect(result.familyConfig.childName).toBe('Testkind');
+    expect(result.parentOnboardingDone).toBe(true);
+    expect(rpcMock).not.toHaveBeenCalledWith('profile_upsert', expect.anything());
+  });
+
+  it('still lets a played local profile win when it is newer than the cloud', async () => {
+    const local = {
+      quests: [],
+      lastDate: '2026-09-15',
+      onboardingDone: true,
+      parentOnboardingDone: true,
+      familyConfig: { childName: 'Louis' },
+    };
+    mockStore['hdx2_drachennest'] = local;
+    rpcMock.mockImplementation((fn) =>
+      fn === 'profile_get'
+        ? Promise.resolve({
+            data: { state: { ...seed, lastDate: '2026-09-10', onboardingDone: true }, updated_at: '2026-09-10T08:00:00Z' },
+            error: null,
+          })
+        : Promise.resolve({ data: { updated_at: '2026-09-15T08:00:01Z' }, error: null }),
+    );
+
+    const result = await storage.syncLoadByToken(TOKEN);
+
+    expect(result.familyConfig.childName).toBe('Louis');
+    expect(rpcMock).toHaveBeenCalledWith('profile_upsert', { p_token: TOKEN, p_state: local });
+  });
+});
