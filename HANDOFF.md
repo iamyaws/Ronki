@@ -4,6 +4,15 @@ _Single source of truth: done, in flight, backlog. Update before any /compact an
 
 ---
 
+## Where things stand (14 September 2026)
+
+Revival check done, nothing built. Full write-up (German): [docs/strategy/2026-09-14-wiederbelebungs-check.md](docs/strategy/2026-09-14-wiederbelebungs-check.md). Raw Search Console export: `docs/analytics/gsc-2026-09-14/`.
+
+- **Traffic:** Search Console, 13 Jun to 12 Sep 2026: 15 clicks, 1,403 impressions. /ratgeber/morgenroutine-grundschulkind ranks position 6.5 and takes 5 of the clicks. Impressions doubled after 8 Sep (Schulstart). More than half of all impressions are foreign typo searches landing on /en.
+- **Backend is gone:** Supabase project `jdpxfvqaoxmnyvlxikce` was paused around 25 May (inactivity) and permanently frozen around 23 Aug (mail of 18 Aug, unread). The host no longer resolves. Both live bundles embed it, so profile cards, QR login, cloud sync, waitlist and feedback forms have been dead since late May. Supabase still offers a data download; the project itself cannot be restored.
+- **Deploys:** website and app production both sit on commit `2fa8ab5` (3 May). The July docs commits live only on `experiment/drachennest`. v2 execution never started.
+- **Proposal (awaiting Marc):** 1) rebuild backend and redeploy (one evening), 2) instrument the funnel and add a home CTA to /profil-erstellen (one evening), 3) optional SEO push on the clusters Google already ranks, 4) decide after 30 days against a preset threshold (suggested: 10 outside families with a created card).
+
 ## Where things stand (7 July 2026)
 
 The repo folder is `C:\Users\öööö\ronki` (renamed from `louis-quest-drachennest` today; git history intact, all path references in code/scripts/docs updated). Working branch `experiment/drachennest`; it has been fast-forward-pushed to `main` several times. Docs are sorted, index at [docs/README.md](docs/README.md).
@@ -31,6 +40,7 @@ The repo folder is `C:\Users\öööö\ronki` (renamed from `louis-quest-drachenn
 
 ## Backlog (ordered)
 
+0. **Backend restore (blocks everything below, see the 14 Sep check).** Download data from the frozen Supabase project, create a new project, rebuild the schema (waitlist + both RPCs, site_feedback, profiles with token RLS, game_state, telemetry_events, feedback, app_evals + app_eval_counts view), set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in Vercel `ronki` and `ronki-app`, redeploy main, create one card end to end. Then funnel instrumentation: Plausible goals, profiles counter, home CTA to /profil-erstellen, sitemap entry.
 1. **Ferienmodus build** (PRD 11.5 says candidate to ship first; summer break is the forcing function). Needs: card board component, dashboard toggle + activity-pool editor, RonkisTag middle-block swap, Feuer wiring.
 2. **v2 Phase 1: fix the funnel.** Onboarding reorder (egg-first, name chips, camera fallback, close fix), 8 funnel events, opt-in timing fix, telemetry repairs (quest.complete on RonkisTag), section-7 cuts (Journal into Buch, Starfighter/CloudJump/TaskList deleted, dead economy fields dropped).
 3. **v2 Phase 2: the return engine.** Return beat, Feuer meter, expedition appointment timing, story pool 8 → 30 voiced, tomorrow's hook, Abenteuertage feeding evolution. Voice re-record rides here (open question 1).
@@ -48,5 +58,5 @@ Voice re-record scope, website analytics opt-in seeding, push notifications timi
 - PRD: `docs/prd/RONKI-V2-PRD.md`
 - Design brief: `docs/design-briefs/2026-07-07-v2-loop-and-onboarding.md`
 - Strategy: `docs/strategy/` (NORTHSTAR, PATH, synthesis)
-- Supabase project: `jdpxfvqaoxmnyvlxikce` (profiles table, token-keyed RLS); local env in `.env.local` (gitignored), website reads it via `envDir: '..'`
+- Supabase project: `jdpxfvqaoxmnyvlxikce` (FROZEN since about 23 Aug 2026, host no longer resolves, see the 14 Sep check; profiles table, token-keyed RLS); local env in `.env.local` (gitignored), website reads it via `envDir: '..'`
 - Dev servers: app `npx vite --port 5173`, website `npm run dev:web -- --port 5174` (both currently stopped after the folder rename)
