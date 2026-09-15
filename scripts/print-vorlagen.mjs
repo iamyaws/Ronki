@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Renders the three Vorlagen print routes to A4 PDFs in website/public/vorlagen/.
+ * Renders the four Vorlagen print routes to A4 PDFs in website/public/vorlagen/.
  *
  * Why headless Edge and not Playwright or Puppeteer: Edge ships with Windows,
  * prints to PDF from the command line and needs no install. Node 24, no deps.
@@ -33,6 +33,7 @@ const TEMPLATES = [
   { route: '/print/vorlage-morgen', file: 'morgenroutine.pdf' },
   { route: '/print/vorlage-abend', file: 'abendroutine.pdf' },
   { route: '/print/vorlage-kleine-geschwister', file: 'kleine-geschwister.pdf' },
+  { route: '/print/vorlage-adhs', file: 'adhs.pdf' },
 ];
 
 /* ------------------------------------------------------------------ */

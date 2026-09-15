@@ -35,6 +35,14 @@ export interface VorlagePrintTemplate {
   bigIcons?: boolean;
   /** Toddler sheets get no clock line. */
   showTimes?: boolean;
+  /** Tighter rows so five or six steps still fit one A4 page. */
+  compact?: boolean;
+  /** Strip on the left of every row where a clothespin or paper clip sits. */
+  clipLane?: boolean;
+  /** One line above the list explaining how the clip is used. */
+  nowMarker?: string;
+  /** Duration shown as a bar instead of clock times, so nothing runs against a clock. */
+  timeBar?: { start: string; end: string; note?: string };
   metaTitle: string;
   metaDescription: string;
 }
@@ -92,6 +100,42 @@ export const VORLAGE_PRINT_KLEINE_GESCHWISTER: VorlagePrintTemplate = {
     'Druckfertige A4-Vorlage nur mit Bildern, für 2- bis 4-jährige Geschwisterkinder.',
 };
 
+/**
+ * Sheet for kids with ADHS or weak executive functions.
+ *
+ * Deliberately different from the other three: six steps instead of four,
+ * one picture and one word per row, no clock line, no streak count. The
+ * clip lane on the left is where a clothespin marks the step that is
+ * running right now, so the sheet shows one step at a time instead of six.
+ */
+export const VORLAGE_PRINT_ADHS: VorlagePrintTemplate = {
+  eyebrow: 'Ein Schritt',
+  title: 'Mein Morgen',
+  description:
+    'Sechs Schritte, jeden Tag in derselben Reihenfolge. Ein Bild, ein Wort, keine Uhrzeit.',
+  accent: '#0369a1',
+  compact: true,
+  clipLane: true,
+  nowMarker:
+    'Klemm eine Wäscheklammer an den linken Rand. Sie zeigt, was jetzt dran ist, und wandert nach unten.',
+  timeBar: {
+    start: 'Aufstehen',
+    end: 'Tür',
+    note: 'So lang ist euer Morgen ungefähr. Ohne Uhrzeit, damit nichts gegen die Zeit läuft.',
+  },
+  steps: [
+    { icon: '💡', label: 'Licht' },
+    { icon: '🚽', label: 'Klo' },
+    { icon: '👕', label: 'Anziehen' },
+    { icon: '🥣', label: 'Frühstück' },
+    { icon: '🪥', label: 'Zähne' },
+    { icon: '🎒', label: 'Ranzen' },
+  ],
+  metaTitle: 'Morgenroutine bei ADHS: Vorlage zum Ausdrucken (A4)',
+  metaDescription:
+    'Druckfertige A4-Vorlage für Kinder mit ADHS oder schwachen Exekutivfunktionen: sechs Schritte, ein Bild pro Schritt, Klammer statt Uhr.',
+};
+
 /* ------------------------------------------------------------------ */
 /* Page                                                                */
 /* ------------------------------------------------------------------ */
@@ -112,9 +156,21 @@ export function VorlagePrint({ template }: { template: VorlagePrintTemplate }) {
     steps,
     bigIcons,
     showTimes,
+    compact,
+    clipLane,
+    nowMarker,
+    timeBar,
     metaTitle,
     metaDescription,
   } = template;
+
+  const sheetClass = [
+    'vp-sheet',
+    bigIcons ? 'vp-sheet-big' : '',
+    compact ? 'vp-sheet-compact' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   return (
     <div className="vp-root" style={{ '--vp-accent': accent } as React.CSSProperties}>
@@ -128,7 +184,7 @@ export function VorlagePrint({ template }: { template: VorlagePrintTemplate }) {
         </button>
       </div>
 
-      <section className={`vp-sheet${bigIcons ? ' vp-sheet-big' : ''}`}>
+      <section className={sheetClass}>
         <header className="vp-head">
           <div className="vp-eyebrow-row">
             <span className="vp-eyebrow">{eyebrow}</span>
@@ -142,9 +198,12 @@ export function VorlagePrint({ template }: { template: VorlagePrintTemplate }) {
           Das ist der Plan von <span className="vp-name-line" aria-hidden />
         </p>
 
+        {nowMarker && <p className="vp-now">{nowMarker}</p>}
+
         <ol className="vp-steps">
           {steps.map((step, i) => (
             <li className="vp-step" key={i}>
+              {clipLane && <span className="vp-clip" aria-hidden />}
               <span className="vp-num" aria-hidden>
                 {i + 1}
               </span>
@@ -164,6 +223,17 @@ export function VorlagePrint({ template }: { template: VorlagePrintTemplate }) {
             </li>
           ))}
         </ol>
+
+        {timeBar && (
+          <div className="vp-timebar">
+            <div className="vp-timebar-row">
+              <span className="vp-timebar-label">{timeBar.start}</span>
+              <span className="vp-timebar-track" aria-hidden />
+              <span className="vp-timebar-label">{timeBar.end}</span>
+            </div>
+            {timeBar.note && <p className="vp-timebar-note">{timeBar.note}</p>}
+          </div>
+        )}
 
         <footer className="vp-foot">
           <span>Ronki hilft beim Dranbleiben. Streaks gibt es hier nicht.</span>
@@ -376,6 +446,75 @@ const sheetCss = `
     border: 1mm solid var(--vp-accent);
     border-radius: 3mm;
     background: #ffffff;
+  }
+
+  /* Now-marker line -------------------------------------------------- */
+  .vp-now {
+    display: flex;
+    align-items: center;
+    gap: 3mm;
+    margin: 0 0 5mm;
+    padding: 3mm 4mm;
+    border: 0.5mm dashed var(--vp-accent);
+    border-radius: 3mm;
+    font-size: 9.5pt;
+    line-height: 1.35;
+    color: rgba(26,60,63,0.75);
+  }
+
+  /* Clip lane --------------------------------------------------------- */
+  .vp-clip {
+    width: 5mm;
+    align-self: stretch;
+    flex-shrink: 0;
+    margin: -3mm 0 -3mm -3mm;
+    border-right: 0.4mm dashed rgba(26,60,63,0.28);
+    border-radius: 3mm 0 0 3mm;
+    background: var(--vp-accent);
+    opacity: 0.12;
+  }
+
+  /* Compact variant: five or six steps on one page -------------------- */
+  .vp-sheet-compact .vp-title { font-size: 25pt; }
+  .vp-sheet-compact .vp-desc { font-size: 10.5pt; }
+  .vp-sheet-compact .vp-name { margin: 6mm 0 4mm; font-size: 11pt; }
+  .vp-sheet-compact .vp-name-line { height: 5mm; }
+  .vp-sheet-compact .vp-steps { gap: 3.5mm; }
+  .vp-sheet-compact .vp-step {
+    min-height: 27mm;
+    padding: 3mm 5mm;
+    gap: 4mm;
+  }
+  .vp-sheet-compact .vp-icon { font-size: 15mm; width: 20mm; }
+  .vp-sheet-compact .vp-label { font-size: 17pt; }
+  .vp-sheet-compact .vp-check { width: 16mm; height: 16mm; border-width: 0.8mm; }
+
+  /* Time bar ---------------------------------------------------------- */
+  .vp-timebar { margin-top: 7mm; }
+  .vp-timebar-row {
+    display: flex;
+    align-items: center;
+    gap: 4mm;
+  }
+  .vp-timebar-label {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-weight: 700;
+    font-size: 9pt;
+    color: var(--vp-accent);
+    white-space: nowrap;
+  }
+  .vp-timebar-track {
+    flex: 1;
+    height: 4mm;
+    border-radius: 999px;
+    background: var(--vp-accent);
+    opacity: 0.22;
+  }
+  .vp-timebar-note {
+    margin: 2.5mm 0 0;
+    font-size: 8.5pt;
+    line-height: 1.35;
+    color: rgba(26,60,63,0.5);
   }
 
   /* Toddler variant -------------------------------------------------- */

@@ -102,4 +102,13 @@ export const ARTICLES: Article[] = [
     readMinutes: 5,
     image: '/art/bioms/Sonnenglast_sun-highlands.webp',
   },
+  {
+    slug: 'morgenroutine-adhs',
+    title: 'Morgenroutine bei ADHS: was Kindern mit schwachen Exekutivfunktionen wirklich hilft',
+    description:
+      'Morgenroutine ADHS: warum das Anfangen die eigentliche Arbeit ist, was bei schwachen Exekutivfunktionen hilft und wie ein Plan aus Bildern aussieht.',
+    category: 'Morgenroutine',
+    readMinutes: 9,
+    image: '/art/bioms/Sonnenglast_sun-highlands.webp',
+  },
 ];

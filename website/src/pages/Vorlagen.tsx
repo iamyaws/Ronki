@@ -46,6 +46,16 @@ const VORLAGEN: Vorlage[] = [
     accent: '#50a082',
     accentLight: 'rgba(80,160,130,0.12)',
   },
+  {
+    slug: 'adhs',
+    title: 'Mein Morgen, ein Schritt nach dem anderen',
+    subtitle: 'Bei ADHS oder schwachen Exekutivfunktionen',
+    description:
+      'Sechs Schritte, ein Bild und ein Wort pro Schritt. Eine Wäscheklammer wandert am Rand nach unten und zeigt, was jetzt dran ist. Keine Uhr, kein Punktestand.',
+    ages: '5–9 Jahre',
+    accent: '#0369a1',
+    accentLight: 'rgba(3,105,161,0.12)',
+  },
 ];
 
 export default function Vorlagen() {
@@ -78,14 +88,14 @@ export default function Vorlagen() {
               <em className="italic text-sage whitespace-nowrap">Kühlschrank</em>.
             </h1>
             <p className="mt-6 text-base sm:text-lg text-ink/75 max-w-2xl leading-relaxed">
-              Bevor Ronki auf dem Handy läuft, hilft ein Blatt Papier am Kühlschrank schon sehr viel. Drei kostenlose Vorlagen, direkt aus dem Browser druckbar. Ohne Anmeldung. Ohne Werbung.
+              Bevor Ronki auf dem Handy läuft, hilft ein Blatt Papier am Kühlschrank schon sehr viel. Vier kostenlose Vorlagen, direkt aus dem Browser druckbar. Ohne Anmeldung. Ohne Werbung.
             </p>
           </motion.div>
         </div>
       </section>
 
       <section className="px-6 pb-24 sm:pb-28">
-        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
           {VORLAGEN.map((v, i) => (
             <motion.article
               key={v.slug}

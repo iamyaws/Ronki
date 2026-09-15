@@ -54,7 +54,7 @@ const ROUTES: RouteMeta[] = [
     path: '/vorlagen',
     title: 'Vorlagen zum Ausdrucken: Ronki',
     description:
-      'Druckbare Routinen-Vorlagen für Kinder. Morgenroutine, Abendroutine und eine einfache Version für kleine Geschwister. Zum Ausmalen, kostenlos, ohne Anmeldung.',
+      'Druckbare Routinen-Vorlagen für Kinder. Morgenroutine, Abendroutine, eine einfache Version für kleine Geschwister und ein Plan aus Bildern bei ADHS. Kostenlos, ohne Anmeldung.',
   },
   {
     path: '/ratgeber',
@@ -90,6 +90,18 @@ const ROUTES: RouteMeta[] = [
     description:
       'Eine Morgenroutine, die ein Grundschulkind selbst ausführen kann. Reihenfolge, Zeitplan, typische Stolpersteine und warum deine Routine vielleicht am falschen Ende anfängt.',
     ogImage: '/og-ratgeber-morgenroutine.jpg',
+  },
+  {
+    path: '/ratgeber/morgenroutine-adhs',
+    title: 'Morgenroutine bei ADHS: was Kindern mit schwachen Exekutivfunktionen wirklich hilft · Ratgeber · Ronki',
+    description:
+      'Morgenroutine ADHS: warum das Anfangen die eigentliche Arbeit ist, was bei schwachen Exekutivfunktionen hilft und wie ein Plan aus Bildern aussieht.',
+  },
+  {
+    path: '/vorlagen/adhs',
+    title: 'Mein Morgen, ein Schritt nach dem anderen: Vorlage bei ADHS · Ronki',
+    description:
+      'Druckbarer Morgenplan für Kinder mit ADHS oder schwachen Exekutivfunktionen. Sechs Schritte, ein Bild pro Schritt, eine Klammer zeigt, was jetzt dran ist. Kostenlos, ohne Anmeldung.',
   },
   {
     path: '/ratgeber/abendroutine-grundschulkind',

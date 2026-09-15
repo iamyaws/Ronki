@@ -15,6 +15,7 @@ const MitMachen = lazy(() => import('./pages/MitMachen'));
 const VorlageMorgen = lazy(() => import('./pages/VorlageMorgen'));
 const VorlageAbend = lazy(() => import('./pages/VorlageAbend'));
 const VorlageKleineGeschwister = lazy(() => import('./pages/VorlageKleineGeschwister'));
+const VorlageAdhs = lazy(() => import('./pages/VorlageAdhs'));
 const HomeEN = lazy(() => import('./pages/HomeEN'));
 const Installieren = lazy(() => import('./pages/Installieren'));
 const ProfilErstellen = lazy(() => import('./pages/ProfilErstellen'));
@@ -44,6 +45,7 @@ const PrintA4PosterAntiEngagement = lazy(() => import('./pages/PrintA4PosterAnti
 const VorlagePrintMorgen = lazy(() => import('./pages/print/VorlagePrintMorgen'));
 const VorlagePrintAbend = lazy(() => import('./pages/print/VorlagePrintAbend'));
 const VorlagePrintKleineGeschwister = lazy(() => import('./pages/print/VorlagePrintKleineGeschwister'));
+const VorlagePrintAdhs = lazy(() => import('./pages/print/VorlagePrintAdhs'));
 const RatgeberWasKinderAppsMachen = lazy(() => import('./pages/ratgeber/WasKinderAppsMachen'));
 const RatgeberMorgenTroedeln = lazy(() => import('./pages/ratgeber/MorgenTroedeln'));
 const RatgeberStickerChartAlternative = lazy(() => import('./pages/ratgeber/StickerChartAlternative'));
@@ -53,6 +55,7 @@ const RatgeberZaehneputzenOhneStreit = lazy(() => import('./pages/ratgeber/Zaehn
 const RatgeberEinschulungSelbststaendigkeit = lazy(() => import('./pages/ratgeber/EinschulungSelbststaendigkeit'));
 const RatgeberMorgenroutineGrundschulkind = lazy(() => import('./pages/ratgeber/MorgenroutineGrundschulkind'));
 const RatgeberElternBereich = lazy(() => import('./pages/ratgeber/ElternBereich'));
+const RatgeberMorgenroutineAdhs = lazy(() => import('./pages/ratgeber/MorgenroutineAdhs'));
 const Impressum = lazy(() => import('./pages/Impressum'));
 const Datenschutz = lazy(() => import('./pages/Datenschutz'));
 const AGB = lazy(() => import('./pages/AGB'));
@@ -81,6 +84,7 @@ export function AppRoutes() {
         <Route path="/vorlagen/morgenroutine" element={<VorlageMorgen />} />
         <Route path="/vorlagen/abendroutine" element={<VorlageAbend />} />
         <Route path="/vorlagen/kleine-geschwister" element={<VorlageKleineGeschwister />} />
+        <Route path="/vorlagen/adhs" element={<VorlageAdhs />} />
         <Route path="/installieren" element={<Installieren />} />
         <Route path="/profil-erstellen" element={<ProfilErstellen />} />
         <Route path="/print/a6-flyer" element={<PrintA6Flyer />} />
@@ -101,6 +105,7 @@ export function AppRoutes() {
         <Route path="/print/vorlage-morgen" element={<VorlagePrintMorgen />} />
         <Route path="/print/vorlage-abend" element={<VorlagePrintAbend />} />
         <Route path="/print/vorlage-kleine-geschwister" element={<VorlagePrintKleineGeschwister />} />
+        <Route path="/print/vorlage-adhs" element={<VorlagePrintAdhs />} />
         <Route path="/tools" element={<ToolsHub />} />
         <Route path="/tools/app-check" element={<AppCheck />} />
         <Route path="/tools/app-check/r/:id" element={<AppCheckResult />} />
@@ -117,6 +122,7 @@ export function AppRoutes() {
         <Route path="/ratgeber/einschulung-selbststaendigkeit" element={<RatgeberEinschulungSelbststaendigkeit />} />
         <Route path="/ratgeber/morgenroutine-grundschulkind" element={<RatgeberMorgenroutineGrundschulkind />} />
         <Route path="/ratgeber/eltern-bereich" element={<RatgeberElternBereich />} />
+        <Route path="/ratgeber/morgenroutine-adhs" element={<RatgeberMorgenroutineAdhs />} />
         <Route path="/en" element={<HomeEN />} />
         <Route path="/impressum" element={<Impressum />} />
         <Route path="/datenschutz" element={<Datenschutz />} />

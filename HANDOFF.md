@@ -24,7 +24,7 @@ Full text with the queries: PRD section 12 ([docs/prd/RONKI-V2-PRD.md](docs/prd/
 Everything below is built, tested and pushed on branch `revival/2026-09-15`, draft PR https://github.com/iamyaws/Ronki/pull/12. Nothing is live yet. Order matters: SQL first, then merge.
 
 1. **Supabase SQL editor** (project jdpxfvqaoxmnyvlxikce): paste `supabase/apply-2026-09-15.sql` and run it. It adds `leads`, `profile_activity`, the profile RPCs and locks the `profiles` table (anon can currently list all profiles; after this only the RPCs work). Safe to run twice. Then `node scripts/supabase-smoke.mjs` must show every row OK. About 3 minutes.
-2. **Read** the two rewritten articles (Abendroutine, Trödeln) on the preview URL or in the PR. 10 minutes.
+2. **Read** the two rewritten articles (Abendroutine, Trödeln) and the new ADHS article on the preview URL or in the PR. 15 minutes.
 3. **Merge PR 12** into main. Vercel deploys ronki.de and app.ronki.de. Then check: https://www.ronki.de/ shows the card CTA, https://www.ronki.de/profil-erstellen creates a card, the card loads in https://app.ronki.de/?p=<token>, https://www.ronki.de/vorlagen/morgenroutine offers the PDF.
 4. **Plausible**: create goals "CTA Klick", "Karte erstellt", "Vorlage Download" (custom events). 2 minutes.
 5. **GitHub Actions**: run the "Supabase keep-alive" workflow once by hand (Actions tab, workflow_dispatch) to confirm the secrets still work. It then runs every Monday 06:17 UTC.
@@ -47,13 +47,13 @@ Commit `54ec438`. Five Opus 5 build agents plus one review lane, orchestrated by
 - **Activity is measured per card and day** in `profile_activity` (written by `profile_upsert`), no personal data. This is what Gate 1 reads.
 - **Lead magnet is a convenience, not a toll.** The template pages stay printable without an email; the gate says so in plain words. No double opt-in yet because no mail provider exists; the policy states that no update mails go out until one does.
 - **Card first, app second** on every CTA, because the app is a kid space that only scans.
-- **A5 (ADHS article and template) was cut** per the plan's budget rule. The brief is ready in the plan file; it is the first follow-up and goes into its own PR after Marc reads it.
+- **A5 (ADHS article and template) was cut** per the plan's budget rule, then added on Marc's go the same morning (commit 4): article `/ratgeber/morgenroutine-adhs`, template `/vorlagen/adhs` with `adhs.pdf` (clip lane, no clock), five verified sources, 220k tokens.
 - **No merge, no SQL applied to the live project overnight**, because the new bundle needs the RPCs and the old bundle needs the old policies; the two must switch together, so Marc does SQL then merge in the morning.
 - **Not verified**: the mobile hero animation in the test browser (paused-tab artifact, markup and desktop render are fine); one real phone check is still worth a minute. The in-app parent setup ("Drei kleine Sachen") still appears after scanning a fresh card and does not prefill the name from the card. Pre-existing, belongs to v2 Phase 1.
 
 ## Follow-ups (ordered)
 
-1. ADHS/Exekutivfunktion article plus template variant (A5 brief in the plan file), own PR, Marc reads before merge.
+1. Screen preview and PDF of the ADHS template differ slightly (the PDF carries the clip lane and time bar); rendering `VorlagePrint` inside the preview frame would unify them.
 2. Double opt-in and update mails once a mail provider is chosen.
 3. `updatedAt` support in `RatgeberArticle` (visible "aktualisiert am" plus `dateModified` in the schema) for the two rewritten articles.
 4. Prefill the kid's name in the in-app setup from the card seed (v2 Phase 1 territory).
