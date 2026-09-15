@@ -11,10 +11,10 @@ export default function RatgeberAbendroutineGrundschulkind() {
   return (
     <RatgeberArticle
       slug="abendroutine-grundschulkind"
-      title="Die Abendroutine für Grundschulkinder: ruhiger runterkommen, besser schlafen"
-      description="Abendroutine für 6- bis 8-Jährige: Warum 45 Minuten reichen, welche Reihenfolge wirklich Schlaf bringt, und wie du aus dem Zähneputz-Drama rauskommst."
+      title="Abendroutine für Kinder: der Ablauf, der bei 5- bis 8-Jährigen wirklich trägt"
+      description="Abendroutine für Kinder von 5 bis 8: warum 45 Minuten reichen, welche Reihenfolge trägt und wie die Abendroutine Kinder ruhiger ins Bett bringt."
       category="Abendroutine"
-      readMinutes={9}
+      readMinutes={10}
       publishedAt="2026-04-19"
       ogImage="/og-ratgeber-abendroutine.jpg"
       heroImage="/art/bioms/Sternenmeer_sea-of-stars.webp"
@@ -25,201 +25,214 @@ export default function RatgeberAbendroutineGrundschulkind() {
           title: 'Die Morgenroutine, die wirklich klappt: was für 6- bis 8-Jährige funktioniert',
         },
         {
-          slug: 'zaehneputzen-ohne-streit',
-          title: 'Zähneputzen ohne Streit: was bei 5- bis 8-Jährigen wirklich hilft',
+          slug: 'morgen-troedeln',
+          title: 'Kind trödelt morgens? Warum das normal ist und was wirklich hilft',
         },
         {
-          slug: 'morgen-troedeln',
-          title: 'Warum dein Kind morgens trödelt (und warum das kein Erziehungsproblem ist)',
+          slug: 'zaehneputzen-ohne-streit',
+          title: 'Zähneputzen ohne Streit: was bei 5- bis 8-Jährigen wirklich hilft',
         },
       ]}
     >
       <p className="lead">
         Es ist 19:52 Uhr. Du wolltest um 20 Uhr Licht aus. Dein Kind steht im
         Wohnzimmer, hat noch den Pulli an, den es um 15 Uhr aus der Schule
-        mitgebracht hat, und ist gerade sehr beschäftigt damit, dem
-        Plüschdrachen einen Monolog zu halten.
+        mitgebracht hat, und hält dem Plüschdrachen einen Monolog. Von
+        Zähneputzen ist keine Rede. Wenn du diesen Abend kennst, bist du hier
+        richtig. Es geht um eine Abendroutine für Kinder, die auch dann noch
+        trägt, wenn alle müde sind.
       </p>
 
       <p>
-        Von Zähneputzen ist noch keine Rede.
+        Der Morgen ist fast immer die Folge des Abends, nicht andersrum. Wenn
+        die Abende ruhiger werden, fallen dir die Morgen oft halb von selbst in
+        den Schoß. Nur muss eine Abendroutine Kinder genau dann durch vier bis
+        sechs Schritte bringen, wenn im ganzen Haus niemand mehr Kraft hat. Sie
+        ist deshalb kurz, sie ist jeden Tag gleich, und sie sieht für
+        Abendroutine Kleinkind und Schulkind ein bisschen unterschiedlich aus.
+        Beides steht weiter unten.
       </p>
 
       <p>
-        Wenn du den Satz kennst, lies weiter. Die gute Nachricht ist: der
-        Morgen ist fast immer die Folge des Abends, nicht andersrum. Das heißt,
-        wenn du die Abende entspannter hinkriegst, fallen dir die Morgen
-        oft halb von selbst in den Schoß. Die schlechte Nachricht ist: abends
-        sind alle kaputt. Du auch. Ich auch. Das ist der Kontext, in dem das
-        Ganze stattfinden muss.
+        Was hier kommt: warum der Abend mehr entscheidet als der Morgen, die
+        fünf Fallen, die den Abend am zuverlässigsten ruinieren, unser Ablauf
+        von 18 Uhr bis Licht aus, die Variante für Drei- bis Fünfjährige und
+        das, was hilft, wenn dein Kind einfach nicht einschlafen kann.
       </p>
 
-      <h2>Warum der Abend eigentlich wichtiger ist als der Morgen</h2>
+      <h2>Warum der Abend mehr entscheidet als der Morgen</h2>
 
       <Callout type="forschung">
         <p>
-          Grundschulkinder zwischen sechs und neun brauchen ungefähr zehn bis
-          elf Stunden Schlaf pro Nacht. Das empfehlen die Deutsche Gesellschaft
-          für Kinder- und Jugendmedizin und die Deutsche Gesellschaft für
-          Schlafforschung ziemlich einhellig. Wenn das Kind um 6:30 Uhr aufstehen
-          soll, muss es ungefähr um 20 Uhr schlafen. Nicht im Bett liegen.
-          Schlafen.
+          Die amerikanische Schlafmedizin-Fachgesellschaft AASM empfiehlt für
+          Kinder von 6 bis 12 Jahren 9 bis 12 Stunden Schlaf pro Nacht. Die
+          deutsche Elterninformation kindergesundheit-info nennt für Schulkinder
+          etwa elf Stunden und hält Abweichungen von bis zu zwei Stunden für
+          normal.
         </p>
         <p>
-          Zwischen ins-Bett-gehen und tatsächlich-einschlafen liegen bei den
-          meisten Kindern 15 bis 30 Minuten. Das heißt Licht aus spätestens
-          19:45 Uhr, damit die biologische Rechnung aufgeht. Und damit fängt
-          die ganze Planung rückwärts an.
+          Rechne das einmal rückwärts. Wenn dein Kind um 6:30 Uhr raus muss und
+          zehn Stunden schlafen soll, muss es gegen 20:30 Uhr schlafen. Nicht im
+          Bett liegen. Schlafen. Zwischen Hinlegen und Einschlafen liegen bei
+          vielen Kindern noch 15 bis 30 Minuten. Also Licht aus um 20 Uhr, und
+          damit fängt der ganze Abend deutlich früher an, als die meisten
+          denken.
         </p>
       </Callout>
 
       <p>
-        Dahinter steckt ein bisschen simple Biologie. Melatonin, das Hormon,
-        das uns schläfrig macht, wird ab dem späten Nachmittag ausgeschüttet.
-        Blaulicht aus Bildschirmen und grelles Deckenlicht bremsen diese
-        Ausschüttung. Gleichzeitig muss die Körpertemperatur leicht sinken,
-        damit das Einschlafen funktioniert. Ein aufgedrehtes, heißgelaufenes
-        Kind schläft nicht einfach so ein, weil du das Licht ausmachst. Sein
-        Körper ist einfach noch nicht so weit.
+        Dahinter steckt simple Biologie. Melatonin, das Hormon, das müde macht,
+        wird ab dem späten Nachmittag ausgeschüttet. Helles Licht bremst das.
+        Und Kinderaugen sind dafür empfindlicher, als man denkt: in einer
+        kleinen Studie aus Colorado senkte eine Stunde helles Licht vor dem
+        Zubettgehen den Melatoninspiegel von Drei- bis Fünfjährigen um rund 88
+        Prozent, und er blieb auch nach dem Ausschalten noch fast eine
+        Dreiviertelstunde unten.
       </p>
 
       <p>
-        Das ist keine Wissenschafts-Vorlesung, sondern der Grund, warum so
-        viele Abendroutinen scheitern: sie ignorieren den Körper und setzen
-        darauf, dass Willenskraft den Rest regelt. Tut sie nicht.
+        Gleichzeitig muss die Körpertemperatur leicht sinken, damit Einschlafen
+        überhaupt geht. Ein aufgedrehtes, heißgelaufenes Kind schläft nicht ein,
+        nur weil du das Licht ausmachst. Sein Körper ist noch nicht so weit.
+        Genau daran scheitern die meisten Abendroutinen: sie ignorieren den
+        Körper und hoffen, dass Willenskraft den Rest regelt. Tut sie nicht.
       </p>
 
-      <h2>Die fünf klassischen Fallen</h2>
+      <h2>Die fünf Fallen, die jede Abendroutine für Kinder kippen</h2>
 
       <p>
-        Bevor ich zur Lösung komme, die Sachen, die den Abend am zuverlässigsten
-        ruinieren. Du erkennst wahrscheinlich mindestens drei davon wieder.
+        Bevor es zum Ablauf geht, die Sachen, die den Abend am sichersten
+        ruinieren. Du erkennst wahrscheinlich mindestens drei wieder.
       </p>
 
       <Callout type="achtung" label="Abend-Killer">
         <ul>
           <li>
-            <strong>Zu spät mit der Routine anfangen.</strong> Der häufigste
-            Fehler. Um 19:30 Uhr denkt man <em>ach wir haben noch Zeit</em>,
-            und zwanzig Minuten später fängt die Hetzerei an. Ab 19:45 Uhr
-            müsstest du eigentlich aus dem Bad kommen, nicht erst reingehen.
-            Der Puffer, den du früher am Abend einplanst, ist der einzige,
-            den du am Ende wirklich hast.
+            <strong>Zu spät anfangen.</strong> Der häufigste Fehler. Um 19:30
+            Uhr denkt man <em>ach, wir haben noch Zeit</em>, zwanzig Minuten
+            später fängt die Hetzerei an. Der Puffer, den du früher am Abend
+            einplanst, ist der einzige, den du am Ende wirklich hast.
           </li>
           <li>
-            <strong>Bildschirmzeit bis kurz vor dem Schlafen.</strong> Eine
-            Folge der Lieblingsserie um 19:40 Uhr, und das Kind ist danach
-            heller wach als davor. Das ist nicht nur der Inhalt, das ist auch
-            das Licht. Faustregel: eine Stunde vor dem Schlafen keine
-            Bildschirme mehr, wenn es irgendwie geht. Wenn es nicht geht,
-            wenigstens keine Action und keine schrillen Farben.
+            <strong>Bildschirm bis kurz vor dem Schlafen.</strong> Eine Folge
+            der Lieblingsserie um 19:40 Uhr, und das Kind ist danach wacher als
+            davor. Das ist der Inhalt und das Licht zusammen. Faustregel: eine
+            Stunde vorher Schluss. Wenn das nicht geht, wenigstens nichts
+            Lautes und nichts Grelles.
           </li>
           <li>
-            <strong>Grelle Deckenlampen bis zum Schluss.</strong> Die meisten
-            Wohnungen sind abends beleuchtet wie ein OP. Dabei ist das eine
-            der einfachsten Stellschrauben überhaupt: eine kleine warme
-            Tischlampe im Kinderzimmer, Deckenlicht aus, und die biologische
-            Rechnung stimmt schon besser. Nicht dramatisch, aber messbar.
+            <strong>Deckenlampen bis zum Schluss.</strong> Die meisten
+            Wohnungen sind abends beleuchtet wie ein OP. Eine kleine warme
+            Lampe im Kinderzimmer, Deckenlicht aus, und die biologische
+            Rechnung stimmt schon besser. Das ist die billigste Stellschraube
+            im ganzen Artikel.
           </li>
           <li>
-            <strong>Zu viele Reize gleichzeitig.</strong> Geschwister, die
-            noch durch die Wohnung toben. Das Lego-Chaos im Kinderzimmer.
-            Musik aus dem Nebenraum. Ein eingeschalteter Fernseher im
-            Hintergrund. Für ein Kind, das gerade runterfahren soll, ist das
-            zu viel Input. Die Abendroutine braucht eine Art sensorische
-            Bremsspur.
+            <strong>Zu viele Reize gleichzeitig.</strong> Geschwister, die noch
+            toben. Das Lego-Chaos im Zimmer. Musik aus dem Nebenraum. Für ein
+            Kind, das runterfahren soll, ist das zu viel Input auf einmal.
           </li>
           <li>
             <strong>Unklare Reihenfolge.</strong>{' '}
-            <em>Machst du erst Zähne oder erst Pyjama? Baden wir heute? Liest
-            Papa vor oder Mama?</em> Jede dieser Fragen ist eine Entscheidung,
-            die abends mental Geld kostet, das niemand mehr auf dem Konto hat.
-            Wenn die Reihenfolge jeden Tag anders ist, wird sie jeden Tag
-            verhandelt. Und Verhandlungen mit müden Kindern laufen bekanntlich
-            schlecht.
+            <em>Erst Zähne oder erst Pyjama? Baden wir heute? Liest Papa vor
+            oder Mama?</em> Jede dieser Fragen ist eine Entscheidung, und abends
+            hat niemand mehr Geld auf dem Entscheidungskonto. Was jeden Tag
+            anders ist, wird jeden Tag verhandelt.
           </li>
         </ul>
       </Callout>
 
-      <h2>Die Routine, die bei uns funktioniert</h2>
+      <h2>Der Ablauf, der bei uns trägt</h2>
 
       <p>
-        45 Minuten reichen, wenn die Reihenfolge stimmt. Das ist die
-        vielleicht wichtigste Zahl in diesem Artikel. Du brauchst keine
-        Stunde. Du brauchst nicht 15 Minuten. Du brauchst 45, wenn sie in
-        einer vernünftigen Sequenz liegen.
+        45 Minuten reichen, wenn die Reihenfolge stimmt. Das ist die vielleicht
+        wichtigste Zahl hier. Du brauchst keine Stunde. Du brauchst 45 Minuten
+        in einer vernünftigen Abfolge, und davor einen Abend, der nicht schon
+        gegen dich arbeitet. Deshalb fängt die Zeitleiste beim Abendessen an
+        und nicht im Bad.
       </p>
-
-      <p>Die Sequenz, die bei Louis stabil läuft, sieht so aus:</p>
 
       <Timeline
         direction="evening"
-        ariaLabel="Abendroutine von 19:10 bis 19:55 Uhr mit sechs Stationen."
+        ariaLabel="Abendroutine von 18:00 Uhr bis Licht aus um 19:50 Uhr mit sieben Stationen."
+        caption="Die Zeiten sind Platzhalter. Schieb sie auf euren Abend, die Reihenfolge bleibt."
         stops={[
-          { time: '19:10', label: 'Essen fertig', body: 'mindestens 1h vor Schlaf' },
-          { time: '19:15', label: 'Runterkommen', body: 'kurz toben, dann ruhig' },
-          { time: '19:25', label: 'Bad', body: 'Duschen oder nicht' },
-          { time: '19:35', label: 'Pyjama', body: 'direkt ins Bett' },
-          { time: '19:40', label: 'Vorlesen', body: 'der Anker' },
-          { time: '19:55', label: 'Licht aus', body: 'gute Nacht', highlight: true },
+          { time: '18:00', label: 'Abendessen', body: 'mind. 1,5 h vor Licht aus' },
+          { time: '18:45', label: 'Licht runter', body: 'Deckenlampe aus' },
+          { time: '19:05', label: 'Toben, dann leiser', body: 'kurz entladen' },
+          { time: '19:15', label: 'Bad', body: 'Zähne, waschen' },
+          { time: '19:30', label: 'Pyjama', body: 'direkt ins Bett' },
+          { time: '19:35', label: 'Vorlesen', body: 'der Anker' },
+          { time: '19:50', label: 'Licht aus', body: 'gute Nacht', highlight: true },
         ]}
       />
 
       <Steps>
-        <StepCard n={1} title="19:10 Uhr: Essen fertig">
+        <StepCard n={1} title="18:00 Uhr: Abendessen">
           <p>
-            Abendessen sollte mindestens eine Stunde vor dem Schlafen
-            erledigt sein. Volle Mägen schlafen schlecht, zuckerreiches
-            Essen noch schlechter.
+            Volle Mägen schlafen schlecht, zuckerreiche noch schlechter. Wenn
+            das Essen anderthalb Stunden vor dem Licht-aus durch ist, hat der
+            Körper Zeit.
           </p>
         </StepCard>
-        <StepCard n={2} title="19:10 bis 19:20 Uhr: körperlich runterkommen">
+        <StepCard n={2} title="18:45 Uhr: Licht runter">
           <p>
-            Kurz toben, durchs Wohnzimmer hüpfen, einmal Kissenschlacht,
-            dann bewusst leiser werden. Klingt kontraintuitiv, funktioniert
-            aber.
+            Deckenlampen aus, kleine warme Lampen an. Kein Ansagen, kein
+            Kommentar. Die Wohnung wird einfach leiser und dunkler, und das
+            Kind merkt den Wechsel, ohne dass ihr darüber reden müsst.
           </p>
         </StepCard>
-        <StepCard n={3} title="19:20 bis 19:35 Uhr: Bad">
+        <StepCard n={3} title="19:05 Uhr: kurz toben, dann leiser werden">
           <p>
-            Zähne putzen, eventuell duschen. Kurz, effizient, mit klarer
-            Struktur.
+            Fünf Minuten Kissenschlacht oder einmal durch den Flur, dann
+            bewusst ausklingen. Klingt widersinnig, ist aber der Schritt, den
+            ich am wenigsten missen möchte.
           </p>
         </StepCard>
-        <StepCard n={4} title="19:35 bis 19:40 Uhr: Pyjama an, ins Bett">
+        <StepCard n={4} title="19:15 Uhr: Bad">
+          <p>
+            Zähne putzen, Gesicht waschen, fertig. Kurz und in fester
+            Reihenfolge. Wenn das Zähneputzen bei euch der eigentliche Kampf
+            ist, steht dazu unten ein eigener Artikel.
+          </p>
+        </StepCard>
+        <StepCard n={5} title="19:30 Uhr: Pyjama an, ins Bett">
           <p>
             Kein Zwischenstopp am Spielzeugregal, kein kurzer Abstecher ins
             Wohnzimmer. Direkt vom Bad ins Bett.
           </p>
         </StepCard>
-        <StepCard n={5} title="19:40 bis 19:55 Uhr: Vorlesen">
-          <p>
-            Gedämpftes Licht, leise Stimme, feste Länge.
-          </p>
+        <StepCard n={6} title="19:35 Uhr: Vorlesen">
+          <p>Gedämpftes Licht, leise Stimme, feste Länge.</p>
         </StepCard>
-        <StepCard n={6} title="19:55 Uhr: Licht aus, gute Nacht">
+        <StepCard n={7} title="19:50 Uhr: Licht aus">
           <p>
-            Keine Verhandlung über noch eine Seite, kein schnelles noch-mal
-            runter. Der Tag ist vorbei.
+            Keine Verhandlung über noch eine Seite, kein schnelles Nochmal-nach-unten.
+            Der Tag ist vorbei.
           </p>
         </StepCard>
       </Steps>
 
-      <p>
-        Die Zeiten sind Platzhalter. Du musst sie auf euch anpassen. Aber
-        die Struktur dahinter bleibt tragfähig.
-      </p>
+      <Callout type="ausprobieren" label="Zum Ausdrucken">
+        <p>
+          Diese Reihenfolge gibt es bei uns als{' '}
+          <a href="/vorlagen/abendroutine">
+            Abendroutine als Vorlage zum Ausdrucken, auch als PDF
+          </a>
+          . Vier Bilder, dein Kind malt den Kreis aus, wenn ein Schritt
+          geschafft ist. Badezimmertür oder Kinderzimmerwand, fertig.
+        </p>
+      </Callout>
 
-      <h2>Warum körperlich runterkommen VOR dem Bad gehört</h2>
+      <h2>Warum körperlich runterkommen vor das Bad gehört</h2>
 
       <p>
-        Das klingt nach einem Detail, ist aber für mich die wichtigste
-        Einsicht der letzten zwei Jahre. Kinder, die aufgedreht ins Bad
-        gehen, kommen wach raus. Das Wasser, das Licht im Bad, das Zähneputzen
-        mit der elektrischen Bürste: das alles ist aktivierend, nicht
-        beruhigend. Wenn dein Kind kurz vor dem Bad noch durch die Wohnung
-        rennt, verlagert die Bad-Viertelstunde nur die Aufgedrehtheit auf
-        später.
+        Das klingt nach einem Detail, ist für mich aber die wichtigste
+        Einsicht der letzten zwei Jahre. Kinder, die aufgedreht ins Bad gehen,
+        kommen wach raus. Das Wasser, das helle Licht, die elektrische
+        Zahnbürste: das ist alles aktivierend, nicht beruhigend. Wenn dein Kind
+        kurz vorher noch durch die Wohnung rennt, verschiebt die
+        Bad-Viertelstunde die Aufgedrehtheit nur nach hinten.
       </p>
 
       <PullQuote>
@@ -227,185 +240,243 @@ export default function RatgeberAbendroutineGrundschulkind() {
       </PullQuote>
 
       <p>
-        Die Lösung ist, die körperliche Entladung bewusst vor das Bad zu
-        ziehen. Fünf Minuten Toben, dann langsam ausklingen lassen, dann
-        Bad. Das Kind kommt schon ruhiger ins Bad rein, und verlässt es
-        auch so. Der Effekt ist größer, als es sich anhört.
+        Die Lösung ist, die körperliche Entladung bewusst vorzuziehen. Fünf
+        Minuten toben, langsam ausklingen lassen, dann Bad. Das Kind kommt
+        ruhiger rein und verlässt es auch so. Der Effekt ist größer, als es
+        sich anhört.
       </p>
 
-      <h2>Vorlesen als Anker</h2>
+      <h2>Vorlesen ist der Anker, nicht die Belohnung</h2>
 
       <p>
-        Vorlesen ist nicht verhandelbar, selbst wenn dein Kind schon liest.
-        Es geht nicht primär darum, dass es Geschichten hört. Es geht darum,
-        dass eine vertraute Stimme ruhig und gleichmäßig wird und im gedämpften
-        Licht ein Ritual bildet, das das Gehirn mit Schlaf verknüpft.
-      </p>
-
-      <p>
-        Bei Louis lesen wir jeden Abend 10 bis 15 Minuten. Manchmal ist er
-        nach fünf Minuten raus. Manchmal fragt er nach mehr. Aber der Rahmen
-        ist fest. Die Minuten, die du hier investierst, sind mit Abstand die
-        produktivsten des ganzen Abends. Und ich sage das als Gamer-Vater,
-        der lieber eine Stunde Zelda hätte.
-      </p>
-
-      <h2>Autonomie dosiert einsetzen</h2>
-
-      <p>
-        Kinder in dem Alter wollen mitbestimmen. Das ist richtig und gut. Aber
-        abends, wenn alle müde sind, ist das keine Zeit für offene Fragen
-        wie <em>was willst du jetzt machen?</em>. Das endet in einer
-        Verhandlung, die niemand gewinnt.
+        Vorlesen steht nicht zur Debatte, auch wenn dein Kind längst selbst
+        liest. Es geht nicht in erster Linie um die Geschichte. Es geht darum,
+        dass eine vertraute Stimme im gedämpften Licht ruhig und gleichmäßig
+        wird. Das ist der Teil, den das Gehirn mit Schlaf verknüpft.
       </p>
 
       <p>
-        Was funktioniert: ein bis zwei geschlossene Entscheidungen pro Abend.
-        Welches Buch lesen wir? Welches T-Shirt nimmst du als Pyjama? Das
-        reicht. Das gibt dem Kind das Gefühl von Kontrolle, ohne dass die
-        ganze Routine zur Debatte steht.
+        Bei Louis lesen wir 10 bis 15 Minuten. Manchmal ist er nach fünf
+        Minuten raus, manchmal fragt er nach mehr. Der Rahmen bleibt fest. Und
+        wenn du Vorlesen als Belohnung einsetzt, die es bei schlechtem Benehmen
+        nicht gibt, nimmst du dem Abend genau den Teil, der ihn zusammenhält.
+        Streich lieber etwas anderes.
+      </p>
+
+      <h2>Abendroutine Kleinkind: was bei 3- bis 5-Jährigen anders läuft</h2>
+
+      <p>
+        Der Ablauf oben ist für Schulkinder gebaut. Bei einem Kleinkind
+        stimmen die Zutaten, aber nicht die Maße. Drei Unterschiede zählen.
+      </p>
+
+      <p>
+        <strong>Mehr Schlaf, also früher anfangen.</strong> Drei- bis
+        Vierjährige brauchen laut kindergesundheit-info oft noch elf bis zwölf
+        Stunden. Wenn ein Kleinkind um 7 Uhr wach wird, heißt das Licht aus
+        gegen 19 Uhr, nicht gegen 20 Uhr. Die ganze Leiste rutscht eine Stunde
+        nach vorne.
+      </p>
+
+      <p>
+        <strong>Weniger Schritte, mehr Bild.</strong> Vier Schritte sind bei
+        einem Kleinkind das Maximum: Zähne, waschen, Pyjama, Licht aus. Und sie
+        brauchen ein Bild, keinen Text. Ein Dreijähriger liest keine Liste, er
+        erkennt einen Zahnbürsten-Kringel.
+      </p>
+
+      <p>
+        <strong>Gleiche Worte statt neuer Sätze.</strong> Schulkinder
+        vertragen Variation, Kleinkinder brauchen Wiederholung. Derselbe Satz
+        zum Übergang, jeden Abend. <em>Die Lampe geht aus, dann kommt das
+        Buch.</em> Das ist kein Mangel an Fantasie, das ist der Anker.
       </p>
 
       <Callout type="wichtig">
         <p>
-          Mehr Autonomie ist nicht besser. Im Gegenteil. Ein aufgedrehter
-          Sechsjähriger, dem du um 19:45 Uhr sagst <em>du kannst selbst
-          entscheiden, wann du ins Bett gehst</em>, ist kein souveränes Kind.
-          Er ist ein überfordertes Kind, das du gerade im Stich gelassen hast.
-          Autonomie funktioniert innerhalb eines Rahmens, nicht als Ersatz
-          für einen.
+          Wenn Kleinkind und Schulkind im selben Zimmer schlafen, sortiere nach
+          Schlafbedarf, nicht nach Bequemlichkeit. Das Kleine startet früher,
+          das Große darf danach noch 20 Minuten leise im Wohnzimmer lesen. Ein
+          gemeinsamer Zeitpunkt für beide Alter macht immer eins von beiden
+          kaputt: das Kleine ist übermüdet, oder das Große liegt wach und
+          langweilt sich.
         </p>
       </Callout>
 
-      <h2>Wenn das Kind nicht einschlafen kann</h2>
+      <h2>Wenn dein Kind nicht einschlafen kann</h2>
 
       <p>
-        Manchmal klappt alles, und das Kind liegt trotzdem wach. Die üblichen
-        Verdächtigen, in der Reihenfolge, wie ich sie prüfen würde:
+        Manchmal stimmt alles, und das Kind liegt trotzdem wach. Die üblichen
+        Verdächtigen, in der Reihenfolge, in der ich sie prüfen würde:
       </p>
 
       <ul>
         <li>
-          <strong>Über-müdigkeit.</strong> Klingt paradox, ist aber der
-          häufigste Grund. Ein Kind, das eigentlich seit einer Stunde hätte
-          schlafen sollen, produziert Cortisol statt Melatonin. Es wirkt
-          dann wach und aufgedreht, obwohl es komplett fertig ist. Abhilfe:
-          früher anfangen.
+          <strong>Übermüdung.</strong> Klingt widersinnig, ist aber der
+          häufigste Grund. Ein Kind, das längst hätte schlafen sollen, wirkt
+          aufgedreht statt müde. Abhilfe: früher anfangen, nicht später.
         </li>
         <li>
-          <strong>Stress und Sorgen.</strong> Schule, Streit mit Freunden,
-          ein Film, der nachhallt. Wenn das Kind reden will, gib fünf
-          Minuten. Nicht 45. Fünf Minuten, ehrlich zugehört, wirken mehr
-          als eine Stunde Diskussion.
+          <strong>Stress und Sorgen.</strong> Schule, Streit mit Freunden, ein
+          Film, der nachhallt. Wenn dein Kind reden will, gib fünf Minuten.
+          Nicht 45. Fünf Minuten, ehrlich zugehört, wirken mehr als eine Stunde
+          Diskussion.
         </li>
         <li>
-          <strong>Licht.</strong> Straßenlaternen, Bildschirme im Nebenraum,
-          Nachttischlampen. Manche Kinder sind erstaunlich lichtempfindlich.
+          <strong>Licht.</strong> Straßenlaterne, Bildschirm im Nebenraum,
+          Nachttischlampe. Manche Kinder sind erstaunlich lichtempfindlich.
           Verdunkelungsrollo probieren.
         </li>
         <li>
-          <strong>Essen zu spät oder zu viel Zucker.</strong> Der Abend-Snack
-          um 19:30 Uhr kann reichen, um den ganzen Plan zu kippen.
+          <strong>Essen zu spät.</strong> Der Snack um 19:30 Uhr kann den
+          ganzen Plan kippen.
         </li>
         <li>
           <strong>Zu wenig Bewegung tagsüber.</strong> Wenn das Kind
-          hauptsächlich gesessen hat, fehlt dem Körper die physische
-          Müdigkeit.
+          hauptsächlich gesessen hat, fehlt dem Körper die physische Müdigkeit.
         </li>
       </ul>
 
-      <Callout type="achtung" label="Wann zum Kinderarzt">
+      <p>
+        Wenn dein Kind morgens außerdem kaum aus dem Bett kommt, lohnt sich der
+        Blick auf die andere Tageshälfte. Dazu haben wir zwei Artikel: die{' '}
+        <a href="/ratgeber/morgenroutine-grundschulkind">
+          Morgenroutine für Grundschulkinder
+        </a>{' '}
+        und einen dazu, warum{' '}
+        <a href="/ratgeber/morgen-troedeln">
+          dein Kind morgens trödelt und was dagegen hilft
+        </a>
+        .
+      </p>
+
+      <Callout type="achtung" label="Wann ein zweiter Blick sich lohnt">
         <p>
-          Wenn das Kind über Wochen hinweg massive Einschlafprobleme hat, nicht
-          nur hier und da, gehört das zur Kinderärztin oder zum Kinderarzt. Es
-          gibt echte Schlafstörungen auch in diesem Alter, und die sind meistens
-          gut behandelbar. Das ist kein Versagen als Eltern, das ist einfach
-          eine andere Liga.
+          Wenn dein Kind über Wochen hinweg massive Einschlafprobleme hat,
+          nicht nur hier und da, gehört das in die kinderärztliche Praxis. Es
+          gibt echte Schlafstörungen auch in diesem Alter, und sie lassen sich
+          gut einordnen. Das ist kein Elternversagen, das ist eine andere Liga.
         </p>
       </Callout>
-
-      <h2>Wo Ronki abends passt</h2>
-
-      <p>
-        Der Abend ist der Moment, an dem ein Tag verarbeitet wird. Wenn
-        die Schritte durch sind und das Licht noch nicht ganz aus ist, hat
-        ein Kind ein paar Minuten, in denen alles noch da ist: was schwer
-        war, was schön war, was geblieben ist. Genau in diesen Spalt sitzt
-        Ronki.
-      </p>
-
-      <p>
-        Viele Eltern, die Ronki ausprobieren, fangen beim Abend an, nicht
-        beim Morgen. Der Schmerz ist abends oft greifbarer: am Morgen gibt
-        es wenigstens einen externen Takt (die Schulzeit), am Abend musst
-        du den ganzen Rahmen selbst halten.
-      </p>
-
-      <p>
-        Ronki zeigt die Schritte. Ohne Push, ohne Drängen, ohne dem Kind
-        zu sagen, wie spät es ist. Was Ronki abends besonders macht, ist
-        der eine ruhige Beat nach den Schritten: ein Drache, der einmal
-        nachfragt, wie der Tag war. Drei Worte reichen. Manchmal nur ein
-        Gesicht. Das Kind weiß: jemand hat zugehört.
-      </p>
-
-      <blockquote>
-        Wir bauen Ronki nicht für Kinder, die jeden Abend in die App
-        müssen. Wir bauen ihn für den einen ruhigen Beat zwischen Zähne
-        und Licht-aus. Wenn der bei euch irgendwann ohne den Drachen
-        funktioniert, war er gut.
-      </blockquote>
-
-      <p>
-        Wenn dich das interessiert, trag dich unten ein. Wenn nicht, nimm
-        die Prinzipien aus diesem Artikel mit. Die funktionieren auch ohne
-        uns.
-      </p>
 
       <h2>Wenn es mal nicht klappt</h2>
 
       <p>
-        Ein letzter Punkt, der mir wichtig ist. Die Abendroutine wird nicht
-        jeden Tag klappen. Louis hat Abende, an denen er um 19:30 Uhr noch
-        total aufgedreht ist, weil der Tag ihn überrollt hat. An solchen
-        Abenden ist 20:30 Uhr völlig in Ordnung. Die Katastrophe kommt nicht
-        vom einzelnen schlechten Abend, sie kommt vom chronischen schlechten
-        Abend.
+        Die Abendroutine wird nicht jeden Tag klappen. Louis hat Abende, an
+        denen er um 19:30 Uhr noch komplett aufgedreht ist, weil der Tag ihn
+        überrollt hat. An solchen Abenden ist 20:30 Uhr in Ordnung. Der Schaden
+        kommt nicht vom einzelnen schlechten Abend, er kommt vom chronisch
+        schlechten Abend.
       </p>
 
       <p>
-        Perfektionismus ist hier keine Hilfe, er ist Teil des Problems. Die
-        Eltern, die abends am meisten kämpfen, sind oft die, die sich selbst
-        am stärksten daran messen, ob das Kind um Punkt 20 Uhr die Augen
-        zumacht. Dieser Druck überträgt sich. Er macht den Abend schwerer,
-        nicht leichter.
+        Perfektionismus hilft hier nicht, er ist Teil des Problems. Die Eltern,
+        die abends am meisten kämpfen, sind oft die, die sich selbst daran
+        messen, ob das Kind um Punkt 20 Uhr die Augen zumacht. Dieser Druck
+        überträgt sich und macht den Abend schwerer, nicht leichter.
+      </p>
+
+      <h2>Wo Ronki abends passt</h2>
+
+      <p>
+        Ronki ist unser Drachen-Begleiter, noch in einer frühen Version. Er
+        zeigt die Schritte als Bilder, das Kind hakt selbst ab. Keine Push, kein
+        Punktestand, kein Vergleich mit gestern.
+      </p>
+
+      <p>
+        Was er abends dazu tut, ist ein einziger ruhiger Beat zwischen Zähnen
+        und Licht-aus: einmal nachfragen, wie der Tag war. Drei Worte reichen,
+        manchmal nur ein Gesicht. Wenn das bei euch irgendwann ohne Drachen
+        läuft, war er gut. Ein laminierter Zettel an der Badezimmertür tut es
+        übrigens auch.
       </p>
 
       <h2>Was du heute tun kannst</h2>
 
       <Callout type="ausprobieren">
         <p>
-          Eine einzige Aufgabe. Schreib auf einen Zettel die Reihenfolge deiner
-          Abendroutine. Zehn Minuten Arbeit. Heute Abend guckt ihr ihn zusammen
-          an. <em>Das ist, was wir machen. In dieser Reihenfolge. Fertig.</em>
+          <strong>Erstens:</strong> Rechne rückwärts. Aufstehzeit minus zehn
+          Stunden Schlaf minus 20 Minuten Einschlafen. Das ist eure Licht-aus-Zeit.
+          Wahrscheinlich früher, als du gedacht hast.
         </p>
         <p>
-          Klingt banal. Ist es auch. Aber die meisten Abendroutinen existieren
+          <strong>Zweitens:</strong> Schreib die Reihenfolge auf einen Zettel
+          und häng sie auf Kinderhöhe auf. Die meisten Abendroutinen existieren
           nur in einem einzigen Kopf, nämlich deinem. Sobald die Sequenz
-          sichtbar ist, passieren zwei Sachen: das Kind muss nicht mehr raten,
-          was als nächstes kommt. Und du musst nicht mehr jedes Mal aufs Neue
-          ansagen, was dran ist. Beides spart Kraft. Beides macht die Abende
-          leiser.
+          sichtbar ist, muss dein Kind nicht mehr raten, und du musst nicht mehr
+          ansagen.
+        </p>
+        <p>
+          <strong>Drittens:</strong> Mach heute um 18:45 Uhr die Deckenlampe
+          aus. Nur das. Eine Abendroutine für Kinder beginnt beim Licht, nicht
+          beim Zähneputzen, und das ist der Schritt, der dich null Minuten
+          kostet.
         </p>
       </Callout>
 
       <p>
-        Und wenn es nach einer Woche nicht klappt, probier noch eine Woche.
-        Die Abendroutine ist ein Muskel, kein Schalter. Sie wird besser. Und
-        irgendwann wirst du abends auf die Uhr gucken, und es ist 19:48 Uhr,
-        und dein Kind liegt schon im Bett und wartet aufs Vorlesen. Und du
-        denkst, dass das eigentlich ziemlich normal geworden ist. Das ist
-        das Ziel.
+        Wenn es nach einer Woche nicht klappt, probier noch eine. Eine
+        Abendroutine ist ein Muskel, kein Schalter. Das gilt für Abendroutine
+        Kleinkind genauso wie für Schulkind. Und irgendwann guckst du um 19:48
+        Uhr auf die Uhr, und dein Kind liegt schon im Bett und wartet aufs
+        Vorlesen.
+      </p>
+
+      <h2>Quellen</h2>
+
+      <ul>
+        <li>
+          Paruthi S. et al., American Academy of Sleep Medicine:{' '}
+          <a
+            href="https://aasm.org/recharge-with-sleep-pediatric-sleep-recommendations-promoting-optimal-health/"
+            target="_blank"
+            rel="noopener"
+          >
+            Recommended Amount of Sleep for Pediatric Populations
+          </a>
+          , Journal of Clinical Sleep Medicine, 2016. 9 bis 12 Stunden für 6-
+          bis 12-Jährige.
+        </li>
+        <li>
+          Bundesinstitut für Öffentliche Gesundheit (BIÖG, früher BZgA):{' '}
+          <a
+            href="https://www.kindergesundheit-info.de/themen/schlafen/1-6-jahre/schlafbedarf/"
+            target="_blank"
+            rel="noopener"
+          >
+            Von Schlafbedarf und Schlafdauer
+          </a>
+          , kindergesundheit-info.de, Stand 2025. Elf bis zwölf Stunden mit
+          drei, vier Jahren, etwa elf Stunden bei Schulkindern, Abweichungen von
+          bis zu zwei Stunden normal.
+        </li>
+        <li>
+          Akacem L. D., Wright K. P., LeBourgeois M. K.:{' '}
+          <a
+            href="https://physoc.onlinelibrary.wiley.com/doi/10.14814/phy2.13617"
+            target="_blank"
+            rel="noopener"
+          >
+            Sensitivity of the circadian system to evening bright light in
+            preschool-age children
+          </a>
+          , Physiological Reports 6(5), 2018. Melatonin-Unterdrückung von rund
+          88 Prozent nach einer Stunde hellem Licht vor dem Zubettgehen.
+        </li>
+        <li>
+          Hale L., Guan S.: Screen time and sleep among school-aged children and
+          adolescents: a systematic literature review, Sleep Medicine Reviews
+          21, 2015, S. 50 bis 58. Übersicht über 67 Studien, Bildschirmnutzung
+          hängt mit kürzerem und schlechterem Schlaf zusammen.
+        </li>
+      </ul>
+
+      <p className="source">
+        Die Zeiten, Reihenfolgen und Beispiele in diesem Artikel sind unsere
+        Erfahrung aus dem eigenen Alltag, keine Studienergebnisse. Bei
+        anhaltenden Schlafproblemen ist die kinderärztliche Praxis die richtige
+        Adresse.
       </p>
     </RatgeberArticle>
   );

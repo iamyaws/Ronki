@@ -272,4 +272,49 @@ Ferienmodus is a candidate to ship **before** v2 Phase 2: it reuses every existi
 
 ---
 
+## 12. Addendum: Decision gates before any v2 work (added 15 September 2026)
+
+Context: the revival check of 14 September 2026 (`docs/strategy/2026-09-14-wiederbelebungs-check.md`) found small real search traffic and a backend that had been dead since late May, so demand for the app is still unmeasured. Marc decided on 14 September: keep the site as the catch basin with a template lead magnet, keep the app open and honestly labelled, rebuild the measurement, and let two gates decide whether v2 starts. Neither traffic nor email addresses prove the problem is worth solving for Ronki. Usage and, later, willingness to pay do.
+
+### 12.1 Gate 1, pull: does the app draw anyone we do not know?
+
+Checked on **14 November 2026** (60 days after go-live). Passes when at least one family we do not know has created a card since go-live and used it on three or more distinct days.
+
+Query (Supabase SQL editor, run as owner):
+
+```sql
+select left(p.token, 8) as card, p.created_at::date as created, count(distinct a.day) as days
+from public.profiles p
+join public.profile_activity a on a.token = p.token
+where a.day >= date '2026-09-15'
+group by p.token, p.created_at
+having count(distinct a.day) >= 3
+order by days desc;
+```
+
+Subtract our own cards (Louis, test cards) by their first eight characters; Marc has the printed cards. Cross-check in Plausible: "Karte erstellt" events since go-live, "CTA Klick" split by `cta`.
+
+### 12.2 Gate 2, reach: can the site reach parents without paid acquisition?
+
+Checked on **15 March 2027**. Passes when both hold: at least 500 organic visitors per month on ronki.de (Plausible, source Google, average of January and February 2027) and at least 100 distinct email addresses across leads and waitlist (`select public.leads_count();`).
+
+Supporting reads: Search Console clicks per month, "Vorlage Download" events per template, positions for "kind trödelt morgens", "abendroutine kinder", "morgenroutine vorlage".
+
+### 12.3 What each outcome means
+
+| Gate 1 (pull) | Gate 2 (reach) | Decision |
+|---|---|---|
+| passed | passed | Start v2 Phase 1 (funnel fix), then Phase 3 recruiting from the site's own audience. |
+| passed | failed | The app draws people but the site does not reach them: keep the app alive, invest in content and distribution before any Phase 2 work. |
+| failed | passed | Readers come for advice and templates, not for the app: keep the site as an evergreen content asset, freeze the app, no v2. Revisit only if readers ask for it (feedback form, replies). |
+| failed | failed | Ronki stays a family project. Site stays up, app stays up, no further evenings. |
+
+### 12.4 Hygiene that keeps the gates honest
+
+- Supabase free projects pause after seven days without activity; the weekly keep-alive workflow (`.github/workflows/supabase-keepalive.yml`) is the guard. Marc restored the paused project on 14 September 2026.
+- `profile_activity` records one row per card and day on every cloud save, so "used on three days" is measurable without any personal data.
+- The lead magnet has an honest no-email path (the template pages print directly), so the address count measures interest, not coercion.
+
+---
+
 _Sources: codebase audit 7 Jul 2026 (this repo, branch experiment/drachennest); competitor research 7 Jul 2026 (Deconstructor of Fun on Finch, Finch wiki, Finch help center, joonapp.io, brili.com, gotimo.com, playpokpok.com, D4CR guide via Joan Ganz Cooney Center, 5Rights "Disrupted Childhood", The Conversation on kids' hook mechanics, Sesame Workshop preschool tablet best practices, Budge Studios onboarding on Android Developers blog). Prior art: docs/strategy/NORTHSTAR.md (25 Apr 2026), docs/strategy/PATH.md, docs/strategy/strategic-synthesis-2026-04-27.md._

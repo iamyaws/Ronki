@@ -1,4 +1,4 @@
-// ── Ronki Storage — IndexedDB local + Supabase cloud sync ──
+// ── Ronki Storage, IndexedDB local + Supabase cloud sync ──
 //
 // EXPERIMENT BRANCH NOTE (drachennest): the storage names are namespaced
 // with "_drachennest" so this branch's saves stay isolated from main/dev
@@ -29,7 +29,7 @@ const storage = {
     // Apr 2026 fix: prefer IndexedDB, but treat localStorage as a
     // continuous fallback (NOT a one-shot migration that wipes itself).
     // Previous behaviour deleted the localStorage entry on first load
-    // after migrating it to IDB — which meant if a later save's IDB
+    // after migrating it to IDB, which meant if a later save's IDB
     // transaction failed to commit before tab-close (a real bug, see
     // save() comments), there was nothing to fall back on. Result for
     // Marc 27 Apr: Louis re-picks the egg every session.
@@ -78,15 +78,15 @@ const storage = {
     //      the localStorage copy is still there for next load to pick up.
     //
     // The double-write doubles the storage cost but state objects are
-    // small (~50KB peak) and writes happen on a 400ms debounce — total
+    // small (~50KB peak) and writes happen on a 400ms debounce, total
     // overhead is sub-millisecond per save.
     let serialized: string | null = null;
     try {
       serialized = JSON.stringify(state);
-      // Synchronous localStorage write first — guaranteed-persisted
+      // Synchronous localStorage write first, guaranteed-persisted
       // before save() returns even if IDB later fails.
       localStorage.setItem(LS_KEY, serialized);
-    } catch { /* storage full or quota exceeded — IDB still tried below */ }
+    } catch { /* storage full or quota exceeded, IDB still tried below */ }
 
     try {
       const db = await openDB();
@@ -143,27 +143,30 @@ const storage = {
           updated_at: new Date().toISOString(),
         }, { onConflict: 'user_id' });
     } catch {
-      // Silent fail — local IndexedDB is the fallback
+      // Silent fail, local IndexedDB is the fallback
     }
   },
 
   // ── Cloud (Supabase, token-keyed BeyArena pattern) ──
   // Token-as-credential model. The 32-hex token is both the row key
-  // and the auth credential — anyone with it can read/write that
-  // profile. RLS allows anon SELECT/INSERT/UPDATE filtered by token
-  // shape; security relies on token entropy (128 bits, unguessable).
-  // See migrations create_profiles_table_for_qr_auth +
-  // harden_profiles_function_and_rls + docs/specs/qr-profile-auth.md.
+  // and the auth credential, anyone with it can read/write that
+  // profile. Security relies on token entropy (128 bits, unguessable).
+  //
+  // Sep 2026: these two used to hit public.profiles directly, which
+  // meant anon could also LIST the table and walk away with every
+  // family's token. The table is now closed to anon and both calls go
+  // through security-definer RPCs that take the token as an argument,
+  // so a caller can only reach the profile they already hold the token
+  // for. See supabase/migrations/20260915000200_profiles_rpc.sql and
+  // docs/specs/qr-profile-auth.md.
   async cloudLoadByToken(token: string): Promise<GameState | null> {
     if (!token || !/^[a-f0-9]{32}$/.test(token)) return null;
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('state, updated_at')
-        .eq('token', token)
-        .maybeSingle();
+      // profile_get returns null when there is no row, which is the
+      // same "no cloud state yet" case the old maybeSingle() returned.
+      const { data, error } = await supabase.rpc('profile_get', { p_token: token });
       if (error || !data) return null;
-      return (data.state as GameState) || null;
+      return ((data as { state?: GameState }).state as GameState) || null;
     } catch {
       return null;
     }
@@ -172,18 +175,15 @@ const storage = {
   async cloudSaveByToken(token: string, state: GameState): Promise<void> {
     if (!token || !/^[a-f0-9]{32}$/.test(token)) return;
     try {
-      // Upsert by primary-key token. Server-side trigger updates
-      // updated_at on any modification; we set last_active_at here
-      // so cleanup heuristics ("inactive 90+ days") can rely on it.
-      await supabase
-        .from('profiles')
-        .upsert({
-          token,
-          state: state as unknown as Record<string, unknown>,
-          last_active_at: new Date().toISOString(),
-        }, { onConflict: 'token' });
+      // profile_upsert stamps updated_at server-side and records today
+      // in profile_activity, which is what the active-family counter
+      // reads. It rejects a malformed token with an error we swallow.
+      await supabase.rpc('profile_upsert', {
+        p_token: token,
+        p_state: state as unknown as Record<string, unknown>,
+      });
     } catch {
-      // Silent fail — local IndexedDB + localStorage are the fallback
+      // Silent fail, local IndexedDB + localStorage are the fallback
     }
   },
 
@@ -199,23 +199,23 @@ const storage = {
       const cloudDate = (cloud as any).lastDate || '';
       const localDate = (local as any).lastDate || '';
       if (localDate > cloudDate) {
-        // Local is newer — push to cloud
+        // Local is newer, push to cloud
         this.cloudSave(userId, local);
         return local;
       }
-      // Cloud wins — cache locally
+      // Cloud wins, cache locally
       this.save(cloud);
       return cloud;
     }
 
     if (local && !cloud) {
-      // First login with existing local data — migrate to cloud
+      // First login with existing local data, migrate to cloud
       this.cloudSave(userId, local);
       return local;
     }
 
     if (cloud && !local) {
-      // New device — cache cloud data locally
+      // New device, cache cloud data locally
       this.save(cloud);
       return cloud;
     }
@@ -243,20 +243,20 @@ const storage = {
         this.cloudSaveByToken(token, local);
         return local;
       }
-      // Cloud wins — cache locally for offline use + faster next boot.
+      // Cloud wins, cache locally for offline use + faster next boot.
       this.save(cloud);
       return cloud;
     }
 
     if (local && !cloud) {
       // Existing local profile getting tagged with a token for the
-      // first time — migrate to cloud.
+      // first time, migrate to cloud.
       this.cloudSaveByToken(token, local);
       return local;
     }
 
     if (cloud && !local) {
-      // New device that received the token via shared URL — pull
+      // New device that received the token via shared URL, pull
       // cloud state down + cache locally.
       this.save(cloud);
       return cloud;

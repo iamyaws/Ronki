@@ -1,7 +1,7 @@
 {
-  "name": "Ronki — Dein Helden-Abenteuer",
+  "name": "Ronki, dein Drachen-Gefährte",
   "short_name": "Ronki",
-  "description": "Gamifizierter Aufgaben-Tracker für Kinder mit Held, Katze und täglichen Quests",
+  "description": "Ronki ist der Drachen-Gefährte für Kinder-Routinen. Morgen- und Abendroutine ohne Streit, ohne Streaks, ohne Werbung.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

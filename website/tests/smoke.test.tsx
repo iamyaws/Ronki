@@ -10,15 +10,31 @@ describe('App smoke test', () => {
         <App />
       </MemoryRouter>,
     );
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/ronki trägt die routine/i);
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
+      /stell dir vor, du sagst es nur einmal/i,
+    );
   });
 
-  it('renders 404 for unknown route', () => {
+  it('puts the card CTA on the homepage', () => {
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <App />
+      </MemoryRouter>,
+    );
+    expect(
+      screen.getAllByRole('link', { name: /karte für euer kind erstellen/i })[0],
+    ).toHaveAttribute('href', '/profil-erstellen');
+  });
+
+  it('renders 404 for unknown route', async () => {
     render(
       <MemoryRouter initialEntries={['/does-not-exist']}>
         <App />
       </MemoryRouter>,
     );
-    expect(screen.getByText(/hier ist ronki nicht zu hause/i)).toBeInTheDocument();
+    // The 404 page is lazy-loaded, so wait past the suspense spinner.
+    expect(
+      await screen.findByText(/verflogen\. aber nicht verloren\./i),
+    ).toBeInTheDocument();
   });
 });

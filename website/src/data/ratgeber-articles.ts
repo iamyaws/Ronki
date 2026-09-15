@@ -2,8 +2,8 @@
  * Shared source of truth for Ratgeber articles.
  *
  * Used by:
- *   - /ratgeber (Ratgeber.tsx) — full listing
- *   - / (Home.tsx) — featured block (3 direct links for SEO crawl signal)
+ *   - /ratgeber (Ratgeber.tsx), full listing
+ *   - / (Home.tsx), featured block (3 direct links for SEO crawl signal)
  *
  * Extracted to data/ so Home doesn't have to import from the lazy-loaded
  * Ratgeber page, which would defeat code-splitting.
@@ -22,11 +22,11 @@ export interface Article {
 export const ARTICLES: Article[] = [
   {
     slug: 'morgen-troedeln',
-    title: 'Warum dein Kind morgens trödelt (und warum das kein Erziehungsproblem ist)',
+    title: 'Kind trödelt morgens? Warum das normal ist und was wirklich hilft',
     description:
-      'Trödeln ist keine Boshaftigkeit und kein Erziehungsversagen. Was wirklich dahinter steckt, warum Schreien die Sache schlimmer macht und vier Hebel, die bei Grundschulkindern messbar wirken.',
+      'Dein Kind trödelt morgens? Das ist kein Erziehungsproblem, sondern Entwicklung. Was dahinter steckt, warum Schreien bremst und vier Hebel, die wirken.',
     category: 'Morgenroutine',
-    readMinutes: 10,
+    readMinutes: 8,
     image: '/art/routines/getting-ready.webp',
     featured: true,
   },
@@ -68,11 +68,11 @@ export const ARTICLES: Article[] = [
   },
   {
     slug: 'abendroutine-grundschulkind',
-    title: 'Die Abendroutine für Grundschulkinder: ruhiger runterkommen, besser schlafen',
+    title: 'Abendroutine für Kinder: der Ablauf, der bei 5- bis 8-Jährigen wirklich trägt',
     description:
-      'Abendroutine für 6- bis 8-Jährige: Warum 45 Minuten reichen, welche Reihenfolge wirklich Schlaf bringt, und wie du aus dem Zähneputz-Drama rauskommst.',
+      'Abendroutine für Kinder von 5 bis 8: warum 45 Minuten reichen, welche Reihenfolge trägt und wie die Abendroutine Kinder ruhiger ins Bett bringt.',
     category: 'Abendroutine',
-    readMinutes: 9,
+    readMinutes: 10,
     image: '/art/bioms/Sternenmeer_sea-of-stars.webp',
   },
   {

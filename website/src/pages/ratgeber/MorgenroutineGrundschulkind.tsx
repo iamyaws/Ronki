@@ -22,7 +22,7 @@ export default function RatgeberMorgenroutineGrundschulkind() {
       related={[
         {
           slug: 'morgen-troedeln',
-          title: 'Warum dein Kind morgens trödelt (und warum das kein Erziehungsproblem ist)',
+          title: 'Kind trödelt morgens? Warum das normal ist und was wirklich hilft',
         },
         {
           slug: 'sticker-chart-alternative',
@@ -30,7 +30,7 @@ export default function RatgeberMorgenroutineGrundschulkind() {
         },
         {
           slug: 'abendroutine-grundschulkind',
-          title: 'Die Abendroutine für Grundschulkinder: ruhiger runterkommen, besser schlafen',
+          title: 'Abendroutine für Kinder: der Ablauf, der bei 5- bis 8-Jährigen wirklich trägt',
         },
       ]}
     >

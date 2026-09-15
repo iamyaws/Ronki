@@ -9,7 +9,15 @@ _Single source of truth: done, in flight, backlog. Update before any /compact an
 Revival check done, nothing built. Full write-up (German): [docs/strategy/2026-09-14-wiederbelebungs-check.md](docs/strategy/2026-09-14-wiederbelebungs-check.md). Raw Search Console export: `docs/analytics/gsc-2026-09-14/`.
 
 - **Traffic:** Search Console, 13 Jun to 12 Sep 2026: 15 clicks, 1,403 impressions. /ratgeber/morgenroutine-grundschulkind ranks position 6.5 and takes 5 of the clicks. Impressions doubled after 8 Sep (Schulstart). More than half of all impressions are foreign typo searches landing on /en.
-- **Backend is gone:** Supabase project `jdpxfvqaoxmnyvlxikce` was paused around 25 May (inactivity) and permanently frozen around 23 Aug (mail of 18 Aug, unread). The host no longer resolves. Both live bundles embed it, so profile cards, QR login, cloud sync, waitlist and feedback forms have been dead since late May. Supabase still offers a data download; the project itself cannot be restored.
+- **Backend was gone, now back:** Supabase project `jdpxfvqaoxmnyvlxikce` was paused around 25 May (inactivity) and got the "permanently frozen in 5 days" mail on 18 Aug. On the evening of 14 Sep the host did not resolve; Marc restored the project the same night and it answers again on 15 Sep (waitlist_count returns 4, profiles has 3 rows, all tables except `leads` and the never-created `game_state` exist). Between late May and 14 Sep, profile cards, QR login, cloud sync, waitlist and feedback forms were dead on the live site.
+
+## Decision gates (set 15 September 2026)
+
+Full text with the queries: PRD section 12 ([docs/prd/RONKI-V2-PRD.md](docs/prd/RONKI-V2-PRD.md)). Short form:
+
+- **Gate 1, pull, check on 14 Nov 2026:** at least one family we do not know created a card since go-live and used it on three or more distinct days (`profiles` joined with `profile_activity`, subtract our own cards). Plausible cross-check: "Karte erstellt", "CTA Klick" by `cta`.
+- **Gate 2, reach, check on 15 Mar 2027:** at least 500 organic visitors per month on ronki.de (Plausible, Google, average Jan and Feb 2027) and at least 100 distinct addresses across leads and waitlist (`select public.leads_count();`).
+- Outcomes: both pass, start v2 Phase 1. Pull only, keep the app alive and work on reach. Reach only, keep the site as content asset, freeze the app, no v2. Neither, Ronki stays a family project. Ticklers for both dates sit in the HQ Fristen register.
 - **Deploys:** website and app production both sit on commit `2fa8ab5` (3 May). The July docs commits live only on `experiment/drachennest`. v2 execution never started.
 - **Proposal (awaiting Marc):** 1) rebuild backend and redeploy (one evening), 2) instrument the funnel and add a home CTA to /profil-erstellen (one evening), 3) optional SEO push on the clusters Google already ranks, 4) decide after 30 days against a preset threshold (suggested: 10 outside families with a created card).
 

@@ -1,0 +1,54 @@
+name: Supabase keep-alive
+
+# Supabase pauses a free project after seven days without activity, and a
+# paused project gets permanently frozen a few months later. That is exactly
+# what happened to Ronki: paused around 25 May 2026, frozen around 23 August,
+# and the live website and app talked to a host that no longer resolved for
+# three and a half months.
+#
+# This workflow is the fix. Once a week it calls one public read only RPC with
+# the anon key. That single call counts as activity, so the seven day clock
+# never runs out. If the call stops returning 200 the job goes red, which is
+# the early warning the project never had.
+
+on:
+  schedule:
+    # Every Monday at 06:17 UTC. Odd minute on purpose: GitHub's scheduler
+    # queues behind everyone who picked the top of the hour.
+    - cron: '17 6 * * 1'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    name: Ping Supabase
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call waitlist_count and require HTTP 200
+        env:
+          SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "Missing repository secrets VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY."
+            exit 1
+          fi
+
+          status=$(curl --silent --show-error --location \
+            --max-time 30 \
+            --output response.json \
+            --write-out '%{http_code}' \
+            --request POST "${SUPABASE_URL%/}/rest/v1/rpc/waitlist_count" \
+            --header "apikey: ${SUPABASE_ANON_KEY}" \
+            --header "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
+            --header "Content-Type: application/json" \
+            --data '{}')
+
+          echo "HTTP status: ${status}"
+          echo "Response: $(cat response.json)"
+
+          if [ "$status" != "200" ]; then
+            echo "Keep-alive failed. The Supabase project may be paused, frozen, or the secrets may be stale."
+            exit 1
+          fi
+
+          echo "Supabase answered. The seven day pause clock is reset."

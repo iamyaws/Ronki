@@ -1,7 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
 
-// Home loads eagerly — it's the landing page
+// Home loads eagerly, it's the landing page
 import Home from './pages/Home';
 
 // Everything else lazy-loaded
@@ -41,6 +41,9 @@ const PrintA4PosterBaeckerei = lazy(() => import('./pages/PrintA4PosterBaeckerei
 const PrintA4PosterKinderarzt = lazy(() => import('./pages/PrintA4PosterKinderarzt'));
 const PrintA4PosterZaehne = lazy(() => import('./pages/PrintA4PosterZaehne'));
 const PrintA4PosterAntiEngagement = lazy(() => import('./pages/PrintA4PosterAntiEngagement'));
+const VorlagePrintMorgen = lazy(() => import('./pages/print/VorlagePrintMorgen'));
+const VorlagePrintAbend = lazy(() => import('./pages/print/VorlagePrintAbend'));
+const VorlagePrintKleineGeschwister = lazy(() => import('./pages/print/VorlagePrintKleineGeschwister'));
 const RatgeberWasKinderAppsMachen = lazy(() => import('./pages/ratgeber/WasKinderAppsMachen'));
 const RatgeberMorgenTroedeln = lazy(() => import('./pages/ratgeber/MorgenTroedeln'));
 const RatgeberStickerChartAlternative = lazy(() => import('./pages/ratgeber/StickerChartAlternative'));
@@ -95,6 +98,9 @@ export function AppRoutes() {
         <Route path="/print/a4-poster-kinderarzt" element={<PrintA4PosterKinderarzt />} />
         <Route path="/print/a4-poster-zaehne" element={<PrintA4PosterZaehne />} />
         <Route path="/print/a4-poster-anti-engagement" element={<PrintA4PosterAntiEngagement />} />
+        <Route path="/print/vorlage-morgen" element={<VorlagePrintMorgen />} />
+        <Route path="/print/vorlage-abend" element={<VorlagePrintAbend />} />
+        <Route path="/print/vorlage-kleine-geschwister" element={<VorlagePrintKleineGeschwister />} />
         <Route path="/tools" element={<ToolsHub />} />
         <Route path="/tools/app-check" element={<AppCheck />} />
         <Route path="/tools/app-check/r/:id" element={<AppCheckResult />} />

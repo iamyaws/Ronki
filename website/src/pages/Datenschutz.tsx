@@ -29,7 +29,7 @@ export default function Datenschutz() {
           <p className="mt-5 text-base sm:text-lg text-ink/75 max-w-2xl leading-relaxed">
             Wir erheben so wenige Daten wie möglich. Nur, was wir wirklich brauchen, um Ronki an den Start zu bringen. Keine Werbung, keine Cookies, keine personenbezogenen Profile. Für eine anonyme Reichweitenanalyse nutzen wir Plausible Analytics aus der EU (siehe Abschnitt 7).
           </p>
-          <p className="mt-3 text-sm text-ink/60">Stand: 22. April 2026</p>
+          <p className="mt-3 text-sm text-ink/60">Stand: 15. September 2026</p>
 
           <div className="mt-14 flex flex-col gap-12 text-[0.98rem] leading-[1.75] text-ink/85">
 
@@ -142,6 +142,36 @@ export default function Datenschutz() {
               </p>
               <p>
                 <strong className="text-teal-dark">Wichtig zum Verständnis:</strong> Die gespeicherten Bewertungen geben deine eigenen Beobachtungen wieder. Sie sind weder eine Aussage von Ronki über die jeweilige App noch ein verifizierter Test.
+              </p>
+            </Section>
+
+            <Section id="vorlagen" heading="4c. Vorlagen-Download und Updates">
+              <p>
+                Auf den Vorlagen-Seiten kannst du dir eine Routine-Vorlage als PDF öffnen lassen. Dafür trägst du deine E-Mail-Adresse ein und setzt einen Haken. Wir speichern dann:
+              </p>
+              <ul className="list-disc pl-6 space-y-1">
+                <li>deine E-Mail-Adresse</li>
+                <li>die Vorlage, die du angefordert hast (zum Beispiel „vorlage-morgen")</li>
+                <li>den Einwilligungstext, der beim Absenden auf dem Bildschirm stand, und den Zeitpunkt</li>
+                <li>die Sprache (derzeit „de")</li>
+              </ul>
+              <p>
+                <strong className="text-teal-dark">Zweck:</strong> Dir die Vorlage bereitstellen und dich gelegentlich über Neues bei Ronki informieren, höchstens einmal im Monat.
+              </p>
+              <p>
+                <strong className="text-teal-dark">Rechtsgrundlage:</strong> Art. 6 Abs. 1 lit. a DSGVO, also deine Einwilligung, die du mit dem Haken und dem Absenden erteilst.
+              </p>
+              <p>
+                <strong className="text-teal-dark">Speicherung:</strong> Bei Supabase in der EU-Region (Frankfurt), auf Basis eines Auftragsverarbeitungsvertrags nach Art. 28 DSGVO (siehe Abschnitt 7). Wir speichern deinen Eintrag bis zu deinem Widerruf.
+              </p>
+              <p>
+                <strong className="text-teal-dark">Widerruf:</strong> Jederzeit und ohne Angabe von Gründen mit einer formlosen Mail an <a href="mailto:hallo@ronki.de" className="underline decoration-mustard underline-offset-4 hover:text-teal-dark">hallo@ronki.de</a>. Wir löschen deinen Eintrag dann umgehend.
+              </p>
+              <p>
+                <strong className="text-teal-dark">Ehrlich gesagt:</strong> Aktuell verschicken wir noch keine Update-Mails. Wenn wir damit anfangen, bekommst du zuerst eine Bestätigungs-Mail (Double-Opt-in).
+              </p>
+              <p>
+                Ohne E-Mail geht es auch. Jede Vorlagen-Seite lässt sich direkt im Browser ausdrucken, dafür speichern wir nichts.
               </p>
             </Section>
 
@@ -292,9 +322,17 @@ export default function Datenschutz() {
   );
 }
 
-function Section({ heading, children }: { heading: string; children: React.ReactNode }) {
+function Section({
+  heading,
+  children,
+  id,
+}: {
+  heading: string;
+  children: React.ReactNode;
+  id?: string;
+}) {
   return (
-    <section className="flex flex-col gap-4">
+    <section id={id} className="flex flex-col gap-4 scroll-mt-24">
       <h2 className="font-display font-bold text-xl sm:text-2xl tracking-tight text-teal-dark">
         {heading}
       </h2>

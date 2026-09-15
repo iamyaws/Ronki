@@ -1,5 +1,5 @@
 /**
- * profileSetup — website-side parent flow for creating a kid profile.
+ * profileSetup, website-side parent flow for creating a kid profile.
  *
  * Marc 3 May 2026: "the one-time setup could be handled via the
  * website for parents to generate a code for their kids and print it
@@ -21,6 +21,7 @@
  * name Ronki + pick a variant.
  */
 import { supabase } from './supabase';
+import { trackEvent } from './analytics';
 
 const TOKEN_REGEX = /^[a-f0-9]{32}$/;
 
@@ -31,7 +32,7 @@ const TOKEN_REGEX = /^[a-f0-9]{32}$/;
  */
 export function generateToken(): string {
   if (typeof crypto === 'undefined' || !crypto.getRandomValues) {
-    // Fallback for ancient environments — Math.random isn't crypto-
+    // Fallback for ancient environments, Math.random isn't crypto-
     // strong but the threat model here ("annoyed sibling guesses
     // your token") doesn't need it.
     let s = '';
@@ -53,7 +54,7 @@ export interface CreateProfileParams {
   pin?: string | null;
   /**
    * Whether to opt into anonymized analytics. Default false (privacy-
-   * safe — matches CombinedParentSetup's default). Parents can flip
+   * safe, matches CombinedParentSetup's default). Parents can flip
    * later in the in-app dashboard.
    */
   analyticsEnabled?: boolean;
@@ -64,7 +65,7 @@ export interface CreateProfileParams {
  * Returns the generated token so the caller can render the QR + share
  * URL. Seed state matches CombinedParentSetup's output PLUS pre-flips
  * parentHandoffBackSeen (the handoff card is meaningless when the kid
- * is the one scanning on their tablet — they were never the parent's
+ * is the one scanning on their tablet, they were never the parent's
  * device handed-off).
  */
 export async function createProfileOnSite(
@@ -80,7 +81,7 @@ export async function createProfileOnSite(
   const token = generateToken();
   const seedState: Record<string, unknown> = {
     parentOnboardingDone: true,
-    // Skip the "hand the tablet to the kid" card — there's no parent
+    // Skip the "hand the tablet to the kid" card, there's no parent
     // setup on the kid's tablet anymore; they scan directly.
     parentHandoffBackSeen: true,
     parentPin: pin || null,
@@ -94,15 +95,20 @@ export async function createProfileOnSite(
     onboardingDone: false,
   };
 
-  const { error } = await supabase.from('profiles').upsert(
-    {
-      token,
-      state: seedState,
-      last_active_at: new Date().toISOString(),
-    },
-    { onConflict: 'token' },
-  );
+  // Sep 2026: this used to upsert public.profiles directly. The table is
+  // closed to anon now (anon could list every family's token), so the write
+  // goes through the security-definer RPC instead. Same effect, and it also
+  // records today in profile_activity for the active-family counter.
+  const { error } = await supabase.rpc('profile_upsert', {
+    p_token: token,
+    p_state: seedState,
+  });
   if (error) return { ok: false, reason: 'error' };
+
+  // Funnel gate for the 30 day decision: how many parents actually made a
+  // card, not how many landed on the page.
+  trackEvent('Karte erstellt', { source: 'website' });
+
   return { ok: true, token };
 }
 
@@ -117,7 +123,7 @@ export function buildShareUrl(token: string, appUrl = 'https://app.ronki.de/'): 
 
 /**
  * The 8-char display fragment shown on the printed card. Format
- * 'a3f7-c2e1' — just a memory hook for parents; the QR is the real
+ * 'a3f7-c2e1', just a memory hook for parents; the QR is the real
  * mechanism.
  */
 export function tokenDisplayFragment(token: string | null): string {

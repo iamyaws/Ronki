@@ -1,8 +1,8 @@
+# GitHub Pages is no longer the production host, Vercel is.
+# Manual runs only, this workflow no longer fires on push.
 name: Deploy Dev to GitHub Pages
 
 on:
-  push:
-    branches: [dev]
   workflow_dispatch:
 
 permissions:

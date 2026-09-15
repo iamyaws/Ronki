@@ -127,13 +127,21 @@ export default function Vorlagen() {
                   Öffnen & drucken
                   <span aria-hidden>→</span>
                 </Link>
+                <p className="mt-3 text-center text-xs text-ink/55 leading-relaxed">
+                  <Link
+                    to={`/vorlagen/${v.slug}#pdf`}
+                    className="underline decoration-mustard underline-offset-4 hover:text-teal-dark"
+                  >
+                    Als PDF zum Ausdrucken
+                  </Link>
+                </p>
               </div>
             </motion.article>
           ))}
         </div>
       </section>
 
-      {/* Sammelkarten cross-link — new-ish surface, worth a dedicated
+      {/* Sammelkarten cross-link, new-ish surface, worth a dedicated
           section rather than squeezing into the Vorlagen grid since it
           lives at /drachen-sammelkarten (its own page, not a nested
           /vorlagen/* slug). */}
