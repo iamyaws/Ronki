@@ -2,6 +2,7 @@ import { useId, useState, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { submitLead, LeadSource } from '../lib/leads';
 import { isValidEmail } from '../lib/waitlist';
+import { trackEvent } from '../lib/analytics';
 
 /**
  * Email gate in front of a template PDF.
@@ -15,9 +16,13 @@ import { isValidEmail } from '../lib/waitlist';
 /** Stored verbatim in leads.consent_text so we can prove what was agreed to. */
 export const CONSENT_TEXT =
   'Ich bin einverstanden, dass Ronki meine E-Mail-Adresse speichert, um mir die Vorlage ' +
-  'bereitzustellen und mich gelegentlich über Neues bei Ronki zu informieren (höchstens ' +
-  'einmal im Monat, jederzeit abbestellbar per Mail an hallo@ronki.de). Details in der ' +
-  'Datenschutzerklärung.';
+  'bereitzustellen. Details in der Datenschutzerklärung.';
+
+/** Appended to consent_text only when the parent ticks the optional second box. */
+export const UPDATES_TEXT =
+  'Ja, informiert mich gelegentlich über Neues bei Ronki (höchstens einmal im Monat, ' +
+  'jederzeit abbestellbar per Mail an hallo@ronki.de). Update-Mails verschicken wir noch ' +
+  'nicht. Sobald wir anfangen, bekomme ich zuerst eine Bestätigungs-Mail.';
 
 type Status =
   | { kind: 'idle' }
@@ -39,8 +44,10 @@ interface Props {
 export function VorlageDownload({ source, pdfHref, title, printHref }: Props) {
   const emailId = useId();
   const consentId = useId();
+  const updatesId = useId();
   const [email, setEmail] = useState('');
   const [consent, setConsent] = useState(false);
+  const [wantsUpdates, setWantsUpdates] = useState(false);
   const [status, setStatus] = useState<Status>({ kind: 'idle' });
 
   const ready = consent && isValidEmail(email.trim());
@@ -54,7 +61,8 @@ export function VorlageDownload({ source, pdfHref, title, printHref }: Props) {
       email,
       source,
       consent,
-      consentText: CONSENT_TEXT,
+      consentText: wantsUpdates ? `${CONSENT_TEXT} ${UPDATES_TEXT}` : CONSENT_TEXT,
+      wantsUpdates,
     });
 
     if (result.ok) {
@@ -141,15 +149,7 @@ export function VorlageDownload({ source, pdfHref, title, printHref }: Props) {
             />
             <label htmlFor={consentId} className="text-sm text-ink/75 leading-relaxed">
               Ich bin einverstanden, dass Ronki meine E-Mail-Adresse speichert, um mir die
-              Vorlage bereitzustellen und mich gelegentlich über Neues bei Ronki zu
-              informieren (höchstens einmal im Monat, jederzeit abbestellbar per Mail an{' '}
-              <a
-                href="mailto:hallo@ronki.de"
-                className="underline decoration-mustard underline-offset-4"
-              >
-                hallo@ronki.de
-              </a>
-              ). Details in der{' '}
+              Vorlage bereitzustellen. Details in der{' '}
               <Link
                 to="/datenschutz#vorlagen"
                 className="underline decoration-mustard underline-offset-4 hover:text-teal-dark"
@@ -157,6 +157,28 @@ export function VorlageDownload({ source, pdfHref, title, printHref }: Props) {
                 Datenschutzerklärung
               </Link>
               .
+            </label>
+          </div>
+
+          <div className="flex items-start gap-3">
+            <input
+              id={updatesId}
+              type="checkbox"
+              checked={wantsUpdates}
+              onChange={(e) => setWantsUpdates(e.target.checked)}
+              className="mt-1 h-5 w-5 shrink-0 rounded border-2 border-teal/40 accent-teal"
+            />
+            <label htmlFor={updatesId} className="text-sm text-ink/60 leading-relaxed">
+              Optional: Ja, informiert mich gelegentlich über Neues bei Ronki (höchstens
+              einmal im Monat, jederzeit abbestellbar per Mail an{' '}
+              <a
+                href="mailto:hallo@ronki.de"
+                className="underline decoration-mustard underline-offset-4"
+              >
+                hallo@ronki.de
+              </a>
+              ). Update-Mails verschicken wir noch nicht. Sobald wir anfangen, bekommst du
+              zuerst eine Bestätigungs-Mail.
             </label>
           </div>
 
@@ -186,6 +208,7 @@ export function VorlageDownload({ source, pdfHref, title, printHref }: Props) {
         Ohne E-Mail:{' '}
         <Link
           to={printHref}
+          onClick={() => trackEvent('Vorlage Download', { vorlage: source, weg: 'druck' })}
           className="underline decoration-mustard underline-offset-4 hover:text-teal-dark"
         >
           Diese Seite ist selbst schon druckbar

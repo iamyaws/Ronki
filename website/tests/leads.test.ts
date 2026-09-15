@@ -46,10 +46,12 @@ describe('submitLead', () => {
       source: 'vorlage-morgen',
       consent: true,
       consent_text: CONSENT,
+      wants_updates: false,
       locale: 'de',
     });
     expect(trackEvent).toHaveBeenCalledWith('Vorlage Download', {
       vorlage: 'vorlage-morgen',
+      weg: 'pdf',
     });
   });
 
@@ -91,6 +93,7 @@ describe('submitLead', () => {
     expect(result).toEqual({ ok: true, alreadyKnown: true });
     expect(trackEvent).toHaveBeenCalledWith('Vorlage Download', {
       vorlage: 'vorlage-abend',
+      weg: 'pdf',
     });
   });
 

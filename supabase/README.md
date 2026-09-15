@@ -13,14 +13,14 @@ Probed with the public anon key, so this is what the shipped bundles can reach.
 | Object | Kind | In the repo |
 |---|---|---|
 | `waitlist` | table | yes, `migrations/20260415170000_waitlist_table.sql` (applied live) |
-| `waitlist_count()` | RPC | no, exists live only |
-| `update_waitlist_screener()` | RPC | no, exists live only |
-| `site_feedback` | table | no, columns documented in `CLAUDE.md` |
+| `waitlist_count()` | RPC | yes, `migrations/20260915000050_baseline_live_objects.sql` (captured from the live schema on 15 Sep 2026) |
+| `update_waitlist_screener()` | RPC | yes, `migrations/20260915000050_baseline_live_objects.sql` (captured from the live schema on 15 Sep 2026) |
+| `site_feedback` | table | yes, `migrations/20260915000050_baseline_live_objects.sql` (captured from the live schema on 15 Sep 2026) |
 | `profiles` | table | no, spec in `docs/specs/qr-profile-auth.md` |
 | `telemetry_events` | table | yes, `migrations/20260422000000_telemetry_events.sql` (applied live) |
-| `feedback` | table | no, columns documented in `CLAUDE.md` |
-| `app_evals` | table | no, SQL in `docs/superpowers/specs/2026-04-25-dark-pattern-scanner-design.md` |
-| `app_eval_counts` | view | same as above |
+| `feedback` | table | yes, `migrations/20260915000050_baseline_live_objects.sql` (captured from the live schema on 15 Sep 2026) |
+| `app_evals` | table | yes, `migrations/20260915000050_baseline_live_objects.sql` (captured from the live schema on 15 Sep 2026) |
+| `app_eval_counts` | view | yes, `migrations/20260915000050_baseline_live_objects.sql` (captured from the live schema on 15 Sep 2026) |
 
 Both files under `migrations/` were applied to the live project by hand, long
 before `scripts/supabase-apply.mjs` existed. The apply script knows that and
@@ -138,14 +138,14 @@ Without `pg` it exits with that message rather than half doing the job.
 
 ### `node scripts/supabase-build-apply.mjs`
 
-Regenerates `apply-2026-09-15.sql` from the two new migrations. Run it after
+Regenerates `apply-2026-09-15.sql` from the three 2026-09-15 migrations (baseline, leads, profiles RPCs). Run it after
 editing either one. `--check` fails if the apply file is stale, which makes it
 usable as a CI step.
 
 ## Keep-alive
 
 `.github/workflows/supabase-keepalive.yml` runs every Monday at 06:17 UTC and on
-manual dispatch. It POSTs to `/rest/v1/rpc/waitlist_count` with the anon key and
+manual dispatch. It POSTs to `/rest/v1/rpc/leads_count` (defined in `migrations/20260915000100_leads.sql`) with the anon key and
 fails the job unless the answer is HTTP 200.
 
 A free Supabase project pauses after seven days without activity, then gets
@@ -161,10 +161,8 @@ It needs two repository secrets: `VITE_SUPABASE_URL` and
 
 1. `node scripts/supabase-apply.mjs --all`, or paste `migration.sql`,
    both files in `migrations/`, and the SQL from `CLAUDE.md` and the specs.
-2. Recreate the objects that still have no SQL in the repo: `waitlist_count()`,
-   `update_waitlist_screener()`, `site_feedback`, `feedback`, `app_evals`,
-   `app_eval_counts`. They are documented but not migrated. Writing them as
-   migrations is the obvious next cleanup.
+2. The 2026-09-15 migrations cover everything the code calls except `game_state`
+   (dead code) and the anon telemetry grant (see HANDOFF follow-ups).
 3. `node scripts/supabase-smoke.mjs` until it says PASS.
 4. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in both Vercel projects
    and in the GitHub repository secrets, then redeploy.

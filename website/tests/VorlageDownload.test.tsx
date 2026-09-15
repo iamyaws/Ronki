@@ -26,7 +26,7 @@ function setup() {
 const submitButton = () => screen.getByRole('button', { name: /pdf öffnen/i });
 // Exact string: the consent label also mentions "E-Mail-Adresse".
 const emailField = () => screen.getByLabelText('E-Mail');
-const consentBox = () => screen.getByRole('checkbox');
+const consentBox = () => screen.getAllByRole('checkbox')[0];
 
 describe('VorlageDownload', () => {
   beforeEach(() => vi.clearAllMocks());

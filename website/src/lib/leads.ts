@@ -8,7 +8,7 @@ import { trackEvent } from './analytics';
  * A lead row is one parent asking for one template PDF. The table is
  * insert-only for anon (see supabase/migrations/20260915000100_leads.sql):
  *
- *   leads(id, created_at, email, source, consent, consent_text, locale)
+ *   leads(id, created_at, email, source, consent, consent_text, wants_updates, locale)
  *   CHECK source in ('vorlage-morgen','vorlage-abend',
  *                    'vorlage-kleine-geschwister','vorlage-adhs')
  *   CHECK consent = true
@@ -32,6 +32,8 @@ export interface LeadSubmission {
   consent: boolean;
   /** The exact wording that stood next to the checkbox on screen. */
   consentText: string;
+  /** Second, optional checkbox: occasional update mails. Default false. */
+  wantsUpdates?: boolean;
   locale?: 'de' | 'en';
 }
 
@@ -44,6 +46,7 @@ export async function submitLead({
   source,
   consent,
   consentText,
+  wantsUpdates = false,
   locale = 'de',
 }: LeadSubmission): Promise<LeadResult> {
   const email = rawEmail.trim().toLowerCase();
@@ -65,17 +68,18 @@ export async function submitLead({
     source,
     consent: true,
     consent_text: consentText,
+    wants_updates: wantsUpdates,
     locale,
   });
 
   if (!error) {
-    trackEvent('Vorlage Download', { vorlage: source });
+    trackEvent('Vorlage Download', { vorlage: source, weg: 'pdf' });
     return { ok: true };
   }
 
   // 23505 = unique_violation. This parent already has this template.
   if (error.code === '23505') {
-    trackEvent('Vorlage Download', { vorlage: source });
+    trackEvent('Vorlage Download', { vorlage: source, weg: 'pdf' });
     return { ok: true, alreadyKnown: true };
   }
 

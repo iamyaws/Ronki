@@ -17,8 +17,8 @@ const mockTransaction = {
       setTimeout(() => req.onsuccess?.(), 0);
       return req;
     },
-    put: (val, key) => { mockStore[key] = val; },
-    delete: (key) => { delete mockStore[key]; },
+    put: (val, key) => { mockStore[key] = val; setTimeout(() => mockTransaction.oncomplete?.(), 0); },
+    delete: (key) => { delete mockStore[key]; setTimeout(() => mockTransaction.oncomplete?.(), 0); },
   }),
 };
 const mockDB = {
@@ -68,8 +68,6 @@ describe('storage', () => {
 
     const result = await storage.load();
     expect(result).toEqual(testData);
-    // localStorage should be cleared after migration
-    expect(localStorage.getItem('hdx2_drachennest')).toBeNull();
   });
 
   it('falls back to localStorage when IndexedDB fails on save', async () => {

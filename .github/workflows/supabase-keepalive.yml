@@ -23,7 +23,7 @@ jobs:
     name: Ping Supabase
     runs-on: ubuntu-latest
     steps:
-      - name: Call waitlist_count and require HTTP 200
+      - name: Call leads_count and require HTTP 200
         env:
           SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
@@ -37,7 +37,7 @@ jobs:
             --max-time 30 \
             --output response.json \
             --write-out '%{http_code}' \
-            --request POST "${SUPABASE_URL%/}/rest/v1/rpc/waitlist_count" \
+            --request POST "${SUPABASE_URL%/}/rest/v1/rpc/leads_count" \
             --header "apikey: ${SUPABASE_ANON_KEY}" \
             --header "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
             --header "Content-Type: application/json" \

@@ -12,7 +12,7 @@ export default function RatgeberAbendroutineGrundschulkind() {
     <RatgeberArticle
       slug="abendroutine-grundschulkind"
       title="Abendroutine für Kinder: der Ablauf, der bei 5- bis 8-Jährigen wirklich trägt"
-      description="Abendroutine für Kinder von 5 bis 8: warum 45 Minuten reichen, welche Reihenfolge trägt und wie die Abendroutine Kinder ruhiger ins Bett bringt."
+      description="Abendroutine für Kinder von 5 bis 8: warum 45 Minuten reichen, welche Reihenfolge trägt und was bei einer Abendroutine fürs Kleinkind anders läuft."
       category="Abendroutine"
       readMinutes={10}
       publishedAt="2026-04-19"
@@ -48,8 +48,8 @@ export default function RatgeberAbendroutineGrundschulkind() {
         die Abende ruhiger werden, fallen dir die Morgen oft halb von selbst in
         den Schoß. Nur muss eine Abendroutine Kinder genau dann durch vier bis
         sechs Schritte bringen, wenn im ganzen Haus niemand mehr Kraft hat. Sie
-        ist deshalb kurz, sie ist jeden Tag gleich, und sie sieht für
-        Abendroutine Kleinkind und Schulkind ein bisschen unterschiedlich aus.
+        ist deshalb kurz, sie ist jeden Tag gleich, und sie sieht bei einem
+        Kleinkind ein bisschen anders aus als beim Schulkind.
         Beides steht weiter unten.
       </p>
 
@@ -86,8 +86,8 @@ export default function RatgeberAbendroutineGrundschulkind() {
         Und Kinderaugen sind dafür empfindlicher, als man denkt: in einer
         kleinen Studie aus Colorado senkte eine Stunde helles Licht vor dem
         Zubettgehen den Melatoninspiegel von Drei- bis Fünfjährigen um rund 88
-        Prozent, und er blieb auch nach dem Ausschalten noch fast eine
-        Dreiviertelstunde unten.
+        Prozent, und er blieb nach dem Ausschalten noch bis zu 50 Minuten
+        unten.
       </p>
 
       <p>
@@ -417,8 +417,8 @@ export default function RatgeberAbendroutineGrundschulkind() {
 
       <p>
         Wenn es nach einer Woche nicht klappt, probier noch eine. Eine
-        Abendroutine ist ein Muskel, kein Schalter. Das gilt für Abendroutine
-        Kleinkind genauso wie für Schulkind. Und irgendwann guckst du um 19:48
+        Abendroutine ist ein Muskel, kein Schalter. Das gilt für ein
+        Kleinkind genauso wie für ein Schulkind. Und irgendwann guckst du um 19:48
         Uhr auf die Uhr, und dein Kind liegt schon im Bett und wartet aufs
         Vorlesen.
       </p>

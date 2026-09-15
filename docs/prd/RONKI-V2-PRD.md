@@ -287,6 +287,7 @@ select left(p.token, 8) as card, p.created_at::date as created, count(distinct a
 from public.profiles p
 join public.profile_activity a on a.token = p.token
 where a.day >= date '2026-09-15'
+  and p.created_at >= date '2026-09-15'
 group by p.token, p.created_at
 having count(distinct a.day) >= 3
 order by days desc;

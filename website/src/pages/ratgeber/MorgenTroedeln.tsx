@@ -12,7 +12,7 @@ export default function RatgeberMorgenTroedeln() {
     <RatgeberArticle
       slug="morgen-troedeln"
       title="Kind trödelt morgens? Warum das normal ist und was wirklich hilft"
-      description="Dein Kind trödelt morgens? Das ist kein Erziehungsproblem, sondern Entwicklung. Was dahinter steckt, warum Schreien bremst und vier Hebel, die wirken."
+      description="Dein Kind trödelt morgens? Kein Erziehungsproblem, sondern Entwicklung. Was dahinter steckt und vier Hebel, die wirken, auch wenn das Kleinkind morgens trödelt."
       category="Morgenroutine"
       readMinutes={8}
       publishedAt="2026-04-19"

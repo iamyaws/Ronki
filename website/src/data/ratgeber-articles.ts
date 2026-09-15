@@ -24,7 +24,7 @@ export const ARTICLES: Article[] = [
     slug: 'morgen-troedeln',
     title: 'Kind trödelt morgens? Warum das normal ist und was wirklich hilft',
     description:
-      'Dein Kind trödelt morgens? Das ist kein Erziehungsproblem, sondern Entwicklung. Was dahinter steckt, warum Schreien bremst und vier Hebel, die wirken.',
+      'Dein Kind trödelt morgens? Kein Erziehungsproblem, sondern Entwicklung. Was dahinter steckt und vier Hebel, die wirken, auch wenn das Kleinkind morgens trödelt.',
     category: 'Morgenroutine',
     readMinutes: 8,
     image: '/art/routines/getting-ready.webp',
@@ -70,7 +70,7 @@ export const ARTICLES: Article[] = [
     slug: 'abendroutine-grundschulkind',
     title: 'Abendroutine für Kinder: der Ablauf, der bei 5- bis 8-Jährigen wirklich trägt',
     description:
-      'Abendroutine für Kinder von 5 bis 8: warum 45 Minuten reichen, welche Reihenfolge trägt und wie die Abendroutine Kinder ruhiger ins Bett bringt.',
+      'Abendroutine für Kinder von 5 bis 8: warum 45 Minuten reichen, welche Reihenfolge trägt und was bei einer Abendroutine fürs Kleinkind anders läuft.',
     category: 'Abendroutine',
     readMinutes: 10,
     image: '/art/bioms/Sternenmeer_sea-of-stars.webp',

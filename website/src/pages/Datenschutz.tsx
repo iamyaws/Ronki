@@ -156,16 +156,16 @@ export default function Datenschutz() {
                 <li>die Sprache (derzeit „de")</li>
               </ul>
               <p>
-                <strong className="text-teal-dark">Zweck:</strong> Dir die Vorlage bereitstellen und dich gelegentlich über Neues bei Ronki informieren, höchstens einmal im Monat.
+                <strong className="text-teal-dark">Zweck:</strong> Dir die Vorlage bereitstellen. Nur wenn du das zweite, freiwillige Häkchen setzt: dich gelegentlich über Neues bei Ronki informieren, höchstens einmal im Monat.
               </p>
               <p>
                 <strong className="text-teal-dark">Rechtsgrundlage:</strong> Art. 6 Abs. 1 lit. a DSGVO, also deine Einwilligung, die du mit dem Haken und dem Absenden erteilst.
               </p>
               <p>
-                <strong className="text-teal-dark">Speicherung:</strong> Bei Supabase in der EU-Region (Frankfurt), auf Basis eines Auftragsverarbeitungsvertrags nach Art. 28 DSGVO (siehe Abschnitt 7). Wir speichern deinen Eintrag bis zu deinem Widerruf.
+                <strong className="text-teal-dark">Speicherung:</strong> Bei Supabase in der EU-Region (Frankfurt), auf Basis eines Auftragsverarbeitungsvertrags nach Art. 28 DSGVO (siehe Abschnitt 7). Wir speichern deinen Eintrag bis zu deinem Widerruf, spätestens 24 Monate nach deiner letzten Anforderung löschen wir ihn.
               </p>
               <p>
-                <strong className="text-teal-dark">Widerruf:</strong> Jederzeit und ohne Angabe von Gründen mit einer formlosen Mail an <a href="mailto:hallo@ronki.de" className="underline decoration-mustard underline-offset-4 hover:text-teal-dark">hallo@ronki.de</a>. Wir löschen deinen Eintrag dann umgehend.
+                <strong className="text-teal-dark">Widerruf:</strong> Jederzeit und ohne Angabe von Gründen mit einer formlosen Mail an <a href="mailto:hallo@ronki.de" className="underline decoration-mustard underline-offset-4 hover:text-teal-dark">hallo@ronki.de</a>. Wir löschen deinen Eintrag dann umgehend. Die Rechtmäßigkeit der Verarbeitung bis zum Widerruf bleibt davon unberührt.
               </p>
               <p>
                 <strong className="text-teal-dark">Ehrlich gesagt:</strong> Aktuell verschicken wir noch keine Update-Mails. Wenn wir damit anfangen, bekommst du zuerst eine Bestätigungs-Mail (Double-Opt-in).
@@ -209,7 +209,7 @@ export default function Datenschutz() {
               </p>
               <ul className="list-disc pl-6 space-y-3">
                 <li>
-                  <strong className="text-teal-dark">Supabase Inc.:</strong> Datenbank und Backend für die Warteliste. Wir nutzen ausschließlich die EU-Region. Es besteht ein Auftragsverarbeitungsvertrag. Sitz: San Francisco, USA. Datenverarbeitung in der EU-Region; Übermittlung abgesichert durch EU-Standardvertragsklauseln.<br />
+                  <strong className="text-teal-dark">Supabase Inc.:</strong> Datenbank und Backend für die Warteliste, die Vorlagen-Downloads, die Profil-Karten der App, das Feedback-Formular und den App-Check. Wir nutzen ausschließlich die EU-Region. Es besteht ein Auftragsverarbeitungsvertrag. Sitz: San Francisco, USA. Datenverarbeitung in der EU-Region; Übermittlung abgesichert durch EU-Standardvertragsklauseln.<br />
                   <span className="text-sm text-ink/65">Mehr: <a href="https://supabase.com/privacy" target="_blank" rel="noopener noreferrer" className="underline decoration-mustard underline-offset-4 hover:text-teal-dark">supabase.com/privacy</a></span>
                 </li>
                 <li>

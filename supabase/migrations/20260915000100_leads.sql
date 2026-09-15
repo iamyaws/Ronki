@@ -17,6 +17,7 @@ create table if not exists public.leads (
   source text not null,
   consent boolean not null default false,
   consent_text text,
+  wants_updates boolean not null default false,
   locale text not null default 'de'
 );
 
@@ -26,6 +27,7 @@ create table if not exists public.leads (
 alter table public.leads add column if not exists created_at timestamptz not null default now();
 alter table public.leads add column if not exists consent boolean not null default false;
 alter table public.leads add column if not exists consent_text text;
+alter table public.leads add column if not exists wants_updates boolean not null default false;
 alter table public.leads add column if not exists locale text not null default 'de';
 
 -- CHECK constraints. Postgres has no "add constraint if not exists",
@@ -100,6 +102,7 @@ grant insert on public.leads to anon;
 comment on table public.leads is 'Ronki template download leads. Parent emails only, consent required.';
 comment on column public.leads.source is 'Which template page the parent came from.';
 comment on column public.leads.consent_text is 'The consent wording shown on screen at the time of signup.';
+comment on column public.leads.wants_updates is 'Second, optional checkbox: the parent wants occasional update mails.';
 
 -- Public counter for the funnel gate. Counts a parent once, whether they
 -- arrived through a template download or the waitlist.

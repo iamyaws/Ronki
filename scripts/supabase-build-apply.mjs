@@ -22,6 +22,7 @@ const outFile = join(repoRoot, 'supabase', 'apply-2026-09-15.sql');
 
 // Order matters: leads first, then the profiles lockdown.
 const PARTS = [
+  '20260915000050_baseline_live_objects.sql',
   '20260915000100_leads.sql',
   '20260915000200_profiles_rpc.sql',
 ];
