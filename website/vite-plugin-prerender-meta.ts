@@ -65,9 +65,9 @@ const ROUTES: RouteMeta[] = [
   },
   {
     path: '/ratgeber/morgen-troedeln',
-    title: 'Warum dein Kind morgens trödelt · Ratgeber · Ronki',
+    title: 'Kind trödelt morgens? Warum das normal ist und was wirklich hilft · Ratgeber · Ronki',
     description:
-      'Trödeln ist keine Boshaftigkeit und kein Erziehungsversagen. Was wirklich dahinter steckt und vier Hebel, die bei Grundschulkindern messbar wirken.',
+      'Dein Kind trödelt morgens? Kein Erziehungsproblem, sondern Entwicklung. Was dahinter steckt und vier Hebel, die wirken, auch wenn das Kleinkind morgens trödelt.',
     ogImage: '/og-ratgeber-morgen-troedeln.jpg',
   },
   {
@@ -93,9 +93,9 @@ const ROUTES: RouteMeta[] = [
   },
   {
     path: '/ratgeber/abendroutine-grundschulkind',
-    title: 'Die Abendroutine für Grundschulkinder · Ratgeber · Ronki',
+    title: 'Abendroutine für Kinder: der Ablauf, der bei 5- bis 8-Jährigen wirklich trägt · Ratgeber · Ronki',
     description:
-      'Abendroutine für 6- bis 9-Jährige: Warum 45 Minuten reichen, welche Reihenfolge wirklich Schlaf bringt, und wie du aus dem Zähneputz-Drama rauskommst.',
+      'Abendroutine für Kinder von 5 bis 8: warum 45 Minuten reichen, welche Reihenfolge trägt und was bei einer Abendroutine fürs Kleinkind anders läuft.',
     ogImage: '/og-ratgeber-abendroutine.jpg',
   },
   {
