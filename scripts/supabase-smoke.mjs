@@ -86,7 +86,7 @@ const FAKE_TOKEN = '0'.repeat(32);
 // Every RPC the code calls, plus the counters the funnel gates need.
 const RPCS = [
   ['waitlist_count', {}, 'total waitlist signups'],
-  ['update_waitlist_screener', { email: 'smoke-probe@example.invalid', child_age: '', challenge: '', willing_to_test: 'später' }, 'waitlist screener (no-op for unknown email)'],
+  ['update_waitlist_screener', { p_email: 'smoke-probe@example.invalid', p_child_age: '', p_challenge: '', p_willing_to_test: 'später' }, 'waitlist screener (no-op for unknown email)'],
   ['leads_count', {}, 'unique parent emails, leads plus waitlist'],
   ['profiles_count', {}, 'cards created'],
   ['profiles_active_count', {}, 'cards used on 3+ days in 60 days'],
