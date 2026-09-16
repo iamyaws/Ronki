@@ -83,6 +83,10 @@ Built after go-live, verified in the browser on local production builds against 
 
 Note for local builds: `dist/` and `website/dist/` were last built against the mock (`127.0.0.1:54321`). They are not deployed (Vercel builds from source), but rebuild without the mock env before any manual deploy.
 
+## Design proposal: Bilderbuch (16 Sep 2026)
+
+Marc generated a new Ronki look with ChatGPT image generation (cobalt, red-orange, sun yellow on paper, crayon texture, hand-lettered headlines). Extracted as a design system with compatibility notes and a rollout path: [docs/design-briefs/2026-09-16-bilderbuch-design-system.md](docs/design-briefs/2026-09-16-bilderbuch-design-system.md). Not applied anywhere. Conflicts with the brand direction in `.impeccable.md`; decision and character sheet come first.
+
 ## Follow-ups (ordered)
 
 1. Screen preview and PDF of the ADHS template differ slightly (the PDF carries the clip lane and time bar); rendering `VorlagePrint` inside the preview frame would unify them.
