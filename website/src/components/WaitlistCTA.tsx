@@ -19,9 +19,8 @@ type Status =
 type Props = {
   launchState: LaunchState;
   appUrl?: string;
-  /** Set to true when the CTA is rendered on a dark background (hero,
-   *  dark-teal callout). Swaps the button to mustard-on-teal-dark for
-   *  proper contrast, the default teal-on-teal-dark is unreadable. */
+  /** Set to true when the CTA is rendered on a cobalt block. Swaps the
+   *  pill to white-on-cobalt, the default cobalt pill would vanish. */
   onDarkBackground?: boolean;
 };
 
@@ -34,24 +33,32 @@ export function WaitlistCTA({ launchState, appUrl, onDarkBackground }: Props) {
   const resolvedAppUrl = appUrl ?? copy.appUrl ?? '/app';
 
   if (copy.ctaAction === 'install') {
+    // On a cobalt block the pill goes white with ink text; on the white
+    // ground it is the cobalt pill. Both keep the drawn chevron.
     const btnBg = onDarkBackground
-      ? 'bg-mustard text-teal-dark hover:bg-mustard-soft'
-      : 'bg-teal text-cream';
-    const helperColor = onDarkBackground ? 'text-cream/80' : 'opacity-70';
+      ? 'bg-white text-ink'
+      : 'bg-cobalt text-white';
+    const helperColor = onDarkBackground ? 'text-white/[0.88]' : 'text-ink/70';
     // Parents create the card on the website first; the app is a kid
     // space that only scans. So the primary action is the card, the app
     // link stays for families that already have one.
-    const cardLinkClass = onDarkBackground ? 'text-cream/80 hover:text-cream' : 'text-teal-dark/70 hover:text-teal-dark';
+    const cardLinkClass = onDarkBackground ? 'text-white' : 'text-cobalt';
     return (
       <div className="flex flex-col items-start gap-3">
         <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
           <Link
             to="/profil-erstellen"
             onClick={() => trackEvent('CTA Klick', { cta: 'karte', source: 'cta_block' })}
-            className={`group relative inline-flex items-center gap-3 rounded-full px-8 py-4 font-display font-semibold text-lg shadow-md hover:shadow-lg transition-shadow overflow-hidden ${btnBg}`}
+            className={`group relative inline-flex items-center gap-3 rounded-full px-8 py-4 font-display font-bold text-lg transition-transform hover:-translate-y-0.5 ${btnBg}`}
           >
             <span className="relative z-10">Karte für euer Kind erstellen</span>
-            <span className="relative z-10 transition-transform group-hover:translate-x-1">→</span>
+            <svg
+              aria-hidden
+              viewBox="0 0 64 64"
+              className="relative z-10 h-4 w-4 transition-transform group-hover:translate-x-1"
+            >
+              <use href="#bb-arrow" />
+            </svg>
           </Link>
         </motion.div>
         <p
@@ -67,7 +74,7 @@ export function WaitlistCTA({ launchState, appUrl, onDarkBackground }: Props) {
         <a
           href={resolvedAppUrl}
           onClick={() => trackEvent('CTA Klick', { cta: 'app', source: 'cta_block' })}
-          className={`text-sm underline underline-offset-4 ${cardLinkClass}`}
+          className={`text-sm font-display font-semibold underline decoration-2 underline-offset-4 ${cardLinkClass}`}
         >
           Schon eine Karte? App öffnen
         </a>
@@ -148,8 +155,8 @@ function WaitlistForm({ copy }: { copy: ReturnType<typeof getLaunchCopy> }) {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-3 w-full max-w-md" noValidate>
       <div
-        className={`relative flex items-center rounded-full border-2 transition-all duration-300 bg-cream ${
-          focused ? 'border-teal shadow-md' : 'border-teal/25'
+        className={`relative flex items-center rounded-full border-[2.5px] transition-colors duration-300 bg-white ${
+          focused ? 'border-cobalt' : 'border-ink'
         }`}
       >
         <input
@@ -162,7 +169,7 @@ function WaitlistForm({ copy }: { copy: ReturnType<typeof getLaunchCopy> }) {
           onBlur={() => setFocused(false)}
           placeholder="deine@email.de"
           aria-label="E-Mail"
-          className="flex-1 bg-transparent pl-6 pr-2 py-3.5 text-base text-teal-dark placeholder:text-teal-dark/35 focus:outline-none"
+          className="flex-1 bg-transparent pl-6 pr-2 py-3.5 text-base text-ink placeholder:text-ink/40 focus:outline-none"
           required
         />
         <motion.button
@@ -170,10 +177,16 @@ function WaitlistForm({ copy }: { copy: ReturnType<typeof getLaunchCopy> }) {
           disabled={status.kind === 'submitting'}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.97 }}
-          className="group relative m-1 inline-flex shrink-0 items-center gap-2 rounded-full bg-teal px-5 py-2.5 text-cream font-display font-semibold text-sm whitespace-nowrap [hyphens:none] disabled:opacity-50 shadow-sm hover:shadow-md transition-shadow"
+          className="group relative m-1 inline-flex shrink-0 items-center gap-2 rounded-full bg-cobalt px-5 py-2.5 text-white font-display font-bold text-sm whitespace-nowrap [hyphens:none] disabled:opacity-50 transition-transform hover:-translate-y-0.5"
         >
           {status.kind === 'submitting' ? '…' : copy.ctaLabel}
-          <span className="transition-transform group-hover:translate-x-0.5">→</span>
+          <svg
+            aria-hidden
+            viewBox="0 0 64 64"
+            className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5"
+          >
+            <use href="#bb-arrow" />
+          </svg>
         </motion.button>
       </div>
       <p className="text-xs opacity-60 pl-6">{copy.ctaHelper}</p>
@@ -193,7 +206,7 @@ function WaitlistForm({ copy }: { copy: ReturnType<typeof getLaunchCopy> }) {
             initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="text-sm text-sage pl-6"
+            className="text-sm text-cobalt font-medium pl-6"
           >
             Bitte gib eine gültige E-Mail-Adresse ein.
           </motion.p>
@@ -204,7 +217,7 @@ function WaitlistForm({ copy }: { copy: ReturnType<typeof getLaunchCopy> }) {
             initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="text-sm text-sage pl-6"
+            className="text-sm text-cobalt font-medium pl-6"
           >
             Du stehst schon auf der Liste. Wir melden uns am Start-Tag.
           </motion.p>
@@ -215,7 +228,7 @@ function WaitlistForm({ copy }: { copy: ReturnType<typeof getLaunchCopy> }) {
             initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="text-sm text-sage pl-6"
+            className="text-sm text-cobalt font-medium pl-6"
           >
             Das hat leider nicht geklappt. Bitte versuch es gleich noch mal.
           </motion.p>

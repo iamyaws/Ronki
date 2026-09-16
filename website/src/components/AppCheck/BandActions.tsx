@@ -38,7 +38,7 @@ export function BandActions({ band, answers }: Props) {
   return (
     <div className="space-y-5">
       <div>
-        <h3 className="font-display font-bold text-xl sm:text-2xl text-teal-dark mb-2">
+        <h3 className="font-display font-bold text-xl sm:text-2xl text-ink mb-2">
           Was du jetzt machen kannst
         </h3>
         <p className="text-sm text-ink/70 leading-relaxed max-w-prose">
@@ -66,7 +66,7 @@ export function BandActions({ band, answers }: Props) {
               {i + 1}
             </span>
             <div className="space-y-1.5 flex-1">
-              <p className="font-display font-bold text-teal-dark text-base max-w-prose">
+              <p className="font-display font-bold text-ink text-base max-w-prose">
                 {item.title}
               </p>
               <p className="text-sm text-ink/75 leading-relaxed max-w-prose">

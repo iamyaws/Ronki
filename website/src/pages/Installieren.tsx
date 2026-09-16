@@ -112,19 +112,19 @@ export default function Installieren() {
           >
             <Link
               to="/"
-              className="inline-flex items-center gap-2 text-sm text-teal-dark/60 hover:text-teal-dark transition-colors mb-8"
+              className="inline-flex items-center gap-2 text-sm text-ink/60 hover:text-ink transition-colors mb-8"
             >
               <span aria-hidden>←</span> Zurück
             </Link>
             <p className="text-xs uppercase tracking-[0.2em] text-teal font-medium mb-6">
               Ronki installieren
             </p>
-            <h1 className="font-display font-bold text-4xl sm:text-5xl lg:text-6xl leading-[1.04] tracking-tight text-teal-dark">
+            <h1 className="font-display font-bold text-4xl sm:text-5xl lg:text-6xl leading-[1.04] tracking-tight text-ink">
               Einmal antippen,{' '}
               <em className="italic text-sage whitespace-nowrap">fertig</em>.
             </h1>
             <p className="mt-6 text-base sm:text-lg text-ink/75 max-w-2xl leading-relaxed">
-              Ronki läuft direkt im Browser. Kein App-Store, kein Download, keine APK. Ihr öffnet einmal <span className="font-display font-semibold text-teal-dark">app.ronki.de</span> und legt die Seite einmalig auf den Startbildschirm. Danach fühlt sich Ronki an wie jede andere App auf eurem Gerät.
+              Ronki läuft direkt im Browser. Kein App-Store, kein Download, keine APK. Ihr öffnet einmal <span className="font-display font-semibold text-ink">app.ronki.de</span> und legt die Seite einmalig auf den Startbildschirm. Danach fühlt sich Ronki an wie jede andere App auf eurem Gerät.
             </p>
           </motion.div>
         </div>
@@ -133,7 +133,7 @@ export default function Installieren() {
       {/* ─────────── Device picker ─────────── */}
       <section className="px-6 pb-16 sm:pb-20">
         <div className="max-w-4xl mx-auto">
-          <p className="text-xs uppercase tracking-[0.2em] text-teal-dark/60 font-semibold mb-5">
+          <p className="text-xs uppercase tracking-[0.2em] text-ink/60 font-semibold mb-5">
             Womit möchtet ihr starten?
           </p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
@@ -151,7 +151,7 @@ export default function Installieren() {
                 <span className="text-2xl" aria-hidden>
                   {d.icon}
                 </span>
-                <span className="font-display font-bold text-sm sm:text-base text-teal-dark leading-tight">
+                <span className="font-display font-bold text-sm sm:text-base text-ink leading-tight">
                   {d.label}
                 </span>
                 <span className="text-[0.7rem] sm:text-xs text-ink/55 font-medium leading-snug">
@@ -184,7 +184,7 @@ export default function Installieren() {
                 <div>
                   <h2
                     id={`${d.id}-heading`}
-                    className="font-display font-bold text-2xl sm:text-3xl text-teal-dark leading-tight tracking-tight"
+                    className="font-display font-bold text-2xl sm:text-3xl text-ink leading-tight tracking-tight"
                   >
                     {d.label}
                   </h2>
@@ -226,18 +226,18 @@ export default function Installieren() {
             viewport={{ once: true }}
             transition={{ duration: 0.7, ease: EASE_OUT }}
           >
-            <p className="text-xs uppercase tracking-[0.2em] text-teal-dark/60 font-semibold mb-5">
+            <p className="text-xs uppercase tracking-[0.2em] text-ink/60 font-semibold mb-5">
               Die ersten 10 Minuten
             </p>
             <h2
               id="first-steps-heading"
-              className="font-display font-bold text-3xl sm:text-4xl leading-[1.08] tracking-tight text-teal-dark mb-8"
+              className="font-display font-bold text-3xl sm:text-4xl leading-[1.08] tracking-tight text-ink mb-8"
             >
               Ronki ist installiert. Was jetzt?
             </h2>
             <div className="grid md:grid-cols-2 gap-8">
               <article>
-                <h3 className="font-display font-bold text-lg text-teal-dark mb-3">
+                <h3 className="font-display font-bold text-lg text-ink mb-3">
                   Als Elternteil
                 </h3>
                 <ol className="install-steps install-steps--compact">
@@ -251,7 +251,7 @@ export default function Installieren() {
                 </ol>
               </article>
               <article>
-                <h3 className="font-display font-bold text-lg text-teal-dark mb-3">
+                <h3 className="font-display font-bold text-lg text-ink mb-3">
                   Mit deinem Kind
                 </h3>
                 <ol className="install-steps install-steps--compact">
@@ -280,7 +280,7 @@ export default function Installieren() {
             viewport={{ once: true }}
             transition={{ duration: 0.7, ease: EASE_OUT }}
             className="rounded-3xl bg-teal-dark text-cream p-8 sm:p-10"
-            style={{ boxShadow: '0 24px 48px -24px rgba(26,60,63,0.35)' }}
+            style={{ boxShadow: '0 24px 48px -24px rgba(4,8,18,0.35)' }}
           >
             <div className="grid sm:grid-cols-[1.1fr_1fr] gap-10 items-center">
               <div>
@@ -320,7 +320,7 @@ export default function Installieren() {
             Fragen zur Installation? Schreib direkt an{' '}
             <a
               href="mailto:hallo@ronki.de"
-              className="font-display font-semibold text-teal-dark underline decoration-teal/30 underline-offset-4 hover:decoration-teal"
+              className="font-display font-semibold text-ink underline decoration-teal/30 underline-offset-4 hover:decoration-teal"
             >
               hallo@ronki.de
             </a>
@@ -359,13 +359,13 @@ export default function Installieren() {
           font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
           font-weight: 800;
           font-size: 0.9rem;
-          color: #50A082;
+          color: #0544B0;
           letter-spacing: 0.08em;
           width: 2.25rem;
           text-align: left;
         }
         .install-steps > li strong {
-          color: #1A3C3F;
+          color: #040812;
           font-weight: 700;
         }
         .install-steps--compact > li {

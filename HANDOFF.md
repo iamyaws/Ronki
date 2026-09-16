@@ -73,7 +73,7 @@ Marc asked for real checks in the app. The Vercel share links for the previews s
 
 ## Website follow-ups (16 Sep 2026, branch revival-followups)
 
-Built after go-live, verified in the browser on local production builds against the Supabase mock. Not merged yet.
+Merged as PR 13 (merge commit 3aebd52) and live on 16 Sep 2026; both production bundles verified changed. Built after go-live, verified in the browser on local production builds against the Supabase mock.
 
 - **Template link where the traffic is.** The Morgenroutine article (our only page-1 result) now links the morning template twice and the ADHS template once.
 - **Template pages as search pages.** `/vorlagen/morgenroutine`, `/vorlagen/abendroutine`, `/vorlagen/kleine-geschwister` carry the search phrase as the single H1, about 330 to 390 words of how-to text, a four-question FAQ with FAQPage JSON-LD and a picture of the real PDF (`website/public/vorlagen/previews/`). `/vorlagen/adhs` got the picture, the FAQ and a single H1. Shared component `VorlageGuide.tsx`; `RoutinePrintSheet` gained optional page title and intro props (sheet title becomes H2 when set). Prerendered crawler titles updated.
@@ -85,7 +85,13 @@ Note for local builds: `dist/` and `website/dist/` were last built against the m
 
 ## Design proposal: Bilderbuch (16 Sep 2026)
 
-Marc generated a new Ronki look with ChatGPT image generation (cobalt, red-orange, sun yellow on paper, crayon texture, hand-lettered headlines). Extracted as a design system with compatibility notes and a rollout path: [docs/design-briefs/2026-09-16-bilderbuch-design-system.md](docs/design-briefs/2026-09-16-bilderbuch-design-system.md). Not applied anywhere. Conflicts with the brand direction in `.impeccable.md`; decision and character sheet come first. Website side-by-side (live vs. draft, desktop and phone) built 16 Sep: `docs/design-incoming/bilderbuch/2026-09-16-website-vergleich.html`, published as a private artifact for Marc. Colour tokens in the brief are now measured from the original board files.
+Marc generated a new Ronki look with ChatGPT image generation (cobalt, red-orange, sun yellow on paper, crayon texture, hand-lettered headlines). Extracted as a design system with compatibility notes and a rollout path: [docs/design-briefs/2026-09-16-bilderbuch-design-system.md](docs/design-briefs/2026-09-16-bilderbuch-design-system.md). Website side-by-side (live vs. draft, desktop and phone, with switches for ground, cards and headline font) built 16 Sep: `docs/design-incoming/bilderbuch/2026-09-16-website-vergleich.html`, published as a private artifact for Marc. Colour tokens in the brief are measured from the original board files.
+
+**Decisions (Marc, 16 Sep 2026):** white page ground, not paper; the start page hero as a full cobalt block; the one action card per page (template signup) inverted cobalt; Fredoka Bold for headlines (Bagel Fat One was too heavy to read); the same look in app and website. Image batch list for the art swap, to be generated on Sunday 20 Sep once image tokens are back: [docs/design-briefs/2026-09-16-bilderbuch-image-list.md](docs/design-briefs/2026-09-16-bilderbuch-image-list.md) (character sheet first, 18 website motifs, 20 app motifs).
+
+**In flight:** website token remap on the local branch `design/bilderbuch` (from b3525dc, docs commits 9ac7978 to 76942fc, not pushed). One Opus 5 agent moves fonts, tokens, page ground, hero, action card, template and print sheets and the article head to the new look, regenerates the four PDFs and previews, keeps tests and build green. Next: local browser check against the mock at desktop and phone width, local commit, then ask Marc before pushing (the branch holds board crops and the repo is public). Rollout order after that: art swap on the website (batch 1), then the app screen by screen, then rewrite the brand direction in `.impeccable.md`.
+
+Backlog from the design work: sticker lettering as SVG so it stays centred; tracked links on the print posters; the ADHS preview vs PDF unification (follow-up 1 below).
 
 ## Follow-ups (ordered)
 

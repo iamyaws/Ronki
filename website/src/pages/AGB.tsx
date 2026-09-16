@@ -15,7 +15,7 @@ export default function AGB() {
         <article className="max-w-3xl mx-auto">
           <Link
             to="/"
-            className="inline-flex items-center gap-2 text-sm text-teal-dark/70 hover:text-teal-dark transition-colors"
+            className="inline-flex items-center gap-2 text-sm text-ink/70 hover:text-ink transition-colors"
           >
             <span aria-hidden>←</span> Zurück zu Ronki
           </Link>
@@ -23,7 +23,7 @@ export default function AGB() {
           <p className="mt-10 text-xs uppercase tracking-[0.2em] text-teal font-medium">
             Rechtliches
           </p>
-          <h1 className="mt-4 font-display font-bold text-4xl sm:text-5xl lg:text-6xl leading-[1.05] tracking-tight text-teal-dark">
+          <h1 className="mt-4 font-display font-bold text-4xl sm:text-5xl lg:text-6xl leading-[1.05] tracking-tight text-ink">
             Allgemeine Geschäfts&shy;bedingungen
           </h1>
           <p className="mt-5 text-base sm:text-lg text-ink/75 max-w-2xl leading-relaxed">
@@ -56,7 +56,7 @@ export default function AGB() {
                 Wir speichern ausschließlich die E-Mail-Adresse. Diese wird nur für eine einmalige Benachrichtigung am Start-Tag verwendet.
               </p>
               <p>
-                Eine Abmeldung ist jederzeit möglich, eine formlose Nachricht an <a href="mailto:hallo@ronki.de" className="underline decoration-mustard underline-offset-4 hover:text-teal-dark">hallo@ronki.de</a> reicht.
+                Eine Abmeldung ist jederzeit möglich, eine formlose Nachricht an <a href="mailto:hallo@ronki.de" className="underline decoration-mustard underline-offset-4 hover:text-ink">hallo@ronki.de</a> reicht.
               </p>
             </Section>
 
@@ -95,7 +95,7 @@ export default function AGB() {
 
             <Section heading="§8 Online-Streitbeilegung">
               <p>
-                Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung bereit, die du unter <a href="https://ec.europa.eu/consumers/odr/" target="_blank" rel="noopener noreferrer" className="underline decoration-mustard underline-offset-4 hover:text-teal-dark break-words">ec.europa.eu/consumers/odr</a> erreichst. Wir sind nicht bereit und nicht verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.
+                Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung bereit, die du unter <a href="https://ec.europa.eu/consumers/odr/" target="_blank" rel="noopener noreferrer" className="underline decoration-mustard underline-offset-4 hover:text-ink break-words">ec.europa.eu/consumers/odr</a> erreichst. Wir sind nicht bereit und nicht verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.
               </p>
             </Section>
 
@@ -115,7 +115,7 @@ export default function AGB() {
               Kurz gesagt
             </p>
             <p className="text-base sm:text-lg text-ink/80 leading-relaxed max-w-2xl">
-              Ronki ist kostenlos, respektvoll und für Kinder gemacht. Wir speichern nur das Nötigste und ändern diese Bedingungen nur, wenn es einen guten Grund gibt. Fragen? <a href="mailto:hallo@ronki.de" className="underline decoration-mustard underline-offset-4 hover:text-teal-dark">hallo@ronki.de</a>.
+              Ronki ist kostenlos, respektvoll und für Kinder gemacht. Wir speichern nur das Nötigste und ändern diese Bedingungen nur, wenn es einen guten Grund gibt. Fragen? <a href="mailto:hallo@ronki.de" className="underline decoration-mustard underline-offset-4 hover:text-ink">hallo@ronki.de</a>.
             </p>
           </div>
         </article>
@@ -128,7 +128,7 @@ export default function AGB() {
 function Section({ heading, children }: { heading: string; children: React.ReactNode }) {
   return (
     <section className="flex flex-col gap-4">
-      <h2 className="font-display font-bold text-xl sm:text-2xl tracking-tight text-teal-dark">
+      <h2 className="font-display font-bold text-xl sm:text-2xl tracking-tight text-ink">
         {heading}
       </h2>
       {children}

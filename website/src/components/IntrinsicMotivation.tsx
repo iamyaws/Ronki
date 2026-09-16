@@ -18,12 +18,12 @@ export function IntrinsicMotivation() {
             viewport={{ once: true, margin: '-10%' }}
             transition={{ duration: 0.7 }}
           >
-            <p className="text-xs uppercase tracking-[0.2em] text-teal-dark/85 mb-6 font-semibold">
+            <p className="text-xs uppercase tracking-[0.2em] text-ink/85 mb-6 font-semibold">
               Der Ansatz dahinter
             </p>
             <h2
               id="intrinsic-heading"
-              className="font-display font-bold text-3xl sm:text-4xl lg:text-5xl leading-[1.1] tracking-tight text-teal-dark mb-6"
+              className="font-display font-bold text-3xl sm:text-4xl lg:text-5xl leading-[1.1] tracking-tight text-ink mb-6"
             >
               Intrinsisch statt{' '}
               <em className="italic text-sage">extrinsisch.</em>
@@ -33,7 +33,7 @@ export function IntrinsicMotivation() {
                 Kinder-Apps arbeiten oft mit externen Belohnungen: Punkte, Abzeichen, Lootboxen. Das funktioniert kurzfristig, tötet aber die natürliche Motivation.
               </p>
               <p>
-                Ronki dreht das um: Am Anfang begleitet der Drache intensiv. Dann zieht er sich Schritt für Schritt zurück, bis dein Kind seine Routinen <strong className="text-teal-dark">aus eigenem Antrieb</strong> macht.
+                Ronki dreht das um: Am Anfang begleitet der Drache intensiv. Dann zieht er sich Schritt für Schritt zurück, bis dein Kind seine Routinen <strong className="text-ink">aus eigenem Antrieb</strong> macht.
               </p>
               <p className="text-sm text-ink/60">
                 Inspiriert von der Selbstbestimmungstheorie (Deci & Ryan) und dem Montessori-Prinzip der vorbereiteten Umgebung. Autonomie, Kompetenz und Verbundenheit statt Abhängigkeit.
@@ -48,7 +48,7 @@ export function IntrinsicMotivation() {
             transition={{ duration: 0.7, delay: 0.15 }}
             className="rounded-2xl bg-cream/90 border border-teal/15 p-7 sm:p-8 shadow-lg"
           >
-            <p className="text-xs uppercase tracking-[0.15em] text-teal-dark/70 font-semibold mb-8">
+            <p className="text-xs uppercase tracking-[0.15em] text-ink/70 font-semibold mb-8">
               Fading Rewards: So löst sich Ronki auf
             </p>
             <div className="space-y-6">
@@ -61,7 +61,7 @@ export function IntrinsicMotivation() {
                   transition={{ duration: 0.4, delay: 0.3 + i * 0.12 }}
                 >
                   <div className="flex justify-between items-baseline mb-2">
-                    <span className="text-xs font-display font-bold text-teal-dark">{bar.week}</span>
+                    <span className="text-xs font-display font-bold text-ink">{bar.week}</span>
                     <span className="text-xs text-ink/45">{bar.label}</span>
                   </div>
                   <div className="flex h-3.5 rounded-full overflow-hidden bg-teal-dark/8">
@@ -104,7 +104,7 @@ export function IntrinsicMotivation() {
           className="mt-12 text-sm text-ink/50 text-center"
         >
           Basierend auf Selbstbestimmungstheorie (Deci & Ryan), Fading Scaffolding (Vygotsky) und Montessori-Prinzipien.{' '}
-          <a href="/wissenschaft" className="underline decoration-teal/30 hover:text-teal-dark transition-colors">
+          <a href="/wissenschaft" className="underline decoration-teal/30 hover:text-ink transition-colors">
             Mehr erfahren →
           </a>
         </motion.p>

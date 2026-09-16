@@ -118,18 +118,18 @@ export function PWAInstall() {
         viewport={{ once: true, margin: '-10%' }}
         transition={{ duration: 0.7 }}
         className="max-w-5xl mx-auto rounded-3xl bg-teal-dark p-8 sm:p-12 lg:p-16 relative overflow-hidden"
-        style={{ boxShadow: '0 30px 60px -20px rgba(45,90,94,0.5)' }}
+        style={{ boxShadow: '0 30px 60px -20px rgba(4,8,18,0.5)' }}
       >
         {/* Ambient glow */}
         <div
           aria-hidden
           className="absolute top-0 right-0 w-96 h-96 -mr-32 -mt-32 rounded-full blur-[100px] pointer-events-none"
-          style={{ background: 'rgba(80,160,130,0.35)' }}
+          style={{ background: 'rgba(5,68,176,0.35)' }}
         />
         <div
           aria-hidden
           className="absolute bottom-0 left-0 w-80 h-80 -ml-24 -mb-24 rounded-full blur-[90px] pointer-events-none"
-          style={{ background: 'rgba(252,211,77,0.18)' }}
+          style={{ background: 'rgba(253,209,52,0.18)' }}
         />
 
         <div className="relative z-10 text-center max-w-3xl mx-auto">
@@ -169,7 +169,7 @@ export function PWAInstall() {
                 className="relative bg-cream/[0.06] backdrop-blur-sm rounded-2xl p-6 border border-cream/10 text-left [hyphens:none]"
               >
                 <div
-                  className="w-9 h-9 rounded-full bg-mustard text-teal-dark font-display font-bold text-sm flex items-center justify-center mb-4"
+                  className="w-9 h-9 rounded-full bg-mustard text-ink font-display font-bold text-sm flex items-center justify-center mb-4"
                 >
                   {s.step}
                 </div>

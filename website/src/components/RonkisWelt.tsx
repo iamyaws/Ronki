@@ -18,49 +18,49 @@ const FREUNDE: Freund[] = [
     subtitle: 'Wenn es dunkel wird',
     blurb: 'Sie zündet Laternen an, wenn dein Kind Mut braucht.',
     image: '/art/freunde/lichtbringerin.webp',
-    accent: '#d97706',
+    accent: '#0544B0',
   },
   {
     name: 'Sternenweberin',
     subtitle: 'Vor dem Einschlafen',
     blurb: 'Sie webt die Gedanken des Tages zu ruhigen Träumen.',
     image: '/art/freunde/sternenweberin.webp',
-    accent: '#4338ca',
+    accent: '#0544B0',
   },
   {
     name: 'Windreiterin',
     subtitle: 'Beim Neues wagen',
     blurb: 'Sie springt voraus, wenn etwas schwer aussieht.',
     image: '/art/freunde/windreiterin.webp',
-    accent: '#50a082',
+    accent: '#0544B0',
   },
   {
     name: 'Tiefentaucherin',
     subtitle: 'Wenn Gefühle groß sind',
     blurb: 'Sie hört zu, auch wenn die Worte noch fehlen.',
     image: '/art/freunde/tiefentaucherin.webp',
-    accent: '#2D5A5E',
+    accent: '#0544B0',
   },
   {
     name: 'Brückenbauer',
     subtitle: 'Wenn Freunde sich streiten',
     blurb: 'Er baut kleine Brücken, wo Worte fehlen.',
     image: '/art/freunde/brueckenbauer.webp',
-    accent: '#A83E2C',
+    accent: '#0544B0',
   },
   {
     name: 'Flackerfuchs',
     subtitle: 'Wenn etwas Freude macht',
     blurb: 'Er tanzt mit, wenn dein Kind lacht.',
     image: '/art/freunde/flackerfuchs.webp',
-    accent: '#c2410c',
+    accent: '#0544B0',
   },
   {
     name: 'Pilzhüter',
     subtitle: 'Wenn alles wuselt',
     blurb: 'Er atmet langsam, und dein Kind darf mitatmen.',
     image: '/art/freunde/pilzhueter.webp',
-    accent: '#735c00',
+    accent: '#0544B0',
   },
 ];
 
@@ -87,7 +87,7 @@ export function RonkisWelt() {
           </p>
           <h2
             id="welt-heading"
-            className="font-display font-bold text-4xl sm:text-5xl lg:text-6xl leading-[1.08] tracking-tight text-teal-dark"
+            className="font-display font-bold text-4xl sm:text-5xl lg:text-6xl leading-[1.08] tracking-tight text-ink"
           >
             Dein Kind ist nicht allein.{' '}
             <em className="italic text-sage">Ronki hat Freunde.</em>
@@ -112,7 +112,7 @@ export function RonkisWelt() {
               <div
                 className="relative aspect-square overflow-hidden rounded-[1.25rem] ring-1 ring-inset ring-teal/10"
                 style={{
-                  boxShadow: '0 12px 30px -12px rgba(45,90,94,0.25)',
+                  boxShadow: '0 12px 30px -12px rgba(4,8,18,0.25)',
                 }}
               >
                 <div
@@ -138,7 +138,7 @@ export function RonkisWelt() {
                 >
                   {f.subtitle}
                 </p>
-                <p className="font-display font-bold text-base sm:text-lg text-teal-dark leading-tight mb-2">
+                <p className="font-display font-bold text-base sm:text-lg text-ink leading-tight mb-2">
                   {f.name}
                 </p>
                 <p className="text-xs sm:text-sm text-ink/65 leading-relaxed">

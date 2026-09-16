@@ -25,6 +25,10 @@ interface Props {
   publishedAt: string;
   heroImage?: string;
   heroAlt?: string;
+  /** Short hand-written line under the hero picture. The alt text is a
+   *  description for screen readers and reads far too long as a caption,
+   *  so pages pass their own line or take the default. */
+  heroCaption?: string;
   /** Path to a 1200x630 OG image for social previews. Falls back to /og-ronki.jpg. */
   ogImage?: string;
   related?: RelatedLink[];
@@ -133,6 +137,7 @@ export function RatgeberArticle({
   publishedAt,
   heroImage,
   heroAlt,
+  heroCaption = 'Aus Ronkis Welt',
   ogImage,
   related,
   children,
@@ -185,13 +190,16 @@ export function RatgeberArticle({
           >
             <Link
               to="/ratgeber"
-              className="inline-flex items-center gap-2 text-sm text-teal-dark/60 hover:text-teal-dark transition-colors mb-8"
+              className="inline-flex items-center gap-2 font-display font-semibold text-sm text-ink/70 hover:text-ink transition-colors mb-8"
             >
-              <span aria-hidden>←</span> Ratgeber
+              <svg aria-hidden viewBox="0 0 64 64" className="h-3.5 w-3.5">
+                <use href="#bb-back" />
+              </svg>
+              Ratgeber
             </Link>
 
             <div className="flex items-center gap-3 mb-6">
-              <span className="inline-flex items-center rounded-full bg-teal/10 px-3 py-1 text-[0.7rem] font-display font-bold uppercase tracking-[0.15em] text-teal">
+              <span className="inline-flex items-center rounded-full bg-sky-wash px-3.5 py-1.5 text-[0.7rem] font-display font-bold uppercase tracking-[0.1em] text-cobalt">
                 {category}
               </span>
               <span className="text-xs text-ink/50">
@@ -199,7 +207,7 @@ export function RatgeberArticle({
               </span>
             </div>
 
-            <h1 className="font-display font-bold text-3xl sm:text-4xl lg:text-5xl leading-[1.1] tracking-tight text-teal-dark">
+            <h1 className="bb-display text-3xl sm:text-4xl lg:text-5xl text-ink">
               {title}
             </h1>
             <p className="mt-6 text-lg sm:text-xl text-ink/70 leading-relaxed">
@@ -218,7 +226,7 @@ export function RatgeberArticle({
             transition={{ duration: 0.8, delay: 0.2, ease: EASE_OUT }}
             className="max-w-4xl mx-auto"
           >
-            <div className="relative aspect-[16/9] sm:aspect-[2/1] overflow-hidden rounded-[1.5rem] ring-1 ring-inset ring-teal/10 shadow-sm">
+            <div className="bb-frame relative aspect-[16/9] sm:aspect-[2/1] rotate-[1.5deg]">
               <img
                 src={heroImage}
                 alt={heroAlt || ''}
@@ -227,6 +235,11 @@ export function RatgeberArticle({
                 height={600}
               />
             </div>
+            {heroCaption && (
+              <p className="bb-hand mt-4 ml-4 text-xl sm:text-2xl leading-tight text-cobalt -rotate-1">
+                {heroCaption}
+              </p>
+            )}
           </motion.div>
         </section>
       )}
@@ -246,23 +259,23 @@ export function RatgeberArticle({
       </article>
 
       {/* ─────────── CTA ─────────── */}
-      <section className="px-6 py-20 sm:py-24 bg-teal-dark text-cream">
+      <section className="px-6 py-20 sm:py-24 bg-cobalt text-white">
         <div className="max-w-3xl mx-auto">
           <div className="grid sm:grid-cols-[1.1fr_1fr] gap-10 items-center">
             <div>
-              <p className="text-[0.7rem] uppercase tracking-[0.2em] text-mustard/80 font-semibold mb-4">
+              <p className="bb-hand text-2xl uppercase text-sun leading-none mb-3">
                 Ritual statt Routine
               </p>
-              <h2 className="font-display font-bold text-2xl sm:text-3xl leading-tight mb-4">
+              <h2 className="bb-display text-2xl sm:text-3xl mb-4">
                 Ronki macht aus der Routine ein tägliches Ritual.
               </h2>
-              <p className="text-cream/70 leading-relaxed">
+              <p className="text-white/[0.88] leading-relaxed">
                 {getLaunchCopy(LAUNCH_STATE).ctaAction === 'install'
                   ? 'Eine Routine führst du aus. Ein Ritual lebt ihr gemeinsam. Ronki läuft direkt im Browser, ohne Store, ohne Download, ohne Werbung. Probier es aus und schreib uns an hallo@ronki.de, wenn was klemmt.'
                   : 'Eine Routine führst du aus. Ein Ritual lebt ihr gemeinsam. Wir öffnen Ronki in kleinen Gruppen. Kein Store, kein Download, keine Werbung. Trag dich ein und sag uns, wo\u2019s bei euch gerade klemmt.'}
               </p>
             </div>
-            <div className="text-cream">
+            <div className="text-white">
               <WaitlistCTA launchState={LAUNCH_STATE} onDarkBackground />
             </div>
           </div>
@@ -271,27 +284,28 @@ export function RatgeberArticle({
 
       {/* ─────────── Related articles ─────────── */}
       {related && related.length > 0 && (
-        <section className="px-6 py-20 sm:py-24 border-t border-teal/10">
+        <section className="px-6 py-20 sm:py-24 border-t-2 border-ink/10">
           <div className="max-w-3xl mx-auto">
-            <p className="text-xs uppercase tracking-[0.2em] text-teal font-medium mb-6">
+            <p className="bb-hand text-2xl uppercase text-cobalt leading-none mb-5">
               Weiterlesen
             </p>
-            <ul className="divide-y divide-teal/10">
+            <ul className="divide-y-2 divide-ink/10">
               {related.map((link) => (
                 <li key={link.slug}>
                   <Link
                     to={`/ratgeber/${link.slug}`}
-                    className="group flex items-start gap-4 py-5 hover:text-teal transition-colors"
+                    className="group flex items-start gap-4 py-5 hover:text-cobalt transition-colors"
                   >
-                    <span className="flex-1 font-display font-semibold text-base sm:text-lg text-teal-dark group-hover:text-teal transition-colors leading-snug">
+                    <span className="flex-1 font-display font-bold text-base sm:text-lg text-ink group-hover:text-cobalt transition-colors leading-snug">
                       {link.title}
                     </span>
-                    <span
-                      className="text-teal/60 group-hover:text-teal group-hover:translate-x-1 transition-all"
+                    <svg
                       aria-hidden
+                      viewBox="0 0 64 64"
+                      className="mt-1.5 h-4 w-4 shrink-0 text-cobalt transition-transform group-hover:translate-x-1"
                     >
-                      →
-                    </span>
+                      <use href="#bb-arrow" />
+                    </svg>
                   </Link>
                 </li>
               ))}
@@ -301,12 +315,12 @@ export function RatgeberArticle({
       )}
 
       {/* ─────────── Feedback / content-planning ─────────── */}
-      <section className="px-6 py-20 sm:py-24 border-t border-teal/10 bg-cream/30">
+      <section className="px-6 py-20 sm:py-24 border-t-2 border-ink/10 bg-white">
         <div className="max-w-2xl mx-auto">
-          <p className="text-xs uppercase tracking-[0.2em] text-teal font-medium mb-4">
+          <p className="bb-hand text-2xl uppercase text-cobalt leading-none mb-3">
             Was fehlt dir zu diesem Thema?
           </p>
-          <h2 className="font-display font-bold text-2xl sm:text-3xl leading-tight tracking-tight text-teal-dark mb-4">
+          <h2 className="bb-display text-2xl sm:text-3xl text-ink mb-4">
             Sag uns, was wir noch schreiben sollen.
           </h2>
           <p className="text-base text-ink/70 leading-relaxed mb-8">
@@ -340,11 +354,11 @@ export function RatgeberArticle({
           margin-top: 1.2em;
         }
         .ratgeber-body h2 {
-          font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+          font-family: 'Fredoka', system-ui, sans-serif;
           font-weight: 700;
           font-size: 1.75rem;
           line-height: 1.2;
-          color: #1A3C3F;
+          color: #040812;
           margin-top: 2.5em;
           margin-bottom: 0.6em;
           letter-spacing: -0.01em;
@@ -354,11 +368,11 @@ export function RatgeberArticle({
           .ratgeber-body h2 { font-size: 2rem; }
         }
         .ratgeber-body h3 {
-          font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+          font-family: 'Fredoka', system-ui, sans-serif;
           font-weight: 700;
           font-size: 1.3rem;
           line-height: 1.25;
-          color: #1A3C3F;
+          color: #040812;
           margin-top: 2em;
           margin-bottom: 0.4em;
           letter-spacing: -0.005em;
@@ -367,31 +381,31 @@ export function RatgeberArticle({
           text-wrap: pretty;
         }
         .ratgeber-body strong {
-          color: #1A3C3F;
+          color: #040812;
           font-weight: 600;
         }
         .ratgeber-body em {
-          color: #1A3C3F;
+          color: #040812;
         }
         .ratgeber-body a {
-          color: #2D5A5E;
+          color: #0544B0;
           text-decoration: underline;
-          text-decoration-color: rgba(80, 160, 130, 0.5);
+          text-decoration-color: rgba(5, 68, 176, 0.5);
           text-underline-offset: 3px;
           transition: text-decoration-color 0.2s;
         }
         .ratgeber-body a:hover {
-          text-decoration-color: #2D5A5E;
+          text-decoration-color: #0544B0;
         }
         .ratgeber-body blockquote {
-          border-left: 3px solid #FCD34D;
+          border-left: 6px solid #FDD134;
           padding-left: 1.5rem;
           margin: 2em 0;
-          font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+          font-family: 'Fredoka', system-ui, sans-serif;
           font-size: 1.25rem;
           line-height: 1.5;
           font-style: italic;
-          color: #1A3C3F;
+          color: #040812;
           font-weight: 500;
         }
         .ratgeber-body ul, .ratgeber-body ol {
@@ -411,7 +425,7 @@ export function RatgeberArticle({
           width: 0.5rem;
           height: 0.5rem;
           border-radius: 50%;
-          background-color: #FCD34D;
+          background-color: #FDD134;
         }
         .ratgeber-body ol {
           counter-reset: item;
@@ -429,16 +443,16 @@ export function RatgeberArticle({
           position: absolute;
           left: 0;
           top: 0.1em;
-          font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+          font-family: 'Fredoka', system-ui, sans-serif;
           font-weight: 700;
           font-size: 0.85em;
-          color: #50A082;
+          color: #0544B0;
           letter-spacing: 0.05em;
         }
         .ratgeber-body hr {
           border: none;
           height: 1px;
-          background: rgba(45, 90, 94, 0.15);
+          background: rgba(4, 8, 18, 0.15);
           margin: 3em 0;
         }
         .ratgeber-body .lead {
@@ -449,13 +463,13 @@ export function RatgeberArticle({
         }
         /* Drop cap on the lead paragraph — first letter only */
         .ratgeber-body .lead::first-letter {
-          font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+          font-family: 'Fredoka', system-ui, sans-serif;
           font-weight: 800;
           font-size: 4.25rem;
           line-height: 0.88;
           float: left;
           margin: 0.25rem 0.6rem -0.1rem 0;
-          color: #50A082;
+          color: #0544B0;
           letter-spacing: -0.04em;
         }
         .ratgeber-body .source {
@@ -468,12 +482,14 @@ export function RatgeberArticle({
         .ratgeber-pullquote {
           position: relative;
           margin: 3em 0;
-          padding: 0.5rem 0 0.5rem 2.5rem;
-          font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+          background: #B9E3FC;
+          border-radius: 1.5rem;
+          padding: 1.75rem 1.75rem 1.5rem 2.75rem;
+          font-family: 'Fredoka', system-ui, sans-serif;
           font-weight: 500;
           font-size: 1.5rem;
           line-height: 1.3;
-          color: #1A3C3F;
+          color: #040812;
           font-style: italic;
           letter-spacing: -0.015em;
           text-wrap: balance;
@@ -481,18 +497,18 @@ export function RatgeberArticle({
         @media (min-width: 640px) {
           .ratgeber-pullquote {
             font-size: 1.85rem;
-            padding-left: 3rem;
+            padding-left: 3.25rem;
             margin: 3.5em -1.5rem;
           }
         }
         .ratgeber-pullquote::before {
           content: "\\201C";
           position: absolute;
-          left: -0.15rem;
-          top: -1.5rem;
+          left: 0.6rem;
+          top: 0.1rem;
           font-size: 5rem;
           line-height: 1;
-          color: #FCD34D;
+          color: #FDD134;
           font-family: Georgia, 'Times New Roman', serif;
           font-weight: 700;
           pointer-events: none;
@@ -500,8 +516,8 @@ export function RatgeberArticle({
         @media (min-width: 640px) {
           .ratgeber-pullquote::before {
             font-size: 6rem;
-            top: -2rem;
-            left: -0.4rem;
+            top: -0.3rem;
+            left: 0.6rem;
           }
         }
         .ratgeber-pullquote__body > p {
@@ -515,7 +531,7 @@ export function RatgeberArticle({
           font-style: normal;
           font-size: 0.8rem;
           font-weight: 700;
-          color: #2D5A5E;
+          color: #0544B0;
           margin-top: 1.2rem;
           letter-spacing: 0.1em;
           text-transform: uppercase;
@@ -525,12 +541,12 @@ export function RatgeberArticle({
         .ratgeber-callout {
           margin: 2em 0;
           padding: 1.5rem 1.75rem;
-          border-radius: 1rem;
+          border-radius: 1.375rem;
           position: relative;
         }
         .ratgeber-callout__label {
           display: inline-block;
-          font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+          font-family: 'Fredoka', system-ui, sans-serif;
           font-size: 0.65rem;
           font-weight: 700;
           text-transform: uppercase;
@@ -547,41 +563,40 @@ export function RatgeberArticle({
           height: 0.35rem;
         }
         .ratgeber-callout--wichtig {
-          background: #1A3C3F;
-          color: rgb(253 248 240 / 0.92);
+          background: #FFFFFF;
+          color: #040812;
+          border: 3px solid #040812;
         }
         .ratgeber-callout--wichtig .ratgeber-callout__label {
-          color: #FCD34D;
+          color: #040812;
         }
-        .ratgeber-callout--wichtig strong { color: #FCD34D; font-weight: 700; }
-        .ratgeber-callout--wichtig em { color: rgb(253 248 240 / 0.92); }
+        .ratgeber-callout--wichtig strong { color: #040812; font-weight: 700; }
         .ratgeber-callout--wichtig a {
-          color: #FCD34D;
-          text-decoration-color: rgba(252, 211, 77, 0.5);
+          color: #0544B0;
+          text-decoration-color: rgba(5, 68, 176, 0.5);
         }
         .ratgeber-callout--forschung {
-          background: rgba(80, 160, 130, 0.1);
-          color: #1A3C3F;
-          border-left: 3px solid #50A082;
+          background: #B9E3FC;
+          color: #040812;
         }
         .ratgeber-callout--forschung .ratgeber-callout__label {
-          color: #2D5A5E;
+          color: #0544B0;
         }
         .ratgeber-callout--ausprobieren {
-          background: rgba(252, 211, 77, 0.15);
-          color: #1A3C3F;
-          border-left: 3px solid #FCD34D;
+          background: #FFFFFF;
+          color: #040812;
+          border: 2.5px solid #0544B0;
         }
         .ratgeber-callout--ausprobieren .ratgeber-callout__label {
-          color: #A83E2C;
+          color: #0544B0;
         }
         .ratgeber-callout--achtung {
-          background: rgba(217, 119, 6, 0.08);
-          color: #1A3C3F;
-          border-left: 3px solid #D97706;
+          background: #FFFFFF;
+          color: #040812;
+          border: 3px solid #EE4F35;
         }
         .ratgeber-callout--achtung .ratgeber-callout__label {
-          color: #A83E2C;
+          color: #040812;
         }
 
         /* ── StepCard ───────────────────────────────────────────────── */
@@ -593,27 +608,26 @@ export function RatgeberArticle({
         .ratgeber-step {
           position: relative;
           padding: 1.5rem 1.5rem 1.25rem 4.5rem;
-          background: rgb(253 248 240 / 0.7);
-          backdrop-filter: blur(2px);
-          border-radius: 1rem;
-          border-left: 3px solid rgba(252, 211, 77, 0.6);
+          background: #FFFFFF;
+          border-radius: 1.375rem;
+          border: 2.5px solid #040812;
         }
         .ratgeber-step__n {
           position: absolute;
           left: 1.25rem;
           top: 1.3rem;
-          font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+          font-family: 'Fredoka', system-ui, sans-serif;
           font-weight: 800;
           font-size: 1.75rem;
           line-height: 1;
-          color: #50A082;
+          color: #0544B0;
           letter-spacing: -0.02em;
         }
         .ratgeber-step__title {
-          font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+          font-family: 'Fredoka', system-ui, sans-serif;
           font-weight: 700;
           font-size: 1.15rem;
-          color: #1A3C3F;
+          color: #040812;
           margin: 0 0 0.5rem;
           line-height: 1.3;
           letter-spacing: -0.005em;
@@ -635,15 +649,15 @@ export function RatgeberArticle({
         .ratgeber-figure img {
           width: 100%;
           height: auto;
-          border-radius: 1.25rem;
+          border: 3px solid #040812;
+          border-radius: 1.75rem;
           display: block;
-          box-shadow: 0 8px 24px -12px rgba(26, 60, 63, 0.15);
         }
         .ratgeber-figure figcaption {
-          font-family: 'Be Vietnam Pro', system-ui, sans-serif;
-          font-size: 0.85rem;
-          color: rgb(45 90 94 / 0.75);
-          font-style: italic;
+          font-family: 'Gochi Hand', 'Comic Sans MS', cursive;
+          font-size: 1.25rem;
+          line-height: 1.15;
+          color: #0544B0;
           margin-top: 0.85rem;
           text-align: center;
         }

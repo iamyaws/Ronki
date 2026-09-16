@@ -23,12 +23,12 @@ export function BeforeAfter() {
           transition={{ duration: 0.7 }}
           className="text-center mb-14"
         >
-          <p className="text-xs uppercase tracking-[0.2em] text-teal-dark/85 mb-6 font-semibold">
+          <p className="text-xs uppercase tracking-[0.2em] text-ink/85 mb-6 font-semibold">
             Was sich ändert
           </p>
           <h2
             id="before-after-heading"
-            className="font-display font-bold text-4xl sm:text-5xl lg:text-6xl leading-[1.1] tracking-tight text-teal-dark"
+            className="font-display font-bold text-4xl sm:text-5xl lg:text-6xl leading-[1.1] tracking-tight text-ink"
           >
             Vorher. <em className="italic text-sage">Nachher.</em>
           </h2>
@@ -45,7 +45,7 @@ export function BeforeAfter() {
             <span className="inline-flex self-end items-center px-3 py-1 rounded-full bg-sage/20 text-sage text-xs font-bold uppercase tracking-wider mb-6">
               Der alte Weg
             </span>
-            <h3 className="font-display font-bold text-xl sm:text-2xl text-teal-dark mb-6">
+            <h3 className="font-display font-bold text-xl sm:text-2xl text-ink mb-6">
               Zufällige Erinnerungen
             </h3>
             <ul className="space-y-4 flex-1">
@@ -78,9 +78,9 @@ export function BeforeAfter() {
             viewport={{ once: true, margin: '-10%' }}
             transition={{ duration: 0.7, delay: 0.1 }}
             className="rounded-2xl border border-teal/30 bg-teal-dark p-7 sm:p-8 text-cream shadow-xl flex flex-col"
-            style={{ boxShadow: '0 25px 50px -20px rgba(45,90,94,0.4)' }}
+            style={{ boxShadow: '0 25px 50px -20px rgba(4,8,18,0.4)' }}
           >
-            <span className="inline-flex self-end items-center px-3 py-1 rounded-full bg-mustard/90 text-teal-dark text-xs font-bold uppercase tracking-wider mb-6">
+            <span className="inline-flex self-end items-center px-3 py-1 rounded-full bg-mustard/90 text-ink text-xs font-bold uppercase tracking-wider mb-6">
               Der Ronki-Weg
             </span>
             <h3 className="font-display font-bold text-xl sm:text-2xl text-cream mb-6">

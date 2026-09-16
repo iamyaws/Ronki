@@ -60,23 +60,74 @@
   src: url("/fonts/be-vietnam-pro-600.woff2") format("woff2");
 }
 
+/* Fredoka, variable weight axis. One file per subset, 600 to 700 in use. */
+@font-face {
+  font-family: "Fredoka";
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url("/fonts/fredoka-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Fredoka";
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url("/fonts/fredoka-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* Gochi Hand, the note voice. Google serves a latin subset only. */
+@font-face {
+  font-family: "Gochi Hand";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/gochi-hand-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* ------------------------------------------------------------------ */
+/* Bilderbuch tokens, measured from the boards on 16 Sep 2026.         */
+/* Ground is white. Paper stays for cards and speech bubbles only.     */
+/* The teal/sage/mustard names are kept so the 1,400 existing utility  */
+/* usages keep working; they now render the Bilderbuch palette.        */
+/* ------------------------------------------------------------------ */
 @theme {
-  --color-cream: #fff8f1;
-  --color-parchment: #fff8f1;
-  --color-ink: #1a1f1d;
-  --color-teal: #2d5a5e;
-  --color-teal-dark: #1f3f43;
-  --color-teal-light: #3e7478;
-  --color-mustard: #fcd34d;
-  --color-mustard-soft: #fde589;
-  --color-sage: #50a082;
-  --color-sage-soft: #7bb89f;
+  --color-cream: #ffffff;
+  --color-parchment: #ffffff;
+  --color-ink: #040812;
+  --color-teal: #0544b0;
+  --color-teal-dark: #0544b0;
+  --color-teal-light: #41a2fb;
+  --color-mustard: #fdd134;
+  --color-mustard-soft: #ffe68a;
+  --color-sage: #0544b0;
+  --color-sage-soft: #b9e3fc;
 
-  --color-moss: #2d5a5e;
-  --color-ochre: #fcd34d;
-  --color-plum: #50a082;
+  --color-moss: #0544b0;
+  --color-ochre: #fdd134;
+  --color-plum: #0544b0;
 
-  --font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  /* Real names for new code. */
+  --color-cobalt: #0544b0;
+  --color-sky: #41a2fb;
+  --color-sky-wash: #b9e3fc;
+  --color-ember: #ee4f35;
+  --color-sun: #fdd134;
+  --color-night: #04225e;
+  --color-paper: #fdfbf3;
+  --color-page: #e8dbbf;
+
+  --font-display: "Fredoka", "Baloo 2", ui-sans-serif, system-ui, sans-serif;
+  --font-hand: "Gochi Hand", "Comic Sans MS", cursive;
   --font-body: "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
 }
 
@@ -103,9 +154,62 @@ p {
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-mustard);
+  outline: 2px solid var(--color-cobalt);
   outline-offset: 2px;
   border-radius: 4px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Bilderbuch helpers                                                  */
+/* Shared shapes from the specimen that Tailwind classes cannot carry  */
+/* on their own. Everything else stays in the components.              */
+/* ------------------------------------------------------------------ */
+
+/* Display headline: Fredoka Bold, slightly tight, tight leading. */
+.bb-display {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 0.98;
+  text-wrap: balance;
+}
+
+/* Hand note voice. */
+.bb-hand {
+  font-family: var(--font-hand);
+  font-weight: 400;
+}
+
+/* Hand-drawn sun underline under the last words of a headline. */
+.bb-swipe {
+  position: relative;
+  white-space: nowrap;
+}
+.bb-swipe > svg {
+  position: absolute;
+  left: -2%;
+  bottom: -0.12em;
+  width: 104%;
+  height: 0.36em;
+  z-index: -1;
+  overflow: visible;
+}
+
+/* Rounded frame with a drawn outline, used around every illustration. */
+.bb-frame {
+  border: 3px solid var(--color-ink);
+  border-radius: 28px;
+  overflow: hidden;
+  background: var(--color-paper);
+}
+.bb-frame--light {
+  border-color: #ffffff;
+}
+.bb-frame > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 @media (prefers-reduced-motion: reduce) {

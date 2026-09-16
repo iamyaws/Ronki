@@ -38,12 +38,12 @@ export function FAQ() {
           transition={{ duration: 0.7 }}
           className="text-center mb-12"
         >
-          <p className="text-xs uppercase tracking-[0.2em] text-teal-dark/85 mb-6 font-semibold">
+          <p className="text-xs uppercase tracking-[0.2em] text-ink/85 mb-6 font-semibold">
             Häufige Fragen
           </p>
           <h2
             id="faq-heading"
-            className="font-display font-bold text-3xl sm:text-4xl lg:text-5xl leading-[1.1] tracking-tight text-teal-dark"
+            className="font-display font-bold text-3xl sm:text-4xl lg:text-5xl leading-[1.1] tracking-tight text-ink"
           >
             Noch Fragen?
           </h2>
@@ -66,11 +66,11 @@ export function FAQ() {
                   className="w-full flex items-center justify-between px-6 py-5 text-left gap-4"
                   aria-expanded={isOpen}
                 >
-                  <span className="font-display font-bold text-teal-dark text-base sm:text-lg">
+                  <span className="font-display font-bold text-ink text-base sm:text-lg">
                     {item.q}
                   </span>
                   <span
-                    className="text-teal-dark/40 text-xl shrink-0 transition-transform duration-300"
+                    className="text-ink/40 text-xl shrink-0 transition-transform duration-300"
                     style={{ transform: isOpen ? 'rotate(45deg)' : 'rotate(0deg)' }}
                     aria-hidden
                   >

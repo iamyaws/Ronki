@@ -24,26 +24,26 @@ export function AntiFeatures() {
           transition={{ duration: 0.7 }}
           className="mb-14 max-w-3xl"
         >
-          <p className="text-xs uppercase tracking-[0.2em] text-teal-dark/85 mb-6 font-semibold">
+          <p className="text-xs uppercase tracking-[0.2em] text-ink/85 mb-6 font-semibold">
             Unser Versprechen
           </p>
           <h2
             id="anti-features-heading"
-            className="font-display font-bold text-5xl sm:text-6xl lg:text-7xl leading-[1.1] tracking-tight text-teal-dark"
+            className="font-display font-bold text-5xl sm:text-6xl lg:text-7xl leading-[1.1] tracking-tight text-ink"
           >
             Die <em className="italic text-sage">ehrliche</em> Liste.
           </h2>
           <p className="mt-6 text-base opacity-75 max-w-2xl leading-relaxed">
             Das sind keine fehlenden Funktionen. Es sind bewusste Entscheidungen, festgeschrieben, bevor die erste Zeile Code stand.
           </p>
-          <div className="mt-8 max-w-2xl rounded-2xl bg-cream/70 backdrop-blur-sm border border-mustard/30 p-5 sm:p-6 shadow-sm">
+          <div className="mt-8 max-w-2xl rounded-2xl bg-white border-2 border-ink/80 p-5 sm:p-6 shadow-sm">
             <div className="flex items-center gap-2 mb-3">
-              <span aria-hidden className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-mustard/80 text-teal-dark font-display font-bold text-xs">i</span>
-              <p className="text-xs uppercase tracking-[0.15em] text-teal-dark font-bold">
+              <span aria-hidden className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-sun text-ink font-display font-bold text-xs">i</span>
+              <p className="text-xs uppercase tracking-[0.15em] text-ink font-bold">
                 Kurz erklärt
               </p>
             </div>
-            <p className="font-display font-bold text-xl sm:text-2xl text-teal-dark leading-tight mb-3">
+            <p className="font-display font-bold text-xl sm:text-2xl text-ink leading-tight mb-3">
               Dark Patterns
             </p>
             <p className="text-sm sm:text-base text-ink/80 leading-relaxed">
@@ -67,7 +67,7 @@ export function AntiFeatures() {
                   {String(i + 1).padStart(2, '0')}
                 </span>
                 <div className="flex-1">
-                  <p className="relative font-display font-bold text-2xl sm:text-3xl leading-tight inline-block text-teal-dark">
+                  <p className="relative font-display font-bold text-2xl sm:text-3xl leading-tight inline-block text-ink">
                     {item.label}
                     <motion.span
                       aria-hidden
@@ -98,7 +98,7 @@ export function AntiFeatures() {
             to="/wissenschaft"
             className="group inline-flex items-center gap-3 rounded-full border border-teal/20 bg-cream/60 backdrop-blur-sm px-8 py-4 hover:border-teal/40 hover:bg-cream transition-all shadow-sm"
           >
-            <span className="font-display font-semibold text-sm sm:text-base text-teal-dark">
+            <span className="font-display font-semibold text-sm sm:text-base text-ink">
               Wissenschaftlicher Hintergrund
             </span>
             <span className="text-teal/70 group-hover:text-teal group-hover:translate-x-1 transition-all" aria-hidden>

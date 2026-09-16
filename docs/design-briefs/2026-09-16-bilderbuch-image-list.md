@@ -19,6 +19,10 @@ Every prompt below appends to this prefix. "No text" matters: text gets set in c
 
 Reference 0.1 to 0.3 in every later prompt ("same character as the attached sheet"). If the model drifts, regenerate the sheet, not the scene.
 
+**0.1 exists (shared 16 Sep, evening):** front, three-quarter, side and back view on near-white, each on a small sky-blue crayon shadow. It fixes details the base prompt should name from now on: red-orange fin ears with a lighter inner edge, cream horns with a dark outline, cobalt crest from the head down the spine to the tail tip, darker orange freckles on the body, a lighter tan belly, small black claws, thin dark eyebrows, two white eye highlights. Add to the base prompt: "red fin ears, lighter tan belly, small black claws, dark eyebrows". The back view (cell 4) is the reference for the app icon silhouette. Original file to be dropped into the design-incoming folder next to board 4.
+
+**0.2 and 0.3 exist too (same evening).** Expressions sheet: happy (open mouth, one tooth, sun ticks), curious (claw at the chin, cobalt ticks), sleepy (eyes closed, head on claws), wild (claws on the head, tongue out, ink scribbles around), heavy (wet eyes, drooping ears), calm (small smile). Poses sheet: sitting, sleeping curled up, holding an orange leaf up (sun sparkle), hugging a cloud, waving (cobalt ticks), walking. Six heads and six bodies cover 2.4 (mood set) and give the app its feelings screen, the hatch reaction and the "Alles ganz verknotet" state without new generations. Only 0.4 (egg and hatch) is still missing from the character sheet. The tick marks around heads and claws (sun for happy, cobalt for curious and waving, ink for wild) are a reusable motion mark; keep them in code as a small SVG set.
+
 ## 1. Website, first batch (unlocks the website switch)
 
 | # | Image | Where it is used today | Prompt addition | Format |
@@ -70,6 +74,49 @@ Website count: 18 motifs. Share images (OG) are cut from 1.2 to 1.14 in code, no
 | 2.20 | App icon | `icon-192`, `icon-512`, `ronki-egg-logo` | Ronki's head only, front, on cobalt circle, bold and simple | 1024 x 1024 |
 
 App count: 20 motifs, about 45 files. The mini-game art (Starfighter, ColorMix), bosses, micropedia creatures, birthday scenes and the poem days are not in this list: the PRD cuts Starfighter and CloudJump, and the rest waits until the core loop is on the new look.
+
+## 2b. Board 4, the scene library (shared 16 Sep, evening)
+
+Marc shared a fourth board: 20 square scenes, no text, same character, same palette (plus green foliage in the outdoor scenes). Original file still to be dropped into the design-incoming folder. Read left to right, top to bottom:
+
+| Cell | Scene | Covers |
+|---|---|---|
+| 1 | Ronki on the cobalt cushion, shelf with plant, boat and star | 1.1 hero (exactly the brief) |
+| 2 | Brushing teeth at the sink, blue tiles, towel, heart mug | 1.2, 1.7, 2.8 |
+| 3 | Asleep in the starry blanket, lamp, moon, blue bunny | 1.3, 2.16 |
+| 4 | Drawing with crayons, rainbow on the wall | 2.15 book page, 1.9 alternative |
+| 5 | Walking with a blue backpack, forest path, signpost | 1.8 Einschulung, 2.12 |
+| 6 | Ronki reading a picture book with a small hatchling | 1.4 kleine Geschwister |
+| 7 | Magnifying glass and ladybug in the forest | 2.12 Morgenwald, expedition |
+| 8 | On a rock at sunset | 1.6 Trödeln mood, 2.17 golden hour |
+| 9 | Blanket tent with fairy lights, lantern, plush, book | 1.12 story scene, TonightRitual |
+| 10 | Kicking a football | free play, expedition reward |
+| 11 | Thinking, sun and cloud thought bubble | 1.14 FAQ, feelings intro |
+| 12 | Hugging a cloud, eyes closed | 2.10 breathing (exactly the brief) |
+| 13 | Yellow raincoat in the rain, arms up | feelings "wild", 2.5 alternative |
+| 14 | Fruit bowl and star bottle at the table | breakfast, 2.9 alternative |
+| 15 | Reading a book with a moon on the cover, book stack | 1.13 Wissenschaft, 2.15 |
+| 16 | Globe and books | 1.13 alternative, micropedia |
+| 17 | Throwing a paper plane in a meadow | 1.17 share image mood |
+| 18 | Sitting cross-legged, eyes closed, calm | 2.11 tangle calm screen |
+| 19 | Riding a star rocket through night clouds | 2.13 Sternenmeer |
+| 20 | Telescope under the night sky | 2.13 Sternenmeer, 1.16 alternative |
+
+What this means for the batch: the board proves the prompt style and settles roughly 12 of the 18 website motifs in composition. Each cell is only about 300 px on the board, so the cells serve as references, not as final art. On Sunday, regenerate the cells we use at the listed sizes with the board attached as reference ("same scene as cell N of the attached board"), which is cheaper in retries than fresh prompts. Still missing after the board: 1.5 ADHS (one card on the wall), 1.10 tablet, 1.11 gate, 1.15 card held up, 1.16 flashlight, 1.18 fridge poster, and 0.4 (egg and hatch); 0.1 to 0.3 are done.
+
+## 2c. Contact sheet for 0.2 to 1.18 (shared 16 Sep, late evening)
+
+Marc generated the whole of batch 0 and batch 1 as one labelled contact sheet. Every motif reads as intended, so the full-size run on Sunday is a regeneration per cell with the sheet attached as reference, not a fresh prompt round. Small corrections for the full-size run:
+
+- 0.4 egg: cream shell with cobalt spots, three stages, matches the brief; keep.
+- 1.5 ADHS: the brief wants one big card in focus and the others faded; the sheet shows all cards equally strong. Add "only the sun card sharp, the other cards pale and smaller".
+- 1.10 Kinder-Apps: Ronki lies on the tablet showing a night sky, calm; fits. The brief's tail closing the tablet is optional.
+- 1.15 Karte: Ronki holds up a blank card with a sunburst, matches; make sure the card stays blank so the child's name can be set in code.
+- 1.16 and 1.17: the sheet has two "Share image" cells (waving, and cheering with both arms). Take the waving one for 1.17 and keep the cheering one as the "Karte erstellt" success image. 1.16 (404, flashlight in the dark) is the separate dark cell and is fine.
+- 1.18 print poster: the sheet shows Ronki hugging a heart, not the fridge scene. Either take it as the poster mark (works as a sticker) or rerun with the fridge prompt; the top-third headline space is the one thing that matters for print.
+- Cells carry text labels on the sheet; the full-size files must not.
+
+The sheet cells are about 300 px, so nothing on it is final art. Reference only.
 
 ## 3. Rules for the batch
 

@@ -12,9 +12,9 @@ function QuoteTapeTopRight() {
       fill="none"
       aria-hidden
     >
-      <rect x="0" y="4" width="120" height="32" rx="2" fill="#6B8F71" fillOpacity="0.55" />
-      <line x1="8" y1="14" x2="112" y2="14" stroke="#fff" strokeOpacity="0.12" strokeWidth="1" strokeDasharray="6 4" />
-      <line x1="8" y1="26" x2="112" y2="26" stroke="#fff" strokeOpacity="0.12" strokeWidth="1" strokeDasharray="6 4" />
+      <rect x="0" y="4" width="120" height="32" rx="2" fill="#FDD134" fillOpacity="0.9" />
+      <line x1="8" y1="14" x2="112" y2="14" stroke="#040812" strokeOpacity="0.12" strokeWidth="1" strokeDasharray="6 4" />
+      <line x1="8" y1="26" x2="112" y2="26" stroke="#040812" strokeOpacity="0.12" strokeWidth="1" strokeDasharray="6 4" />
     </svg>
   );
 }
@@ -27,9 +27,9 @@ function QuoteTapeBottomLeft() {
       fill="none"
       aria-hidden
     >
-      <rect x="0" y="4" width="120" height="32" rx="2" fill="#6B8F71" fillOpacity="0.55" />
-      <line x1="8" y1="14" x2="112" y2="14" stroke="#fff" strokeOpacity="0.12" strokeWidth="1" strokeDasharray="6 4" />
-      <line x1="8" y1="26" x2="112" y2="26" stroke="#fff" strokeOpacity="0.12" strokeWidth="1" strokeDasharray="6 4" />
+      <rect x="0" y="4" width="120" height="32" rx="2" fill="#FDD134" fillOpacity="0.9" />
+      <line x1="8" y1="14" x2="112" y2="14" stroke="#040812" strokeOpacity="0.12" strokeWidth="1" strokeDasharray="6 4" />
+      <line x1="8" y1="26" x2="112" y2="26" stroke="#040812" strokeOpacity="0.12" strokeWidth="1" strokeDasharray="6 4" />
     </svg>
   );
 }
@@ -78,14 +78,14 @@ export function UeberMich() {
                 className="absolute -inset-4 rounded-[2rem] blur-3xl opacity-55 -z-10"
                 style={{
                   background:
-                    'radial-gradient(ellipse 70% 55% at 50% 55%, rgba(252,211,77,0.35) 0%, transparent 70%)',
+                    'radial-gradient(ellipse 70% 55% at 50% 55%, rgba(253,209,52,0.35) 0%, transparent 70%)',
                 }}
               />
               <div
                 className="relative overflow-hidden rounded-[1.5rem] aspect-[9/10] border border-teal/15"
                 style={{
                   boxShadow:
-                    '0 30px 70px -20px rgba(45,90,94,0.38), 0 12px 24px -10px rgba(252,211,77,0.18), 0 0 0 1px rgba(45,90,94,0.04)',
+                    '0 30px 70px -20px rgba(4,8,18,0.38), 0 12px 24px -10px rgba(253,209,52,0.18), 0 0 0 1px rgba(4,8,18,0.04)',
                 }}
               >
                 <img
@@ -110,7 +110,7 @@ export function UeberMich() {
                   className="pointer-events-none absolute inset-0"
                   style={{
                     boxShadow:
-                      'inset 0 -30px 60px -20px rgba(45,90,94,0.18), inset 0 0 80px 10px rgba(45,90,94,0.08)',
+                      'inset 0 -30px 60px -20px rgba(4,8,18,0.18), inset 0 0 80px 10px rgba(4,8,18,0.08)',
                   }}
                 />
               </div>
@@ -119,7 +119,7 @@ export function UeberMich() {
             {/* Name block — order matches seating in the photo (Marc left,
              * Louis right). */}
             <div className="mt-5 text-center md:text-left">
-              <p className="font-display font-bold text-teal-dark text-base leading-tight">
+              <p className="font-display font-bold text-ink text-base leading-tight">
                 Marc &amp; Louis
               </p>
               <p className="text-sm text-ink/60 mt-1 leading-relaxed">
@@ -136,7 +136,7 @@ export function UeberMich() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.7 }}
-              className="font-display font-bold text-3xl sm:text-4xl lg:text-5xl leading-[1.1] tracking-tight text-teal-dark"
+              className="font-display font-bold text-3xl sm:text-4xl lg:text-5xl leading-[1.1] tracking-tight text-ink"
             >
               Ronki ist kein Produkt. Es ist ein{' '}
               <em className="italic text-sage whitespace-nowrap">Experiment</em>{' '}
@@ -173,13 +173,13 @@ export function UeberMich() {
               <QuoteTapeBottomLeft />
               <span
                 aria-hidden
-                className="absolute -top-2 left-6 font-display font-extrabold text-7xl leading-none text-teal-dark/15 select-none"
+                className="absolute -top-2 left-6 font-display font-extrabold text-7xl leading-none text-ink/15 select-none"
               >
                 &ldquo;
               </span>
               <p
                 lang="de"
-                className="relative font-display italic text-xl sm:text-2xl text-teal-dark leading-relaxed pt-2"
+                className="relative font-display italic text-xl sm:text-2xl text-ink leading-relaxed pt-2"
                 style={{
                   hyphens: 'manual',
                   WebkitHyphens: 'manual',
@@ -202,7 +202,7 @@ export function UeberMich() {
               <p>
                 Ronki ist nicht die Wunderlösung, und auch kein Urteil über andere Wege. Jede Familie findet ihren. Ich baue diesen hier mit Louis zusammen. Er ist mein erster Nutzer, mein härtester Kritiker und manchmal auch mein Co-Designer. Wenn es bei euch einen Unterschied macht, freut mich das. Wenn nicht, ist das genauso ok.
               </p>
-              <p className="font-display font-semibold text-teal-dark">
+              <p className="font-display font-semibold text-ink">
                 Wenn in einem Jahr jemand sagt: „Der Marc hatte recht. Es kann funktionieren. Und wir hatten eine schöne gemeinsame Zeit mit Ronki." Dann hat sich alles gelohnt.
               </p>
             </motion.div>

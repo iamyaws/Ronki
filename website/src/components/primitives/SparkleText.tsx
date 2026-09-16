@@ -11,7 +11,7 @@ type Props = {
 export function SparkleText({
   children,
   sparkleCount = 10,
-  color = '#FCD34D',
+  color = '#FDD134',
   className = '',
 }: Props) {
   const reduced = useReducedMotion();

@@ -37,7 +37,7 @@ export default function VorlageMorgen() {
       eyebrow="Morgen"
       title="Die Morgenroutine"
       description="Vier Schritte bis zur Tasche. Dein Kind malt den Kreis aus, wenn ein Schritt geschafft ist."
-      accent="#d97706"
+      accent="#0544B0"
       pageTitle="Morgenroutine Vorlage für Kinder zum Ausdrucken"
       pageIntro="Vier Schritte vom Zähneputzen bis zur fertigen Tasche, mit Bildern, die dein Kind auch ohne Lesen versteht. Druck diese Seite direkt aus, ohne Anmeldung, oder hol dir das fertige PDF."
       metaTitle={META_TITLE}

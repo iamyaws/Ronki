@@ -70,7 +70,7 @@ export default function ProfilErstellen() {
         errorCorrectionLevel: 'M',
         margin: 2,
         width: 240,
-        color: { dark: '#1a3c3f', light: '#ffffff' },
+        color: { dark: '#040812', light: '#ffffff' },
       }).catch(() => { /* canvas not ready — next render */ });
     }
     if (qrPrintRef.current) {
@@ -159,14 +159,14 @@ export default function ProfilErstellen() {
           >
             <Link
               to="/"
-              className="inline-flex items-center gap-2 text-sm text-teal-dark/60 hover:text-teal-dark transition-colors mb-8"
+              className="inline-flex items-center gap-2 text-sm text-ink/60 hover:text-ink transition-colors mb-8"
             >
               <span aria-hidden>←</span> Zurück
             </Link>
             <p className="text-xs uppercase tracking-[0.2em] text-teal font-medium mb-4">
               Einrichtung &middot; einmalig
             </p>
-            <h1 className="font-display font-bold text-4xl sm:text-5xl leading-[1.06] tracking-tight text-teal-dark mb-6">
+            <h1 className="font-display font-bold text-4xl sm:text-5xl leading-[1.06] tracking-tight text-ink mb-6">
               {phase.kind === 'success' ? (
                 <>Eure <em className="italic text-sage">Profil-Karte</em> ist bereit</>
               ) : (
@@ -174,7 +174,7 @@ export default function ProfilErstellen() {
               )}
             </h1>
             {phase.kind !== 'success' && (
-              <p className="text-lg text-teal-dark/70 leading-relaxed mb-10 max-w-prose">
+              <p className="text-lg text-ink/70 leading-relaxed mb-10 max-w-prose">
                 Ein kurzes Formular, dann generieren wir eine Karte mit
                 QR-Code. Druckt sie aus, klebt sie an den Kühlschrank
                 oder ins Kinderzimmer. Euer Kind scannt sie auf dem
@@ -193,7 +193,7 @@ export default function ProfilErstellen() {
               className="rounded-3xl bg-cream/60 border border-teal-dark/10 p-6 sm:p-8 shadow-sm"
             >
               <label className="block mb-5">
-                <span className="block text-sm font-display font-semibold text-teal-dark mb-2">
+                <span className="block text-sm font-display font-semibold text-ink mb-2">
                   Name eures Kindes
                 </span>
                 <input
@@ -202,15 +202,15 @@ export default function ProfilErstellen() {
                   autoComplete="off"
                   value={childName}
                   onChange={(e) => setChildName(e.target.value)}
-                  className="w-full rounded-xl px-4 py-3 bg-white border border-teal-dark/15 text-base text-teal-dark focus:outline-none focus:border-teal focus:ring-2 focus:ring-teal/20"
+                  className="w-full rounded-xl px-4 py-3 bg-white border border-teal-dark/15 text-base text-ink focus:outline-none focus:border-teal focus:ring-2 focus:ring-teal/20"
                   placeholder="z. B. Louis"
                   maxLength={40}
                 />
               </label>
 
               <label className="block mb-2">
-                <span className="block text-sm font-display font-semibold text-teal-dark mb-2">
-                  Eltern-PIN <span className="font-normal text-teal-dark/50">(optional)</span>
+                <span className="block text-sm font-display font-semibold text-ink mb-2">
+                  Eltern-PIN <span className="font-normal text-ink/50">(optional)</span>
                 </span>
                 <input
                   type="text"
@@ -224,11 +224,11 @@ export default function ProfilErstellen() {
                     setPin(digits);
                     setPinError('');
                   }}
-                  className="w-full rounded-xl px-4 py-3 bg-white border border-teal-dark/15 text-base text-teal-dark focus:outline-none focus:border-teal focus:ring-2 focus:ring-teal/20 font-mono tracking-[0.4em]"
+                  className="w-full rounded-xl px-4 py-3 bg-white border border-teal-dark/15 text-base text-ink focus:outline-none focus:border-teal focus:ring-2 focus:ring-teal/20 font-mono tracking-[0.4em]"
                   placeholder="1234"
                 />
               </label>
-              <p className="text-xs text-teal-dark/60 mb-6 leading-relaxed">
+              <p className="text-xs text-ink/60 mb-6 leading-relaxed">
                 {pinError ? (
                   <span className="text-rose-700">{pinError}</span>
                 ) : (
@@ -251,7 +251,7 @@ export default function ProfilErstellen() {
                 {phase.kind !== 'submitting' && <span aria-hidden>→</span>}
               </button>
 
-              <p className="text-xs text-teal-dark/55 mt-5 leading-relaxed">
+              <p className="text-xs text-ink/55 mt-5 leading-relaxed">
                 Keine E-Mail nötig. Keine Werbung. Der QR-Code ist
                 der einzige Weg in das Profil — bewahrt die Karte gut
                 auf. Verloren? Auf dieser Seite eine neue erstellen.
@@ -291,7 +291,7 @@ export default function ProfilErstellen() {
                   style={{ width: 88, height: 88 }}
                   aria-label="QR-Code zum direkten Scannen"
                 />
-                <div className="text-left text-sm text-teal-dark/75 leading-snug">
+                <div className="text-left text-sm text-ink/75 leading-snug">
                   Direkt scannbar — euer Kind kann die Kamera auch jetzt schon hierauf richten.
                 </div>
               </div>
@@ -307,7 +307,7 @@ export default function ProfilErstellen() {
                 <button
                   type="button"
                   onClick={handleShare}
-                  className="inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 font-display font-semibold text-sm bg-cream text-teal-dark border border-teal-dark/20 hover:bg-cream/80 transition-colors"
+                  className="inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 font-display font-semibold text-sm bg-cream text-ink border border-teal-dark/20 hover:bg-cream/80 transition-colors"
                 >
                   {shareCopied ? '✓ Kopiert' : 'Link teilen'}
                 </button>
@@ -316,17 +316,17 @@ export default function ProfilErstellen() {
               <button
                 type="button"
                 onClick={handleCreateAnother}
-                className="w-full text-sm text-teal-dark/60 hover:text-teal-dark py-3 transition-colors"
+                className="w-full text-sm text-ink/60 hover:text-ink py-3 transition-colors"
               >
                 Weitere Karte für ein anderes Kind erstellen
               </button>
             </motion.div>
 
             <div className="mt-8 text-center">
-              <h2 className="font-display font-semibold text-xl text-teal-dark mb-3">
+              <h2 className="font-display font-semibold text-xl text-ink mb-3">
                 So geht's weiter
               </h2>
-              <ol className="text-left text-base text-teal-dark/75 leading-relaxed space-y-2 max-w-sm mx-auto">
+              <ol className="text-left text-base text-ink/75 leading-relaxed space-y-2 max-w-sm mx-auto">
                 <li><strong>1.</strong> Druckt die Karte aus (zwei Seiten — Vorder &amp; Rückseite) oder lasst sie auf dem Bildschirm.</li>
                 <li><strong>2.</strong> Öffnet <a href="https://app.ronki.de" className="text-teal hover:underline">app.ronki.de</a> auf dem Tablet eures Kindes.</li>
                 <li><strong>3.</strong> Tippt auf „QR-Code scannen" und haltet die Kamera auf die Rückseite der Karte.</li>

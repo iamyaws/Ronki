@@ -86,10 +86,10 @@ export function FeedbackForm({ source, label, placeholder }: Props) {
         transition={{ duration: 0.5 }}
         className="rounded-2xl border-2 border-mustard/40 bg-mustard/10 p-5 sm:p-6 shadow-sm"
       >
-        <p className="text-xs uppercase tracking-[0.15em] font-display font-bold text-teal-dark mb-2">
+        <p className="text-xs uppercase tracking-[0.15em] font-display font-bold text-ink mb-2">
           Angekommen · Danke
         </p>
-        <p className="font-display font-bold text-lg leading-tight text-teal-dark mb-2">
+        <p className="font-display font-bold text-lg leading-tight text-ink mb-2">
           Wir lesen jede Nachricht.
         </p>
         <p className="text-sm text-ink/70 leading-relaxed">
@@ -128,7 +128,7 @@ export function FeedbackForm({ source, label, placeholder }: Props) {
       </div>
 
       <label className="flex flex-col gap-2">
-        <span className="text-sm font-display font-semibold text-teal-dark">
+        <span className="text-sm font-display font-semibold text-ink">
           {label || DEFAULT_LABEL}
         </span>
         <textarea
@@ -148,7 +148,7 @@ export function FeedbackForm({ source, label, placeholder }: Props) {
       </label>
 
       <label className="flex flex-col gap-2">
-        <span className="text-xs font-display font-medium text-teal-dark/70">
+        <span className="text-xs font-display font-medium text-ink/70">
           E-Mail (optional, nur falls ihr eine persönliche Antwort wollt)
         </span>
         <input
@@ -191,7 +191,7 @@ export function FeedbackForm({ source, label, placeholder }: Props) {
           disabled={!canSubmit}
           whileHover={canSubmit ? { scale: 1.02 } : undefined}
           whileTap={canSubmit ? { scale: 0.97 } : undefined}
-          className="inline-flex items-center gap-2 rounded-full bg-mustard px-5 py-2.5 text-teal-dark font-display font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md transition-shadow"
+          className="inline-flex items-center gap-2 rounded-full bg-cobalt px-5 py-2.5 text-white font-display font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed transition-transform enabled:hover:-translate-y-0.5"
         >
           {status.kind === 'submitting' ? 'Sende…' : 'Absenden'}
           <span aria-hidden>→</span>

@@ -52,12 +52,12 @@ export function FeaturedRatgeber() {
           transition={{ duration: 0.7 }}
           className="mb-14 max-w-3xl"
         >
-          <p className="text-xs uppercase tracking-[0.2em] text-teal-dark/85 mb-6 font-semibold">
+          <p className="text-xs uppercase tracking-[0.2em] text-ink/85 mb-6 font-semibold">
             Aus dem Ratgeber
           </p>
           <h2
             id="featured-ratgeber-heading"
-            className="font-display font-bold text-5xl sm:text-6xl lg:text-7xl leading-[1.1] tracking-tight text-teal-dark"
+            className="font-display font-bold text-5xl sm:text-6xl lg:text-7xl leading-[1.1] tracking-tight text-ink"
           >
             Was wir <em className="italic text-sage">rausgefunden</em> haben.
           </h2>
@@ -103,7 +103,7 @@ export function FeaturedRatgeber() {
                       {article.readMinutes} Min.
                     </span>
                   </div>
-                  <h3 className="font-display font-bold text-xl sm:text-[1.35rem] text-teal-dark leading-snug mb-3 group-hover:text-teal transition-colors">
+                  <h3 className="font-display font-bold text-xl sm:text-[1.35rem] text-ink leading-snug mb-3 group-hover:text-teal transition-colors">
                     {article.title}
                   </h3>
                   <p className="text-sm text-ink/70 leading-relaxed mb-5 flex-1">
@@ -128,7 +128,7 @@ export function FeaturedRatgeber() {
         >
           <Link
             to="/ratgeber"
-            className="inline-flex items-center gap-2 rounded-full border border-teal/30 px-6 py-3 text-sm text-teal-dark font-display font-semibold hover:bg-teal-dark hover:text-cream hover:border-teal-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-cream transition-colors"
+            className="inline-flex items-center gap-2 rounded-full border border-teal/30 px-6 py-3 text-sm text-ink font-display font-semibold hover:bg-teal-dark hover:text-cream hover:border-teal-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-cream transition-colors"
           >
             Alle Artikel ansehen
             <span aria-hidden>→</span>

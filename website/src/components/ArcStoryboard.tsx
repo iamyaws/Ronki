@@ -28,8 +28,8 @@ const BEATS: Beat[] = [
     icon: '☀️',
     title: 'Drei von vier geschafft. Ohne Nachfragen.',
     body: 'Sieben Uhr. Louis kommt verschlafen ins Bad. Ronki zeigt ihm die Liste: Gesicht waschen, anziehen, frühstücken, Tasche packen. Drei Haken schon drin. Fehlt nur noch die Tasche. Niemand muss rufen.',
-    accent: '#d97706',
-    accentLight: 'rgba(217,119,6,0.10)',
+    accent: '#0544B0',
+    accentLight: 'rgba(5,68,176,0.10)',
     wash: 'rgba(217,119,6,0.08)',
     tasks: [
       { label: 'Gesicht waschen', done: true },
@@ -44,9 +44,9 @@ const BEATS: Beat[] = [
     icon: '🎨',
     title: 'Malen, Fußball, Gedicht. Sein Nachmittag.',
     body: 'Nach der Schule gehört der Tag Louis. Ronki schlägt drei Sachen vor. Was davon drankommt, entscheidet er selbst. Heute war Fußball-Training. Das Bild kommt morgen. Das Gedicht übt er abends.',
-    accent: '#50A082',
-    accentLight: 'rgba(80,160,130,0.10)',
-    wash: 'rgba(80,160,130,0.08)',
+    accent: '#0544B0',
+    accentLight: 'rgba(5,68,176,0.10)',
+    wash: 'rgba(5,68,176,0.08)',
     tasks: [
       { label: 'Bild malen', done: true },
       { label: 'Fußball Training', done: true },
@@ -59,8 +59,8 @@ const BEATS: Beat[] = [
     icon: '🌙',
     title: 'Zähne, Pyjama, Licht aus. Ronki schläft schon.',
     body: 'Abendroutine. Zähne putzen, Gesicht waschen, Pyjama an. Drei von vier erledigt. Das Licht macht Louis gleich selbst aus. Ronki liegt schon im Nest. „Bis morgen." Niemand muss dreimal rufen.',
-    accent: '#4338ca',
-    accentLight: 'rgba(67,56,202,0.10)',
+    accent: '#04225E',
+    accentLight: 'rgba(4,34,94,0.10)',
     wash: 'rgba(67,56,202,0.08)',
     tasks: [
       { label: 'Zähne putzen', done: true },
@@ -98,7 +98,7 @@ export function ArcStoryboard() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
-          className="font-display font-bold text-4xl sm:text-5xl lg:text-6xl leading-[1.1] tracking-tight text-teal-dark max-w-3xl"
+          className="font-display font-bold text-4xl sm:text-5xl lg:text-6xl leading-[1.1] tracking-tight text-ink max-w-3xl"
         >
           Ein Tag. Drei ruhige <em className="italic text-sage whitespace-nowrap">Routinen</em> für dein Kind.
         </motion.h2>
@@ -127,7 +127,7 @@ export function ArcStoryboard() {
         >
           <a
             href="/wie-es-funktioniert"
-            className="inline-flex items-center gap-2 text-sm font-display font-semibold text-teal hover:text-teal-dark transition-colors"
+            className="inline-flex items-center gap-2 text-sm font-display font-semibold text-teal hover:text-ink transition-colors"
           >
             So funktioniert Ronki im Detail
             <span className="transition-transform group-hover:translate-x-1">→</span>
@@ -172,7 +172,7 @@ function BeatRow({
         />
         <div
           className="relative rounded-[1.5rem] bg-white p-5 sm:p-6 ring-1 ring-inset ring-black/[0.04]"
-          style={{ boxShadow: '0 20px 50px -20px rgba(45,90,94,0.20), 0 4px 16px -4px rgba(45,90,94,0.08)' }}
+          style={{ boxShadow: '0 20px 50px -20px rgba(4,8,18,0.20), 0 4px 16px -4px rgba(4,8,18,0.08)' }}
           role="img"
           aria-label={`${beat.time}routine: ${doneCount} von ${beat.tasks.length} erledigt`}
         >
@@ -186,7 +186,7 @@ function BeatRow({
           <div className="flex items-center gap-3 mb-5 mt-1">
             <span className="text-xl" aria-hidden>{beat.icon}</span>
             <div className="flex-1">
-              <p className="font-display font-bold text-teal-dark text-sm sm:text-base leading-tight">
+              <p className="font-display font-bold text-ink text-sm sm:text-base leading-tight">
                 {beat.time}routine
               </p>
               <p className="text-xs text-ink/40 mt-0.5">Heute, {beat.progress}</p>
@@ -240,7 +240,7 @@ function BeatRow({
                   className={`text-sm font-medium leading-none ${
                     task.done
                       ? 'text-ink/40 line-through'
-                      : 'text-teal-dark'
+                      : 'text-ink'
                   }`}
                 >
                   {task.label}
@@ -292,7 +292,7 @@ function BeatRow({
             style={{ backgroundColor: beat.accent, opacity: 0.4 }}
           />
         </div>
-        <h3 className="font-display font-bold text-[1.85rem] sm:text-[2.4rem] lg:text-[2.8rem] leading-[1.1] tracking-tight text-teal-dark">
+        <h3 className="font-display font-bold text-[1.85rem] sm:text-[2.4rem] lg:text-[2.8rem] leading-[1.1] tracking-tight text-ink">
           {beat.title}
         </h3>
         <p className="text-ink/75 leading-[1.7] text-base sm:text-lg max-w-xl">

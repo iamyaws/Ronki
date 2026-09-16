@@ -29,14 +29,14 @@ export default function Ratgeber() {
           >
             <Link
               to="/"
-              className="inline-flex items-center gap-2 text-sm text-teal-dark/60 hover:text-teal-dark transition-colors mb-8"
+              className="inline-flex items-center gap-2 text-sm text-ink/60 hover:text-ink transition-colors mb-8"
             >
               <span aria-hidden>←</span> Zurück
             </Link>
             <p className="text-xs uppercase tracking-[0.2em] text-teal font-medium mb-6">
               Ratgeber
             </p>
-            <h1 className="font-display font-bold text-4xl sm:text-5xl lg:text-6xl leading-[1.04] tracking-tight text-teal-dark">
+            <h1 className="font-display font-bold text-4xl sm:text-5xl lg:text-6xl leading-[1.04] tracking-tight text-ink">
               Was wir <em className="italic text-sage">rausgefunden</em> haben.
             </h1>
             <p className="mt-6 text-base sm:text-lg text-ink/75 max-w-2xl leading-relaxed">
@@ -63,11 +63,11 @@ export default function Ratgeber() {
               viewport={{ once: true }}
               transition={{ duration: 0.7, ease: EASE_OUT }}
               className="group relative overflow-hidden rounded-[1.5rem] bg-teal-dark text-cream grid md:grid-cols-[1.1fr_1fr]"
-              style={{ boxShadow: '0 24px 48px -24px rgba(26,60,63,0.35)' }}
+              style={{ boxShadow: '0 24px 48px -24px rgba(4,8,18,0.35)' }}
             >
               <div className="p-8 sm:p-10 lg:p-12 flex flex-col justify-center">
                 <div className="flex items-center gap-3 mb-6">
-                  <span className="inline-flex items-center rounded-full bg-mustard/90 px-3 py-1 text-[0.7rem] font-display font-bold uppercase tracking-[0.15em] text-teal-dark">
+                  <span className="inline-flex items-center rounded-full bg-mustard/90 px-3 py-1 text-[0.7rem] font-display font-bold uppercase tracking-[0.15em] text-ink">
                     Unser Einstieg
                   </span>
                   <span className="text-xs text-cream/60">
@@ -82,7 +82,7 @@ export default function Ratgeber() {
                 </p>
                 <Link
                   to={`/ratgeber/${featured.slug}`}
-                  className="self-start inline-flex items-center gap-2 rounded-full bg-mustard px-6 py-3 text-teal-dark font-display font-bold text-sm shadow-sm hover:shadow-md transition-all group-hover:gap-3"
+                  className="self-start inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-ink font-display font-bold text-sm transition-all group-hover:gap-3"
                 >
                   Artikel lesen
                   <span aria-hidden>→</span>
@@ -141,7 +141,7 @@ export default function Ratgeber() {
                         {article.readMinutes} Min. Lesezeit
                       </span>
                     </div>
-                    <h2 className="font-display font-bold text-xl sm:text-2xl text-teal-dark leading-snug mb-3 group-hover:text-teal transition-colors">
+                    <h2 className="font-display font-bold text-xl sm:text-2xl text-ink leading-snug mb-3 group-hover:text-teal transition-colors">
                       {article.title}
                     </h2>
                     <p className="text-base text-ink/70 leading-relaxed mb-3">
@@ -165,7 +165,7 @@ export default function Ratgeber() {
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            className="text-[0.7rem] uppercase tracking-[0.2em] text-teal-dark/60 font-semibold mb-4"
+            className="text-[0.7rem] uppercase tracking-[0.2em] text-ink/60 font-semibold mb-4"
           >
             Du willst einen bestimmten Artikel?
           </motion.p>
@@ -173,7 +173,7 @@ export default function Ratgeber() {
             initial={{ opacity: 0, y: 8 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="font-display font-bold text-2xl sm:text-3xl text-teal-dark mb-4"
+            className="font-display font-bold text-2xl sm:text-3xl text-ink mb-4"
           >
             Sag uns, was bei euch hängt.
           </motion.h2>
@@ -193,7 +193,7 @@ export default function Ratgeber() {
             viewport={{ once: true }}
             transition={{ delay: 0.25 }}
             href="mailto:hallo@ronki.de"
-            className="inline-flex items-center gap-2 rounded-full border border-teal/30 px-5 py-2.5 text-sm text-teal-dark hover:bg-teal-dark hover:text-cream transition-colors"
+            className="inline-flex items-center gap-2 rounded-full border border-teal/30 px-5 py-2.5 text-sm text-ink hover:bg-teal-dark hover:text-cream transition-colors"
           >
             hallo@ronki.de
           </motion.a>
