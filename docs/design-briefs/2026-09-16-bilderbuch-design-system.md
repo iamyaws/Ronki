@@ -106,7 +106,9 @@ Built and published: `docs/design-incoming/bilderbuch/2026-09-16-website-verglei
 - **Ground: white**, not paper. The boards' paper is near white (#FDFBF3); the warmer cream of the current site and any beige wash compete with the sun yellow. Paper grain lives only inside illustrations, blobs and stickers.
 - **Hero: full cobalt block** on the start page (white pill button with ink text, yellow for the eyebrow, underline and hand notes, sky-blue blob behind the art). Marc: "fühlt sich gut an". Rule: at most one cobalt block per screen.
 - **Display face: Fredoka Bold** with slightly tight tracking. Bagel Fat One was rejected as hard to read. Fredoka is already loaded by the app. Runners-up if needed: Baloo 2 ExtraBold, Nunito Black.
-- **Open:** whether the one action card on a page (template signup) goes inverted cobalt or stays white with an ink outline; audience split between app and website; sticker lettering as image or SVG rather than live text.
+- **Action card: inverted cobalt** (Marc, 16 Sep). One per page, white pill button with ink text inside, consent copy short or in a white inset.
+- **Same look everywhere** (Marc, 16 Sep): app and website share the full Bilderbuch system; the website keeps a readable text face for long parent copy.
+- **Open:** sticker lettering as image or SVG rather than live text. Image batch list: `2026-09-16-bilderbuch-image-list.md`.
 
 ## 9. Recommended path
 
