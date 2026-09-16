@@ -19,16 +19,27 @@ Full text with the queries: PRD section 12 ([docs/prd/RONKI-V2-PRD.md](docs/prd/
 - **Gate 2, reach, check on 15 Mar 2027:** at least 500 organic visitors per month on ronki.de (Plausible, Google, average Jan and Feb 2027) and at least 100 distinct addresses across leads and waitlist (`select public.leads_count();`).
 - Outcomes: both pass, start v2 Phase 1. Pull only, keep the app alive and work on reach. Reach only, keep the site as content asset, freeze the app, no v2. Neither, Ronki stays a family project. Ticklers for both dates sit in the HQ Fristen register.
 
-## Morning checklist (15 Sep 2026, for Marc)
+## LIVE since 16 Sep 2026
 
-Everything below is built, tested and pushed on branch `revival/2026-09-15`, draft PR https://github.com/iamyaws/Ronki/pull/12. Nothing is live yet. Order matters: SQL first, then merge.
+The revival build is in production. Order kept: Marc ran `supabase/apply-2026-09-15.sql` in the SQL editor, the smoke script passed (read and write round trip, anon access to `profiles` now 401), then PR 12 was merged (merge commit b3525dc, 16 Sep 2026, 19:52 UTC).
 
-1. **Supabase SQL editor** (project jdpxfvqaoxmnyvlxikce): paste `supabase/apply-2026-09-15.sql` and run it. It adds `leads`, `profile_activity`, the profile RPCs and locks the `profiles` table (anon can currently list all profiles; after this only the RPCs work). Safe to run twice. Then `node scripts/supabase-smoke.mjs` must show every row OK. About 3 minutes.
-2. **Read** the two rewritten articles (Abendroutine, Trödeln) and the new ADHS article on the preview URL or in the PR. 15 minutes.
-3. **Merge PR 12** into main. Vercel deploys ronki.de and app.ronki.de. Then check: https://www.ronki.de/ shows the card CTA, https://www.ronki.de/profil-erstellen creates a card, the card loads in https://app.ronki.de/?p=<token>, https://www.ronki.de/vorlagen/morgenroutine offers the PDF.
-4. **Plausible**: create goals "CTA Klick", "Karte erstellt", "Vorlage Download" (custom events). 2 minutes.
-5. **GitHub Actions**: run the "Supabase keep-alive" workflow once by hand (Actions tab, workflow_dispatch) to confirm the secrets still work. It then runs every Monday 06:17 UTC.
-6. Decide later: keep the weekly ping (default) or move to Supabase Pro.
+| Check after deploy | Result |
+|---|---|
+| Website bundle | changed (index-CBsCUO8p.js to index-4GscKx0K.js), card CTA inside |
+| App bundle | changed (index-DAc7hKam.js to index-Bc-y_Wtz.js), day transition bug gone, profile RPCs inside |
+| Live card creation on ronki.de/profil-erstellen | card written via RPC, activity day recorded |
+| Same card opened in app.ronki.de | parent setup skipped, child name kept, egg choice shown |
+| Live template download with consent | lead stored with consent true |
+| Keep-alive workflow, manual run on main | success |
+
+The live test card and test lead were deleted right after, so the gate counters start clean: 3 cards and 4 addresses from before the revival.
+
+Still open for Marc:
+1. **Plausible**: create goals "CTA Klick", "Karte erstellt", "Vorlage Download" (custom events). 2 minutes. Until then the events arrive but no goal reports them.
+2. **Mail provider** for the update box (EU, double opt-in) before promoting the templates.
+3. Decide later: keep the weekly ping (default) or move to Supabase Pro.
+
+Note: `main` is checked out in the worktree `C:\Users\öööö\louis-quest`, so this repo works on branches. Follow-ups start on `revival-followups` (from b3525dc).
 
 ## Done (overnight build, 15 Sep 2026)
 
