@@ -1,7 +1,7 @@
 <title>Ronki Bilderbuch-Vergleich</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Baloo+2:wght@500;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600;700&family=Gochi+Hand&family=Lilita+One&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Baloo+2:wght@500;600;700;800&family=Fredoka:wght@600;700&family=Nunito:wght@700;900&family=Be+Vietnam+Pro:wght@400;500;600;700&family=Gochi+Hand&family=Lilita+One&display=swap">
 <style>
   :root {
     /* Review board chrome: a neutral desk the drafts lie on. */
@@ -23,16 +23,35 @@
     --bb-ember: #EE4F35;
     --bb-sun: #FDD134;
     --bb-night: #04225E;
-    --bb-display: "Bagel Fat One", "Lilita One", "Baloo 2", system-ui, sans-serif;
-    --bb-display-weight: 400;
-    --bb-display-track: -0.005em;
+    --bb-display: "Fredoka", "Baloo 2", system-ui, sans-serif;
+    --bb-display-weight: 700;
+    --bb-display-track: -0.015em;
     --bb-ui: "Baloo 2", "Nunito", system-ui, sans-serif;
     --bb-hand: "Gochi Hand", "Comic Sans MS", cursive;
     --bb-text: "Be Vietnam Pro", system-ui, sans-serif;
   }
+  body[data-font="bagel"] { --bb-display: "Bagel Fat One", "Lilita One", system-ui, sans-serif; --bb-display-weight: 400; --bb-display-track: -0.005em; }
+  body[data-font="nunito"] { --bb-display: "Nunito", system-ui, sans-serif; --bb-display-weight: 900; --bb-display-track: -0.025em; }
   body[data-font="lilita"] { --bb-display: "Lilita One", "Baloo 2", system-ui, sans-serif; --bb-display-weight: 400; --bb-display-track: 0.005em; }
   body[data-font="baloo"] { --bb-display: "Baloo 2", system-ui, sans-serif; --bb-display-weight: 800; --bb-display-track: -0.02em; }
 
+  body[data-ground="weiss"] { --bb-paper: #FFFFFF; --bb-paper-warm: #FFFFFF; }
+  body[data-ground="weiss"] .bb::before, body[data-ground="kobalt"] .bb::before { opacity: 0; }
+  body[data-ground="kobalt"] { --bb-paper: #FFFFFF; --bb-paper-warm: #FFFFFF; }
+  body[data-ground="kobalt"] .hero-bb { background: var(--bb-cobalt); color: #fff; }
+  body[data-ground="kobalt"] .hero-bb .bb-eyebrow { color: var(--bb-sun); }
+  body[data-ground="kobalt"] .hero-bb .bb-eyebrow i { background: var(--bb-sun); }
+  body[data-ground="kobalt"] .hero-bb .bb-lead, body[data-ground="kobalt"] .hero-bb .bb-helper { color: rgba(255,255,255,0.88); }
+  body[data-ground="kobalt"] .hero-bb .bb-btn--primary { background: #fff; color: var(--bb-ink); }
+  body[data-ground="kobalt"] .hero-bb .bb-btn--secondary { background: transparent; color: #fff; border-color: #fff; }
+  body[data-ground="kobalt"] .hero-bb .bb-quiet { color: #fff; }
+  body[data-ground="kobalt"] .hero-bb .note { color: var(--bb-sun); }
+  body[data-ground="kobalt"] .hero-bb .note svg { color: var(--bb-sun); }
+  body[data-ground="kobalt"] .hero-bb .bb-badges li { background: transparent; border-color: rgba(255,255,255,0.8); color: #fff; }
+  body[data-ground="kobalt"] .hero-bb .bb-badges svg { color: var(--bb-sun); }
+  body[data-ground="kobalt"] .hero-bb .blob { color: var(--bb-sky); }
+  body[data-ground="kobalt"] .hero-bb .bb-art { border-color: #fff; }
+  body[data-ground="kobalt"] .hero-bb .swipe svg path { stroke: var(--bb-sun); }
   * { box-sizing: border-box; }
   body {
     margin: 0;
@@ -297,7 +316,7 @@
     <div>
       <span class="kicker">Ronki · Website · Entwurf vom 16.09.2026</span>
       <h1>Die Website heute und im Bilderbuch-Look</h1>
-      <p>Links steht jede Seite so, wie sie gerade auf ronki.de live ist. Rechts steht derselbe Inhalt im Stil deiner Boards. Die Farben sind aus den Originaldateien gemessen, die Illustrationen stammen aus deinen Boards. Schrift und Details sind Vorschläge.</p>
+      <p>Links steht jede Seite so, wie sie gerade auf ronki.de live ist. Rechts steht derselbe Inhalt im Stil deiner Boards. Die Farben sind aus den Originaldateien gemessen, die Illustrationen stammen aus deinen Boards. Oben kannst du Grund und Überschrift umschalten; Schrift und Details sind Vorschläge.</p>
       <span class="status">Entwurf, nichts davon ist live</span>
     </div>
     <div class="controls">
@@ -309,11 +328,21 @@
         </div>
       </div>
       <div class="control">
+        <span class="control-label" id="lbl-ground">Grund</span>
+        <div class="seg" role="group" aria-labelledby="lbl-ground">
+          <button type="button" id="ground-weiss" data-ground="weiss" aria-pressed="true">Weiß</button>
+          <button type="button" id="ground-kobalt" data-ground="kobalt" aria-pressed="false">Weiß, Hero kobalt</button>
+          <button type="button" id="ground-papier" data-ground="papier" aria-pressed="false">Papier</button>
+        </div>
+      </div>
+      <div class="control">
         <span class="control-label" id="lbl-font">Überschrift</span>
         <div class="seg" role="group" aria-labelledby="lbl-font">
-          <button type="button" id="font-bagel" data-font="bagel" aria-pressed="true">Bagel Fat One</button>
-          <button type="button" id="font-lilita" data-font="lilita" aria-pressed="false">Lilita One</button>
+          <button type="button" id="font-fredoka" data-font="fredoka" aria-pressed="true">Fredoka</button>
           <button type="button" id="font-baloo" data-font="baloo" aria-pressed="false">Baloo 2</button>
+          <button type="button" id="font-nunito" data-font="nunito" aria-pressed="false">Nunito Black</button>
+          <button type="button" id="font-lilita" data-font="lilita" aria-pressed="false">Lilita One</button>
+          <button type="button" id="font-bagel" data-font="bagel" aria-pressed="false">Bagel Fat One</button>
         </div>
       </div>
     </div>
@@ -334,7 +363,7 @@
       <figure class="panel">
         <figcaption><span class="tag tag--new">Bilderbuch</span> Entwurf</figcaption>
         <div class="stage v-desktop" data-w="1280" data-h="860">
-          <div class="fit bb" style="width:1280px;height:860px">
+          <div class="fit bb hero-bb" style="width:1280px;height:860px">
             <div class="hero-d">
               <div class="copy">
                 <span class="bb-eyebrow"><i></i>Public Alpha · jetzt spielbar</span>
@@ -362,7 +391,7 @@
           </div>
         </div>
         <div class="stage v-phone" data-w="390" data-h="1120">
-          <div class="fit bb" style="width:390px;height:1120px">
+          <div class="fit bb hero-bb" style="width:390px;height:1120px">
             <div class="hero-p">
               <span class="bb-eyebrow"><i></i>Public Alpha · jetzt spielbar</span>
               <div class="bb-display">Stell dir vor, du sagst es <span class="swipe">nur einmal.<svg aria-hidden="true"><use href="#i-underline"/></svg></span></div>
@@ -558,6 +587,8 @@
           <div class="voice"><small>Fließtext für Eltern · Be Vietnam Pro</small><div class="v-text">Du kannst keine Morgenroutine bauen, die klappt. Dein Kind kann sich eine aneignen.</div></div>
         </div>
         <div class="cands">
+          <div class="cand"><span style="font-family:'Fredoka',system-ui;font-weight:700;letter-spacing:-0.015em">Heute ist alles wild</span><span>Fredoka Bold</span></div>
+          <div class="cand"><span style="font-family:'Nunito',system-ui;font-weight:900;letter-spacing:-0.025em">Heute ist alles wild</span><span>Nunito Black</span></div>
           <div class="cand"><span style="font-family:'Bagel Fat One',system-ui">Heute ist alles wild</span><span>Bagel Fat One</span></div>
           <div class="cand"><span style="font-family:'Lilita One',system-ui">Heute ist alles wild</span><span>Lilita One</span></div>
           <div class="cand"><span style="font-family:'Baloo 2',system-ui;font-weight:800">Heute ist alles wild</span><span>Baloo 2 ExtraBold</span></div>
@@ -624,13 +655,20 @@
   function setFont(f) {
     body.dataset.font = f;
     document.querySelectorAll('button[data-font]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.font === f)); });
-    write('ronki-sbs-font', f);
+    write('ronki-sbs-font-v2', f);
   }
 
   document.querySelectorAll('button[data-view]').forEach(function (b) { b.addEventListener('click', function () { setView(b.dataset.view); }); });
+  function setGround(g) {
+    body.dataset.ground = g;
+    document.querySelectorAll('button[data-ground]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.ground === g)); });
+    write('ronki-sbs-ground-v2', g);
+  }
   document.querySelectorAll('button[data-font]').forEach(function (b) { b.addEventListener('click', function () { setFont(b.dataset.font); }); });
+  document.querySelectorAll('button[data-ground]').forEach(function (b) { b.addEventListener('click', function () { setGround(b.dataset.ground); }); });
+  setGround(read('ronki-sbs-ground-v2', 'weiss'));
 
-  setFont(read('ronki-sbs-font', 'bagel'));
+  setFont(read('ronki-sbs-font-v2', 'fredoka'));
   setView(read('ronki-sbs-view', window.matchMedia('(max-width: 700px)').matches ? 'phone' : 'desktop'));
 
   if ('ResizeObserver' in window) {
