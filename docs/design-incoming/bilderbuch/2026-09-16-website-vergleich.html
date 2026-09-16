@@ -331,7 +331,7 @@
       <span class="kicker">Ronki · Website · Entwurf vom 16.09.2026</span>
       <h1>Die Website heute und im Bilderbuch-Look</h1>
       <p>Links steht jede Seite so, wie sie gerade auf ronki.de live ist. Rechts steht derselbe Inhalt im Stil deiner Boards. Die Farben sind aus den Originaldateien gemessen, die Illustrationen stammen aus deinen Boards. Oben kannst du Grund, Karten und Überschrift umschalten; Schrift und Details sind Vorschläge.</p>
-      <span class="status">Entwurf, nichts davon ist live</span>
+      <span class="status">Entwurf, nichts davon ist live. Entschieden am 16.09.: Grund Weiß mit kobaltem Hero, Überschrift Fredoka.</span>
     </div>
     <div class="controls">
       <div class="control">
@@ -676,14 +676,14 @@
   function setFont(f) {
     body.dataset.font = f;
     document.querySelectorAll('button[data-font]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.font === f)); });
-    write('ronki-sbs-font-v3', f);
+    write('ronki-sbs-font-v4', f);
   }
 
   document.querySelectorAll('button[data-view]').forEach(function (b) { b.addEventListener('click', function () { setView(b.dataset.view); }); });
   function setGround(g) {
     body.dataset.ground = g;
     document.querySelectorAll('button[data-ground]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.ground === g)); });
-    write('ronki-sbs-ground-v3', g);
+    write('ronki-sbs-ground-v4', g);
   }
   document.querySelectorAll('button[data-font]').forEach(function (b) { b.addEventListener('click', function () { setFont(b.dataset.font); }); });
   document.querySelectorAll('button[data-ground]').forEach(function (b) { b.addEventListener('click', function () { setGround(b.dataset.ground); }); });
@@ -694,9 +694,9 @@
   }
   document.querySelectorAll('button[data-card]').forEach(function (b) { b.addEventListener('click', function () { setCard(b.dataset.card); }); });
   setCard(read('ronki-sbs-card', 'outline'));
-  setGround(read('ronki-sbs-ground-v3', 'weiss'));
+  setGround(read('ronki-sbs-ground-v4', 'kobalt'));
 
-  setFont(read('ronki-sbs-font-v3', 'fredoka'));
+  setFont(read('ronki-sbs-font-v4', 'fredoka'));
   setView(read('ronki-sbs-view', window.matchMedia('(max-width: 700px)').matches ? 'phone' : 'desktop'));
 
   if ('ResizeObserver' in window) {

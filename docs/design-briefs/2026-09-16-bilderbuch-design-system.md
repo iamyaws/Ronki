@@ -101,6 +101,13 @@ The boards already speak Ronki's language and fit the anti-pressure positioning:
 
 Built and published: `docs/design-incoming/bilderbuch/2026-09-16-website-vergleich.html` (home, template page and article head, live screenshot next to the Bilderbuch draft, desktop and phone, three display font candidates switchable, colour and component sheet). Illustrations in it are crops from the boards with baked-in text; real pages need their own motifs from a character sheet.
 
+## 8c. Decisions so far (Marc, 16 Sep 2026)
+
+- **Ground: white**, not paper. The boards' paper is near white (#FDFBF3); the warmer cream of the current site and any beige wash compete with the sun yellow. Paper grain lives only inside illustrations, blobs and stickers.
+- **Hero: full cobalt block** on the start page (white pill button with ink text, yellow for the eyebrow, underline and hand notes, sky-blue blob behind the art). Marc: "fühlt sich gut an". Rule: at most one cobalt block per screen.
+- **Display face: Fredoka Bold** with slightly tight tracking. Bagel Fat One was rejected as hard to read. Fredoka is already loaded by the app. Runners-up if needed: Baloo 2 ExtraBold, Nunito Black.
+- **Open:** whether the one action card on a page (template signup) goes inverted cobalt or stays white with an ink outline; audience split between app and website; sticker lettering as image or SVG rather than live text.
+
 ## 9. Recommended path
 
 1. **Decide the register split.** Kid-facing app: full Bilderbuch. Parent-facing website: "Bilderbuch light", meaning paper ground, cobalt, ember and sun, hand-lettered hero headline and doodles, but calm density and a readable text face, so the Ratgeber and the ADHS content keep their credibility.
