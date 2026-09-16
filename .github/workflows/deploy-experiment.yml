@@ -1,3 +1,5 @@
+# GitHub Pages is no longer the production host, Vercel is.
+# Manual runs only, this workflow no longer fires on push.
 name: Deploy Experiment (Drachennest) to GitHub Pages
 
 # Mirrors deploy-dev.yml but targets the experiment/drachennest branch
@@ -6,8 +8,6 @@ name: Deploy Experiment (Drachennest) to GitHub Pages
 # (gh-pages /Ronki/dev/) without disturbing either.
 
 on:
-  push:
-    branches: [experiment/drachennest]
   workflow_dispatch:
 
 permissions:

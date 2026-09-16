@@ -339,4 +339,4 @@ strategic move, not an emergency.
 
 ---
 
-_Saved at `docs/qr-profile-auth.md`. Last revised: 27 April 2026._
+_Saved at `docs/specs/qr-profile-auth.md`. Last revised: 27 April 2026._

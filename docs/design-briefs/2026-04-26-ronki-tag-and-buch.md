@@ -4,7 +4,7 @@ _Written 26 April 2026. Companion to the earlier Meet + Tonight brief._
 
 ---
 
-okay we are building an iteration of the old ronki PWA game and therefore we are shifting our direction a little (read-up on `docs/NORTHSTAR.md` and `docs/PATH.md`).
+okay we are building an iteration of the old ronki PWA game and therefore we are shifting our direction a little (read-up on `docs/strategy/NORTHSTAR.md` and `docs/strategy/PATH.md`).
 
 i want you specifically to redesign two existing items for me with 3 wireframes each for exploration on the direction. these are surfaces that already exist and are getting in the way — the productivity-app skin is mostly off elsewhere, but these two screens haven't caught up. we are aiming for a finch-style game for 6-8 y.os within the ronki design space (happy to explore above and beyond)
 
@@ -12,7 +12,7 @@ here are the items with a little more details
 
 ## The voice + quality bar
 
-Read `src/components/drachennest/BeiRonkiSein.jsx` lines 31–42 (the 10 stories) and `docs/NORTHSTAR.md`. Same bar as before — soft, hedge-y, slightly stumbly, no em-dashes, no exclamation points, no "you did it!" praise. No emojis in copy unless it's *the* visual element.
+Read `src/components/drachennest/BeiRonkiSein.jsx` lines 31–42 (the 10 stories) and `docs/strategy/NORTHSTAR.md`. Same bar as before — soft, hedge-y, slightly stumbly, no em-dashes, no exclamation points, no "you did it!" praise. No emojis in copy unless it's *the* visual element.
 
 The German respects German linguistics — compound words break only at morpheme boundaries. The whole product is a quiet anti-app; default toward less, not more.
 

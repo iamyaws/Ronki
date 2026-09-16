@@ -29,7 +29,7 @@ export default function RatgeberWasKinderAppsMachen() {
         {
           slug: 'morgen-troedeln',
           title:
-            'Warum dein Kind morgens trödelt (und warum das kein Erziehungsproblem ist)',
+            'Kind trödelt morgens? Warum das normal ist und was wirklich hilft',
         },
       ]}
     >

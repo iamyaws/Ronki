@@ -1,9 +1,13 @@
 import { motion, useReducedMotion } from 'motion/react';
-import { WaitlistCTA } from './WaitlistCTA';
+import { Link } from 'react-router-dom';
 import { LAUNCH_STATE, getLaunchCopy } from '../config/launch-state';
+import { trackEvent } from '../lib/analytics';
 import { EASE_OUT } from '../lib/motion';
 
-/** Variant F — Dark hero with character art + story-driven B+E copy. */
+/** Fallback for the "App öffnen" link when the launch state carries no appUrl. */
+const APP_URL_FALLBACK = 'https://app.ronki.de/';
+
+/** Variant F: dark hero with character art plus story-driven B+E copy. */
 export function HeroVariantF() {
   const reduced = useReducedMotion();
   const copy = getLaunchCopy(LAUNCH_STATE);
@@ -61,7 +65,7 @@ export function HeroVariantF() {
             {copy.heroEyebrow}
           </motion.p>
 
-          {/* Headline — B copy */}
+          {/* Headline, B copy */}
           <motion.h1
             {...fade(0.2)}
             className="font-display font-extrabold leading-[0.95] tracking-tight text-[2.5rem] sm:text-[3.2rem] lg:text-[4rem] xl:text-[4.5rem] text-cream"
@@ -80,7 +84,7 @@ export function HeroVariantF() {
             </span>
           </motion.h1>
 
-          {/* Subtitle — B copy */}
+          {/* Subtitle, B copy */}
           <motion.p
             {...fade(0.4)}
             className="mt-8 text-lg sm:text-xl text-cream/80 leading-relaxed max-w-lg"
@@ -88,12 +92,52 @@ export function HeroVariantF() {
             Ein kleiner Drache, der morgens an die Zähne erinnert und abends zuhört, wenn der Tag schwer war. Nicht du. Nicht zum zehnten Mal.
           </motion.p>
 
-          {/* CTA form */}
+          {/* CTA pair: create the card, or take the paper template.
+           * Two honest ways in. The card is the product, the template
+           * is the thing parents came to Google for. Stacks to one
+           * column below sm so both buttons stay full width at 375px. */}
           <motion.div {...fade(0.55)} className="mt-8 w-full max-w-md text-cream">
-            <WaitlistCTA launchState={LAUNCH_STATE} onDarkBackground />
+            <div className="flex flex-col sm:flex-row gap-3 w-full">
+              <Link
+                to="/profil-erstellen"
+                onClick={() => trackEvent('CTA Klick', { cta: 'karte', source: 'hero' })}
+                className="group inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-mustard px-6 py-4 font-display font-semibold text-base sm:text-lg text-teal-dark shadow-md hover:bg-mustard-soft hover:shadow-lg transition-all text-center [hyphens:none]"
+              >
+                <span>Karte für euer Kind erstellen</span>
+                <span aria-hidden className="transition-transform group-hover:translate-x-1">
+                  →
+                </span>
+              </Link>
+              <Link
+                to="/vorlagen"
+                onClick={() => trackEvent('CTA Klick', { cta: 'vorlage', source: 'hero' })}
+                className="inline-flex shrink-0 items-center justify-center rounded-full border-2 border-cream/35 px-6 py-4 font-display font-semibold text-base sm:text-lg text-cream hover:border-cream/70 hover:bg-cream/5 transition-all text-center [hyphens:none]"
+              >
+                Vorlage holen
+              </Link>
+            </div>
+
+            <p
+              className="mt-3 text-sm text-cream/75 leading-relaxed"
+              style={{
+                hyphens: 'manual',
+                WebkitHyphens: 'manual',
+                MozHyphens: 'manual',
+              }}
+            >
+              Eltern erstellen die Karte in einer Minute, das Kind scannt sie in der App. Kostenlos, frühe Version.
+            </p>
+
+            <a
+              href={copy.appUrl ?? APP_URL_FALLBACK}
+              onClick={() => trackEvent('CTA Klick', { cta: 'app', source: 'hero' })}
+              className="mt-3 inline-flex items-center gap-1.5 text-sm text-cream/55 hover:text-cream/85 underline underline-offset-4 transition-colors"
+            >
+              Schon eine Karte? App öffnen
+            </a>
           </motion.div>
 
-          {/* Secondary hook — Ritual framing (option C).
+          {/* Secondary hook: ritual framing (option C).
            * Explicit line break between the two statements keeps the
            * rhythm Marc wants. hyphens: manual stops German auto-
            * hyphenation from splitting "Unterschied" mid-word on
@@ -163,7 +207,7 @@ export function HeroVariantF() {
         </div>
       </div>
 
-      {/* Mobile illustration — below copy */}
+      {/* Mobile illustration, below copy */}
       <motion.div
         {...fade(0.5)}
         className="relative z-10 mt-10 flex md:hidden justify-center w-full"

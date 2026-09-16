@@ -27,10 +27,13 @@ interface Props {
   accent: string;
   /** Steps (3-5 ideal, fit one portrait A4). */
   steps: PrintStep[];
-  /** True for the toddler variant — larger icons, no labels, bigger circles. */
+  /** True for the toddler variant, larger icons, no labels, bigger circles. */
   bigIcons?: boolean;
   /** Optional extra tagline shown at the bottom of the sheet. */
   footerLine?: string;
+  /** Screen-only block above the preview, used for the PDF download form.
+   *  Never printed, so the paper sheet stays exactly as it was. */
+  downloadSlot?: React.ReactNode;
 }
 
 /* ------------------------------------------------------------------ */
@@ -46,6 +49,7 @@ export function RoutinePrintSheet({
   steps,
   bigIcons = false,
   footerLine = 'ronki.de',
+  downloadSlot,
 }: Props) {
   const handlePrint = () => window.print();
 
@@ -57,7 +61,7 @@ export function RoutinePrintSheet({
         canonicalPath={`/vorlagen/${slug}`}
       />
 
-      {/* Screen-only toolbar — hidden when printing */}
+      {/* Screen-only toolbar, hidden when printing */}
       <div className="print:hidden bg-cream min-h-dvh">
         <div className="max-w-3xl mx-auto px-6 py-6 flex items-center gap-4 flex-wrap">
           <Link
@@ -76,6 +80,10 @@ export function RoutinePrintSheet({
             Drucken
           </button>
         </div>
+
+        {downloadSlot && (
+          <div className="max-w-3xl mx-auto px-6 pb-10">{downloadSlot}</div>
+        )}
 
         <div className="max-w-3xl mx-auto px-6 pb-16">
           <p className="text-xs uppercase tracking-[0.2em] text-teal font-medium mb-4">
@@ -103,7 +111,7 @@ export function RoutinePrintSheet({
         </div>
       </div>
 
-      {/* Print-only version — clean, no toolbar */}
+      {/* Print-only version, clean, no toolbar */}
       <div className="hidden print:block">
         <Sheet
           title={title}
@@ -120,7 +128,7 @@ export function RoutinePrintSheet({
 }
 
 /* ------------------------------------------------------------------ */
-/* Sheet body — shared between preview and print                        */
+/* Sheet body, shared between preview and print                        */
 /* ------------------------------------------------------------------ */
 
 function Sheet({

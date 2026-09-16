@@ -1,5 +1,6 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { Link } from 'react-router-dom';
 import { submitWaitlistEmail, isValidEmail } from '../lib/waitlist';
 import { supabase } from '../lib/supabase';
 import { trackEvent } from '../lib/analytics';
@@ -20,13 +21,13 @@ type Props = {
   appUrl?: string;
   /** Set to true when the CTA is rendered on a dark background (hero,
    *  dark-teal callout). Swaps the button to mustard-on-teal-dark for
-   *  proper contrast — the default teal-on-teal-dark is unreadable. */
+   *  proper contrast, the default teal-on-teal-dark is unreadable. */
   onDarkBackground?: boolean;
 };
 
 export function WaitlistCTA({ launchState, appUrl, onDarkBackground }: Props) {
   const copy = getLaunchCopy(launchState);
-  // Route by the copy's declared action rather than the state name —
+  // Route by the copy's declared action rather than the state name ,
   // that way any future 'install'-action state (live, public-alpha,
   // etc.) gets the direct-link button automatically, and waitlist-
   // action states (waitlist, beta) get the email form.
@@ -37,18 +38,22 @@ export function WaitlistCTA({ launchState, appUrl, onDarkBackground }: Props) {
       ? 'bg-mustard text-teal-dark hover:bg-mustard-soft'
       : 'bg-teal text-cream';
     const helperColor = onDarkBackground ? 'text-cream/80' : 'opacity-70';
+    // Parents create the card on the website first; the app is a kid
+    // space that only scans. So the primary action is the card, the app
+    // link stays for families that already have one.
+    const cardLinkClass = onDarkBackground ? 'text-cream/80 hover:text-cream' : 'text-teal-dark/70 hover:text-teal-dark';
     return (
       <div className="flex flex-col items-start gap-3">
-        <motion.a
-          href={resolvedAppUrl}
-          onClick={() => trackEvent('App Install Click', { source: 'waitlist_cta' })}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className={`group relative inline-flex items-center gap-3 rounded-full px-8 py-4 font-display font-semibold text-lg shadow-md hover:shadow-lg transition-shadow overflow-hidden ${btnBg}`}
-        >
-          <span className="relative z-10">{copy.ctaLabel}</span>
-          <span className="relative z-10 transition-transform group-hover:translate-x-1">→</span>
-        </motion.a>
+        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+          <Link
+            to="/profil-erstellen"
+            onClick={() => trackEvent('CTA Klick', { cta: 'karte', source: 'cta_block' })}
+            className={`group relative inline-flex items-center gap-3 rounded-full px-8 py-4 font-display font-semibold text-lg shadow-md hover:shadow-lg transition-shadow overflow-hidden ${btnBg}`}
+          >
+            <span className="relative z-10">Karte für euer Kind erstellen</span>
+            <span className="relative z-10 transition-transform group-hover:translate-x-1">→</span>
+          </Link>
+        </motion.div>
         <p
           className={`text-sm ${helperColor}`}
           style={{
@@ -57,8 +62,15 @@ export function WaitlistCTA({ launchState, appUrl, onDarkBackground }: Props) {
             MozHyphens: 'manual',
           }}
         >
-          {copy.ctaHelper}
+          Eltern erstellen die Karte in einer Minute, das Kind scannt sie in der App. Kostenlos, frühe Version.
         </p>
+        <a
+          href={resolvedAppUrl}
+          onClick={() => trackEvent('CTA Klick', { cta: 'app', source: 'cta_block' })}
+          className={`text-sm underline underline-offset-4 ${cardLinkClass}`}
+        >
+          Schon eine Karte? App öffnen
+        </a>
       </div>
     );
   }

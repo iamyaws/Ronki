@@ -59,7 +59,7 @@ This branch is fully isolated from main / dev:
 
 - **Storage namespace**: `herodex_drachennest` (IndexedDB) + `hdx2_drachennest` (localStorage fallback) — see `src/utils/storage.ts`. Does not collide with `hdx2` from main / dev when sharing the gh-pages.io origin.
 - **Deploy**: `.github/workflows/deploy-experiment.yml` builds + serves at `https://iamyaws.github.io/Ronki/experiment/`. Independent of `/Ronki/dev/` (dev) and `app.ronki.de` (main / Vercel).
-- **Worktree**: developed in a sibling folder (`../louis-quest-drachennest/`). Both worktrees share the same `.git` so commits move cleanly between branches when needed.
+- **Worktree**: developed in a sibling folder (`../ronki/`). Both worktrees share the same `.git` so commits move cleanly between branches when needed.
 
 ## What's intentionally NOT in this branch yet
 

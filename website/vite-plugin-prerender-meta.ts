@@ -54,7 +54,7 @@ const ROUTES: RouteMeta[] = [
     path: '/vorlagen',
     title: 'Vorlagen zum Ausdrucken: Ronki',
     description:
-      'Druckbare Routinen-Vorlagen für Kinder. Morgenroutine, Abendroutine und eine einfache Version für kleine Geschwister. Zum Ausmalen, kostenlos, ohne Anmeldung.',
+      'Druckbare Routinen-Vorlagen für Kinder. Morgenroutine, Abendroutine, eine einfache Version für kleine Geschwister und ein Plan aus Bildern bei ADHS. Kostenlos, ohne Anmeldung.',
   },
   {
     path: '/ratgeber',
@@ -65,9 +65,9 @@ const ROUTES: RouteMeta[] = [
   },
   {
     path: '/ratgeber/morgen-troedeln',
-    title: 'Warum dein Kind morgens trödelt · Ratgeber · Ronki',
+    title: 'Kind trödelt morgens? Warum das normal ist und was wirklich hilft · Ratgeber · Ronki',
     description:
-      'Trödeln ist keine Boshaftigkeit und kein Erziehungsversagen. Was wirklich dahinter steckt und vier Hebel, die bei Grundschulkindern messbar wirken.',
+      'Dein Kind trödelt morgens? Kein Erziehungsproblem, sondern Entwicklung. Was dahinter steckt und vier Hebel, die wirken, auch wenn das Kleinkind morgens trödelt.',
     ogImage: '/og-ratgeber-morgen-troedeln.jpg',
   },
   {
@@ -92,10 +92,22 @@ const ROUTES: RouteMeta[] = [
     ogImage: '/og-ratgeber-morgenroutine.jpg',
   },
   {
-    path: '/ratgeber/abendroutine-grundschulkind',
-    title: 'Die Abendroutine für Grundschulkinder · Ratgeber · Ronki',
+    path: '/ratgeber/morgenroutine-adhs',
+    title: 'Morgenroutine bei ADHS: was Kindern mit schwachen Exekutivfunktionen wirklich hilft · Ratgeber · Ronki',
     description:
-      'Abendroutine für 6- bis 9-Jährige: Warum 45 Minuten reichen, welche Reihenfolge wirklich Schlaf bringt, und wie du aus dem Zähneputz-Drama rauskommst.',
+      'Morgenroutine ADHS: warum das Anfangen die eigentliche Arbeit ist, was bei schwachen Exekutivfunktionen hilft und wie ein Plan aus Bildern aussieht.',
+  },
+  {
+    path: '/vorlagen/adhs',
+    title: 'Mein Morgen, ein Schritt nach dem anderen: Vorlage bei ADHS · Ronki',
+    description:
+      'Druckbarer Morgenplan für Kinder mit ADHS oder schwachen Exekutivfunktionen. Sechs Schritte, ein Bild pro Schritt, eine Klammer zeigt, was jetzt dran ist. Kostenlos, ohne Anmeldung.',
+  },
+  {
+    path: '/ratgeber/abendroutine-grundschulkind',
+    title: 'Abendroutine für Kinder: der Ablauf, der bei 5- bis 8-Jährigen wirklich trägt · Ratgeber · Ronki',
+    description:
+      'Abendroutine für Kinder von 5 bis 8: warum 45 Minuten reichen, welche Reihenfolge trägt und was bei einer Abendroutine fürs Kleinkind anders läuft.',
     ogImage: '/og-ratgeber-abendroutine.jpg',
   },
   {

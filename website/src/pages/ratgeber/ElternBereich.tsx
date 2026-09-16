@@ -34,7 +34,7 @@ export default function RatgeberElternBereich() {
         },
         {
           slug: 'abendroutine-grundschulkind',
-          title: 'Die Abendroutine für Grundschulkinder: ruhiger runterkommen, besser schlafen',
+          title: 'Abendroutine für Kinder: der Ablauf, der bei 5- bis 8-Jährigen wirklich trägt',
         },
       ]}
     >

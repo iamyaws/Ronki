@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Guarded init — if VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY are
+// Guarded init, if VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY are
 // missing (e.g. dev server started without .env.local populated), we
 // used to throw synchronously here, which nuked the entire app before
 // React could render even a loading screen. Marc hit this 24 Apr 2026.
@@ -37,6 +37,7 @@ function makeStub() {
   return {
     auth: authStub,
     from: () => queryStub,
+    rpc: rejected,
   };
 }
 

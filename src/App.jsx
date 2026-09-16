@@ -682,7 +682,7 @@ function AuthGate() {
   // on first mount so subsequent boots have the token persisted to
   // localStorage. The full Supabase-keyed cloud-load by token is
   // Phase 2; for now this just tags the device with whichever
-  // profile the parent shared. See docs/qr-profile-auth.md.
+  // profile the parent shared. See docs/specs/qr-profile-auth.md.
   React.useEffect(() => {
     getActiveToken();
   }, []);

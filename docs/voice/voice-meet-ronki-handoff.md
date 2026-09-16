@@ -9,7 +9,7 @@ waveform indicator stand in for actual TTS while voice direction is
 locked. This brief covers the 6 audio takes needed to flip MeetRonki
 from "voiceless cinematic" to "voiced cinematic."
 
-Voice profiles are already locked in `docs/ronki-voicelines.md`:
+Voice profiles are already locked in `docs/voice/ronki-voicelines.md`:
 - **Ronki** — Harry (`SOYHLrjzK2X1ezoPC6cr`)
 - **Drachenmutter** — Charlotte (`XB0fDUnXU5powFXDhCwa`)
 
@@ -28,7 +28,7 @@ Voice profiles are already locked in `docs/ronki-voicelines.md`:
 
 ## DB entries to add
 
-Paste into `docs/ronki-voicelines.md` inside the `## Lines` JSON array
+Paste into `docs/voice/ronki-voicelines.md` inside the `## Lines` JSON array
 (after the existing `de_onboarding_kid_intro_01` block):
 
 ```json
@@ -134,12 +134,12 @@ keep the `narrator_meet_*` prefix.
 ## Generation command
 
 ```bash
-cd louis-quest-drachennest
+cd ronki
 python scripts/gen-ronki-voicelines.py --full
 # generates only missing files (skips existing); cost ≈ €0.30-0.50
 ```
 
-The script reads `docs/ronki-voicelines.md`, picks the 6 new IDs,
+The script reads `docs/voice/ronki-voicelines.md`, picks the 6 new IDs,
 calls ElevenLabs with the voice profile from the JSON block at the
 top of that doc, writes mp3s to the right `output_dir` per character.
 

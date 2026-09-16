@@ -1,6 +1,6 @@
-"""Generate the full Ronki voice bank from docs/ronki-voicelines.md.
+"""Generate the full Ronki voice bank from docs/voice/ronki-voicelines.md.
 
-Single source of truth: docs/ronki-voicelines.md. The doc holds two JSON
+Single source of truth: docs/voice/ronki-voicelines.md. The doc holds two JSON
 code blocks — voice profiles + the line list — and this script parses
 them, routes each line to the right output directory based on the
 character (`ronki` → public/audio/ronki/, `drachenmutter` →
@@ -36,7 +36,7 @@ if hasattr(sys.stdout, 'reconfigure'):
 # so MeetRonki audio lands here, not on main. The .env.local can stay
 # on the main worktree (shared API key); we fall through to main if the
 # drachennest copy is missing.
-_REPO = 'C:\\Users\\öööö\\louis-quest-drachennest'
+_REPO = 'C:\\Users\\öööö\\ronki'
 _MAIN = 'C:\\Users\\öööö\\louis-quest'
 DOC_PATH = _REPO + '\\docs\\ronki-voicelines.md'
 ENV_CANDIDATES = [
@@ -241,7 +241,7 @@ def run_batch(api_key, profiles, lines_to_run, label, regen=False):
 
 def main():
     ap = argparse.ArgumentParser(
-        description='Generate Ronki + Drachenmutter audio from docs/ronki-voicelines.md',
+        description='Generate Ronki + Drachenmutter audio from docs/voice/ronki-voicelines.md',
     )
     ap.add_argument('--smoke', action='store_true',
                     help='Generate only the 3-line smoke subset (umlaut + voice + routing check).')

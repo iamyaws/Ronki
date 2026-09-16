@@ -11,7 +11,7 @@ from pathlib import Path
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
-REPO = Path(r"C:\Users\öööö\louis-quest-drachennest")
+REPO = Path(r"C:\Users\öööö\ronki")
 ENV_PATH = Path(r"C:\Users\öööö\louis-quest\.env.local")
 MODEL_ID = "eleven_multilingual_v2"
 
