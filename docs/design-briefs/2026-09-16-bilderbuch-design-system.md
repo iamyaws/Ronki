@@ -12,23 +12,22 @@ It is not the current system. The current website and app follow "Mystic Meadow"
 
 ## 2. Colour tokens
 
-Values are sampled by eye from the generated boards and are approximate. Confirm them with a colour picker on the original PNG files before they go into code.
+Measured on 16 Sep 2026 from the original board files in `C:\Users\öööö\.codex\generated_images\01a09c1d-a841-7512-b7b9-4b8bf0645b4e` (dominant colour per sampled region).
 
-| Token | Approx. hex | Role on the boards |
+| Token | Hex | Role on the boards |
 |---|---|---|
-| `paper` | `#FBF3E4` | Page and screen background, speech bubbles |
-| `paper-deep` | `#F3E6CF` | Book pages, cards on paper |
-| `ink` | `#161616` | Headlines, outlines, icons |
-| `cobalt` | `#1F4DB8` | Primary buttons, selected rings, blobs, active tab |
-| `cobalt-deep` | `#16358A` | Small blue text, labels ("01 / Hallo, Ronki") |
-| `sky` | `#4A86E8` | Full-bleed calm screens ("Alles ganz verknotet?", "Ein Atemzug zusammen") |
-| `sky-wash` | `#CFE2F8` | Soft background washes, clouds |
-| `ember` | `#E8542C` | Ronki's body, the "wild" scribble, home icon, active book icon |
-| `ember-dark` | `#B83A1E` | Freckles, shading on the dragon |
-| `sun` | `#F6C930` | Sun, stars, sticker badges ("Kleiner Drache. Große Gefühle.") |
-| `leaf` | `#4E9A4A` | Forest scenes only |
-| `night` | `#1D2A6E` | Evening and sleep screens ("Schlaf gut.") |
-| `worry` | `#6B4BB0` | Only the "Unruhig" feeling |
+| `paper` | `#FDFBF3` | Page and screen background, speech bubbles |
+| `paper-warm` | `#FDF6E1` | Cards on paper, secondary buttons, sheet ground |
+| `paper-deep` | `#E8DBBF` | Book pages, aged edges |
+| `ink` | `#040812` | Headlines, outlines, icons |
+| `cobalt` | `#0544B0` | Primary buttons, selected rings, blobs, active tab, labels |
+| `sky` | `#41A2FB` | Full-bleed calm screens ("Alles ganz verknotet?", "Ein Atemzug zusammen") |
+| `sky-wash` | `#B9E3FC` | Soft background panels, clouds, category chips |
+| `ember` | `#EE4F35` | Ronki's body, the "wild" scribble, home icon, active book icon |
+| `sun` | `#FDD134` | Sun, stars, sticker badges |
+| `night` | `#04225E` | Evening and sleep screens ("Schlaf gut.") |
+| `leaf` | `#4E9A4A` | Forest scenes only (estimated, not sampled) |
+| `worry` | `#6B4BB0` | Only the "Unruhig" feeling (estimated, not sampled) |
 
 Rules the boards follow:
 - Paper is the default ground. Cobalt, sky and night are grounds only for whole moments (calming down, sleeping), never for dense content.
@@ -36,7 +35,7 @@ Rules the boards follow:
 - No gradients in UI. Colour washes and grain live inside illustrations only.
 - No drop shadows. Depth comes from overlap, outlines and paper texture.
 
-Contrast (to verify with the confirmed values):
+Contrast with the measured values:
 - White on cobalt, ink on paper and cobalt-deep on paper are all comfortably readable.
 - Sun on paper is decoration only, never text.
 - Ember is fine for large shapes and icons, not for small text on paper.
@@ -97,6 +96,10 @@ The boards already speak Ronki's language and fit the anti-pressure positioning:
 
 - **In code, faithfully:** colour tokens, pill buttons, choice tiles with the drawn ring, speech bubbles, tab bar, blobs, sticker shapes, paper grain as a light overlay texture, doodle icons as SVG, the screen layouts.
 - **Not in code:** the dragon, the scenes and the crayon texture inside illustrations. These must come from the image model, with a character sheet and reviewed prompts, and then be exported as optimised WebP.
+
+## 8b. Side-by-side specimen (16 Sep 2026)
+
+Built and published: `docs/design-incoming/bilderbuch/2026-09-16-website-vergleich.html` (home, template page and article head, live screenshot next to the Bilderbuch draft, desktop and phone, three display font candidates switchable, colour and component sheet). Illustrations in it are crops from the boards with baked-in text; real pages need their own motifs from a character sheet.
 
 ## 9. Recommended path
 

@@ -85,7 +85,7 @@ Note for local builds: `dist/` and `website/dist/` were last built against the m
 
 ## Design proposal: Bilderbuch (16 Sep 2026)
 
-Marc generated a new Ronki look with ChatGPT image generation (cobalt, red-orange, sun yellow on paper, crayon texture, hand-lettered headlines). Extracted as a design system with compatibility notes and a rollout path: [docs/design-briefs/2026-09-16-bilderbuch-design-system.md](docs/design-briefs/2026-09-16-bilderbuch-design-system.md). Not applied anywhere. Conflicts with the brand direction in `.impeccable.md`; decision and character sheet come first.
+Marc generated a new Ronki look with ChatGPT image generation (cobalt, red-orange, sun yellow on paper, crayon texture, hand-lettered headlines). Extracted as a design system with compatibility notes and a rollout path: [docs/design-briefs/2026-09-16-bilderbuch-design-system.md](docs/design-briefs/2026-09-16-bilderbuch-design-system.md). Not applied anywhere. Conflicts with the brand direction in `.impeccable.md`; decision and character sheet come first. Website side-by-side (live vs. draft, desktop and phone) built 16 Sep: `docs/design-incoming/bilderbuch/2026-09-16-website-vergleich.html`, published as a private artifact for Marc. Colour tokens in the brief are now measured from the original board files.
 
 ## Follow-ups (ordered)
 
