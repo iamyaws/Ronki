@@ -20,7 +20,7 @@ import Journal from './components/Journal';
 import TeachFireStep from './components/onboarding/TeachFireStep';
 import CombinedParentSetup from './components/CombinedParentSetup';
 import BackgroundMusic from './utils/backgroundMusic';
-import { getActiveToken, ensureTokenForExistingProfile, generateToken, setActiveToken } from './lib/profileToken';
+import { getActiveToken, ensureTokenForExistingProfile, generateToken, setActiveToken, claimLocalProfile } from './lib/profileToken';
 import NoProfileLanding from './components/NoProfileLanding';
 import TeachFirePreview from './components/TeachFirePreview';
 import TeachRitualPreview from './components/TeachRitualPreview';
@@ -909,6 +909,7 @@ function OnboardingChain({ previewLoop, onComplete }) {
             if (!getActiveToken()) {
               const fresh = generateToken();
               setActiveToken(fresh);
+              claimLocalProfile(fresh);
             }
           } catch { /* private mode / quota — survive silently */ }
         }}

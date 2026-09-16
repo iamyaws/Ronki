@@ -19,16 +19,27 @@ Full text with the queries: PRD section 12 ([docs/prd/RONKI-V2-PRD.md](docs/prd/
 - **Gate 2, reach, check on 15 Mar 2027:** at least 500 organic visitors per month on ronki.de (Plausible, Google, average Jan and Feb 2027) and at least 100 distinct addresses across leads and waitlist (`select public.leads_count();`).
 - Outcomes: both pass, start v2 Phase 1. Pull only, keep the app alive and work on reach. Reach only, keep the site as content asset, freeze the app, no v2. Neither, Ronki stays a family project. Ticklers for both dates sit in the HQ Fristen register.
 
-## Morning checklist (15 Sep 2026, for Marc)
+## LIVE since 16 Sep 2026
 
-Everything below is built, tested and pushed on branch `revival/2026-09-15`, draft PR https://github.com/iamyaws/Ronki/pull/12. Nothing is live yet. Order matters: SQL first, then merge.
+The revival build is in production. Order kept: Marc ran `supabase/apply-2026-09-15.sql` in the SQL editor, the smoke script passed (read and write round trip, anon access to `profiles` now 401), then PR 12 was merged (merge commit b3525dc, 16 Sep 2026, 19:52 UTC).
 
-1. **Supabase SQL editor** (project jdpxfvqaoxmnyvlxikce): paste `supabase/apply-2026-09-15.sql` and run it. It adds `leads`, `profile_activity`, the profile RPCs and locks the `profiles` table (anon can currently list all profiles; after this only the RPCs work). Safe to run twice. Then `node scripts/supabase-smoke.mjs` must show every row OK. About 3 minutes.
-2. **Read** the two rewritten articles (Abendroutine, Trödeln) and the new ADHS article on the preview URL or in the PR. 15 minutes.
-3. **Merge PR 12** into main. Vercel deploys ronki.de and app.ronki.de. Then check: https://www.ronki.de/ shows the card CTA, https://www.ronki.de/profil-erstellen creates a card, the card loads in https://app.ronki.de/?p=<token>, https://www.ronki.de/vorlagen/morgenroutine offers the PDF.
-4. **Plausible**: create goals "CTA Klick", "Karte erstellt", "Vorlage Download" (custom events). 2 minutes.
-5. **GitHub Actions**: run the "Supabase keep-alive" workflow once by hand (Actions tab, workflow_dispatch) to confirm the secrets still work. It then runs every Monday 06:17 UTC.
-6. Decide later: keep the weekly ping (default) or move to Supabase Pro.
+| Check after deploy | Result |
+|---|---|
+| Website bundle | changed (index-CBsCUO8p.js to index-4GscKx0K.js), card CTA inside |
+| App bundle | changed (index-DAc7hKam.js to index-Bc-y_Wtz.js), day transition bug gone, profile RPCs inside |
+| Live card creation on ronki.de/profil-erstellen | card written via RPC, activity day recorded |
+| Same card opened in app.ronki.de | parent setup skipped, child name kept, egg choice shown |
+| Live template download with consent | lead stored with consent true |
+| Keep-alive workflow, manual run on main | success |
+
+The live test card and test lead were deleted right after, so the gate counters start clean: 3 cards and 4 addresses from before the revival.
+
+Still open for Marc:
+1. **Plausible**: create goals "CTA Klick", "Karte erstellt", "Vorlage Download" (custom events). 2 minutes. Until then the events arrive but no goal reports them.
+2. **Mail provider** for the update box (EU, double opt-in) before promoting the templates.
+3. Decide later: keep the weekly ping (default) or move to Supabase Pro.
+
+Note: `main` is checked out in the worktree `C:\Users\öööö\louis-quest`, so this repo works on branches. Follow-ups start on `revival-followups` (from b3525dc).
 
 ## Done (overnight build, 15 Sep 2026)
 
@@ -60,12 +71,24 @@ Marc asked for real checks in the app. The Vercel share links for the previews s
 - **Also checked in the browser:** hero CTA trio, both rewritten articles and the ADHS article render, the Vorlagen page shows four cards, the ADHS template form stores a lead with both consent texts and `wants_updates = true`, card creation writes through `profile_upsert`, the app loads it through `profile_get`, activity days are recorded, crawler titles are prerendered for all new and rewritten pages.
 - Tests: app 203 pass (two new tests pin the seed rule), website 56 pass, `tsc` clean of undefined names.
 
+## Website follow-ups (16 Sep 2026, branch revival-followups)
+
+Built after go-live, verified in the browser on local production builds against the Supabase mock. Not merged yet.
+
+- **Template link where the traffic is.** The Morgenroutine article (our only page-1 result) now links the morning template twice and the ADHS template once.
+- **Template pages as search pages.** `/vorlagen/morgenroutine`, `/vorlagen/abendroutine`, `/vorlagen/kleine-geschwister` carry the search phrase as the single H1, about 330 to 390 words of how-to text, a four-question FAQ with FAQPage JSON-LD and a picture of the real PDF (`website/public/vorlagen/previews/`). `/vorlagen/adhs` got the picture, the FAQ and a single H1. Shared component `VorlageGuide.tsx`; `RoutinePrintSheet` gained optional page title and intro props (sheet title becomes H2 when set). Prerendered crawler titles updated.
+- **Hero visible without animation.** Headline, text and buttons start at full opacity and only move; checked in a background tab where animations do not run: headline opacity 1 at load.
+- **Sibling fix.** The local game cache now records which card it belongs to (`ronki_local_owner`). A cache from another card is ignored instead of being pushed into the scanned card; a cache without an owner counts as the current card, so existing devices keep working. The app claims the cache when it assigns a token itself (setup done, token reset in the parent dashboard, tagging an existing profile). Browser test on one device: Louis, then Liam, then a fresh website card for Mia; each opened as the right child and every cloud row kept its own progress. The parent dashboard token reset path is covered by code, not clicked through (PIN).
+- Tests: app 206, website 61, all green.
+
+Note for local builds: `dist/` and `website/dist/` were last built against the mock (`127.0.0.1:54321`). They are not deployed (Vercel builds from source), but rebuild without the mock env before any manual deploy.
+
 ## Follow-ups (ordered)
 
 1. Screen preview and PDF of the ADHS template differ slightly (the PDF carries the clip lane and time bar); rendering `VorlagePrint` inside the preview frame would unify them.
 2. Double opt-in and update mails once a mail provider is chosen.
 3. `updatedAt` support in `RatgeberArticle` (visible "aktualisiert am" plus `dateModified` in the schema) for the two rewritten articles.
-4. **Token switch on one device (pre-existing, sibling risk).** The local cache does not remember which card it belongs to, and `setActiveToken` does not clear it. If one tablet scans a second card and its local state is dated newer, `syncLoadByToken` pushes the first child's state into the second child's cloud row. Fix idea: store the token next to the local state and treat a foreign local state as absent.
+4. ~~Token switch on one device~~ fixed on 16 Sep 2026, see Website follow-ups.
 5. `telemetry_events` only allows inserts for authenticated users while the app inserts with the anon key, so app telemetry is silently dropped (pre-existing). Decide whether anon inserts are wanted, then add the policy as a migration.
 - **Deploys:** website and app production both sit on commit `2fa8ab5` (3 May). The July docs commits live only on `experiment/drachennest`. v2 execution never started.
 - **Proposal (awaiting Marc):** 1) rebuild backend and redeploy (one evening), 2) instrument the funnel and add a home CTA to /profil-erstellen (one evening), 3) optional SEO push on the clusters Google already ranks, 4) decide against preset gates. Superseded the same night by the two gates below (60 days and 14 Nov 2026 for pull, 15 Mar 2027 for reach).

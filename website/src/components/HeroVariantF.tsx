@@ -16,7 +16,10 @@ export function HeroVariantF() {
     reduced
       ? { initial: { opacity: 1, y: 0 }, animate: { opacity: 1, y: 0 } }
       : {
-          initial: { opacity: 0, y: 20 },
+          // Start visible and only move. Content that waits at opacity 0
+          // for the animation stays blank on slow phones, in background
+          // tabs and for crawlers, and it delays the largest paint.
+          initial: { opacity: 1, y: 12 },
           animate: { opacity: 1, y: 0 },
           transition: { duration: 0.7, delay, ease: EASE_OUT },
         };
@@ -179,7 +182,7 @@ export function HeroVariantF() {
         {/* Right column: character illustration (md+) */}
         <div className="hidden md:flex items-center justify-center">
           <motion.div
-            initial={reduced ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
+            initial={reduced ? { opacity: 1, y: 0 } : { opacity: 1, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.45, ease: EASE_OUT }}
           >

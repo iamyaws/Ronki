@@ -98,6 +98,24 @@ const ROUTES: RouteMeta[] = [
       'Morgenroutine ADHS: warum das Anfangen die eigentliche Arbeit ist, was bei schwachen Exekutivfunktionen hilft und wie ein Plan aus Bildern aussieht.',
   },
   {
+    path: '/vorlagen/morgenroutine',
+    title: 'Morgenroutine Vorlage für Kinder zum Ausdrucken · Ronki',
+    description:
+      'Kostenlose Morgenroutine Vorlage für Kinder zum Ausdrucken. Vier Schritte mit Bildern zum Abhaken, dazu Tipps zum Aufhängen und für Morgen, die schiefgehen.',
+  },
+  {
+    path: '/vorlagen/abendroutine',
+    title: 'Abendroutine Vorlage für Kinder zum Ausdrucken · Ronki',
+    description:
+      'Kostenlose Abendroutine Vorlage für Kinder zum Ausdrucken. Vier Schritte bis ins Bett, zum Abhaken. Dazu: wann ihr anfangt und was hilft, wenn es hakt.',
+  },
+  {
+    path: '/vorlagen/kleine-geschwister',
+    title: 'Routine-Vorlage für Kleinkinder zum Ausdrucken · Ronki',
+    description:
+      'Kostenlose Routine-Vorlage für Kleinkinder von 2 bis 4 Jahren zum Ausdrucken. Vier große Bilder, kein Text, zum Abhaken. Mit Tipps, damit es ohne Druck klappt.',
+  },
+  {
     path: '/vorlagen/adhs',
     title: 'Mein Morgen, ein Schritt nach dem anderen: Vorlage bei ADHS · Ronki',
     description:
