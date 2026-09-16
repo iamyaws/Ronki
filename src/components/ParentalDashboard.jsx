@@ -16,6 +16,7 @@ import {
   tokenDisplayFragment,
   generateToken,
   setActiveToken,
+  claimLocalProfile,
 } from '../lib/profileToken';
 import { useAnalytics } from '../hooks/useAnalytics';
 
@@ -1096,6 +1097,8 @@ function SettingsTab({ lang, setLang, t, actions, state, onOpenFeedback }) {
     if (!confirm('Neues Profil anlegen? Der alte QR-Code funktioniert dann nicht mehr.')) return;
     const fresh = generateToken();
     setActiveToken(fresh);
+    // Same kid, new card: the local cache moves with the profile.
+    claimLocalProfile(fresh);
     setProfileTokenState(fresh);
   };
   // ── QR rendering (Phase 2 Apr 27 2026) ──

@@ -71,12 +71,24 @@ Marc asked for real checks in the app. The Vercel share links for the previews s
 - **Also checked in the browser:** hero CTA trio, both rewritten articles and the ADHS article render, the Vorlagen page shows four cards, the ADHS template form stores a lead with both consent texts and `wants_updates = true`, card creation writes through `profile_upsert`, the app loads it through `profile_get`, activity days are recorded, crawler titles are prerendered for all new and rewritten pages.
 - Tests: app 203 pass (two new tests pin the seed rule), website 56 pass, `tsc` clean of undefined names.
 
+## Website follow-ups (16 Sep 2026, branch revival-followups)
+
+Built after go-live, verified in the browser on local production builds against the Supabase mock. Not merged yet.
+
+- **Template link where the traffic is.** The Morgenroutine article (our only page-1 result) now links the morning template twice and the ADHS template once.
+- **Template pages as search pages.** `/vorlagen/morgenroutine`, `/vorlagen/abendroutine`, `/vorlagen/kleine-geschwister` carry the search phrase as the single H1, about 330 to 390 words of how-to text, a four-question FAQ with FAQPage JSON-LD and a picture of the real PDF (`website/public/vorlagen/previews/`). `/vorlagen/adhs` got the picture, the FAQ and a single H1. Shared component `VorlageGuide.tsx`; `RoutinePrintSheet` gained optional page title and intro props (sheet title becomes H2 when set). Prerendered crawler titles updated.
+- **Hero visible without animation.** Headline, text and buttons start at full opacity and only move; checked in a background tab where animations do not run: headline opacity 1 at load.
+- **Sibling fix.** The local game cache now records which card it belongs to (`ronki_local_owner`). A cache from another card is ignored instead of being pushed into the scanned card; a cache without an owner counts as the current card, so existing devices keep working. The app claims the cache when it assigns a token itself (setup done, token reset in the parent dashboard, tagging an existing profile). Browser test on one device: Louis, then Liam, then a fresh website card for Mia; each opened as the right child and every cloud row kept its own progress. The parent dashboard token reset path is covered by code, not clicked through (PIN).
+- Tests: app 206, website 61, all green.
+
+Note for local builds: `dist/` and `website/dist/` were last built against the mock (`127.0.0.1:54321`). They are not deployed (Vercel builds from source), but rebuild without the mock env before any manual deploy.
+
 ## Follow-ups (ordered)
 
 1. Screen preview and PDF of the ADHS template differ slightly (the PDF carries the clip lane and time bar); rendering `VorlagePrint` inside the preview frame would unify them.
 2. Double opt-in and update mails once a mail provider is chosen.
 3. `updatedAt` support in `RatgeberArticle` (visible "aktualisiert am" plus `dateModified` in the schema) for the two rewritten articles.
-4. **Token switch on one device (pre-existing, sibling risk).** The local cache does not remember which card it belongs to, and `setActiveToken` does not clear it. If one tablet scans a second card and its local state is dated newer, `syncLoadByToken` pushes the first child's state into the second child's cloud row. Fix idea: store the token next to the local state and treat a foreign local state as absent.
+4. ~~Token switch on one device~~ fixed on 16 Sep 2026, see Website follow-ups.
 5. `telemetry_events` only allows inserts for authenticated users while the app inserts with the anon key, so app telemetry is silently dropped (pre-existing). Decide whether anon inserts are wanted, then add the policy as a migration.
 - **Deploys:** website and app production both sit on commit `2fa8ab5` (3 May). The July docs commits live only on `experiment/drachennest`. v2 execution never started.
 - **Proposal (awaiting Marc):** 1) rebuild backend and redeploy (one evening), 2) instrument the funnel and add a home CTA to /profil-erstellen (one evening), 3) optional SEO push on the clusters Google already ranks, 4) decide against preset gates. Superseded the same night by the two gates below (60 days and 14 Nov 2026 for pull, 15 Mar 2027 for reach).

@@ -125,6 +125,19 @@ export default function RatgeberMorgenroutineGrundschulkind() {
         funktioniert. Es gibt einen Unterschied.
       </PullQuote>
 
+      <Callout type="ausprobieren" label="Zum Ausdrucken">
+        <p>
+          Die wichtigsten Schritte daraus gibt es als{' '}
+          <a href="/vorlagen/morgenroutine">
+            Morgenroutine-Vorlage zum Ausdrucken, auch als PDF
+          </a>
+          . Vier Bilder, dein Kind malt aus, was geschafft ist. Wenn dein
+          Kind vor allem mit dem Anfangen kämpft, passt die{' '}
+          <a href="/vorlagen/adhs">Vorlage mit einem Schritt nach dem anderen</a>{' '}
+          besser.
+        </p>
+      </Callout>
+
       <h2>Die vier Prinzipien dahinter</h2>
 
       <p>
@@ -356,7 +369,9 @@ export default function RatgeberMorgenroutineGrundschulkind() {
         <p>
           Setz dich heute Abend zehn Minuten hin und schreib die Reihenfolge
           auf, die bei euch morgen früh laufen soll. Nicht die perfekte.
-          Die realistische. Sechs Schritte reichen.
+          Die realistische. Sechs Schritte reichen. Wenn du lieber nicht
+          selbst schreibst, nimm die{' '}
+          <a href="/vorlagen/morgenroutine#pdf">fertige Morgenroutine-Vorlage</a>.
         </p>
         <p>
           Dann leg den Zettel deinem Kind auf den Schreibtisch oder klebt

@@ -21,6 +21,10 @@
  */
 
 const TOKEN_KEY = 'ronki_profile_token';
+// Which card the local game cache on this device belongs to. Siblings share
+// tablets: without this, scanning the second child's card let the first
+// child's cached state win on date and get pushed into the second card.
+const LOCAL_OWNER_KEY = 'ronki_local_owner';
 const URL_PARAM = 'p';
 const TOKEN_REGEX = /^[a-f0-9]{32}$/;
 
@@ -137,6 +141,26 @@ export function buildShareUrl(token: string): string {
  * boot for a brief window, the only effect is that subsequent boots
  * see the same token and skip the generation branch.
  */
+/** Token of the card the local game cache belongs to, or null if unknown. */
+export function getLocalProfileOwner(): string | null {
+  try {
+    const owner = localStorage.getItem(LOCAL_OWNER_KEY);
+    return owner && TOKEN_REGEX.test(owner) ? owner : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Mark the local game cache as belonging to this card. Call it wherever the
+ * app itself moves the current profile to a token (setup done, token reset),
+ * so the next load does not mistake the kid's own cache for a sibling's.
+ */
+export function claimLocalProfile(token: string): void {
+  if (!TOKEN_REGEX.test(token)) return;
+  try { localStorage.setItem(LOCAL_OWNER_KEY, token); } catch { /* quota / private mode */ }
+}
+
 export function ensureTokenForExistingProfile(stateOnboardingDone: boolean): string | null {
   // Only auto-generate for users who already finished onboarding —
   // first-time visitors get their token assigned at parent-setup
@@ -146,5 +170,6 @@ export function ensureTokenForExistingProfile(stateOnboardingDone: boolean): str
   if (existing) return existing;
   const fresh = generateToken();
   setActiveToken(fresh);
+  claimLocalProfile(fresh);
   return fresh;
 }

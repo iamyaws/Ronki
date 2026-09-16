@@ -34,6 +34,16 @@ interface Props {
   /** Screen-only block above the preview, used for the PDF download form.
    *  Never printed, so the paper sheet stays exactly as it was. */
   downloadSlot?: React.ReactNode;
+  /** Page headline for search. When set, it becomes the only H1 on the page
+   *  and the sheet title drops to H2. The printed paper stays the same. */
+  pageTitle?: string;
+  /** Short screen-only paragraph under the page headline. */
+  pageIntro?: string;
+  /** Overrides the default meta title and description. */
+  metaTitle?: string;
+  metaDescription?: string;
+  /** Screen-only content below the preview, e.g. usage guide and FAQ. */
+  children?: React.ReactNode;
 }
 
 /* ------------------------------------------------------------------ */
@@ -50,14 +60,20 @@ export function RoutinePrintSheet({
   bigIcons = false,
   footerLine = 'ronki.de',
   downloadSlot,
+  pageTitle,
+  pageIntro,
+  metaTitle,
+  metaDescription,
+  children,
 }: Props) {
   const handlePrint = () => window.print();
+  const sheetHeading = pageTitle ? 'h2' : 'h1';
 
   return (
     <>
       <PageMeta
-        title={`${title} · Vorlage zum Ausdrucken`}
-        description={description}
+        title={metaTitle ?? `${title} · Vorlage zum Ausdrucken`}
+        description={metaDescription ?? description}
         canonicalPath={`/vorlagen/${slug}`}
       />
 
@@ -80,6 +96,19 @@ export function RoutinePrintSheet({
             Drucken
           </button>
         </div>
+
+        {pageTitle && (
+          <header className="max-w-3xl mx-auto px-6 pt-2 pb-8">
+            <h1 className="font-display font-bold text-3xl sm:text-4xl lg:text-5xl leading-[1.08] tracking-tight text-teal-dark">
+              {pageTitle}
+            </h1>
+            {pageIntro && (
+              <p className="mt-4 text-base sm:text-lg text-ink/75 leading-relaxed max-w-2xl">
+                {pageIntro}
+              </p>
+            )}
+          </header>
+        )}
 
         {downloadSlot && (
           <div className="max-w-3xl mx-auto px-6 pb-10">{downloadSlot}</div>
@@ -106,9 +135,12 @@ export function RoutinePrintSheet({
               steps={steps}
               bigIcons={bigIcons}
               footerLine={footerLine}
+              heading={sheetHeading}
             />
           </div>
         </div>
+
+        {children}
       </div>
 
       {/* Print-only version, clean, no toolbar */}
@@ -121,6 +153,7 @@ export function RoutinePrintSheet({
           steps={steps}
           bigIcons={bigIcons}
           footerLine={footerLine}
+          heading={sheetHeading}
         />
       </div>
     </>
@@ -139,7 +172,11 @@ function Sheet({
   steps,
   bigIcons,
   footerLine,
-}: Omit<Props, 'slug'>) {
+  heading: Heading,
+}: Pick<
+  Props,
+  'title' | 'eyebrow' | 'description' | 'accent' | 'steps' | 'bigIcons' | 'footerLine'
+> & { heading: 'h1' | 'h2' }) {
   const iconSize = bigIcons ? 'text-6xl sm:text-7xl' : 'text-4xl sm:text-5xl';
   const circleSize = bigIcons
     ? 'w-20 h-20 sm:w-24 sm:h-24'
@@ -168,12 +205,12 @@ function Sheet({
             style={{ backgroundColor: accent, opacity: 0.3 }}
           />
         </div>
-        <h1
+        <Heading
           className="font-bold text-3xl sm:text-4xl leading-tight tracking-tight mb-2"
           style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
         >
           {title}
-        </h1>
+        </Heading>
         <p className="text-base text-teal-dark/65 leading-relaxed max-w-xl">
           {description}
         </p>

@@ -214,3 +214,76 @@ describe('storage syncLoadByToken with a website card seed', () => {
     expect(rpcMock).toHaveBeenCalledWith('profile_upsert', { p_token: TOKEN, p_state: local });
   });
 });
+
+// Siblings share tablets. The local cache belongs to the card that last
+// loaded on this device; scanning another card must not push that cache
+// into the other child's cloud row or hand it back as the other child.
+describe('storage syncLoadByToken sibling guard', () => {
+  const CARD_A = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+  const CARD_B = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
+  const childA = {
+    quests: [],
+    lastDate: '2026-09-16',
+    onboardingDone: true,
+    parentOnboardingDone: true,
+    familyConfig: { childName: 'Louis' },
+  };
+
+  beforeEach(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 25));
+    Object.keys(mockStore).forEach((k) => delete mockStore[k]);
+    localStorage.clear();
+    rpcMock.mockReset();
+  });
+
+  it('ignores the first child cache when a second card is scanned', async () => {
+    mockStore['hdx2_drachennest'] = childA;
+    localStorage.setItem('ronki_local_owner', CARD_A);
+    const childB = { ...childA, lastDate: '2026-09-10', familyConfig: { childName: 'Liam' } };
+    rpcMock.mockImplementation((fn) =>
+      fn === 'profile_get'
+        ? Promise.resolve({ data: { state: childB, updated_at: '2026-09-10T08:00:00Z' }, error: null })
+        : Promise.resolve({ data: { updated_at: '2026-09-16T08:00:01Z' }, error: null }),
+    );
+
+    const result = await storage.syncLoadByToken(CARD_B);
+
+    expect(result.familyConfig.childName).toBe('Liam');
+    expect(rpcMock).not.toHaveBeenCalledWith('profile_upsert', expect.anything());
+    expect(localStorage.getItem('ronki_local_owner')).toBe(CARD_B);
+  });
+
+  it('starts fresh instead of reusing the first child when the second card has no cloud state', async () => {
+    mockStore['hdx2_drachennest'] = childA;
+    localStorage.setItem('ronki_local_owner', CARD_A);
+    rpcMock.mockImplementation((fn) =>
+      fn === 'profile_get'
+        ? Promise.resolve({ data: null, error: null })
+        : Promise.resolve({ data: { updated_at: '2026-09-16T08:00:01Z' }, error: null }),
+    );
+
+    const result = await storage.syncLoadByToken(CARD_B);
+
+    expect(result).toBeNull();
+    expect(rpcMock).not.toHaveBeenCalledWith('profile_upsert', expect.anything());
+    expect(mockStore['hdx2_drachennest']).toBeUndefined();
+  });
+
+  it('treats a cache without a recorded owner as the current card', async () => {
+    mockStore['hdx2_drachennest'] = childA;
+    rpcMock.mockImplementation((fn) =>
+      fn === 'profile_get'
+        ? Promise.resolve({
+            data: { state: { ...childA, lastDate: '2026-09-10' }, updated_at: '2026-09-10T08:00:00Z' },
+            error: null,
+          })
+        : Promise.resolve({ data: { updated_at: '2026-09-16T08:00:01Z' }, error: null }),
+    );
+
+    const result = await storage.syncLoadByToken(CARD_A);
+
+    expect(result.familyConfig.childName).toBe('Louis');
+    expect(rpcMock).toHaveBeenCalledWith('profile_upsert', { p_token: CARD_A, p_state: childA });
+    expect(localStorage.getItem('ronki_local_owner')).toBe(CARD_A);
+  });
+});

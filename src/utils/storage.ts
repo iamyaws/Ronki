@@ -8,6 +8,7 @@
 // merges back to main the suffix gets removed in the same commit.
 import type { GameState } from '../types';
 import { supabase } from '../lib/supabase';
+import { claimLocalProfile, getLocalProfileOwner } from '../lib/profileToken';
 
 const DB_NAME = "herodex_drachennest";
 const STORE = "state";
@@ -229,10 +230,23 @@ const storage = {
   // Used by TaskContext when a profile token is present.
   async syncLoadByToken(token: string): Promise<GameState | null> {
     if (!token) return this.load();
-    const [local, cloud] = await Promise.all([
+    const [localRaw, cloud] = await Promise.all([
       this.load(),
       this.cloudLoadByToken(token),
     ]);
+
+    // Sibling guard: the local cache belongs to the card that last loaded
+    // on this device. If a different card was scanned, that cache is another
+    // child's state. It must not be pushed into this card or win on date.
+    // A cache without a recorded owner is treated as this card's own, which
+    // keeps every existing device working after the update.
+    let local = localRaw;
+    const owner = getLocalProfileOwner();
+    if (local && owner && owner !== token) {
+      local = null;
+      if (!cloud) await this.clear();
+    }
+    claimLocalProfile(token);
 
     if (cloud && local) {
       // A card created on the website arrives as a cloud seed with the
