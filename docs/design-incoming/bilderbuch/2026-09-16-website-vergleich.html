@@ -52,6 +52,19 @@
   body[data-ground="kobalt"] .hero-bb .blob { color: var(--bb-sky); }
   body[data-ground="kobalt"] .hero-bb .bb-art { border-color: #fff; }
   body[data-ground="kobalt"] .hero-bb .swipe svg path { stroke: var(--bb-sun); }
+  /* Inverted card: the one action block on the page goes full cobalt. */
+  body[data-card="kobalt"] .card { background: var(--bb-cobalt); color: #fff; border-color: var(--bb-cobalt); }
+  body[data-card="kobalt"] .card .hand-label { color: var(--bb-sun); }
+  body[data-card="kobalt"] .card p, body[data-card="kobalt"] .card .check { color: rgba(255,255,255,0.9); }
+  body[data-card="kobalt"] .card .field-label { color: #fff; }
+  body[data-card="kobalt"] .card .input { border-color: #fff; background: #fff; color: var(--bb-ink); }
+  body[data-card="kobalt"] .card .box { border-color: #fff; background: #fff; }
+  body[data-card="kobalt"] .card .box svg { color: var(--bb-cobalt); }
+  body[data-card="kobalt"] .card .check a { color: #fff; }
+  body[data-card="kobalt"] .card .bb-btn--primary { background: #fff; color: var(--bb-ink); }
+  body[data-card="kobalt"] .card .bb-quiet { color: #fff; }
+  body[data-card="kobalt"] .card .dash { color: #fff; opacity: 0.6; }
+  body[data-card="kobalt"] .card .bb-art { border-color: #fff; }
   * { box-sizing: border-box; }
   body {
     margin: 0;
@@ -316,7 +329,7 @@
     <div>
       <span class="kicker">Ronki · Website · Entwurf vom 16.09.2026</span>
       <h1>Die Website heute und im Bilderbuch-Look</h1>
-      <p>Links steht jede Seite so, wie sie gerade auf ronki.de live ist. Rechts steht derselbe Inhalt im Stil deiner Boards. Die Farben sind aus den Originaldateien gemessen, die Illustrationen stammen aus deinen Boards. Oben kannst du Grund und Überschrift umschalten; Schrift und Details sind Vorschläge.</p>
+      <p>Links steht jede Seite so, wie sie gerade auf ronki.de live ist. Rechts steht derselbe Inhalt im Stil deiner Boards. Die Farben sind aus den Originaldateien gemessen, die Illustrationen stammen aus deinen Boards. Oben kannst du Grund, Karten und Überschrift umschalten; Schrift und Details sind Vorschläge.</p>
       <span class="status">Entwurf, nichts davon ist live</span>
     </div>
     <div class="controls">
@@ -333,6 +346,13 @@
           <button type="button" id="ground-weiss" data-ground="weiss" aria-pressed="true">Weiß</button>
           <button type="button" id="ground-kobalt" data-ground="kobalt" aria-pressed="false">Weiß, Hero kobalt</button>
           <button type="button" id="ground-papier" data-ground="papier" aria-pressed="false">Papier</button>
+        </div>
+      </div>
+      <div class="control">
+        <span class="control-label" id="lbl-card">Karten</span>
+        <div class="seg" role="group" aria-labelledby="lbl-card">
+          <button type="button" id="card-outline" data-card="outline" aria-pressed="true">Weiß mit Kontur</button>
+          <button type="button" id="card-kobalt" data-card="kobalt" aria-pressed="false">Kobalt, invertiert</button>
         </div>
       </div>
       <div class="control">
@@ -655,20 +675,27 @@
   function setFont(f) {
     body.dataset.font = f;
     document.querySelectorAll('button[data-font]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.font === f)); });
-    write('ronki-sbs-font-v2', f);
+    write('ronki-sbs-font-v3', f);
   }
 
   document.querySelectorAll('button[data-view]').forEach(function (b) { b.addEventListener('click', function () { setView(b.dataset.view); }); });
   function setGround(g) {
     body.dataset.ground = g;
     document.querySelectorAll('button[data-ground]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.ground === g)); });
-    write('ronki-sbs-ground-v2', g);
+    write('ronki-sbs-ground-v3', g);
   }
   document.querySelectorAll('button[data-font]').forEach(function (b) { b.addEventListener('click', function () { setFont(b.dataset.font); }); });
   document.querySelectorAll('button[data-ground]').forEach(function (b) { b.addEventListener('click', function () { setGround(b.dataset.ground); }); });
-  setGround(read('ronki-sbs-ground-v2', 'weiss'));
+  function setCard(c) {
+    body.dataset.card = c;
+    document.querySelectorAll('button[data-card]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.card === c)); });
+    write('ronki-sbs-card', c);
+  }
+  document.querySelectorAll('button[data-card]').forEach(function (b) { b.addEventListener('click', function () { setCard(b.dataset.card); }); });
+  setCard(read('ronki-sbs-card', 'outline'));
+  setGround(read('ronki-sbs-ground-v3', 'weiss'));
 
-  setFont(read('ronki-sbs-font-v2', 'fredoka'));
+  setFont(read('ronki-sbs-font-v3', 'fredoka'));
   setView(read('ronki-sbs-view', window.matchMedia('(max-width: 700px)').matches ? 'phone' : 'desktop'));
 
   if ('ResizeObserver' in window) {
