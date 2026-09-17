@@ -1,10 +1,10 @@
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { EASE_OUT } from '../lib/motion';
+import { StickyNote } from './bausteine';
 import { HandNote } from './primitives/HandNote';
 import { PaperEdge } from './primitives/PaperEdge';
 import { StickerLabel } from './primitives/StickerLabel';
-import { WashiTape } from './primitives/WashiTape';
 
 const ITEMS = [
   { label: 'Keine Streaks, die reißen können.', detail: 'Kontinuität wächst als Ort in Ronkis Welt. Nicht als Zähler, der heute noch heil ist und morgen zerbricht.' },
@@ -85,17 +85,10 @@ export function AntiFeatures() {
               </HandNote>
             </motion.div>
 
-            {/* Dark patterns, on a sun sticky note. */}
-            <div className="relative rounded-[22px] bg-sun px-6 py-7 sm:px-7 rotate-[0.8deg] sm:rotate-[1.5deg]">
-              <WashiTape className="-top-3 left-8 w-24 h-9" rotate={-7} tone="paper" />
-              <p className="bb-hand text-xl uppercase leading-none text-ink/80">
-                Kurz erklärt
-              </p>
-              <p className="bb-display mt-3 text-2xl sm:text-3xl text-ink">Dark Patterns</p>
-              <p className="mt-3 text-base sm:text-[1.05rem] text-ink/90 leading-relaxed">
-                So nennt man Tricks in Apps und Spielen, die Kinder länger binden, zum Kaufen bewegen oder zurücklocken. Lootboxen mit Glücksspiel-Logik. Streaks, die ein schlechtes Gewissen machen. Push-Nachrichten am Abend. „Nur noch zwei Minuten"-Schleifen. Wir haben sie uns angesehen und weggelassen.
-              </p>
-            </div>
+            {/* Dark patterns, on a sun sticky note. The one per page. */}
+            <StickyNote eyebrow="Kurz erklärt" title="Dark Patterns" curl={false}>
+              So nennt man Tricks in Apps und Spielen, die Kinder länger binden, zum Kaufen bewegen oder zurücklocken. Lootboxen mit Glücksspiel-Logik. Streaks, die ein schlechtes Gewissen machen. Push-Nachrichten am Abend. „Nur noch zwei Minuten"-Schleifen. Wir haben sie uns angesehen und weggelassen.
+            </StickyNote>
           </div>
 
           <div className="mt-10 grid gap-6 md:grid-cols-2 md:gap-8 md:items-start">

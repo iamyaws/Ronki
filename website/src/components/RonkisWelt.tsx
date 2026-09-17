@@ -1,6 +1,8 @@
 import type { CSSProperties } from 'react';
 import { motion } from 'motion/react';
 import { EASE_OUT } from '../lib/motion';
+import { CrayonBarChart } from './bausteine';
+import type { BarRow, BarTone } from './bausteine';
 import { HandNote } from './primitives/HandNote';
 import { PaperEdge } from './primitives/PaperEdge';
 import { StickerLabel } from './primitives/StickerLabel';
@@ -61,11 +63,44 @@ const FREUNDE: Freund[] = [
   },
 ];
 
-const BARS = [
-  { week: 'Woche 1', external: 85, internal: 15, label: 'Ronki erinnert, lobt, begleitet' },
-  { week: 'Woche 3', external: 50, internal: 50, label: 'Routine wird vertrauter' },
-  { week: 'Woche 6', external: 20, internal: 80, label: 'Dein Kind macht es selbst' },
-  { week: 'Woche 10+', external: 5, internal: 95, label: 'Ronki wird nicht mehr gebraucht' },
+const BARS: BarRow[] = [
+  {
+    label: 'Woche 1',
+    caption: 'Ronki erinnert, lobt, begleitet',
+    parts: [
+      { value: 85, tone: 'sun' },
+      { value: 15, tone: 'cobalt' },
+    ],
+  },
+  {
+    label: 'Woche 3',
+    caption: 'Routine wird vertrauter',
+    parts: [
+      { value: 50, tone: 'sun' },
+      { value: 50, tone: 'cobalt' },
+    ],
+  },
+  {
+    label: 'Woche 6',
+    caption: 'Dein Kind macht es selbst',
+    parts: [
+      { value: 20, tone: 'sun' },
+      { value: 80, tone: 'cobalt' },
+    ],
+  },
+  {
+    label: 'Woche 10+',
+    caption: 'Ronki wird nicht mehr gebraucht',
+    parts: [
+      { value: 5, tone: 'sun' },
+      { value: 95, tone: 'cobalt' },
+    ],
+  },
+];
+
+const LEGEND: { tone: BarTone; label: string }[] = [
+  { tone: 'sun', label: 'Externe Begleitung' },
+  { tone: 'cobalt', label: 'Eigener Antrieb' },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -213,42 +248,7 @@ function FadingChart() {
         So wird Ronki leiser
       </StickerLabel>
 
-      <div className="mt-6 flex flex-col gap-3.5">
-        {BARS.map((bar) => (
-          <div key={bar.week}>
-            <p className="font-display font-bold text-base text-ink">{bar.week}</p>
-            <div
-              className="mt-2 flex h-[22px] w-full overflow-hidden rounded-full border-[2.5px] border-ink"
-              style={{ filter: 'url(#bb-crayon-soft)' }}
-            >
-              <div className="h-full bg-sun" style={{ width: `${bar.external}%` }} />
-              <div className="h-full bg-cobalt" style={{ width: `${bar.internal}%` }} />
-            </div>
-            <p className="bb-hand mt-1 text-[1.05rem] leading-none text-cobalt">{bar.label}</p>
-          </div>
-        ))}
-      </div>
-
-      <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2">
-        <LegendDot color="text-sun" label="Externe Begleitung" />
-        <LegendDot color="text-cobalt" label="Eigener Antrieb" />
-      </div>
+      <CrayonBarChart className="mt-6" rows={BARS} legend={LEGEND} />
     </motion.div>
-  );
-}
-
-function LegendDot({ color, label }: { color: string; label: string }) {
-  return (
-    <span className="inline-flex items-center gap-2">
-      <svg
-        aria-hidden
-        viewBox="0 0 24 24"
-        className={`h-3.5 w-3.5 ${color}`}
-        style={{ filter: 'url(#bb-crayon-soft)' }}
-      >
-        <circle cx="12" cy="12" r="10" fill="currentColor" />
-      </svg>
-      <span className="font-display font-semibold text-sm text-ink">{label}</span>
-    </span>
   );
 }

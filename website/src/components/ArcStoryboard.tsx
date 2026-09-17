@@ -1,10 +1,9 @@
-import type { CSSProperties } from 'react';
 import { motion } from 'motion/react';
 import { EASE_OUT } from '../lib/motion';
+import { PrintedSheet, SheetRow } from './bausteine';
 import { HandNote } from './primitives/HandNote';
 import { PaperEdge } from './primitives/PaperEdge';
 import { StickerLabel } from './primitives/StickerLabel';
-import { WashiTape } from './primitives/WashiTape';
 
 /* ------------------------------------------------------------------ */
 /* Data                                                                */
@@ -162,67 +161,23 @@ function BeatColumn({ beat, index }: { beat: Beat; index: number }) {
       className="flex flex-col"
     >
       {/* The sheet */}
-      <div
-        className="relative rounded-[24px] border-[3px] border-ink bg-white px-5 pt-7 pb-6 [transform:rotate(calc(var(--tilt)*0.5))] md:[transform:rotate(var(--tilt))]"
-        style={{ '--tilt': `${beat.tilt}deg` } as CSSProperties}
+      <PrintedSheet
+        label={beat.time}
+        title={`${beat.time}routine`}
+        corner={beat.icon}
+        tilt={beat.tilt}
+        tapeRotate={index % 2 === 0 ? -6 : 5}
         role="img"
         aria-label={`${beat.time}routine: ${doneCount} von ${beat.tasks.length} erledigt`}
       >
-        <WashiTape
-          className="-top-3.5 left-1/2 -ml-[44px] w-[88px] h-8"
-          rotate={index % 2 === 0 ? -6 : 5}
-        />
-
-        <div className="flex items-start justify-between gap-3">
-          <StickerLabel tone="sun" rotate={-3}>
-            {beat.time}
-          </StickerLabel>
-          <span aria-hidden className="text-2xl leading-none">
-            {beat.icon}
-          </span>
-        </div>
-
-        <p className="bb-display mt-4 text-xl sm:text-2xl text-ink">
-          {beat.time}routine
-        </p>
-
         <ul className="mt-4 flex flex-col gap-1 md:min-h-[204px]">
           {beat.tasks.map((task) => (
-            <li
-              key={task.label}
-              className={`flex items-center gap-3 rounded-[14px] px-2.5 py-2 ${
-                task.done ? '' : 'bg-sun'
-              }`}
-            >
-              <span aria-hidden className="relative h-8 w-8 shrink-0">
-                <svg viewBox="0 0 64 64" className="absolute inset-0 h-8 w-8 text-cobalt">
-                  <use href="#bb-ring" />
-                </svg>
-                {task.done && (
-                  <svg
-                    viewBox="0 0 64 64"
-                    className="absolute inset-[6px] h-5 w-5 text-cobalt"
-                  >
-                    <use href="#bb-check" />
-                  </svg>
-                )}
-              </span>
-              <span className="font-display font-semibold text-[0.95rem] sm:text-base text-ink leading-snug">
-                {task.label}
-              </span>
-            </li>
+            <SheetRow key={task.label} state={task.done ? 'done' : 'current'}>
+              {task.label}
+            </SheetRow>
           ))}
         </ul>
-
-        <svg
-          aria-hidden
-          viewBox="0 0 600 6"
-          preserveAspectRatio="none"
-          className="mt-5 h-1.5 w-full text-ink/35"
-        >
-          <use href="#bb-dash" />
-        </svg>
-      </div>
+      </PrintedSheet>
 
       {/* The beat under it */}
       <h3 className="bb-display mt-7 text-[1.45rem] sm:text-[1.6rem] text-ink">
