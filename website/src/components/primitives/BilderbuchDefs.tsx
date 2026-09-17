@@ -50,6 +50,33 @@ export function BilderbuchDefs() {
           </feMerge>
         </filter>
 
+        {/* Torn paper edges between sections: displacement only. The grain
+         *  of the full crayon filter shows up as grey specks on light grounds. */}
+        <filter id="bb-tear" x="-2%" y="-40%" width="104%" height="180%" colorInterpolationFilters="sRGB">
+          <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="11" result="warp" />
+          <feDisplacementMap in="SourceGraphic" in2="warp" scale="9" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+
+        {/* Gentler displacement for small shapes: bars, dots, plus signs.
+         *  The full crayon filter warps a 20 px bar into mush. */}
+        <filter
+          id="bb-crayon-soft"
+          x="-8%"
+          y="-40%"
+          width="116%"
+          height="180%"
+          colorInterpolationFilters="sRGB"
+        >
+          <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="5" result="warp" />
+          <feDisplacementMap
+            in="SourceGraphic"
+            in2="warp"
+            scale="3"
+            xChannelSelector="R"
+            yChannelSelector="G"
+          />
+        </filter>
+
         <symbol id="bb-blob" viewBox="0 0 580 640">
           <path
             d="M70 60 C 190 -6 420 6 505 88 C 594 176 566 336 526 452 C 486 590 330 640 204 606 C 72 570 -8 478 12 330 C 26 212 -18 104 70 60 Z"
@@ -135,6 +162,64 @@ export function BilderbuchDefs() {
             strokeWidth="2.5"
             strokeDasharray="14 10"
             strokeLinecap="round"
+          />
+        </symbol>
+
+        {/* Drawn cross. Two strokes that miss the exact centre, the way a
+         *  crossed-out line on paper does. */}
+        <symbol id="bb-cross" viewBox="0 0 64 64">
+          <path
+            d="M14 13 C 26 26 38 38 51 51"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="7"
+            strokeLinecap="round"
+          />
+          <path
+            d="M51 14 C 38 27 25 39 13 50"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="7"
+            strokeLinecap="round"
+          />
+        </symbol>
+
+        {/* Drawn plus for the FAQ. Rotating it by 45 degrees turns it into
+         *  the cross above, which is exactly what the open state wants. */}
+        <symbol id="bb-plus" viewBox="0 0 64 64">
+          <path
+            d="M32 11 C 33 25 33 39 32 53"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="7"
+            strokeLinecap="round"
+          />
+          <path
+            d="M11 32 C 25 31 39 31 53 32"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="7"
+            strokeLinecap="round"
+          />
+        </symbol>
+
+        {/* Four-point star, used as a bullet on dark grounds. */}
+        <symbol id="bb-star" viewBox="0 0 24 24">
+          <path
+            d="M12 0 C13.4 7 17 10.6 24 12 C17 13.4 13.4 17 12 24 C10.6 17 7 13.4 0 12 C7 10.6 10.6 7 12 0 Z"
+            fill="currentColor"
+          />
+        </symbol>
+
+        {/* A scribbled ball, the "wild morning" doodle from the boards. */}
+        <symbol id="bb-scribble" viewBox="0 0 120 100">
+          <path
+            d="M18 62 C 6 44 20 20 44 16 C 70 12 96 26 100 48 C 104 70 84 86 62 84 C 40 82 26 70 26 56 C 26 40 44 30 60 34 C 76 38 82 54 74 64 C 66 74 50 72 46 62 C 42 52 52 44 60 48"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           />
         </symbol>
 

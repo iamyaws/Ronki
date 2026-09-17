@@ -174,10 +174,33 @@ p {
   text-wrap: balance;
 }
 
-/* Hand note voice. */
+/* Hand note voice. Never hyphenated: the global `hyphens: auto` used to
+ * break "kom-men" mid-word inside a note, which reads as a typo in a
+ * handwritten line. */
 .bb-hand {
   font-family: var(--font-hand);
   font-weight: 400;
+  hyphens: none;
+  -webkit-hyphens: none;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+/* Headlines never break mid-word either. Fredoka is the display voice, so
+ * every headline that carries it opts out of auto hyphenation. */
+.bb-display,
+.font-display {
+  hyphens: manual;
+  -webkit-hyphens: manual;
+}
+
+/* The one allowed depth device: a hard offset paper shadow. No blur, no
+ * spread, so it reads as a second sheet behind the card, not as a glow. */
+.bb-lift {
+  box-shadow: 5px 6px 0 var(--color-ink);
+}
+.bb-lift--cobalt {
+  box-shadow: 5px 6px 0 var(--color-cobalt);
 }
 
 /* Hand-drawn sun underline under the last words of a headline. */

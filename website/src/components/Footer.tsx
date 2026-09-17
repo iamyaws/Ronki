@@ -4,60 +4,33 @@ import { ClosingBand } from './ClosingBand';
 import { trackEvent } from '../lib/analytics';
 import { getLaunchCopy, LAUNCH_STATE } from '../config/launch-state';
 import { RonkiWordmark } from './primitives/RonkiWordmark';
-
-function TapeTopLeft() {
-  return (
-    <svg
-      className="absolute -top-4 left-6 sm:left-10 w-24 h-10 -rotate-[8deg]"
-      viewBox="0 0 120 40"
-      fill="none"
-      aria-hidden
-    >
-      <rect x="0" y="4" width="120" height="32" rx="2" fill="#FDD134" fillOpacity="0.9" />
-      <line x1="8" y1="14" x2="112" y2="14" stroke="#040812" strokeOpacity="0.12" strokeWidth="1" strokeDasharray="6 4" />
-      <line x1="8" y1="26" x2="112" y2="26" stroke="#040812" strokeOpacity="0.12" strokeWidth="1" strokeDasharray="6 4" />
-    </svg>
-  );
-}
-
-function TapeBottomRight() {
-  return (
-    <svg
-      className="absolute -bottom-4 right-6 sm:right-10 w-24 h-10 rotate-[8deg]"
-      viewBox="0 0 120 40"
-      fill="none"
-      aria-hidden
-    >
-      <rect x="0" y="4" width="120" height="32" rx="2" fill="#FDD134" fillOpacity="0.9" />
-      <line x1="8" y1="14" x2="112" y2="14" stroke="#040812" strokeOpacity="0.12" strokeWidth="1" strokeDasharray="6 4" />
-      <line x1="8" y1="26" x2="112" y2="26" stroke="#040812" strokeOpacity="0.12" strokeWidth="1" strokeDasharray="6 4" />
-    </svg>
-  );
-}
+import { WashiTape } from './primitives/WashiTape';
 
 type FooterProps = {
   /** The night closing band that ends the page. Pages that already end
    *  on a dark CTA block of their own pass false, so no two dark blocks
    *  stack up at the bottom. */
   closing?: boolean;
+  /** Start page only: the band also carries the three install steps. */
+  install?: boolean;
 };
 
-export function Footer({ closing = true }: FooterProps) {
+export function Footer({ closing = true, install = false }: FooterProps) {
   const copy = getLaunchCopy(LAUNCH_STATE);
   const year = new Date().getFullYear();
 
   return (
     <>
-      {closing && <ClosingBand />}
-      <footer className="relative px-6 pt-10 pb-12">
-      <div className="relative max-w-6xl mx-auto rounded-3xl bg-cream/80 backdrop-blur-sm border border-teal/10 px-8 sm:px-12 pt-12 pb-8 shadow-sm">
-        <TapeTopLeft />
-        <TapeBottomRight />
+      {closing && <ClosingBand install={install} />}
+      <footer className="relative bg-white px-5 sm:px-6 pt-8 pb-10">
+      <div className="relative max-w-6xl mx-auto rounded-[28px] bg-white border-2 border-ink px-6 sm:px-12 pt-12 pb-8">
+        <WashiTape className="-top-4 left-6 sm:left-10 w-24 h-10" rotate={-8} />
+        <WashiTape className="-bottom-4 right-6 sm:right-10 w-24 h-10" rotate={8} />
 
         <div className="flex flex-col gap-10">
           <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
+            initial={{ opacity: 1, y: 8 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.7 }}
             /* Stack vertically up to medium viewports; only flip to side-
@@ -88,23 +61,23 @@ export function Footer({ closing = true }: FooterProps) {
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {/* ── Ronki (product understanding) ────────── */}
             <div>
-              <p className="text-xs uppercase tracking-[0.15em] text-teal/60 mb-4 font-medium">
+              <p className="text-xs uppercase tracking-[0.15em] text-cobalt mb-4 font-display font-bold">
                 Ronki
               </p>
               <nav aria-label="Ronki" className="flex flex-col gap-2 text-sm">
-                <Link to="/" className="text-ink/75 hover:text-ink transition-colors w-fit py-2.5">
+                <Link to="/" className="text-ink/85 hover:text-cobalt transition-colors w-fit py-2.5">
                   Start
                 </Link>
-                <Link to="/wie-es-funktioniert" className="text-ink/75 hover:text-ink transition-colors w-fit py-2.5">
+                <Link to="/wie-es-funktioniert" className="text-ink/85 hover:text-cobalt transition-colors w-fit py-2.5">
                   Wie es funktioniert
                 </Link>
-                <Link to="/fuer-eltern" className="text-ink/75 hover:text-ink transition-colors w-fit py-2.5">
+                <Link to="/fuer-eltern" className="text-ink/85 hover:text-cobalt transition-colors w-fit py-2.5">
                   Für Eltern
                 </Link>
-                <Link to="/wissenschaft" className="text-ink/75 hover:text-ink transition-colors w-fit py-2.5">
+                <Link to="/wissenschaft" className="text-ink/85 hover:text-cobalt transition-colors w-fit py-2.5">
                   Wissenschaft
                 </Link>
-                <Link to="/faq" className="text-ink/75 hover:text-ink transition-colors w-fit py-2.5">
+                <Link to="/faq" className="text-ink/85 hover:text-cobalt transition-colors w-fit py-2.5">
                   Häufige Fragen
                 </Link>
               </nav>
@@ -112,7 +85,7 @@ export function Footer({ closing = true }: FooterProps) {
 
             {/* ── Mitmachen (community hub) ─────────────── */}
             <div>
-              <p className="text-xs uppercase tracking-[0.15em] text-sage mb-4 font-medium">
+              <p className="text-xs uppercase tracking-[0.15em] text-cobalt mb-4 font-display font-bold">
                 Mitmachen
               </p>
               <nav aria-label="Mitmachen" className="flex flex-col gap-2 text-sm">
@@ -128,17 +101,17 @@ export function Footer({ closing = true }: FooterProps) {
                   onClick={() => trackEvent('Discord Click', { source: 'footer' })}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-ink/75 hover:text-ink transition-colors w-fit py-2.5 inline-flex items-center gap-1.5"
+                  className="text-ink/85 hover:text-cobalt transition-colors w-fit py-2.5 inline-flex items-center gap-1.5"
                 >
                   Discord-Community
                   <span aria-hidden className="text-sage/70 text-[10px] leading-none">↗</span>
                 </a>
-                <Link to="/installieren" className="text-ink/75 hover:text-ink transition-colors w-fit py-2.5">
+                <Link to="/installieren" className="text-ink/85 hover:text-cobalt transition-colors w-fit py-2.5">
                   Ronki installieren
                 </Link>
                 <a
                   href="mailto:hallo@ronki.de"
-                  className="text-ink/75 hover:text-ink transition-colors w-fit py-2.5"
+                  className="text-ink/85 hover:text-cobalt transition-colors w-fit py-2.5"
                 >
                   hallo@ronki.de
                 </a>
@@ -147,17 +120,17 @@ export function Footer({ closing = true }: FooterProps) {
 
             {/* ── Entdecken (content) ───────────────────── */}
             <div>
-              <p className="text-xs uppercase tracking-[0.15em] text-teal/60 mb-4 font-medium">
+              <p className="text-xs uppercase tracking-[0.15em] text-cobalt mb-4 font-display font-bold">
                 Entdecken
               </p>
               <nav aria-label="Entdecken" className="flex flex-col gap-2 text-sm">
-                <Link to="/ratgeber" className="text-ink/75 hover:text-ink transition-colors w-fit py-2.5">
+                <Link to="/ratgeber" className="text-ink/85 hover:text-cobalt transition-colors w-fit py-2.5">
                   Ratgeber
                 </Link>
-                <Link to="/vorlagen" className="text-ink/75 hover:text-ink transition-colors w-fit py-2.5">
+                <Link to="/vorlagen" className="text-ink/85 hover:text-cobalt transition-colors w-fit py-2.5">
                   Vorlagen zum Ausdrucken
                 </Link>
-                <Link to="/drachen-sammelkarten" className="text-ink/75 hover:text-ink transition-colors w-fit py-2.5">
+                <Link to="/drachen-sammelkarten" className="text-ink/85 hover:text-cobalt transition-colors w-fit py-2.5">
                   Drachen-Sammelkarten
                 </Link>
                 <a
@@ -165,7 +138,7 @@ export function Footer({ closing = true }: FooterProps) {
                   onClick={() => trackEvent('Compendium Click', { source: 'footer' })}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-ink/75 hover:text-ink transition-colors w-fit py-2.5 inline-flex items-center gap-1.5"
+                  className="text-ink/85 hover:text-cobalt transition-colors w-fit py-2.5 inline-flex items-center gap-1.5"
                 >
                   Drachen-Compendium
                   <span aria-hidden className="text-teal/50 text-[10px] leading-none">↗</span>
@@ -175,31 +148,31 @@ export function Footer({ closing = true }: FooterProps) {
 
             {/* ── Rechtliches + Mehr ────────────────────── */}
             <div>
-              <p className="text-xs uppercase tracking-[0.15em] text-teal/60 mb-4 font-medium">
+              <p className="text-xs uppercase tracking-[0.15em] text-cobalt mb-4 font-display font-bold">
                 Rechtliches &amp; Mehr
               </p>
               <nav aria-label="Rechtliches und Mehr" className="flex flex-col gap-2 text-sm">
-                <Link to="/impressum" className="text-ink/75 hover:text-ink transition-colors w-fit py-2.5">
+                <Link to="/impressum" className="text-ink/85 hover:text-cobalt transition-colors w-fit py-2.5">
                   Impressum
                 </Link>
-                <Link to="/datenschutz" className="text-ink/75 hover:text-ink transition-colors w-fit py-2.5">
+                <Link to="/datenschutz" className="text-ink/85 hover:text-cobalt transition-colors w-fit py-2.5">
                   Datenschutz
                 </Link>
-                <Link to="/agb" className="text-ink/75 hover:text-ink transition-colors w-fit py-2.5">
+                <Link to="/agb" className="text-ink/85 hover:text-cobalt transition-colors w-fit py-2.5">
                   AGB
                 </Link>
                 <a
                   href="https://ko-fi.com/ronkiapp"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-ink/75 hover:text-ink transition-colors w-fit py-2.5 inline-flex items-center gap-1.5"
+                  className="text-ink/85 hover:text-cobalt transition-colors w-fit py-2.5 inline-flex items-center gap-1.5"
                 >
                   <span aria-hidden>🍨</span> Louis ein Eis ausgeben
                   <span aria-hidden className="text-teal/50 text-[10px] leading-none">↗</span>
                 </a>
                 <Link
                   to="/en"
-                  className="text-ink/75 hover:text-ink transition-colors w-fit py-2.5 inline-flex items-center gap-1.5"
+                  className="text-ink/85 hover:text-cobalt transition-colors w-fit py-2.5 inline-flex items-center gap-1.5"
                 >
                   <span aria-hidden>🇬🇧</span> English version
                 </Link>
@@ -207,9 +180,9 @@ export function Footer({ closing = true }: FooterProps) {
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-6 pt-8 border-t border-teal/10">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-6 pt-8 border-t-2 border-ink/15">
             <RonkiWordmark size={56} tone="cobalt" />
-            <p className="text-xs text-ink/70">
+            <p className="text-xs text-ink/75">
               © {year} Ronki · Ein unabhängiges Projekt · Keine Werbepartner, keine Cookies.
             </p>
           </div>

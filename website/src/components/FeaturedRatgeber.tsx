@@ -20,17 +20,23 @@
  *   3. abendroutine-grundschulkind — practical, high search intent
  */
 
+import type { CSSProperties } from 'react';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { ARTICLES } from '../data/ratgeber-articles';
 import { EASE_OUT } from '../lib/motion';
 import { HandNote } from './primitives/HandNote';
+import { PaperEdge } from './primitives/PaperEdge';
+import { StickerLabel } from './primitives/StickerLabel';
 
 const FEATURED_SLUGS = [
   'morgen-troedeln',
   'sticker-chart-alternative',
   'abendroutine-grundschulkind',
 ] as const;
+
+/** Each picture lies a little differently in its card. */
+const TILTS = [-1.5, 1.2, -0.8];
 
 export function FeaturedRatgeber() {
   const picks = FEATURED_SLUGS
@@ -40,109 +46,132 @@ export function FeaturedRatgeber() {
   if (picks.length === 0) return null;
 
   return (
-    <section
-      className="relative px-6 py-16 sm:py-24 border-t border-teal/10"
-      aria-labelledby="featured-ratgeber-heading"
-    >
-      <div className="relative max-w-6xl mx-auto">
-        {/* ── Header ──────────────────────────────── */}
-        <motion.div
-          initial={{ opacity: 1, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-20%' }}
-          transition={{ duration: 0.7 }}
-          className="max-w-3xl"
-        >
-          <p className="text-xs uppercase tracking-[0.2em] text-ink/85 mb-4 font-semibold">
-            Aus dem Ratgeber
-          </p>
-          <h2
-            id="featured-ratgeber-heading"
-            className="font-display font-bold text-4xl sm:text-5xl lg:text-6xl leading-[1.1] tracking-tight text-ink"
+    <div className="relative">
+      <PaperEdge tone="white" variant={0} />
+      <section
+        className="relative bg-white px-5 sm:px-6 py-12 sm:py-14"
+        aria-labelledby="featured-ratgeber-heading"
+      >
+        <div className="relative max-w-6xl mx-auto">
+          {/* ── Header ──────────────────────────────── */}
+          <motion.div
+            initial={{ opacity: 1, y: 14 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-15%' }}
+            transition={{ duration: 0.7 }}
+            className="max-w-3xl"
           >
-            Was wir <em className="italic text-sage">rausgefunden</em> haben.
-          </h2>
-          <p className="mt-5 text-base opacity-75 max-w-2xl leading-relaxed">
-            Ehrliche Artikel für Eltern von 5- bis 8-Jährigen. Keine Ratgeber-Klischees,
-            keine Versprechen in drei Schritten. Nur das, was die Forschung sagt und was
-            bei uns zuhause wirklich was verändert hat.
-          </p>
-        </motion.div>
+            <StickerLabel tone="sky-wash" rotate={-3}>
+              Aus dem Ratgeber
+            </StickerLabel>
 
-        {/* ── 3 article cards ─────────────────────── */}
-        <HandNote
-          rotate={4}
-          className="mt-6 lg:mt-0 lg:absolute lg:right-0 lg:top-2 lg:w-[180px] lg:text-right"
-        >
-          Alles selbst ausprobiert.
-        </HandNote>
-
-        <ul className="mt-10 grid gap-6 sm:gap-7 md:grid-cols-3">
-          {picks.map((article, i) => (
-            <motion.li
-              key={article.slug}
-              initial={{ opacity: 1, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-10%' }}
-              transition={{ duration: 0.6, delay: i * 0.08, ease: EASE_OUT }}
+            <h2
+              id="featured-ratgeber-heading"
+              className="bb-display mt-4 text-4xl sm:text-5xl lg:text-[3.5rem] text-ink"
             >
-              <Link
-                to={`/ratgeber/${article.slug}`}
-                className="group flex flex-col h-full rounded-2xl bg-cream/70 backdrop-blur-sm border border-teal/10 overflow-hidden hover:shadow-lg hover:-translate-y-1 focus-visible:-translate-y-1 focus-visible:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-cream transition-all duration-300"
+              Was wir{' '}
+              <span className="bb-swipe">
+                rausgefunden
+                <svg aria-hidden viewBox="0 0 300 20" preserveAspectRatio="none">
+                  <use href="#bb-underline" />
+                </svg>
+              </span>{' '}
+              haben.
+            </h2>
+
+            <p className="mt-4 text-[1.05rem] sm:text-lg text-ink/85 max-w-2xl leading-relaxed">
+              Ehrliche Artikel für Eltern von 5- bis 8-Jährigen. Keine Ratgeber-Klischees,
+              keine Versprechen in drei Schritten. Nur das, was die Forschung sagt und was
+              bei uns zuhause wirklich was verändert hat.
+            </p>
+          </motion.div>
+
+          <HandNote
+            rotate={4}
+            className="mt-6 lg:mt-0 lg:absolute lg:right-2 lg:top-14 lg:w-[190px] lg:text-right"
+          >
+            Alles selbst ausprobiert.
+          </HandNote>
+
+          {/* ── 3 article cards ─────────────────────── */}
+          <ul className="mt-12 grid gap-10 sm:gap-8 md:grid-cols-3">
+            {picks.map((article, i) => (
+              <motion.li
+                key={article.slug}
+                initial={{ opacity: 1, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-5%' }}
+                transition={{ duration: 0.6, delay: i * 0.08, ease: EASE_OUT }}
               >
-                <div className="relative aspect-[16/9] overflow-hidden">
-                  <img
-                    src={article.image}
-                    alt=""
-                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500"
-                    loading="lazy"
-                  />
+                <Link
+                  to={`/ratgeber/${article.slug}`}
+                  className="group flex h-full flex-col rounded-[26px] border-[3px] border-ink bg-white px-5 pb-6 pt-0 transition-transform hover:-translate-y-1 focus-visible:-translate-y-1"
+                >
+                  {/* The picture pokes a little above the card edge, the
+                   *  way a photo taped into a book does. */}
                   <div
-                    className="absolute inset-0 bg-gradient-to-t from-teal-dark/25 via-transparent to-transparent"
-                    aria-hidden
-                  />
-                </div>
-                <div className="flex flex-col flex-1 p-5 sm:p-6">
-                  <div className="flex items-center gap-3 mb-3">
-                    <span className="inline-flex items-center rounded-full bg-teal/10 px-3 py-1 text-[0.65rem] font-display font-bold uppercase tracking-[0.15em] text-teal">
-                      {article.category}
-                    </span>
-                    <span className="text-xs text-ink/50">
-                      {article.readMinutes} Min.
+                    className="-mt-7 overflow-hidden rounded-[18px] border-[3px] border-ink bg-sky-wash [transform:rotate(calc(var(--tilt)*0.5))] sm:[transform:rotate(var(--tilt))]"
+                    style={{ '--tilt': `${TILTS[i % TILTS.length]}deg` } as CSSProperties}
+                  >
+                    <img
+                      src={article.image}
+                      alt=""
+                      className="block aspect-[16/9] w-full object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+
+                  <div className="mt-6 flex flex-1 flex-col">
+                    <div className="flex items-center gap-3">
+                      <span className="inline-flex items-center rounded-full bg-sky-wash px-3.5 py-1.5 text-[0.7rem] font-display font-bold uppercase tracking-[0.1em] text-cobalt">
+                        {article.category}
+                      </span>
+                      <span className="text-sm text-ink/70">
+                        {article.readMinutes} Min.
+                      </span>
+                    </div>
+
+                    <h3 className="bb-display mt-4 text-[1.4rem] sm:text-2xl text-ink">
+                      {article.title}
+                    </h3>
+                    <p className="mt-3 flex-1 text-base text-ink/85 leading-relaxed">
+                      {article.description}
+                    </p>
+
+                    <span className="mt-5 inline-flex items-center gap-2 font-display font-bold text-base text-cobalt">
+                      Weiterlesen
+                      <svg
+                        aria-hidden
+                        viewBox="0 0 64 64"
+                        className="h-4 w-4 transition-transform group-hover:translate-x-1"
+                      >
+                        <use href="#bb-arrow" />
+                      </svg>
                     </span>
                   </div>
-                  <h3 className="font-display font-bold text-xl sm:text-[1.35rem] text-ink leading-snug mb-2 group-hover:text-teal transition-colors">
-                    {article.title}
-                  </h3>
-                  <p className="text-sm text-ink/70 leading-relaxed mb-4 flex-1">
-                    {article.description}
-                  </p>
-                  <span className="inline-flex items-center gap-1 text-sm text-teal font-semibold group-hover:gap-2 transition-all">
-                    Weiterlesen <span aria-hidden>→</span>
-                  </span>
-                </div>
-              </Link>
-            </motion.li>
-          ))}
-        </ul>
+                </Link>
+              </motion.li>
+            ))}
+          </ul>
 
-        {/* ── All articles CTA ────────────────────── */}
-        <motion.div
-          initial={{ opacity: 1 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="mt-10 flex justify-center"
-        >
-          <Link
-            to="/ratgeber"
-            className="inline-flex items-center gap-2 rounded-full border border-teal/30 px-6 py-3 text-sm text-ink font-display font-semibold hover:bg-teal-dark hover:text-cream hover:border-teal-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-cream transition-colors"
-          >
-            Alle Artikel ansehen
-            <span aria-hidden>→</span>
-          </Link>
-        </motion.div>
-      </div>
-    </section>
+          {/* ── All articles CTA ────────────────────── */}
+          <div className="mt-10 flex justify-center">
+            <Link
+              to="/ratgeber"
+              className="group inline-flex items-center gap-3 rounded-full bg-cobalt px-7 py-3.5 font-display font-bold text-base text-white transition-transform hover:-translate-y-0.5"
+            >
+              Alle Artikel ansehen
+              <svg
+                aria-hidden
+                viewBox="0 0 64 64"
+                className="h-4 w-4 transition-transform group-hover:translate-x-1"
+              >
+                <use href="#bb-arrow" />
+              </svg>
+            </Link>
+          </div>
+        </div>
+      </section>
+    </div>
   );
 }
