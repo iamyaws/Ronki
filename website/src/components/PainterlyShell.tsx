@@ -48,7 +48,7 @@ export function PainterlyShell({ children, readingProgress = false }: Props) {
         <motion.div
           aria-hidden
           style={reduced ? undefined : { scaleX: progress }}
-          className="fixed top-0 left-0 right-0 z-50 h-[3px] origin-left bg-sun"
+          className="fixed top-0 left-0 right-0 z-50 h-[3px] origin-left bg-cobalt"
         />
       )}
 
