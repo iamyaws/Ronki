@@ -127,7 +127,7 @@ export function ArcStoryboard() {
           <div className="mt-10 flex justify-center">
             {/* Same pill, from the kit now instead of by hand. Nothing
              *  about this section changes its look. */}
-            <PillButton href="/wie-es-funktioniert">
+            <PillButton href="/wie-es-funktioniert" tone="sun">
               So funktioniert Ronki im Detail
             </PillButton>
           </div>

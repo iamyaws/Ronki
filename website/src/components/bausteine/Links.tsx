@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { Link } from 'react-router-dom';
 
 /* ------------------------------------------------------------------ */
 /* 16. DrawnLink and PillButton                                        */
@@ -24,24 +25,24 @@ const LINK_TEXT: Record<LinkTone, string> = {
 export function DrawnLink({
   children,
   href,
+  to,
   tone = 'cobalt',
   arrow = true,
   onClick,
   className = '',
 }: {
   children: ReactNode;
-  href: string;
+  /** Plain href, or `to` for an in-app route (no full page load). */
+  href?: string;
+  to?: string;
   tone?: LinkTone;
   arrow?: boolean;
   onClick?: () => void;
   className?: string;
 }) {
-  return (
-    <a
-      href={href}
-      onClick={onClick}
-      className={`group relative inline-flex items-baseline gap-2 pb-2 font-display text-[1.05rem] font-semibold [hyphens:none] ${LINK_TEXT[tone]} ${className}`}
-    >
+  const linkClass = `group relative inline-flex items-baseline gap-2 pb-2 font-display text-[1.05rem] font-semibold [hyphens:none] ${LINK_TEXT[tone]} ${className}`;
+  const inner = (
+    <>
       <span className="relative">
         {children}
         {/* The line keeps its 2.5px weight however far it is stretched,
@@ -73,13 +74,26 @@ export function DrawnLink({
           <use href="#bb-arrow" />
         </svg>
       )}
+    </>
+  );
+
+  if (to) {
+    return (
+      <Link to={to} onClick={onClick} className={linkClass}>
+        {inner}
+      </Link>
+    );
+  }
+  return (
+    <a href={href} onClick={onClick} className={linkClass}>
+      {inner}
     </a>
   );
 }
 
 /* ------------------------------------------------------------------ */
 
-type PillTone = 'primary' | 'outline' | 'on-dark' | 'on-night';
+type PillTone = 'primary' | 'outline' | 'on-dark' | 'on-night' | 'sun';
 
 const PILL_CLASS: Record<PillTone, string> = {
   primary: 'bg-cobalt text-white bb-press bb-press--night',
@@ -89,6 +103,9 @@ const PILL_CLASS: Record<PillTone, string> = {
   // passive surface, not as something to press.
   'on-dark': 'bg-sun text-ink bb-press',
   'on-night': 'bg-sun text-ink bb-press',
+  // On a blue-tinted light ground (sky-wash) a cobalt pill is blue on
+  // blue; the sun pill on its ink edge stands out instead.
+  sun: 'bg-sun text-ink bb-press',
 };
 
 /**

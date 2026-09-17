@@ -4,6 +4,7 @@ import { LAUNCH_STATE, getLaunchCopy } from '../config/launch-state';
 import { trackEvent } from '../lib/analytics';
 import { EASE_OUT } from '../lib/motion';
 import { StarSticker } from './primitives/BilderbuchDefs';
+import { DrawnLink } from './bausteine/Links';
 
 /** Fallback for the "App öffnen" link when the launch state carries no appUrl. */
 const APP_URL_FALLBACK = 'https://app.ronki.de/';
@@ -90,13 +91,17 @@ export function HeroVariantF() {
                   <use href="#bb-arrow" />
                 </svg>
               </Link>
-              <Link
+              {/* Second way in, deliberately not a button: an outlined pill on
+               *  the cobalt ground read as blue on blue and competed with the
+               *  one action. A drawn white link stays clearly secondary. */}
+              <DrawnLink
                 to="/vorlagen"
+                tone="white"
                 onClick={() => trackEvent('CTA Klick', { cta: 'vorlage', source: 'hero' })}
-                className="inline-flex shrink-0 items-center justify-center rounded-full border-2 border-white/80 bg-transparent px-6 py-[0.9rem] font-display font-semibold text-base sm:text-lg text-white transition-colors hover:bg-white/10 hover:border-white text-center whitespace-nowrap [hyphens:none]"
+                className="self-start text-base sm:text-lg"
               >
-                Vorlage holen
-              </Link>
+                Oder erst die Vorlage holen
+              </DrawnLink>
             </div>
 
             <p
@@ -146,14 +151,14 @@ export function HeroVariantF() {
           </motion.p>
 
           {/* Trust indicators */}
-          <motion.div
+          <motion.ul
             {...fade(0.8)}
-            className="mt-8 flex flex-wrap items-center gap-2.5"
+            className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2"
           >
             <TrustBadge label="Keine Werbung" />
             <TrustBadge label="Keine Streaks" />
             <TrustBadge label="Keine In-App-Käufe" />
-          </motion.div>
+          </motion.ul>
 
           {/* Secondary link to storyboard */}
           <motion.a
@@ -239,11 +244,12 @@ export function HeroVariantF() {
 
 function TrustBadge({ label }: { label: string }) {
   return (
-    <span className="inline-flex items-center gap-2 rounded-full border-2 border-white/80 px-3.5 py-1.5 font-display font-bold text-sm text-white">
+    // Plain facts, not controls: no outline, so nothing here looks tappable.
+    <li className="inline-flex items-center gap-2 font-display font-semibold text-[0.95rem] text-white">
       <svg aria-hidden viewBox="0 0 64 64" className="h-4 w-4 text-sun">
         <use href="#bb-check" />
       </svg>
       {label}
-    </span>
+    </li>
   );
 }
