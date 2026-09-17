@@ -194,7 +194,7 @@ export function HeroVariantF() {
               />
             </motion.div>
             <StarSticker
-              lines={['Kleiner Drache.', 'Große Gefühle.']}
+              lines={['Kleiner', 'Drache.', 'Große', 'Gefühle.']}
               className="absolute right-0 -top-4 h-[180px] w-[180px]"
             />
           </motion.div>
@@ -224,7 +224,7 @@ export function HeroVariantF() {
             />
           </div>
           <StarSticker
-            lines={['Kleiner Drache.', 'Große Gefühle.']}
+            lines={['Kleiner', 'Drache.', 'Große', 'Gefühle.']}
             className="absolute -right-4 -top-6 h-[124px] w-[124px]"
           />
         </div>

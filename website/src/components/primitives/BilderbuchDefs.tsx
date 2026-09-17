@@ -248,8 +248,12 @@ export function StarSticker({
   className?: string;
   rotate?: number;
 }) {
-  // Text baselines, not centres, so nudge the block down half a cap height.
-  const start = 105 - ((lines.length - 1) * 15) / 2;
+  // The star's inner circle is about 150 units wide. Short lines in the
+  // headline face fill it; long lines in the hand face floated tiny in the
+  // middle. Text baselines, not centres, so nudge down a third of the size.
+  const size = lines.length >= 4 ? 25 : lines.length === 3 ? 28 : 30;
+  const step = size * 1.02;
+  const start = 100 + size * 0.34 - ((lines.length - 1) * step) / 2;
   return (
     <svg
       viewBox="0 0 200 200"
@@ -266,13 +270,14 @@ export function StarSticker({
         <text
           key={line}
           x="100"
-          y={start + i * 15}
+          y={start + i * step}
           textAnchor="middle"
           fill="#040812"
           style={{
-            fontFamily: 'var(--font-hand)',
-            fontSize: '15px',
-            textTransform: 'uppercase',
+            fontFamily: 'var(--font-display)',
+            fontWeight: 700,
+            fontSize: `${size}px`,
+            letterSpacing: '-0.01em',
           }}
         >
           {line}
