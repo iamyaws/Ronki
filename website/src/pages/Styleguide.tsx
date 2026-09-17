@@ -449,6 +449,34 @@ export default function Styleguide() {
                 </div>
               </div>
             </Stage>
+
+            {/* Die drei Varianten, die die Startseite dazugebracht hat. */}
+            <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div>
+                <Stage tone="white" className="pt-14">
+                  <SpeechBubble tone="white" tail="left" tailEdge="top" rotate={-0.5}>
+                    Nein. Ronki läuft auf dem Familien-Tablet.
+                  </SpeechBubble>
+                </Stage>
+                <VariantLabel>Zipfel oben: die Antwort zur Frage darüber</VariantLabel>
+              </div>
+              <div>
+                <Stage tone="white">
+                  <SpeechBubble tone="sky-wash" tail="left" rotate={-0.8}>
+                    Erst die Arbeit, dann das Vergnügen. Sätze von meinen Eltern.
+                  </SpeechBubble>
+                </Stage>
+                <VariantLabel>Himmel hell: ein Elternsatz</VariantLabel>
+              </div>
+              <div>
+                <Stage tone="white">
+                  <SpeechBubble tone="sun" tail="none" tailAtMd="bottom" rotate={1.6}>
+                    Ich bin nicht allein. Du auch nicht.
+                  </SpeechBubble>
+                </Stage>
+                <VariantLabel>Ohne Zipfel am Handy, mit Zipfel ab md</VariantLabel>
+              </div>
+            </div>
           </Entry>
 
           {/* 6 */}

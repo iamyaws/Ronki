@@ -1,4 +1,5 @@
 import { motion } from 'motion/react';
+import { Doodle, TornNote } from './bausteine';
 import { HandNote } from './primitives/HandNote';
 import { Sparkles } from './primitives/Sparkles';
 import { PaperEdge } from './primitives/PaperEdge';
@@ -58,42 +59,44 @@ export function BeforeAfter() {
             </h2>
           </motion.div>
 
-          <div className="mt-10 grid md:grid-cols-2 gap-6 md:gap-8">
-            {/* The old way. White card, ink outline, a scribbled ball in
-             *  the corner and crossed-out bullets. */}
+          <div className="mt-10 grid md:grid-cols-2 gap-6 md:gap-8 md:items-start">
+            {/* The old way. A scrap torn off a bigger sheet, pinned to the
+             *  page: the thing you throw away. The Ronki side beside it is
+             *  a card you keep, so the two never read as a matched pair. */}
             <motion.div
               initial={{ opacity: 1, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-10%' }}
               transition={{ duration: 0.7 }}
-              className="relative overflow-hidden rounded-[26px] border-[3px] border-ink bg-white p-6 sm:p-8 -rotate-[1deg] md:-rotate-[1.5deg]"
+              className="relative md:pt-2"
             >
-              <svg
-                aria-hidden
-                viewBox="0 0 120 100"
-                className="pointer-events-none absolute -right-3 -top-2 h-20 w-24 text-ember/80"
-              >
-                <use href="#bb-scribble" />
-              </svg>
-              <h3 className="bb-display text-2xl sm:text-3xl text-ink">
-                Zufällige Erinnerungen
-              </h3>
-              <ul className="mt-5 flex flex-col gap-4">
-                {BEFORE.map((item) => (
-                  <li key={item} className="flex items-start gap-3.5">
-                    <svg
-                      aria-hidden
-                      viewBox="0 0 64 64"
-                      className="mt-0.5 h-5 w-5 shrink-0 text-ink/70"
-                    >
-                      <use href="#bb-cross" />
-                    </svg>
-                    <p className="text-[1.05rem] sm:text-lg text-ink/85 leading-relaxed">
-                      {item}
-                    </p>
-                  </li>
-                ))}
-              </ul>
+              <TornNote rotate={-1.8}>
+                <Doodle
+                  name="tangle"
+                  size={78}
+                  rotate={-8}
+                  className="pointer-events-none absolute -right-1 -top-6 text-ember/85"
+                />
+                <h3 className="bb-display text-2xl sm:text-3xl text-ink">
+                  Zufällige Erinnerungen
+                </h3>
+                <ul className="mt-5 flex flex-col gap-4 pb-2">
+                  {BEFORE.map((item) => (
+                    <li key={item} className="flex items-start gap-3.5">
+                      <svg
+                        aria-hidden
+                        viewBox="0 0 64 64"
+                        className="mt-0.5 h-5 w-5 shrink-0 text-ink/70"
+                      >
+                        <use href="#bb-cross" />
+                      </svg>
+                      <p className="text-[1.05rem] sm:text-lg text-ink/85 leading-relaxed">
+                        {item}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              </TornNote>
             </motion.div>
 
             {/* The Ronki way. Cobalt, sun stars, the one lifted card. */}

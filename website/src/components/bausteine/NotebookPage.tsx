@@ -95,13 +95,16 @@ export function ChecklistItem({
   children,
   mark = 'check',
   className = '',
+  as: Tag = 'li',
 }: {
   children: ReactNode;
   mark?: 'check' | 'cross' | 'none';
   className?: string;
+  /** Use 'div' when the caller already renders the list item. */
+  as?: 'li' | 'div';
 }) {
   return (
-    <li className={`flex items-start gap-3 ${className}`}>
+    <Tag className={`flex items-start gap-3 ${className}`}>
       {mark !== 'none' && (
         <svg
           aria-hidden
@@ -117,6 +120,6 @@ export function ChecklistItem({
       <span className="font-display font-semibold text-[1.02rem] text-ink [hyphens:none]">
         {children}
       </span>
-    </li>
+    </Tag>
   );
 }

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { EASE_OUT } from '../lib/motion';
+import { SpeechBubble } from './bausteine';
 import { HandNote } from './primitives/HandNote';
 import { StickerLabel } from './primitives/StickerLabel';
 
@@ -28,8 +29,10 @@ const ITEMS = [
 ];
 
 /**
- * The questions, in the same ink-outlined cards the template pages use.
- * The plus is drawn, and it turns into a drawn cross when the card opens.
+ * The questions stay clean ink-outlined rows, because a row you press is
+ * a control. The answer is Ronki talking back: a bubble under the
+ * question with its tail pointing up at it. The plus turns into a cross
+ * when the row opens.
  */
 export function FAQ() {
   const [open, setOpen] = useState<number | null>(null);
@@ -70,13 +73,12 @@ export function FAQ() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: i * 0.04 }}
-                className={`overflow-hidden rounded-[22px] border-[2.5px] border-ink ${
-                  isOpen ? 'bg-sky-wash' : 'bg-white'
-                }`}
               >
                 <button
                   onClick={() => setOpen(isOpen ? null : i)}
-                  className="flex w-full items-center justify-between gap-4 px-5 py-5 text-left sm:px-6"
+                  className={`flex w-full items-center justify-between gap-4 rounded-[22px] border-[2.5px] border-ink px-5 py-5 text-left sm:px-6 ${
+                    isOpen ? 'bg-sky-wash' : 'bg-white'
+                  }`}
                   aria-expanded={isOpen}
                 >
                   <span className="font-display font-bold text-ink text-base sm:text-lg">
@@ -98,10 +100,19 @@ export function FAQ() {
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.3, ease: EASE_OUT }}
+                      className="overflow-hidden"
                     >
-                      <p className="px-5 pb-5 text-base text-ink/85 leading-relaxed sm:px-6">
+                      {/* The tail hangs off the top edge and points back at
+                       *  the question, so the answer belongs to it. */}
+                      <SpeechBubble
+                        tone="white"
+                        tail="left"
+                        tailEdge="top"
+                        rotate={-0.5}
+                        className="mt-[38px] mb-1 w-full"
+                      >
                         {item.a}
-                      </p>
+                      </SpeechBubble>
                     </motion.div>
                   )}
                 </AnimatePresence>

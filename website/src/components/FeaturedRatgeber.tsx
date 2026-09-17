@@ -20,11 +20,11 @@
  *   3. abendroutine-grundschulkind — practical, high search intent
  */
 
-import type { CSSProperties } from 'react';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { ARTICLES } from '../data/ratgeber-articles';
 import { EASE_OUT } from '../lib/motion';
+import { DrawnLink, IndexCard, PillButton } from './bausteine';
 import { HandNote } from './primitives/HandNote';
 import { PaperEdge } from './primitives/PaperEdge';
 import { StickerLabel } from './primitives/StickerLabel';
@@ -35,8 +35,8 @@ const FEATURED_SLUGS = [
   'abendroutine-grundschulkind',
 ] as const;
 
-/** Each picture lies a little differently in its card. */
-const TILTS = [-1.5, 1.2, -0.8];
+/** Each card lies a little differently in the drawer. */
+const TILTS = [-1.4, 0.9, -0.6];
 
 export function FeaturedRatgeber() {
   const picks = FEATURED_SLUGS
@@ -94,7 +94,10 @@ export function FeaturedRatgeber() {
           </HandNote>
 
           {/* ── 3 article cards ─────────────────────── */}
-          <ul className="mt-12 grid gap-10 sm:gap-8 md:grid-cols-3">
+          {/* Cards out of the index box: the tab names the drawer, the
+           *  picture is a small framed thumbnail and "Weiterlesen" is a
+           *  drawn line, so the teaser never wears a pill. */}
+          <ul className="mt-12 grid gap-9 sm:gap-7 md:grid-cols-3">
             {picks.map((article, i) => (
               <motion.li
                 key={article.slug}
@@ -103,72 +106,33 @@ export function FeaturedRatgeber() {
                 viewport={{ once: true, margin: '-5%' }}
                 transition={{ duration: 0.6, delay: i * 0.08, ease: EASE_OUT }}
               >
-                <Link
-                  to={`/ratgeber/${article.slug}`}
-                  className="group flex h-full flex-col rounded-[26px] border-[3px] border-ink bg-white px-5 pb-6 pt-0 transition-transform hover:-translate-y-1 focus-visible:-translate-y-1"
-                >
-                  {/* The picture pokes a little above the card edge, the
-                   *  way a photo taped into a book does. */}
-                  <div
-                    className="-mt-7 overflow-hidden rounded-[18px] border-[3px] border-ink bg-sky-wash [transform:rotate(calc(var(--tilt)*0.5))] sm:[transform:rotate(var(--tilt))]"
-                    style={{ '--tilt': `${TILTS[i % TILTS.length]}deg` } as CSSProperties}
-                  >
-                    <img
-                      src={article.image}
-                      alt=""
-                      className="block aspect-[16/9] w-full object-cover"
-                      loading="lazy"
-                    />
-                  </div>
-
-                  <div className="mt-6 flex flex-1 flex-col">
-                    <div className="flex items-center gap-3">
-                      <span className="inline-flex items-center rounded-full bg-sky-wash px-3.5 py-1.5 text-[0.7rem] font-display font-bold uppercase tracking-[0.1em] text-cobalt">
-                        {article.category}
-                      </span>
-                      <span className="text-sm text-ink/70">
-                        {article.readMinutes} Min.
-                      </span>
-                    </div>
-
-                    <h3 className="bb-display mt-4 text-[1.4rem] sm:text-2xl text-ink">
+                <IndexCard
+                  tab={article.category}
+                  title={
+                    <Link
+                      to={`/ratgeber/${article.slug}`}
+                      className="text-ink transition-colors hover:text-cobalt"
+                    >
                       {article.title}
-                    </h3>
-                    <p className="mt-3 flex-1 text-base text-ink/85 leading-relaxed">
-                      {article.description}
-                    </p>
-
-                    <span className="mt-5 inline-flex items-center gap-2 font-display font-bold text-base text-cobalt">
-                      Weiterlesen
-                      <svg
-                        aria-hidden
-                        viewBox="0 0 64 64"
-                        className="h-4 w-4 transition-transform group-hover:translate-x-1"
-                      >
-                        <use href="#bb-arrow" />
-                      </svg>
-                    </span>
-                  </div>
-                </Link>
+                    </Link>
+                  }
+                  meta={`${article.readMinutes} Minuten`}
+                  image={article.image}
+                  imageAlt=""
+                  rotate={TILTS[i % TILTS.length]}
+                >
+                  <p>{article.description}</p>
+                  <DrawnLink href={`/ratgeber/${article.slug}`} className="mt-3">
+                    Weiterlesen
+                  </DrawnLink>
+                </IndexCard>
               </motion.li>
             ))}
           </ul>
 
           {/* ── All articles CTA ────────────────────── */}
-          <div className="mt-10 flex justify-center">
-            <Link
-              to="/ratgeber"
-              className="group inline-flex items-center gap-3 rounded-full bg-cobalt px-7 py-3.5 font-display font-bold text-base text-white transition-transform hover:-translate-y-0.5"
-            >
-              Alle Artikel ansehen
-              <svg
-                aria-hidden
-                viewBox="0 0 64 64"
-                className="h-4 w-4 transition-transform group-hover:translate-x-1"
-              >
-                <use href="#bb-arrow" />
-              </svg>
-            </Link>
+          <div className="mt-12 flex justify-center">
+            <PillButton href="/ratgeber">Alle Artikel ansehen</PillButton>
           </div>
         </div>
       </section>

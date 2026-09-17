@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react';
 import { motion } from 'motion/react';
 import { EASE_OUT } from '../lib/motion';
-import { CrayonBarChart } from './bausteine';
+import { CrayonBarChart, Doodle, DrawnLink, Ribbon, SpeechBubble } from './bausteine';
 import type { BarRow, BarTone } from './bausteine';
 import { HandNote } from './primitives/HandNote';
 import { PaperEdge } from './primitives/PaperEdge';
@@ -125,13 +125,13 @@ export function RonkisWelt() {
       >
         <div className="relative max-w-6xl mx-auto">
           {/* ── Part 1: the friends ─────────────────────── */}
-          <StickerLabel tone="sky-wash" rotate={-3}>
+          <Ribbon tone="cobalt" rotate={-1.4}>
             Ronkis Welt
-          </StickerLabel>
+          </Ribbon>
 
           <h2
             id="welt-heading"
-            className="bb-display mt-4 text-4xl sm:text-5xl lg:text-[3.5rem] text-ink max-w-3xl"
+            className="bb-display mt-6 text-4xl sm:text-5xl lg:text-[3.5rem] text-ink max-w-3xl"
           >
             Dein Kind ist nicht allein.{' '}
             <span className="bb-swipe">
@@ -145,6 +145,21 @@ export function RonkisWelt() {
           <p className="mt-4 text-[1.05rem] sm:text-lg text-ink/85 max-w-2xl leading-relaxed">
             Sieben Begleiter, die an den richtigen Momenten des Tages auftauchen. Nicht als Feature-Liste. Als Figuren, die ein Kind gern wiedertrifft.
           </p>
+
+          {/* The third of the page beside the headline used to be empty.
+           *  Ronki says the headline back in his own voice, and the tail
+           *  points down at the seven faces. Only where there is room. */}
+          <div className="pointer-events-none absolute right-0 top-[150px] hidden w-[272px] xl:block">
+            <SpeechBubble tone="sun" tail="bottom" rotate={2.2} className="w-full">
+              Ich bin nicht allein. Du auch nicht.
+            </SpeechBubble>
+            <Doodle
+              name="sparkle-trio"
+              size={44}
+              rotate={12}
+              className="absolute -left-12 top-2 text-cobalt"
+            />
+          </div>
 
           <ul className="mt-10 grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-x-5 gap-y-9 sm:gap-x-6">
             {FREUNDE.map((f, i) => (
@@ -180,7 +195,8 @@ export function RonkisWelt() {
             ))}
           </ul>
 
-          <div className="mt-8 flex justify-center lg:justify-end">
+          <div className="mt-8 flex items-center justify-center gap-3 lg:justify-end">
+            <Doodle name="arrow-curved" size={30} rotate={-62} className="text-cobalt" />
             <HandNote rotate={3} icon="heart" className="text-center lg:text-right">
               Alle sieben kommen wieder.
             </HandNote>
@@ -212,15 +228,13 @@ export function RonkisWelt() {
                   <strong className="font-semibold text-ink">aus eigenem Antrieb</strong> macht.
                 </p>
                 <p className="text-base text-ink/70">
-                  Basierend auf der Selbstbestimmungstheorie (Deci &amp; Ryan), Fading Scaffolding (Vygotsky) und Montessori-Prinzipien.{' '}
-                  <a
-                    href="/wissenschaft"
-                    className="text-cobalt underline decoration-2 underline-offset-4"
-                  >
-                    Mehr erfahren
-                  </a>
+                  Basierend auf der Selbstbestimmungstheorie (Deci &amp; Ryan), Fading Scaffolding (Vygotsky) und Montessori-Prinzipien.
                 </p>
               </div>
+
+              <DrawnLink href="/wissenschaft" className="mt-5">
+                Mehr erfahren
+              </DrawnLink>
             </div>
 
             <FadingChart />

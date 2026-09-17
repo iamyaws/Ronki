@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import { LAUNCH_STATE } from '../config/launch-state';
 import { WaitlistCTA } from './WaitlistCTA';
+import { Ticket, TicketLine } from './bausteine';
 import { HandNote } from './primitives/HandNote';
 import {
   getPlatformLabel,
@@ -18,6 +19,11 @@ type Props = {
    *  quiet two-thirds band and links to /installieren instead. */
   install?: boolean;
 };
+
+/** The three install steps, as in demo b on the styleguide: white, sun,
+ *  cobalt, each lying a little differently on the night ground. */
+const TICKET_TONES = ['white', 'sun', 'cobalt'] as const;
+const TICKET_TILTS = [-0.7, 0.9, -0.5];
 
 /** Scattered sun stars. Fixed list so the band looks the same on every
  *  render, varied in size and angle so it does not read as a pattern. */
@@ -133,43 +139,21 @@ export function ClosingBand({ art, install = false }: Props) {
                   </p>
                 )}
 
-                <ol className="mt-7 flex flex-col gap-7">
+                {/* Three tickets, one per tap. The stub carries the
+                 *  number, the notches are bitten out of the night
+                 *  ground, and each ticket wears a different dress so
+                 *  the three never read as one repeated box. */}
+                <ol className="mt-7 flex flex-col gap-4">
                   {steps.map((s, i) => (
-                    <li key={s.step} className="relative flex items-start gap-5 [hyphens:none]">
-                      {/* The dashed line down to the next circle. Drawn
-                       *  per step, so it always stops at step three. */}
-                      {i < steps.length - 1 && (
-                        <svg
-                          aria-hidden
-                          focusable="false"
-                          viewBox="0 0 6 100"
-                          preserveAspectRatio="none"
-                          className="pointer-events-none absolute left-[26px] top-[58px] -bottom-[30px] w-1.5 text-white/35"
-                        >
-                          <path
-                            d="M3 0 C 5 30 1 60 3 100"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2.5"
-                            strokeDasharray="12 10"
-                            strokeLinecap="round"
-                          />
-                        </svg>
-                      )}
-                      <span
-                        aria-hidden
-                        className="relative z-10 flex h-14 w-14 shrink-0 items-center justify-center rounded-full border-[2.5px] border-white bg-night font-display font-bold text-xl text-sun"
+                    <li key={s.step} className="[hyphens:none]">
+                      <Ticket
+                        stub={s.step}
+                        tone={TICKET_TONES[i % TICKET_TONES.length]}
+                        ground="night"
+                        rotate={TICKET_TILTS[i % TICKET_TILTS.length]}
                       >
-                        {s.step}
-                      </span>
-                      <div className="pt-1.5">
-                        <h3 className="font-display font-bold text-white text-lg leading-tight">
-                          {s.title}
-                        </h3>
-                        <p className="mt-1.5 text-[0.95rem] text-white/[0.85] leading-relaxed">
-                          {s.body}
-                        </p>
-                      </div>
+                        <TicketLine title={s.title}>{s.body}</TicketLine>
+                      </Ticket>
                     </li>
                   ))}
                 </ol>

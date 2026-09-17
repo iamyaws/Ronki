@@ -1,10 +1,15 @@
 import { motion } from 'motion/react';
-import { Link } from 'react-router-dom';
 import { EASE_OUT } from '../lib/motion';
-import { StickyNote } from './bausteine';
+import {
+  ChecklistItem,
+  DrawnLink,
+  NotebookPage,
+  Ribbon,
+  StickyNote,
+  TornNote,
+} from './bausteine';
 import { HandNote } from './primitives/HandNote';
 import { PaperEdge } from './primitives/PaperEdge';
-import { StickerLabel } from './primitives/StickerLabel';
 
 const ITEMS = [
   { label: 'Keine Streaks, die reißen können.', detail: 'Kontinuität wächst als Ort in Ronkis Welt. Nicht als Zähler, der heute noch heil ist und morgen zerbricht.' },
@@ -22,18 +27,9 @@ const LIMITS = [
   { label: 'Frühe Version.', detail: 'Es gibt Ecken, die noch haken.' },
 ];
 
-function Mark({ kind }: { kind: 'check' | 'cross' }) {
-  return (
-    <svg
-      aria-hidden
-      focusable="false"
-      viewBox="0 0 64 64"
-      className={`mt-1 h-5 w-5 shrink-0 ${kind === 'check' ? 'text-cobalt' : 'text-ink/75'}`}
-    >
-      <use href={kind === 'check' ? '#bb-check' : '#bb-cross'} />
-    </svg>
-  );
-}
+/** The ruled line spacing the notebook page and its text share. Every
+ *  line of type sets to exactly this, so nothing floats between rules. */
+const RULE = 34;
 
 /**
  * The honest list, on the paper spread.
@@ -58,13 +54,13 @@ export function AntiFeatures() {
               viewport={{ once: true, margin: '-15%' }}
               transition={{ duration: 0.7 }}
             >
-              <StickerLabel tone="sun" rotate={-3}>
+              <Ribbon tone="sun" rotate={-1.4}>
                 Unser Versprechen
-              </StickerLabel>
+              </Ribbon>
 
               <h2
                 id="anti-features-heading"
-                className="bb-display mt-4 text-4xl sm:text-5xl text-ink"
+                className="bb-display mt-6 text-4xl sm:text-5xl text-ink"
               >
                 Die{' '}
                 <span className="bb-swipe">
@@ -91,13 +87,21 @@ export function AntiFeatures() {
             </StickyNote>
           </div>
 
-          <div className="mt-10 grid gap-6 md:grid-cols-2 md:gap-8 md:items-start">
+          {/* Two different objects, not two matching cards: the sheet out
+           *  of the exercise book with the decisions on it, and the strip
+           *  torn off a bigger page with the limits. The torn strip in
+           *  "Vorher / Nachher" is pinned, this one is taped, and the two
+           *  are never on screen together. */}
+          <div className="mt-10 grid gap-10 md:grid-cols-[1.05fr_0.95fr] md:gap-9 md:items-start">
             {/* Left: the things we left out on purpose. */}
-            <div className="rounded-[26px] border-[3px] border-ink bg-white p-6 sm:p-7 -rotate-[0.6deg]">
-              <p className="bb-display text-xl sm:text-2xl text-ink">
+            <NotebookPage ruleHeight={RULE} rotate={-0.9}>
+              <p
+                className="bb-display text-[1.35rem] sm:text-[1.5rem] text-ink"
+                style={{ lineHeight: `${RULE}px` }}
+              >
                 Was wir weggelassen haben
               </p>
-              <ul className="mt-5 flex flex-col gap-5">
+              <ul>
                 {ITEMS.map((item, i) => (
                   <motion.li
                     key={item.label}
@@ -105,69 +109,66 @@ export function AntiFeatures() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, margin: '-5%' }}
                     transition={{ duration: 0.5, delay: i * 0.05, ease: EASE_OUT }}
-                    className="flex items-start gap-3.5"
+                    /* One empty ruled line after the title, then the items
+                     *  run line after line like a handwritten list. */
+                    style={i === 0 ? { marginTop: `${RULE}px` } : undefined}
                   >
-                    <Mark kind="check" />
-                    <div>
-                      <p className="font-display font-bold text-lg leading-snug text-ink">
-                        {item.label}
-                      </p>
-                      <p className="mt-1.5 text-[0.95rem] text-ink/85 leading-relaxed">
+                    <ChecklistItem mark="check" as="div">
+                      <span className="block">{item.label}</span>
+                      <span
+                        className="block font-body text-[0.92rem] font-normal text-ink/80"
+                        style={{ lineHeight: `${RULE}px` }}
+                      >
                         {item.detail}
-                      </p>
-                    </div>
+                      </span>
+                    </ChecklistItem>
                   </motion.li>
                 ))}
               </ul>
-            </div>
+            </NotebookPage>
 
-            {/* Right: what Ronki cannot do. It is the shorter card, so
-             *  the link to the research sits under it and fills the gap
-             *  instead of floating in the middle of a white band. */}
-            <div className="flex flex-col gap-8">
-            <div className="rounded-[26px] border-[3px] border-ink bg-white p-6 sm:p-7 rotate-[0.6deg]">
-              <p className="bb-display text-xl sm:text-2xl text-ink">
-                Was Ronki nicht kann
-              </p>
-              <ul className="mt-5 flex flex-col gap-5">
-                {LIMITS.map((item, i) => (
-                  <motion.li
-                    key={item.label}
-                    initial={{ opacity: 1, y: 8 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: '-5%' }}
-                    transition={{ duration: 0.5, delay: i * 0.05, ease: EASE_OUT }}
-                    className="flex items-start gap-3.5"
-                  >
-                    <Mark kind="cross" />
-                    <div>
-                      <p className="font-display font-bold text-lg leading-snug text-ink">
-                        {item.label}
-                      </p>
-                      <p className="mt-1.5 text-[0.95rem] text-ink/85 leading-relaxed">
-                        {item.detail}
-                      </p>
-                    </div>
-                  </motion.li>
-                ))}
-              </ul>
-            </div>
+            {/* Right: what Ronki cannot do, on a strip torn off the page,
+             *  with the research link under it as a drawn line, never a
+             *  pill: a link is not an action. */}
+            <div className="flex flex-col gap-9 md:pt-6">
+              <TornNote pin="tape" rotate={1.4}>
+                <p className="bb-display text-[1.3rem] sm:text-[1.45rem] text-ink">
+                  Was Ronki nicht kann
+                </p>
+                <ul className="mt-4 flex flex-col gap-4 pb-2">
+                  {LIMITS.map((item, i) => (
+                    <motion.li
+                      key={item.label}
+                      initial={{ opacity: 1, y: 8 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true, margin: '-5%' }}
+                      transition={{ duration: 0.5, delay: i * 0.05, ease: EASE_OUT }}
+                      className="flex items-start gap-3.5"
+                    >
+                      <svg
+                        aria-hidden
+                        focusable="false"
+                        viewBox="0 0 64 64"
+                        className="mt-1 h-5 w-5 shrink-0 text-ink/75"
+                      >
+                        <use href="#bb-cross" />
+                      </svg>
+                      <div>
+                        <p className="font-display font-bold text-[1.05rem] leading-snug text-ink">
+                          {item.label}
+                        </p>
+                        <p className="mt-1 text-[0.93rem] text-ink/85 leading-relaxed">
+                          {item.detail}
+                        </p>
+                      </div>
+                    </motion.li>
+                  ))}
+                </ul>
+              </TornNote>
 
-            <div className="flex justify-center md:justify-start">
-              <Link
-                to="/wissenschaft"
-                className="group inline-flex items-center gap-3 rounded-full border-[2.5px] border-ink bg-white px-7 py-3.5 font-display font-bold text-base text-ink transition-transform hover:-translate-y-0.5"
-              >
+              <DrawnLink href="/wissenschaft" className="self-center md:self-start">
                 Wissenschaftlicher Hintergrund
-                <svg
-                  aria-hidden
-                  viewBox="0 0 64 64"
-                  className="h-4 w-4 transition-transform group-hover:translate-x-1"
-                >
-                  <use href="#bb-arrow" />
-                </svg>
-              </Link>
-            </div>
+              </DrawnLink>
             </div>
           </div>
         </div>

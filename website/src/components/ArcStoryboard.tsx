@@ -1,6 +1,6 @@
 import { motion } from 'motion/react';
 import { EASE_OUT } from '../lib/motion';
-import { PrintedSheet, SheetRow } from './bausteine';
+import { PillButton, PrintedSheet, SheetRow } from './bausteine';
 import { HandNote } from './primitives/HandNote';
 import { PaperEdge } from './primitives/PaperEdge';
 import { StickerLabel } from './primitives/StickerLabel';
@@ -125,19 +125,11 @@ export function ArcStoryboard() {
           </div>
 
           <div className="mt-10 flex justify-center">
-            <a
-              href="/wie-es-funktioniert"
-              className="group inline-flex items-center gap-3 rounded-full bg-cobalt px-7 py-3.5 font-display font-bold text-base text-white transition-transform hover:-translate-y-0.5"
-            >
+            {/* Same pill, from the kit now instead of by hand. Nothing
+             *  about this section changes its look. */}
+            <PillButton href="/wie-es-funktioniert">
               So funktioniert Ronki im Detail
-              <svg
-                aria-hidden
-                viewBox="0 0 64 64"
-                className="h-4 w-4 transition-transform group-hover:translate-x-1"
-              >
-                <use href="#bb-arrow" />
-              </svg>
-            </a>
+            </PillButton>
           </div>
         </div>
       </section>
