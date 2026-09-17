@@ -1,5 +1,6 @@
 import { motion } from 'motion/react';
 import { EASE_OUT } from '../lib/motion';
+import { HandNote } from './primitives/HandNote';
 
 /* ------------------------------------------------------------------ */
 /* Data                                                                */
@@ -80,21 +81,21 @@ export function ArcStoryboard() {
   return (
     <section
       id="storyboard"
-      className="relative border-t border-teal/10 px-6 py-24 sm:py-32"
+      className="relative border-t border-teal/10 px-6 py-16 sm:py-24"
       aria-labelledby="storyboard-heading"
     >
-      <div className="max-w-6xl mx-auto">
+      <div className="relative max-w-6xl mx-auto">
         <motion.p
-          initial={{ opacity: 0, y: 8 }}
+          initial={{ opacity: 1, y: 8 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-xs uppercase tracking-[0.2em] text-teal mb-6 font-medium"
+          className="text-xs uppercase tracking-[0.2em] text-teal mb-4 font-medium"
         >
           Wie ein Tag mit Ronki aussieht
         </motion.p>
         <motion.h2
           id="storyboard-heading"
-          initial={{ opacity: 0, y: 12 }}
+          initial={{ opacity: 1, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
@@ -103,16 +104,23 @@ export function ArcStoryboard() {
           Ein Tag. Drei ruhige <em className="italic text-sage whitespace-nowrap">Routinen</em> für dein Kind.
         </motion.h2>
         <motion.p
-          initial={{ opacity: 0 }}
+          initial={{ opacity: 1 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="mt-6 text-base sm:text-lg text-ink/70 max-w-2xl leading-relaxed"
+          className="mt-5 text-base sm:text-lg text-ink/70 max-w-2xl leading-relaxed"
         >
           Kein straffer Plan, kein Minutenzähler. Ronki zeigt deinem Kind, was heute dran ist. Was geschafft ist, sieht es selbst. Was noch fehlt, auch.
         </motion.p>
 
-        <div className="mt-20 flex flex-col gap-24 sm:gap-28">
+        <HandNote
+          rotate={-5}
+          className="mt-6 lg:mt-0 lg:absolute lg:right-0 lg:top-2 lg:w-[190px] lg:text-right"
+        >
+          Drei kleine Listen, mehr nicht.
+        </HandNote>
+
+        <div className="mt-10 flex flex-col gap-12">
           {BEATS.map((beat, i) => (
             <BeatRow key={beat.time} beat={beat} flip={i % 2 === 1} index={i} />
           ))}
@@ -123,7 +131,7 @@ export function ArcStoryboard() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="mt-16 text-center"
+          className="mt-12 text-center"
         >
           <a
             href="/wie-es-funktioniert"
@@ -155,11 +163,11 @@ function BeatRow({
 
   return (
     <motion.article
-      initial={{ opacity: 0, y: 32 }}
+      initial={{ opacity: 1, y: 32 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-15%' }}
       transition={{ duration: 0.8, delay: 0.05, ease: EASE_OUT }}
-      className={`grid gap-10 sm:gap-14 md:grid-cols-[1fr_1.1fr] items-center ${
+      className={`grid gap-8 sm:gap-12 md:grid-cols-[1fr_1.1fr] items-center ${
         flip ? 'md:[&>*:first-child]:order-2' : ''
       }`}
     >
@@ -171,7 +179,7 @@ function BeatRow({
           style={{ backgroundColor: beat.wash }}
         />
         <div
-          className="relative rounded-[1.5rem] bg-white p-5 sm:p-6 ring-1 ring-inset ring-black/[0.04]"
+          className="relative rounded-[1.5rem] bg-white p-4 sm:p-5 ring-1 ring-inset ring-black/[0.04]"
           style={{ boxShadow: '0 20px 50px -20px rgba(4,8,18,0.20), 0 4px 16px -4px rgba(4,8,18,0.08)' }}
           role="img"
           aria-label={`${beat.time}routine: ${doneCount} von ${beat.tasks.length} erledigt`}
@@ -183,7 +191,7 @@ function BeatRow({
           />
 
           {/* Header */}
-          <div className="flex items-center gap-3 mb-5 mt-1">
+          <div className="flex items-center gap-3 mb-4 mt-1">
             <span className="text-xl" aria-hidden>{beat.icon}</span>
             <div className="flex-1">
               <p className="font-display font-bold text-ink text-sm sm:text-base leading-tight">
@@ -212,7 +220,7 @@ function BeatRow({
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: ti * 0.1 }}
-                className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 transition-colors ${
+                className={`flex items-center gap-3 rounded-xl px-3.5 py-2 transition-colors ${
                   task.done
                     ? 'bg-black/[0.02]'
                     : ''
@@ -278,7 +286,7 @@ function BeatRow({
       </figure>
 
       {/* Text */}
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-5">
         <div className="flex items-center gap-3">
           <span
             className="inline-flex h-10 items-center rounded-full px-4 font-display font-semibold text-xs uppercase tracking-[0.15em] text-white shadow-sm"
@@ -292,7 +300,7 @@ function BeatRow({
             style={{ backgroundColor: beat.accent, opacity: 0.4 }}
           />
         </div>
-        <h3 className="font-display font-bold text-[1.85rem] sm:text-[2.4rem] lg:text-[2.8rem] leading-[1.1] tracking-tight text-ink">
+        <h3 className="font-display font-bold text-[1.6rem] sm:text-[2rem] lg:text-[2.3rem] leading-[1.12] tracking-tight text-ink">
           {beat.title}
         </h3>
         <p className="text-ink/75 leading-[1.7] text-base sm:text-lg max-w-xl">

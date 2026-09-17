@@ -24,6 +24,7 @@ import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { ARTICLES } from '../data/ratgeber-articles';
 import { EASE_OUT } from '../lib/motion';
+import { HandNote } from './primitives/HandNote';
 
 const FEATURED_SLUGS = [
   'morgen-troedeln',
@@ -40,28 +41,28 @@ export function FeaturedRatgeber() {
 
   return (
     <section
-      className="relative px-6 py-28 sm:py-32 border-t border-teal/10"
+      className="relative px-6 py-16 sm:py-24 border-t border-teal/10"
       aria-labelledby="featured-ratgeber-heading"
     >
-      <div className="max-w-6xl mx-auto">
+      <div className="relative max-w-6xl mx-auto">
         {/* ── Header ──────────────────────────────── */}
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 1, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-20%' }}
           transition={{ duration: 0.7 }}
-          className="mb-14 max-w-3xl"
+          className="max-w-3xl"
         >
-          <p className="text-xs uppercase tracking-[0.2em] text-ink/85 mb-6 font-semibold">
+          <p className="text-xs uppercase tracking-[0.2em] text-ink/85 mb-4 font-semibold">
             Aus dem Ratgeber
           </p>
           <h2
             id="featured-ratgeber-heading"
-            className="font-display font-bold text-5xl sm:text-6xl lg:text-7xl leading-[1.1] tracking-tight text-ink"
+            className="font-display font-bold text-4xl sm:text-5xl lg:text-6xl leading-[1.1] tracking-tight text-ink"
           >
             Was wir <em className="italic text-sage">rausgefunden</em> haben.
           </h2>
-          <p className="mt-6 text-base opacity-75 max-w-2xl leading-relaxed">
+          <p className="mt-5 text-base opacity-75 max-w-2xl leading-relaxed">
             Ehrliche Artikel für Eltern von 5- bis 8-Jährigen. Keine Ratgeber-Klischees,
             keine Versprechen in drei Schritten. Nur das, was die Forschung sagt und was
             bei uns zuhause wirklich was verändert hat.
@@ -69,11 +70,18 @@ export function FeaturedRatgeber() {
         </motion.div>
 
         {/* ── 3 article cards ─────────────────────── */}
-        <ul className="grid gap-7 sm:gap-8 md:grid-cols-3">
+        <HandNote
+          rotate={4}
+          className="mt-6 lg:mt-0 lg:absolute lg:right-0 lg:top-2 lg:w-[180px] lg:text-right"
+        >
+          Alles selbst ausprobiert.
+        </HandNote>
+
+        <ul className="mt-10 grid gap-6 sm:gap-7 md:grid-cols-3">
           {picks.map((article, i) => (
             <motion.li
               key={article.slug}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 1, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-10%' }}
               transition={{ duration: 0.6, delay: i * 0.08, ease: EASE_OUT }}
@@ -82,7 +90,7 @@ export function FeaturedRatgeber() {
                 to={`/ratgeber/${article.slug}`}
                 className="group flex flex-col h-full rounded-2xl bg-cream/70 backdrop-blur-sm border border-teal/10 overflow-hidden hover:shadow-lg hover:-translate-y-1 focus-visible:-translate-y-1 focus-visible:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-cream transition-all duration-300"
               >
-                <div className="relative aspect-[5/3] overflow-hidden">
+                <div className="relative aspect-[16/9] overflow-hidden">
                   <img
                     src={article.image}
                     alt=""
@@ -94,8 +102,8 @@ export function FeaturedRatgeber() {
                     aria-hidden
                   />
                 </div>
-                <div className="flex flex-col flex-1 p-6 sm:p-7">
-                  <div className="flex items-center gap-3 mb-4">
+                <div className="flex flex-col flex-1 p-5 sm:p-6">
+                  <div className="flex items-center gap-3 mb-3">
                     <span className="inline-flex items-center rounded-full bg-teal/10 px-3 py-1 text-[0.65rem] font-display font-bold uppercase tracking-[0.15em] text-teal">
                       {article.category}
                     </span>
@@ -103,10 +111,10 @@ export function FeaturedRatgeber() {
                       {article.readMinutes} Min.
                     </span>
                   </div>
-                  <h3 className="font-display font-bold text-xl sm:text-[1.35rem] text-ink leading-snug mb-3 group-hover:text-teal transition-colors">
+                  <h3 className="font-display font-bold text-xl sm:text-[1.35rem] text-ink leading-snug mb-2 group-hover:text-teal transition-colors">
                     {article.title}
                   </h3>
-                  <p className="text-sm text-ink/70 leading-relaxed mb-5 flex-1">
+                  <p className="text-sm text-ink/70 leading-relaxed mb-4 flex-1">
                     {article.description}
                   </p>
                   <span className="inline-flex items-center gap-1 text-sm text-teal font-semibold group-hover:gap-2 transition-all">
@@ -120,11 +128,11 @@ export function FeaturedRatgeber() {
 
         {/* ── All articles CTA ────────────────────── */}
         <motion.div
-          initial={{ opacity: 0 }}
+          initial={{ opacity: 1 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.3 }}
-          className="mt-14 flex justify-center"
+          className="mt-10 flex justify-center"
         >
           <Link
             to="/ratgeber"

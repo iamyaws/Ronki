@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { EASE_OUT } from '../lib/motion';
+import { HandNote } from './primitives/HandNote';
 
 const ITEMS = [
   {
@@ -29,16 +30,16 @@ export function FAQ() {
   const [open, setOpen] = useState<number | null>(null);
 
   return (
-    <section className="px-6 py-24 sm:py-28 border-t border-teal/10" aria-labelledby="faq-heading">
-      <div className="max-w-3xl mx-auto">
+    <section className="px-6 py-16 sm:py-24 border-t border-teal/10" aria-labelledby="faq-heading">
+      <div className="relative max-w-3xl mx-auto">
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
+          initial={{ opacity: 1, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-15%' }}
           transition={{ duration: 0.7 }}
-          className="text-center mb-12"
+          className="text-center"
         >
-          <p className="text-xs uppercase tracking-[0.2em] text-ink/85 mb-6 font-semibold">
+          <p className="text-xs uppercase tracking-[0.2em] text-ink/85 mb-4 font-semibold">
             Häufige Fragen
           </p>
           <h2
@@ -49,13 +50,21 @@ export function FAQ() {
           </h2>
         </motion.div>
 
-        <div className="space-y-3">
+        <HandNote
+          rotate={-5}
+          icon="arrow"
+          className="mt-5 text-center lg:mt-0 lg:text-right lg:absolute lg:right-0 lg:top-6 lg:w-[150px]"
+        >
+          Frag ruhig.
+        </HandNote>
+
+        <div className="mt-10 space-y-3">
           {ITEMS.map((item, i) => {
             const isOpen = open === i;
             return (
               <motion.div
                 key={item.q}
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 1, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: i * 0.05 }}

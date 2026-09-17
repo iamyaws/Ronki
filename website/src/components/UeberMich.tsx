@@ -1,4 +1,6 @@
 import { motion } from 'motion/react';
+import { HandNote } from './primitives/HandNote';
+import { Sparkles } from './primitives/Sparkles';
 
 /* Washi-tape sticker SVGs — same visual language as Footer.tsx so the
  * quote card reads as part of the "grounded / handmade" visual family.
@@ -47,20 +49,28 @@ function QuoteTapeBottomLeft() {
 export function UeberMich() {
   return (
     <section
-      className="relative px-6 py-24 sm:py-32 border-t border-teal/10"
+      className="relative px-6 py-16 sm:py-24 border-t border-teal/10"
       aria-labelledby="ueber-mich-heading"
     >
-      <div className="max-w-5xl mx-auto">
+      <div className="relative max-w-5xl mx-auto">
+        <Sparkles flip className="left-0 bottom-0 opacity-90" />
         <motion.p
-          initial={{ opacity: 0, y: 8 }}
+          initial={{ opacity: 1, y: 8 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-xs uppercase tracking-[0.2em] text-teal mb-6 font-medium"
+          className="text-xs uppercase tracking-[0.2em] text-teal font-medium"
         >
           Über die beiden Macher
         </motion.p>
 
-        <div className="grid md:grid-cols-[auto_1fr] gap-10 md:gap-14 items-start">
+        <HandNote
+          rotate={4}
+          className="mt-4 mb-8 lg:m-0 lg:absolute lg:right-0 lg:top-0 lg:w-[180px] lg:text-right"
+        >
+          Louis ist der Chef hier.
+        </HandNote>
+
+        <div className="mt-8 grid md:grid-cols-[auto_1fr] gap-8 md:gap-12 items-start">
           {/* Photo column — back-to-back stool pose (Marc + Louis), centered
            * crop. Warm teal+mustard shadow + subtle paper-grain overlay to
            * fit the painterly website style. */}
@@ -69,7 +79,7 @@ export function UeberMich() {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.7 }}
-            className="relative shrink-0 md:w-[340px]"
+            className="relative shrink-0 md:w-[300px]"
           >
             <div className="relative">
               {/* Soft mustard glow behind the card */}
@@ -129,14 +139,14 @@ export function UeberMich() {
           </motion.div>
 
           {/* Text column */}
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-5">
             <motion.h2
               id="ueber-mich-heading"
               initial={{ opacity: 0, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.7 }}
-              className="font-display font-bold text-3xl sm:text-4xl lg:text-5xl leading-[1.1] tracking-tight text-ink"
+              className="font-display font-bold text-3xl sm:text-4xl lg:text-[2.75rem] leading-[1.1] tracking-tight text-ink"
             >
               Ronki ist kein Produkt. Es ist ein{' '}
               <em className="italic text-sage whitespace-nowrap">Experiment</em>{' '}
@@ -148,7 +158,7 @@ export function UeberMich() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.7, delay: 0.15 }}
-              className="flex flex-col gap-5 text-base sm:text-lg text-ink/75 leading-relaxed max-w-2xl"
+              className="flex flex-col gap-4 text-base sm:text-lg text-ink/75 leading-relaxed"
             >
               <p>
                 Ich arbeite seit Jahren als Consultant für Gaming und Esports. Ich weiß, wie Spiele heute gemacht sind. Wo die Casino-Mechaniken versteckt sind, warum manche Apps Kinder minutenlang festhalten, wie Dopamin-Loops funktionieren. Ein Teil von mir hat beruflich daran mitgebaut. Ein anderer Teil wollte das nie in der Hand seines Sohnes sehen.
@@ -167,19 +177,19 @@ export function UeberMich() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.7, delay: 0.3 }}
-              className="relative my-2 md:my-3 max-w-2xl rounded-3xl bg-cream/80 backdrop-blur-sm border border-teal/10 py-10 px-8 sm:py-12 sm:px-12 shadow-sm"
+              className="relative my-1 rounded-3xl bg-cream/80 backdrop-blur-sm border border-teal/10 py-8 px-7 sm:py-9 sm:px-10 shadow-sm"
             >
               <QuoteTapeTopRight />
               <QuoteTapeBottomLeft />
               <span
                 aria-hidden
-                className="absolute -top-2 left-6 font-display font-extrabold text-7xl leading-none text-ink/15 select-none"
+                className="absolute -top-2 left-6 font-display font-extrabold text-6xl leading-none text-ink/15 select-none"
               >
                 &ldquo;
               </span>
               <p
                 lang="de"
-                className="relative font-display italic text-xl sm:text-2xl text-ink leading-relaxed pt-2"
+                className="relative font-display italic text-lg sm:text-xl text-ink leading-relaxed pt-1"
                 style={{
                   hyphens: 'manual',
                   WebkitHyphens: 'manual',
@@ -197,7 +207,7 @@ export function UeberMich() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.7, delay: 0.45 }}
-              className="flex flex-col gap-5 text-base sm:text-lg text-ink/75 leading-relaxed max-w-2xl"
+              className="flex flex-col gap-4 text-base sm:text-lg text-ink/75 leading-relaxed"
             >
               <p>
                 Ronki ist nicht die Wunderlösung, und auch kein Urteil über andere Wege. Jede Familie findet ihren. Ich baue diesen hier mit Louis zusammen. Er ist mein erster Nutzer, mein härtester Kritiker und manchmal auch mein Co-Designer. Wenn es bei euch einen Unterschied macht, freut mich das. Wenn nicht, ist das genauso ok.

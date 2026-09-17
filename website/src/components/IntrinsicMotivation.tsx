@@ -1,4 +1,5 @@
 import { motion } from 'motion/react';
+import { HandNote } from './primitives/HandNote';
 
 const BARS = [
   { week: 'Woche 1', external: 85, internal: 15, label: 'Ronki erinnert, lobt, begleitet' },
@@ -9,25 +10,28 @@ const BARS = [
 
 export function IntrinsicMotivation() {
   return (
-    <section className="px-6 py-24 sm:py-28 border-t border-teal/10" aria-labelledby="intrinsic-heading">
+    <section className="px-6 py-16 sm:py-24 border-t border-teal/10" aria-labelledby="intrinsic-heading">
       <div className="max-w-5xl mx-auto">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <div className="grid lg:grid-cols-2 gap-10 lg:gap-14 items-center">
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
+            initial={{ opacity: 1, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: '-10%' }}
             transition={{ duration: 0.7 }}
           >
-            <p className="text-xs uppercase tracking-[0.2em] text-ink/85 mb-6 font-semibold">
+            <p className="text-xs uppercase tracking-[0.2em] text-ink/85 mb-4 font-semibold">
               Der Ansatz dahinter
             </p>
             <h2
               id="intrinsic-heading"
-              className="font-display font-bold text-3xl sm:text-4xl lg:text-5xl leading-[1.1] tracking-tight text-ink mb-6"
+              className="font-display font-bold text-3xl sm:text-4xl lg:text-5xl leading-[1.1] tracking-tight text-ink mb-4"
             >
               Intrinsisch statt{' '}
               <em className="italic text-sage">extrinsisch.</em>
             </h2>
+            <HandNote rotate={-5} className="mb-5 origin-left">
+              Ronki wird mit der Zeit leiser.
+            </HandNote>
             <div className="space-y-4 text-base sm:text-lg text-ink/70 leading-relaxed">
               <p>
                 Kinder-Apps arbeiten oft mit externen Belohnungen: Punkte, Abzeichen, Lootboxen. Das funktioniert kurzfristig, tötet aber die natürliche Motivation.
@@ -46,12 +50,12 @@ export function IntrinsicMotivation() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: '-10%' }}
             transition={{ duration: 0.7, delay: 0.15 }}
-            className="rounded-2xl bg-cream/90 border border-teal/15 p-7 sm:p-8 shadow-lg"
+            className="rounded-2xl bg-cream/90 border border-teal/15 p-6 sm:p-7 shadow-lg"
           >
-            <p className="text-xs uppercase tracking-[0.15em] text-ink/70 font-semibold mb-8">
+            <p className="text-xs uppercase tracking-[0.15em] text-ink/70 font-semibold mb-6">
               Fading Rewards: So löst sich Ronki auf
             </p>
-            <div className="space-y-6">
+            <div className="space-y-5">
               {BARS.map((bar, i) => (
                 <motion.div
                   key={bar.week}
@@ -84,7 +88,7 @@ export function IntrinsicMotivation() {
                 </motion.div>
               ))}
             </div>
-            <div className="flex items-center gap-6 mt-8 pt-6 border-t border-teal/10">
+            <div className="flex items-center gap-6 mt-6 pt-5 border-t border-teal/10">
               <div className="flex items-center gap-2">
                 <span className="h-2.5 w-2.5 rounded-full bg-mustard" />
                 <span className="text-xs text-ink/60 font-semibold">Externe Begleitung</span>
@@ -98,10 +102,10 @@ export function IntrinsicMotivation() {
         </div>
 
         <motion.p
-          initial={{ opacity: 0 }}
+          initial={{ opacity: 1 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          className="mt-12 text-sm text-ink/50 text-center"
+          className="mt-10 text-sm text-ink/50 text-center"
         >
           Basierend auf Selbstbestimmungstheorie (Deci & Ryan), Fading Scaffolding (Vygotsky) und Montessori-Prinzipien.{' '}
           <a href="/wissenschaft" className="underline decoration-teal/30 hover:text-ink transition-colors">

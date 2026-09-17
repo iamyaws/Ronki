@@ -337,7 +337,9 @@ export default function ProfilErstellen() {
         </section>
       )}
 
-      <Footer />
+      {/* This page is the card builder, so a closing band that invites
+       *  you to build a card would point at itself. */}
+      <Footer closing={false} />
 
       {/* ── Print-only frame. Portaled to <body> so the print
             stylesheet's `body > *:not(.profile-print-frame)` selector

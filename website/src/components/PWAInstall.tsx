@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
+import { HandNote } from './primitives/HandNote';
 
 type Platform = 'ios' | 'android' | 'desktop' | 'unknown';
 
@@ -111,13 +112,13 @@ export function PWAInstall() {
   const steps = getSteps(platform === 'unknown' ? 'ios' : platform);
 
   return (
-    <section className="px-6 py-24 sm:py-28 border-t border-teal/10" aria-labelledby="pwa-heading">
+    <section className="px-6 py-16 sm:py-24 border-t border-teal/10" aria-labelledby="pwa-heading">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 1, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: '-10%' }}
         transition={{ duration: 0.7 }}
-        className="max-w-5xl mx-auto rounded-3xl bg-teal-dark p-8 sm:p-12 lg:p-16 relative overflow-hidden"
+        className="max-w-5xl mx-auto rounded-3xl bg-teal-dark p-7 sm:p-9 lg:p-10 relative overflow-hidden"
         style={{ boxShadow: '0 30px 60px -20px rgba(4,8,18,0.5)' }}
       >
         {/* Ambient glow */}
@@ -133,23 +134,33 @@ export function PWAInstall() {
         />
 
         <div className="relative z-10 text-center max-w-3xl mx-auto">
-          <p className="text-[0.65rem] uppercase tracking-[0.15em] text-cream/70 font-semibold mb-4">
+          <p className="text-[0.65rem] uppercase tracking-[0.15em] text-cream/70 font-semibold mb-3">
             So wird die Installation aussehen
           </p>
           <h2
             id="pwa-heading"
-            className="font-display font-bold text-3xl sm:text-4xl lg:text-5xl text-cream leading-tight mb-5"
+            className="font-display font-bold text-3xl sm:text-4xl lg:text-5xl text-cream leading-tight mb-4"
           >
             Kein App Store.{' '}
             <em className="italic text-mustard inline-block">Einmal antippen, fertig.</em>
           </h2>
-          <p className="text-base sm:text-lg text-cream/70 leading-relaxed mb-10 max-w-xl mx-auto">
+          <p className="text-base sm:text-lg text-cream/70 leading-relaxed mb-8 max-w-xl mx-auto">
             Ronki öffnest du im Browser und legst es einmal auf den Startbildschirm. Danach ist es wie jede andere App: ein Symbol, das dein Kind antippt. Keine Werbung, keine Tracker, kein Download.
           </p>
 
+          {/* Note in the hand voice. Inline under the head on phones,
+           *  pinned into the card's top right corner from lg. */}
+          <HandNote
+            tone="sun"
+            rotate={5}
+            className="mb-8 text-center lg:mb-0 lg:text-right lg:absolute lg:-right-12 lg:-top-6 lg:w-[150px]"
+          >
+            Dauert eine Minute.
+          </HandNote>
+
           {/* Platform badge */}
           {platform !== 'unknown' && (
-            <div className="inline-flex items-center gap-2 bg-cream/10 border border-cream/15 rounded-full px-4 py-1.5 mb-10">
+            <div className="inline-flex items-center gap-2 bg-cream/10 border border-cream/15 rounded-full px-4 py-1.5 mb-8">
               <span className="w-1.5 h-1.5 rounded-full bg-mustard animate-pulse" aria-hidden />
               <span className="text-xs font-display font-bold text-cream/80">
                 Anleitung für {getPlatformLabel(platform)}
@@ -162,11 +173,11 @@ export function PWAInstall() {
             {steps.map((s, i) => (
               <motion.div
                 key={s.step}
-                initial={{ opacity: 0, y: 12 }}
+                initial={{ opacity: 1, y: 12 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: 0.2 + i * 0.1 }}
-                className="relative bg-cream/[0.06] backdrop-blur-sm rounded-2xl p-6 border border-cream/10 text-left [hyphens:none]"
+                className="relative bg-cream/[0.06] backdrop-blur-sm rounded-2xl p-5 border border-cream/10 text-left [hyphens:none]"
               >
                 <div
                   className="w-9 h-9 rounded-full bg-mustard text-ink font-display font-bold text-sm flex items-center justify-center mb-4"
@@ -182,7 +193,7 @@ export function PWAInstall() {
           </div>
 
           {/* Trust row */}
-          <div className="flex flex-wrap gap-x-6 gap-y-3 justify-center mt-10 pt-8 border-t border-cream/10">
+          <div className="flex flex-wrap gap-x-6 gap-y-3 justify-center mt-8 pt-6 border-t border-cream/10">
             <TrustDot label="Keine Drittanbieter-Tracker" />
             <TrustDot label="Keine Werbung" />
             <TrustDot label="Funktioniert offline" />

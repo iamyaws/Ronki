@@ -336,7 +336,9 @@ export function RatgeberArticle({
         </div>
       </section>
 
-      <Footer />
+      {/* The article already closes on its own cobalt CTA block, so the
+       *  night band stays off here. One dark closing moment per page. */}
+      <Footer closing={false} />
 
       <RatgeberFiguresStyles />
 

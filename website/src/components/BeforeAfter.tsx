@@ -1,4 +1,6 @@
 import { motion } from 'motion/react';
+import { HandNote } from './primitives/HandNote';
+import { Sparkles } from './primitives/Sparkles';
 
 const BEFORE = [
   'Zehnmal „Zähne putzen!" rufen. Eltern-Müdigkeit schon um sieben.',
@@ -14,16 +16,17 @@ const AFTER = [
 
 export function BeforeAfter() {
   return (
-    <section className="px-6 py-24 sm:py-28 border-t border-teal/10" aria-labelledby="before-after-heading">
-      <div className="max-w-5xl mx-auto">
+    <section className="px-6 py-16 sm:py-24 border-t border-teal/10" aria-labelledby="before-after-heading">
+      <div className="relative max-w-5xl mx-auto">
+        <Sparkles className="right-0 -top-2 opacity-90" />
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
+          initial={{ opacity: 1, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-15%' }}
           transition={{ duration: 0.7 }}
-          className="text-center mb-14"
+          className="text-center"
         >
-          <p className="text-xs uppercase tracking-[0.2em] text-ink/85 mb-6 font-semibold">
+          <p className="text-xs uppercase tracking-[0.2em] text-ink/85 mb-4 font-semibold">
             Was sich ändert
           </p>
           <h2
@@ -34,7 +37,15 @@ export function BeforeAfter() {
           </h2>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <HandNote
+          rotate={-5}
+          icon="arrow"
+          className="mt-5 text-center lg:mt-0 lg:text-left lg:absolute lg:left-0 lg:top-6 lg:w-[180px]"
+        >
+          Weniger Ansagen. Mehr Morgen.
+        </HandNote>
+
+        <div className="mt-10 grid md:grid-cols-2 gap-6">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -42,10 +53,10 @@ export function BeforeAfter() {
             transition={{ duration: 0.7 }}
             className="rounded-2xl border border-teal/15 bg-cream p-7 sm:p-8 flex flex-col"
           >
-            <span className="inline-flex self-end items-center px-3 py-1 rounded-full bg-sage/20 text-sage text-xs font-bold uppercase tracking-wider mb-6">
+            <span className="inline-flex self-end items-center px-3 py-1 rounded-full bg-sage/20 text-sage text-xs font-bold uppercase tracking-wider mb-4">
               Der alte Weg
             </span>
-            <h3 className="font-display font-bold text-xl sm:text-2xl text-ink mb-6">
+            <h3 className="font-display font-bold text-xl sm:text-2xl text-ink mb-4">
               Zufällige Erinnerungen
             </h3>
             <ul className="space-y-4 flex-1">
@@ -56,7 +67,7 @@ export function BeforeAfter() {
                 </li>
               ))}
             </ul>
-            <div className="mt-8 pt-6 border-t border-teal/10">
+            <div className="mt-6 pt-5 border-t border-teal/10">
               <div className="h-2.5 w-full bg-teal/10 rounded-full overflow-hidden">
                 <motion.div
                   className="h-full bg-mustard rounded-full"
@@ -80,10 +91,10 @@ export function BeforeAfter() {
             className="rounded-2xl border border-teal/30 bg-teal-dark p-7 sm:p-8 text-cream shadow-xl flex flex-col"
             style={{ boxShadow: '0 25px 50px -20px rgba(4,8,18,0.4)' }}
           >
-            <span className="inline-flex self-end items-center px-3 py-1 rounded-full bg-mustard/90 text-ink text-xs font-bold uppercase tracking-wider mb-6">
+            <span className="inline-flex self-end items-center px-3 py-1 rounded-full bg-mustard/90 text-ink text-xs font-bold uppercase tracking-wider mb-4">
               Der Ronki-Weg
             </span>
-            <h3 className="font-display font-bold text-xl sm:text-2xl text-cream mb-6">
+            <h3 className="font-display font-bold text-xl sm:text-2xl text-cream mb-4">
               Struktur statt Stress
             </h3>
             <ul className="space-y-4 flex-1">
@@ -94,7 +105,7 @@ export function BeforeAfter() {
                 </li>
               ))}
             </ul>
-            <div className="mt-8 pt-6 border-t border-cream/10">
+            <div className="mt-6 pt-5 border-t border-cream/10">
               <div className="h-2.5 w-full bg-cream/10 rounded-full overflow-hidden">
                 <motion.div
                   className="h-full bg-sage rounded-full"

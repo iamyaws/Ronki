@@ -22,9 +22,17 @@ type Props = {
   /** Set to true when the CTA is rendered on a cobalt block. Swaps the
    *  pill to white-on-cobalt, the default cobalt pill would vanish. */
   onDarkBackground?: boolean;
+  /** Set to true inside the night closing band. Night is the one ground
+   *  that carries a sun pill, so the action goes sun with ink text. */
+  onNightBackground?: boolean;
 };
 
-export function WaitlistCTA({ launchState, appUrl, onDarkBackground }: Props) {
+export function WaitlistCTA({
+  launchState,
+  appUrl,
+  onDarkBackground,
+  onNightBackground,
+}: Props) {
   const copy = getLaunchCopy(launchState);
   // Route by the copy's declared action rather than the state name ,
   // that way any future 'install'-action state (live, public-alpha,
@@ -35,14 +43,17 @@ export function WaitlistCTA({ launchState, appUrl, onDarkBackground }: Props) {
   if (copy.ctaAction === 'install') {
     // On a cobalt block the pill goes white with ink text; on the white
     // ground it is the cobalt pill. Both keep the drawn chevron.
-    const btnBg = onDarkBackground
-      ? 'bg-white text-ink'
-      : 'bg-cobalt text-white';
-    const helperColor = onDarkBackground ? 'text-white/[0.88]' : 'text-ink/70';
+    const onDark = onDarkBackground || onNightBackground;
+    const btnBg = onNightBackground
+      ? 'bg-sun text-ink'
+      : onDarkBackground
+        ? 'bg-white text-ink'
+        : 'bg-cobalt text-white';
+    const helperColor = onDark ? 'text-white/[0.88]' : 'text-ink/70';
     // Parents create the card on the website first; the app is a kid
     // space that only scans. So the primary action is the card, the app
     // link stays for families that already have one.
-    const cardLinkClass = onDarkBackground ? 'text-white' : 'text-cobalt';
+    const cardLinkClass = onDark ? 'text-white' : 'text-cobalt';
     return (
       <div className="flex flex-col items-start gap-3">
         <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>

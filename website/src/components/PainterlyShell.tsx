@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
 import { motion, useScroll, useSpring, useReducedMotion } from 'motion/react';
+import { SiteHeader } from './SiteHeader';
 
 type Props = { children: ReactNode };
 
@@ -43,6 +44,8 @@ export function PainterlyShell({ children }: Props) {
         style={reduced ? undefined : { scaleX: progress }}
         className="fixed top-0 left-0 right-0 z-50 h-[3px] origin-left bg-cobalt"
       />
+
+      <SiteHeader />
 
       <div id="main-content" className="relative z-10">{children}</div>
     </div>

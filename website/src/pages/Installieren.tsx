@@ -329,7 +329,8 @@ export default function Installieren() {
         </div>
       </section>
 
-      <Footer />
+      {/* This page already ends on its own dark install CTA card. */}
+      <Footer closing={false} />
 
       {/* Install-specific list styling — numbered, teal accents */}
       <style>{`

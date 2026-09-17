@@ -31,7 +31,7 @@ export function HeroVariantF() {
 
   return (
     <section
-      className="relative flex flex-col items-center justify-center min-h-[92vh] px-6 pt-24 pb-20 sm:pt-32 sm:pb-24 overflow-hidden bg-cobalt"
+      className="relative flex flex-col items-center justify-center md:min-h-[640px] px-6 pt-24 pb-14 sm:pt-28 sm:pb-16 md:pb-20 overflow-hidden bg-cobalt"
       aria-label="Hero"
     >
       {/* Main content: two-column on md+ */}
@@ -42,7 +42,7 @@ export function HeroVariantF() {
           {/* Eyebrow */}
           <motion.p
             {...fade(0.1)}
-            className="inline-flex items-center gap-3 text-sm uppercase tracking-[0.1em] text-sun mb-8 font-display font-bold"
+            className="inline-flex items-center gap-3 text-sm uppercase tracking-[0.1em] text-sun mb-6 font-display font-bold"
           >
             <span aria-hidden className="inline-block h-2.5 w-2.5 rounded-full bg-ember" />
             {copy.heroEyebrow}
@@ -65,7 +65,7 @@ export function HeroVariantF() {
           {/* Subtitle, B copy */}
           <motion.p
             {...fade(0.4)}
-            className="mt-8 text-lg sm:text-xl text-white/[0.88] leading-relaxed max-w-lg"
+            className="mt-6 text-lg sm:text-xl text-white/[0.88] leading-relaxed max-w-lg"
           >
             Ein kleiner Drache, der morgens an die Zähne erinnert und abends zuhört, wenn der Tag schwer war. Nicht du. Nicht zum zehnten Mal.
           </motion.p>
@@ -204,7 +204,7 @@ export function HeroVariantF() {
       {/* Mobile illustration, below copy */}
       <motion.div
         {...fade(0.5)}
-        className="relative z-10 mt-12 flex md:hidden justify-center w-full"
+        className="relative z-10 mt-10 flex md:hidden justify-center w-full"
       >
         <div className="relative w-[280px] h-[400px]">
           <svg
@@ -228,23 +228,6 @@ export function HeroVariantF() {
             className="absolute -right-4 -top-6 h-[124px] w-[124px]"
           />
         </div>
-      </motion.div>
-
-      {/* Scroll hint */}
-      <motion.div
-        aria-hidden
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1, delay: 1.6 }}
-        className="absolute bottom-6 left-1/2 -translate-x-1/2 text-xs tracking-[0.15em] uppercase text-white/50"
-      >
-        <motion.span
-          animate={reduced ? {} : { y: [0, 6, 0] }}
-          transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
-          className="inline-block"
-        >
-          scroll ↓
-        </motion.span>
       </motion.div>
     </section>
   );

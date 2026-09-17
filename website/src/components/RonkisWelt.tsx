@@ -1,4 +1,6 @@
 import { motion } from 'motion/react';
+import { HandNote } from './primitives/HandNote';
+import { Sparkles } from './primitives/Sparkles';
 
 /* ------------------------------------------------------------------ */
 /* Data                                                                */
@@ -71,18 +73,19 @@ const FREUNDE: Freund[] = [
 export function RonkisWelt() {
   return (
     <section
-      className="relative px-6 py-24 sm:py-32 border-t border-teal/10"
+      className="relative px-6 py-16 sm:py-24 border-t border-teal/10"
       aria-labelledby="welt-heading"
     >
-      <div className="max-w-6xl mx-auto">
+      <div className="relative max-w-6xl mx-auto">
+        <Sparkles className="right-0 top-0 opacity-90" />
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
+          initial={{ opacity: 1, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
-          className="mb-16 max-w-3xl"
+          className="max-w-3xl"
         >
-          <p className="text-xs uppercase tracking-[0.2em] text-teal mb-6 font-medium">
+          <p className="text-xs uppercase tracking-[0.2em] text-teal mb-4 font-medium">
             Ronkis Welt
           </p>
           <h2
@@ -92,16 +95,24 @@ export function RonkisWelt() {
             Dein Kind ist nicht allein.{' '}
             <em className="italic text-sage">Ronki hat Freunde.</em>
           </h2>
-          <p className="mt-6 text-base sm:text-lg text-ink/70 max-w-2xl leading-relaxed">
+          <p className="mt-5 text-base sm:text-lg text-ink/70 max-w-2xl leading-relaxed">
             Sieben Begleiter, die an den richtigen Momenten des Tages auftauchen. Nicht als Feature-Liste. Als Figuren, die ein Kind gern wiedertrifft.
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-5 sm:gap-6">
+        <HandNote
+          rotate={5}
+          icon="heart"
+          className="mt-6 lg:mt-0 lg:absolute lg:right-0 lg:top-[7.5rem] lg:w-[180px] lg:text-right"
+        >
+          Alle sieben kommen wieder.
+        </HandNote>
+
+        <div className="mt-10 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-5 sm:gap-6">
           {FREUNDE.map((f, i) => (
             <motion.figure
               key={f.name}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 1, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-10%' }}
               transition={{ duration: 0.6, delay: i * 0.08 }}
@@ -131,7 +142,7 @@ export function RonkisWelt() {
               </div>
 
               {/* Caption */}
-              <figcaption className="mt-4 [hyphens:none]">
+              <figcaption className="mt-3 [hyphens:none]">
                 <p
                   className="text-[0.7rem] uppercase tracking-[0.15em] font-display font-bold mb-1"
                   style={{ color: f.accent }}

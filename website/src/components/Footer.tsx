@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { WaitlistCTA } from './WaitlistCTA';
+import { ClosingBand } from './ClosingBand';
 import { trackEvent } from '../lib/analytics';
 import { getLaunchCopy, LAUNCH_STATE } from '../config/launch-state';
+import { RonkiWordmark } from './primitives/RonkiWordmark';
 
 function TapeTopLeft() {
   return (
@@ -34,17 +35,26 @@ function TapeBottomRight() {
   );
 }
 
-export function Footer() {
+type FooterProps = {
+  /** The night closing band that ends the page. Pages that already end
+   *  on a dark CTA block of their own pass false, so no two dark blocks
+   *  stack up at the bottom. */
+  closing?: boolean;
+};
+
+export function Footer({ closing = true }: FooterProps) {
   const copy = getLaunchCopy(LAUNCH_STATE);
   const year = new Date().getFullYear();
 
   return (
-    <footer className="relative px-6 pt-10 pb-12">
-      <div className="relative max-w-6xl mx-auto rounded-3xl bg-cream/80 backdrop-blur-sm border border-teal/10 px-8 sm:px-12 pt-16 pb-10 shadow-sm">
+    <>
+      {closing && <ClosingBand />}
+      <footer className="relative px-6 pt-10 pb-12">
+      <div className="relative max-w-6xl mx-auto rounded-3xl bg-cream/80 backdrop-blur-sm border border-teal/10 px-8 sm:px-12 pt-12 pb-8 shadow-sm">
         <TapeTopLeft />
         <TapeBottomRight />
 
-        <div className="flex flex-col gap-12">
+        <div className="flex flex-col gap-10">
           <motion.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
@@ -57,6 +67,8 @@ export function Footer() {
                room (~960px inner minus 320px CTA = 640px paragraph). */
             className="flex flex-col lg:flex-row lg:items-center gap-6 lg:gap-10"
           >
+            {/* The card CTA lives in the closing band above the footer
+                now, so this line is the footer's own quiet sign-off. */}
             <p
               className="font-display font-semibold text-2xl sm:text-3xl leading-snug text-ink lg:flex-1 lg:max-w-2xl"
               style={{
@@ -67,13 +79,6 @@ export function Footer() {
             >
               {copy.footerMicro}
             </p>
-            {/* Fixed-ish width on lg+ so the long CTA helper-text doesn't
-                spread this column wide and squeeze the paragraph. 380px
-                fits 'Ronki ausprobieren →' comfortably plus helper text
-                wrapped on 2-3 lines. */}
-            <div className="w-full lg:w-[380px] shrink-0">
-              <WaitlistCTA launchState={LAUNCH_STATE} />
-            </div>
           </motion.div>
 
           {/* Four-column grid on desktop: Ronki (product), Mitmachen
@@ -203,15 +208,14 @@ export function Footer() {
           </div>
 
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-6 pt-8 border-t border-teal/10">
-            <p className="font-display font-extrabold text-6xl sm:text-8xl leading-none tracking-tighter text-cobalt/25">
-              ronki
-            </p>
+            <RonkiWordmark size={56} tone="cobalt" />
             <p className="text-xs text-ink/70">
               © {year} Ronki · Ein unabhängiges Projekt · Keine Werbepartner, keine Cookies.
             </p>
           </div>
         </div>
       </div>
-    </footer>
+      </footer>
+    </>
   );
 }
