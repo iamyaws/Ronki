@@ -82,10 +82,13 @@ export function DrawnLink({
 type PillTone = 'primary' | 'outline' | 'on-dark' | 'on-night';
 
 const PILL_CLASS: Record<PillTone, string> = {
-  primary: 'bg-cobalt text-white',
-  outline: 'border-[2.5px] border-ink bg-white text-ink',
-  'on-dark': 'bg-white text-ink',
-  'on-night': 'bg-sun text-ink',
+  primary: 'bg-cobalt text-white bb-press bb-press--night',
+  outline: 'border-[2.5px] border-ink bg-white text-ink transition-transform hover:-translate-y-0.5',
+  // Sun is the loudest colour we have on blue, so it carries the one
+  // action on cobalt and on night alike. White on cobalt read as a
+  // passive surface, not as something to press.
+  'on-dark': 'bg-sun text-ink bb-press',
+  'on-night': 'bg-sun text-ink bb-press',
 };
 
 /**
@@ -131,7 +134,7 @@ export function PillButton({
     </>
   );
 
-  const shared = `group inline-flex items-center justify-center gap-3 rounded-full font-display font-bold transition-transform hover:-translate-y-0.5 text-center [hyphens:none] ${
+  const shared = `group inline-flex items-center justify-center gap-3 rounded-full font-display font-bold text-center [hyphens:none] ${
     size === 'lg' ? 'px-7 py-4 text-base sm:text-lg' : 'px-7 py-3.5 text-base'
   } ${PILL_CLASS[tone]} ${className}`;
 

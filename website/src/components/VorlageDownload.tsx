@@ -112,7 +112,7 @@ export function VorlageDownload({ source, pdfHref, title, printHref }: Props) {
             href={pdfHref}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-4 inline-flex items-center gap-3 rounded-full bg-white px-6 py-3.5 text-ink font-display font-bold text-base transition-transform hover:-translate-y-0.5"
+            className="bb-press mt-4 inline-flex items-center gap-3 rounded-full bg-sun px-6 py-3.5 text-ink font-display font-bold text-base"
           >
             {title} als PDF öffnen
             <svg aria-hidden viewBox="0 0 64 64" className="h-4 w-4">
@@ -199,7 +199,7 @@ export function VorlageDownload({ source, pdfHref, title, printHref }: Props) {
           <button
             type="submit"
             disabled={!ready || status.kind === 'submitting'}
-            className="self-start inline-flex items-center gap-3 rounded-full bg-white px-6 py-3.5 text-ink font-display font-bold text-base transition-transform enabled:hover:-translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="bb-press self-start inline-flex items-center gap-3 rounded-full bg-sun px-6 py-3.5 text-ink font-display font-bold text-base disabled:bg-white/15 disabled:text-white/70 disabled:cursor-not-allowed"
           >
             {status.kind === 'submitting' ? '…' : 'PDF öffnen'}
             <svg aria-hidden viewBox="0 0 64 64" className="h-4 w-4">

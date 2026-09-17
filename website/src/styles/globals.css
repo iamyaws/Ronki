@@ -203,6 +203,39 @@ p {
   box-shadow: 5px 6px 0 var(--color-cobalt);
 }
 
+/* A button you want to press: a hard edge under the pill that the pill
+ * sinks into on tap. The edge colour comes from --press, so the same
+ * class works for the sun pill on dark grounds and the cobalt pill on
+ * light ones. */
+.bb-press {
+  --press: var(--color-ink);
+  box-shadow: 0 5px 0 var(--press);
+  transition: transform 0.12s ease-out, box-shadow 0.12s ease-out;
+}
+.bb-press:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 0 var(--press);
+}
+.bb-press:active:not(:disabled) {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 var(--press);
+}
+.bb-press--night {
+  --press: var(--color-night);
+}
+/* Inactive: flat, no edge to press into. */
+.bb-press:disabled {
+  box-shadow: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .bb-press,
+  .bb-press:hover:not(:disabled),
+  .bb-press:active:not(:disabled) {
+    transform: none;
+    transition: none;
+  }
+}
+
 /* Hand-drawn sun underline under the last words of a headline. */
 .bb-swipe {
   position: relative;

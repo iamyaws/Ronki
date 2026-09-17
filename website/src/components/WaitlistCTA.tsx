@@ -41,14 +41,11 @@ export function WaitlistCTA({
   const resolvedAppUrl = appUrl ?? copy.appUrl ?? '/app';
 
   if (copy.ctaAction === 'install') {
-    // On a cobalt block the pill goes white with ink text; on the white
-    // ground it is the cobalt pill. Both keep the drawn chevron.
+    // On any dark ground (cobalt or night) the pill is sun with ink text,
+    // on white it is the cobalt pill. Both sit on a hard edge they sink
+    // into when pressed, and both keep the drawn chevron.
     const onDark = onDarkBackground || onNightBackground;
-    const btnBg = onNightBackground
-      ? 'bg-sun text-ink'
-      : onDarkBackground
-        ? 'bg-white text-ink'
-        : 'bg-cobalt text-white';
+    const btnBg = onDark ? 'bg-sun text-ink bb-press' : 'bg-cobalt text-white bb-press bb-press--night';
     const helperColor = onDark ? 'text-white/[0.88]' : 'text-ink/70';
     // Parents create the card on the website first; the app is a kid
     // space that only scans. So the primary action is the card, the app
@@ -56,11 +53,11 @@ export function WaitlistCTA({
     const cardLinkClass = onDark ? 'text-white' : 'text-cobalt';
     return (
       <div className="flex flex-col items-start gap-3">
-        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+        <div>
           <Link
             to="/profil-erstellen"
             onClick={() => trackEvent('CTA Klick', { cta: 'karte', source: 'cta_block' })}
-            className={`group relative inline-flex items-center gap-3 rounded-full px-8 py-4 font-display font-bold text-lg transition-transform hover:-translate-y-0.5 ${btnBg}`}
+            className={`group relative inline-flex items-center gap-3 rounded-full px-8 py-4 font-display font-bold text-lg ${btnBg}`}
           >
             <span className="relative z-10">Karte für euer Kind erstellen</span>
             <svg
@@ -71,7 +68,7 @@ export function WaitlistCTA({
               <use href="#bb-arrow" />
             </svg>
           </Link>
-        </motion.div>
+        </div>
         <p
           className={`text-sm ${helperColor}`}
           style={{

@@ -65,7 +65,7 @@ export function HeroVariantF() {
           {/* Subtitle, B copy */}
           <motion.p
             {...fade(0.4)}
-            className="mt-6 text-lg sm:text-xl text-white/[0.88] leading-relaxed max-w-lg"
+            className="mt-6 text-lg sm:text-xl text-white/[0.88] leading-relaxed max-w-lg [hyphens:manual]"
           >
             Ein kleiner Drache, der morgens an die Zähne erinnert und abends zuhört, wenn der Tag schwer war. Nicht du. Nicht zum zehnten Mal.
           </motion.p>
@@ -74,12 +74,12 @@ export function HeroVariantF() {
            * Two honest ways in. The card is the product, the template
            * is the thing parents came to Google for. Stacks to one
            * column below sm so both buttons stay full width at 375px. */}
-          <motion.div {...fade(0.55)} className="mt-8 w-full max-w-md text-white">
-            <div className="flex flex-col sm:flex-row gap-3 w-full">
+          <motion.div {...fade(0.55)} className="mt-8 w-full max-w-xl text-white">
+            <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-x-3 gap-y-4 w-full">
               <Link
                 to="/profil-erstellen"
                 onClick={() => trackEvent('CTA Klick', { cta: 'karte', source: 'hero' })}
-                className="group inline-flex flex-1 items-center justify-center gap-3 rounded-full bg-white px-6 py-4 font-display font-bold text-base sm:text-lg text-ink transition-transform hover:-translate-y-0.5 text-center [hyphens:none]"
+                className="bb-press group inline-flex items-center justify-center gap-3 rounded-full bg-sun px-7 py-4 font-display font-bold text-base sm:text-lg text-ink text-center whitespace-nowrap [hyphens:none]"
               >
                 <span>Karte für euer Kind erstellen</span>
                 <svg
@@ -93,7 +93,7 @@ export function HeroVariantF() {
               <Link
                 to="/vorlagen"
                 onClick={() => trackEvent('CTA Klick', { cta: 'vorlage', source: 'hero' })}
-                className="inline-flex shrink-0 items-center justify-center rounded-full border-[2.5px] border-white bg-transparent px-6 py-4 font-display font-bold text-base sm:text-lg text-white transition-colors hover:bg-white/10 text-center [hyphens:none]"
+                className="inline-flex shrink-0 items-center justify-center rounded-full border-2 border-white/80 bg-transparent px-6 py-[0.9rem] font-display font-semibold text-base sm:text-lg text-white transition-colors hover:bg-white/10 hover:border-white text-center whitespace-nowrap [hyphens:none]"
               >
                 Vorlage holen
               </Link>

@@ -82,7 +82,7 @@ export default function Ratgeber() {
                 </p>
                 <Link
                   to={`/ratgeber/${featured.slug}`}
-                  className="self-start inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-ink font-display font-bold text-sm transition-all group-hover:gap-3"
+                  className="bb-press self-start inline-flex items-center gap-2 rounded-full bg-sun px-6 py-3 text-ink font-display font-bold text-sm"
                 >
                   Artikel lesen
                   <span aria-hidden>→</span>
