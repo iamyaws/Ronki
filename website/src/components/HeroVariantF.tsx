@@ -187,10 +187,10 @@ export function HeroVariantF() {
               className="bb-frame bb-frame--light absolute left-6 top-8 w-[76%] h-[84%] -rotate-[2.5deg]"
             >
               <img
-                src="/art/routines/brushing-teeth.webp"
-                alt="Ein Junge und sein Drache Ronki beim Zähneputzen, fröhlich, im Abenteuer-Stil gemalt."
-                width={520}
-                height={520}
+                src="/art/bilderbuch/hero-zuhause.webp"
+                alt="Ronki, ein kleiner roter Drache mit blauem Kamm, liegt auf einem blauen Kissen und fragt: Magst du kurz bei mir sitzen?"
+                width={716}
+                height={1024}
               />
             </motion.div>
             <StarSticker
@@ -217,10 +217,10 @@ export function HeroVariantF() {
           </svg>
           <div className="bb-frame bb-frame--light absolute left-5 top-6 w-[78%] h-[86%] -rotate-[2.5deg]">
             <img
-              src="/art/routines/brushing-teeth.webp"
-              alt="Ein Junge und sein Drache Ronki beim Zähneputzen."
-              width={320}
-              height={320}
+              src="/art/bilderbuch/hero-zuhause.webp"
+              alt="Ronki, ein kleiner roter Drache mit blauem Kamm, liegt auf einem blauen Kissen und fragt: Magst du kurz bei mir sitzen?"
+              width={716}
+              height={1024}
             />
           </div>
           <StarSticker
