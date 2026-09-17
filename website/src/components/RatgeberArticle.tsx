@@ -158,7 +158,7 @@ export function RatgeberArticle({
     : `https://www.ronki.de${schemaImagePath}`;
 
   return (
-    <PainterlyShell>
+    <PainterlyShell readingProgress>
       <PageMeta
         title={`${title} · Ratgeber`}
         description={description}

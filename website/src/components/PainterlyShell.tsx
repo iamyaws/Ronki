@@ -2,7 +2,12 @@ import { ReactNode } from 'react';
 import { motion, useScroll, useSpring, useReducedMotion } from 'motion/react';
 import { SiteHeader } from './SiteHeader';
 
-type Props = { children: ReactNode };
+type Props = {
+  children: ReactNode;
+  /** Reading progress line at the top of the window. Only long reads
+   *  (articles) want it; on every other page it is just a stray line. */
+  readingProgress?: boolean;
+};
 
 /**
  * Page shell in the Bilderbuch look.
@@ -13,7 +18,7 @@ type Props = { children: ReactNode };
  * edge as the single piece of page decoration, faint enough that text
  * never lands on top of colour.
  */
-export function PainterlyShell({ children }: Props) {
+export function PainterlyShell({ children, readingProgress = false }: Props) {
   const reduced = useReducedMotion();
   const { scrollYProgress } = useScroll();
   const progress = useSpring(scrollYProgress, { stiffness: 80, damping: 20 });
@@ -39,11 +44,13 @@ export function PainterlyShell({ children }: Props) {
         </svg>
       </div>
 
-      <motion.div
-        aria-hidden
-        style={reduced ? undefined : { scaleX: progress }}
-        className="fixed top-0 left-0 right-0 z-50 h-[3px] origin-left bg-cobalt"
-      />
+      {readingProgress && (
+        <motion.div
+          aria-hidden
+          style={reduced ? undefined : { scaleX: progress }}
+          className="fixed top-0 left-0 right-0 z-50 h-[3px] origin-left bg-sun"
+        />
+      )}
 
       <SiteHeader />
 
