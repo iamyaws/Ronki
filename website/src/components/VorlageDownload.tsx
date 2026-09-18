@@ -165,7 +165,7 @@ export function VorlageDownload({ source, pdfHref, title, printHref }: Props) {
               Vorlage bereitzustellen. Details in der{' '}
               <Link
                 to="/datenschutz#vorlagen"
-                className="text-white underline underline-offset-4"
+                className="text-white underline decoration-sun decoration-2 underline-offset-4"
               >
                 Datenschutzerklärung
               </Link>
@@ -187,7 +187,7 @@ export function VorlageDownload({ source, pdfHref, title, printHref }: Props) {
               einmal im Monat, jederzeit abbestellbar per Mail an{' '}
               <a
                 href="mailto:hallo@ronki.de"
-                className="text-white underline underline-offset-4"
+                className="text-white underline decoration-sun decoration-2 underline-offset-4"
               >
                 hallo@ronki.de
               </a>
@@ -235,7 +235,7 @@ export function VorlageDownload({ source, pdfHref, title, printHref }: Props) {
         <Link
           to={printHref}
           onClick={() => trackEvent('Vorlage Download', { vorlage: source, weg: 'druck' })}
-          className="text-white underline underline-offset-4"
+          className="text-white underline decoration-sun decoration-2 underline-offset-4"
         >
           Diese Seite ist selbst schon druckbar
         </Link>

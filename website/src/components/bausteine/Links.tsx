@@ -48,6 +48,9 @@ export function DrawnLink({
         {/* The line keeps its 2.5px weight however far it is stretched,
          *  so it stays a drawn line and never turns into a smear. */}
         <svg
+          /* On blue grounds the line is sun, the same mark as the
+           *  headline underline; white lines read as plain web links. */
+          style={tone === 'white' ? { color: 'var(--color-sun)' } : undefined}
           aria-hidden
           focusable="false"
           viewBox="0 0 300 12"

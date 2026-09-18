@@ -50,7 +50,7 @@ export function WaitlistCTA({
     // Parents create the card on the website first; the app is a kid
     // space that only scans. So the primary action is the card, the app
     // link stays for families that already have one.
-    const cardLinkClass = onDark ? 'text-white' : 'text-cobalt';
+    const cardLinkClass = onDark ? 'text-white decoration-sun' : 'text-cobalt';
     return (
       <div className="flex flex-col items-start gap-3">
         <div>

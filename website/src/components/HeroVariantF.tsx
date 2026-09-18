@@ -118,7 +118,7 @@ export function HeroVariantF() {
             <a
               href={copy.appUrl ?? APP_URL_FALLBACK}
               onClick={() => trackEvent('CTA Klick', { cta: 'app', source: 'hero' })}
-              className="mt-3 inline-flex items-center gap-1.5 text-sm font-display font-semibold text-white underline decoration-2 underline-offset-4"
+              className="mt-3 inline-flex items-center gap-1.5 text-sm font-display font-semibold text-white underline decoration-sun decoration-2 underline-offset-4"
             >
               Schon eine Karte? App öffnen
             </a>
