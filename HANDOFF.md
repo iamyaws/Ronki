@@ -4,6 +4,40 @@ _Single source of truth: done, in flight, backlog. Update before any /compact an
 
 ---
 
+## Finch pass (25-26 September 2026, overnight)
+
+Marc's ask (25 Sep, late): reduce the features, learn from Finch's onboarding and from what makes Finch work (his screen recording, the App Breakdown #55 video, the screensdesign teardown), build what Ronki is missing, keep its essence, make it sticky and at least on par with Finch; "fully authorized to make changes to the app"; "ship it to main when it's tested". Ultracode was on.
+
+**What changed for a child.**
+- **Egg first, no card wall.** Every family starts at the egg shelf; "Ich habe schon eine Karte" is a quiet link. After the name, Ronki asks the child's name and sends them for Mama or Papa; the parent step (about 45 s: name, routine pictures pre-ticked, evening start, optional PIN, consent, a home-screen tip) comes after the hatch, on the same tablet. The card path (`?p=` link or scan) works as before and now greets a known child ("Und dich kenn ich schon, Louisa!").
+- **Teach through success.** Round 1 of the first breath always gives a spark, round 2 always a flame; a spoken hold instruction.
+- **One Nest screen.** Ronki in his room, his fire (one flame per routine task, day 1 starts half warm), one big spoken task picture ("Jetzt" card with "Geschafft" and a quiet "Später"), a small task row, the treasure shelf, a face button (feelings any time), a parent lock. Two tabs: Nest and Ronki.
+- **One adventure a day, anchored to a routine.** A full morning fire sends Ronki out ("Tschüss! Jetzt geht dein Tag los."); the Nest is empty while he is away; at the family's evening start he is back in the nest with a treasure and a spoken story (14 hand-written trips in a fixed order); if the morning did not fill the fire, a full evening fire sends him on a dream trip, back at breakfast. TonightRitual retells today's trip and names the next one ("Als Nächstes flieg ich zur Lichtung.").
+- **Growth counts adventures.** catEvo moves only when a treasure is opened, at most one stage per treasure (6 adventures to Jungtier); stepping stones and a spoken count show the next look. Nothing ever shrinks.
+- **Ronki's passport** replaces the heavy profile: name, "Der Freund von {Kind}", "Kann Feuer pusten. {Kind} hat es ihm gezeigt.", adventures, the stones, the found-only treasure shelf.
+- **Less.** Behind switches in `src/config/features.ts` (code kept): the old day strip, the old profile, the map screen, friend takeovers, praise toasts, tab unlocks, the victory screen, the kid install sheet, the random sad days, the room style sheet. Behind the parent "Extras zeigen" toggle (off for everyone, Louis included): Tagebuch, Laden, Spielzeug.
+- **Guardrails.** Removed: the hidden streak that made Ronki proud after 7/14/21 days in a row, the `besorgt` absence face, "happy only when all tasks are done", random sad days on the Nest, the rotating praise toast. Ronki's warmth never depends on tasks.
+- **Voice.** 94 new Ronki lines in Harry's voice (onboarding, Nest, fire, trips, growth, the 13 task asks word for word), every one Whisper-checked.
+
+**Parents.** The lock on the Nest opens the PIN gate (the dashboard no longer hides behind 50 Sterne); "PIN ändern" now uses the real PIN; new "Ronkis Tag" section (routine pictures, evening start, Ferien, Extras); the Übersicht shows adventures and where Ronki is.
+
+**Sync safety (found in review, fixed).** Every cloud write is stamp-checked (`storage.cloudSaveChecked`, `_cloudStamp` in the row): a device that fell behind or never reconciled the row writes nothing, freezes and reloads; a failed first read writes nothing; a stale tab (hidden more than 5 minutes, a new day, or a sleep without a visibility event) reloads before it can write. Verified with two real browser tabs against the local Supabase mock.
+
+**Docs of the run.** Research: `docs/research/2026-09-25-finch-teardown.md`, `docs/research/2026-09-26-ronki-feature-census.md`. Spec: `docs/specs/2026-09-26-finch-pass-spec.md` (rulings R1 to R15) on the base `docs/reviews/2026-09-26-finch-pass/design-finch-faithful.md`. Reviews and responses: `docs/reviews/2026-09-26-finch-pass/` (Astra spar, three designs and judges, Astra code rounds 1 and 2, the Claude review workflow, fix round 1, own reads).
+
+**Tests.** 598 app tests green (about 250 before), `check:names` clean, both builds green, tsc unchanged at 23 pre-existing errors.
+
+**Open for Marc.**
+1. Louis loses games, Tagebuch and Laden by default: Eltern-Bereich, Familie, "Extras zeigen" brings them back in one tap.
+2. Every save without a chosen routine now gets the default (5 morning, 4 evening) from the next day, Louis included; change it in "Ronkis Tag".
+3. Two of your own task asks were flagged by the guardrail reviewer as need-framing ("Allein ist es so still im Zimmer", "sonst werd ich ganz steif"); kept as your lines, your call.
+4. Backend, not done: a server-side revision check in `profile_upsert` (closes the last milliseconds between check and write); the `telemetry_events` insert policy is `TO authenticated` while the app never signs in, so client events are correct but may not land.
+5. Known limit: day keys stay UTC app-wide, so the day rolls over at 01:00 or 02:00 local time, not at midnight.
+6. Content runway: 14 trips; a daily child reaches trip 15 after about 2.5 weeks, then trips repeat honestly ("Da war ich schon mal"). The next story wave should land before then.
+7. German is the default language until a parent picks English (Ronki's new lines exist only in German). `?onboardingPreview=1` now works only in DEV builds (it reset real saves).
+
+---
+
 ## Bilderbuch in the app (25 September 2026)
 
 **LIVE since 25 Sep 2026, 19:49 UTC** (Marc: "push to main"). PR #14 merged as `770092c` (website and app together). Checked after the Vercel production deploys: app.ronki.de bundle `index-XpNMOyqB.js` to `index-Cr2hEU5F.js` (name chips, old-save split, feelings entry, 1 s guard, task pictures inside; theme #0544B0; hatch clips, name recordings and icons served); ronki.de (redirects to www.ronki.de) bundle `index-BVdpiTzB.js` to `index-BzYYt3Jw.js` (Bilderbuch markers inside, hero art served). No Supabase change was needed. First thing after go-live: open the parent area on Louis's tablet and answer the child-name note if it shows.
