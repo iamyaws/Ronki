@@ -88,6 +88,10 @@ const SLEEPY_CAMERA = new Set(['NotAllowedError', 'PermissionDeniedError', 'NotF
  * no longer ends the flow. onBeforeOpen(token) runs right before the
  * token is stored (the chain stashes a local hatch there, bound to that
  * token, spec R7).
+ *
+ * Fix round 1 (26 Sep 2026): opened from the egg, the sheet speaks
+ * scan_open_01 once, so a pre-reader hears what it is for and that the
+ * egg leads back.
  */
 export default function NoProfileLanding({ onBack, backToEgg = true, onBeforeOpen, reload = defaultReload } = {}) {
   const [mode, setMode] = useState('choice'); // 'choice' | 'scan'
@@ -98,6 +102,15 @@ export default function NoProfileLanding({ onBack, backToEgg = true, onBeforeOpe
   const [codeError, setCodeError] = useState('');
 
   useEffect(() => { track('onboarding.landing.view'); }, []);
+
+  // Opened from the egg: Ronki says what this sheet is and how to get
+  // back ("Hast du eine Karte? Halt sie vor die Kamera. Oder tipp auf das
+  // Ei, dann geht's zurück.", scan_open_01), once per opening. Not from
+  // the parent step, where a grown-up reads the sheet.
+  const fromEgg = !!onBack && backToEgg;
+  useEffect(() => {
+    if (fromEgg) VoiceAudio.playLocalized('scan_open_01', 300);
+  }, [fromEgg]);
 
   /** Store the token and reload, the same way a successful scan does. */
   const openToken = (token) => {
@@ -313,7 +326,7 @@ export default function NoProfileLanding({ onBack, backToEgg = true, onBeforeOpe
               type="button"
               data-testid="scan-back"
               aria-label={backToEgg ? 'Zurück zum Ei' : 'Zurück'}
-              onClick={() => { stopScan(); onBack(); }}
+              onClick={() => { stopScan(); if (fromEgg) VoiceAudio.stop?.(); onBack(); }}
               className="inline-flex items-center gap-2 min-h-[64px] min-w-[64px] -ml-2 pl-2 pr-4 rounded-full bg-transparent text-ink font-headline font-semibold text-lg focus:outline-none focus-visible:ring-[3px] focus-visible:ring-cobalt"
             >
               <DoodleIcon name="back" size={30} />

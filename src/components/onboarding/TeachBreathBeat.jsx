@@ -36,6 +36,14 @@ import { DoodleIcon, MotionTicks, PillButton } from '../bilderbuch';
  * (teach_fire_learned_01). Kid words for these beats come from
  * finchLines.de.json. The ritual flavors keep their old two rounds.
  *
+ * Fix round 1 (Astra FC-06, KIDUX-3): the first prompt shows and speaks
+ * "Drück ganz lange auf den Knopf. Und dann lass los!" (teach_fire_hold_01)
+ * in place of the muted narrator intro, and the hold button shows the
+ * move itself (it sinks in, stays down, comes back up) until the first
+ * real hold. A press shorter than the minimum speaks the line again and
+ * brings the demonstration back (with a cooldown, so fast taps never
+ * restart the line mid-sentence).
+ *
  * Renders:
  *   · H1 title (from copyKeys.title)
  *   · Chibi stage (360×360) with fire/smoke puff + mouth glow
@@ -61,6 +69,11 @@ const LEARNED_VOICE_DELAY = 900;
 const SUCCESS_TO_SOLO_DELAY = 1300;
 const SOLO_TO_DONE_DELAY = 1200;
 const INTRO_DURATION_MS = 2200;
+// The hold line on the first prompt waits for the prompt to settle.
+const HOLD_VOICE_DELAY = 300;
+// The hold line takes about 3 s; a short tap inside that window does not
+// restart it.
+const HOLD_VOICE_COOLDOWN_MS = 3000;
 
 // Chibi container: nominal 540px (50% larger than v2's 360px per Marc
 // 24 Apr 2026 "ronki could be 50% bigger"). Actual size measured at
@@ -127,6 +140,9 @@ export default function TeachBreathBeat({
   const [attemptNum, setAttemptNum] = useState(1);  // 1 = will smoke; 2 = will fire
   const [fireKey, setFireKey] = useState(0);
   const [fireFlavor, setFireFlavor] = useState(targetFlavor);
+  // A press shorter than MIN_HOLD_MS happened in this round: show the
+  // hold line and the demonstration again (onboarding flame only).
+  const [holdNudge, setHoldNudge] = useState(false);
   const holdStart = useRef(null);
   const timersRef = useRef([]);
   const prefersReducedMotion = useReducedMotion();
@@ -179,12 +195,19 @@ export default function TeachBreathBeat({
   // gaps. Onboarding-flame only: ritual unlock variants will get
   // their own audio bank when those modals ship.
   const isOnboardingFlame = targetFlavor === 'flame';
-  const introPlayedRef = useRef(false);
+  // The narrator is muted app-wide, so the intro used to be silent. Ronki
+  // now says the move himself on the first prompt (teach_fire_hold_01).
+  const holdLinePlayedRef = useRef(false);
+  const lastHoldVoiceAt = useRef(-Infinity);
+  const speakHoldLine = (delayMs) => {
+    lastHoldVoiceAt.current = performance.now();
+    VoiceAudio.playLocalized('teach_fire_hold_01', delayMs);
+  };
   useEffect(() => {
     if (!isOnboardingFlame) return;
-    if (phase === 'intro' && !introPlayedRef.current) {
-      introPlayedRef.current = true;
-      VoiceAudio.playNarrator('teach_fire_intro_01', 400);
+    if (phase === 'prompt' && attemptNum === 1 && !holdLinePlayedRef.current) {
+      holdLinePlayedRef.current = true;
+      speakHoldLine(HOLD_VOICE_DELAY);
     } else if (phase === 'smoke') {
       VoiceAudio.playLocalized('teach_fire_spark_01', 200);
     } else if (phase === 'released') {
@@ -214,8 +237,16 @@ export default function TeachBreathBeat({
 
     if (duration < MIN_HOLD_MS) {
       setPhase('prompt');
+      if (isOnboardingFlame) {
+        // A quick tap: Ronki says the move again, and the button shows it.
+        setHoldNudge(true);
+        if (performance.now() - lastHoldVoiceAt.current >= HOLD_VOICE_COOLDOWN_MS) {
+          speakHoldLine(0);
+        }
+      }
       return;
     }
+    setHoldNudge(false);
 
     if (attemptNum === 1) {
       // Round 1: deterministic per spec. Onboarding: a small spark (a
@@ -272,14 +303,21 @@ export default function TeachBreathBeat({
     phase === 'released' ? copyKeys.celebrate :
                            copyKeys.soloLine;
   // Onboarding flame: Ronki's own lines from finchLines.de.json. The
-  // spark line stays up for round 2 ("Nochmal. Ganz lange Luft holen.").
+  // first prompt (and any prompt after a too-short press) is the hold
+  // line; the spark line stays up for round 2 ("Nochmal. Ganz lange Luft
+  // holen.").
+  const showHoldLine = isOnboardingFlame && phase === 'prompt' && (attemptNum === 1 || holdNudge);
   const lineId = !isOnboardingFlame ? null :
+    showHoldLine ? 'teach_fire_hold_01' :
     (phase === 'smoke' || (phase === 'prompt' && attemptNum === 2)) ? 'teach_fire_spark_01' :
     (phase === 'solo' || phase === 'done') ? 'teach_fire_learned_01' :
     null;
   const copyText = lineId ? lineText(lineId) : t(copyKey);
 
   const showHoldButton = phase === 'prompt' || phase === 'inhaling';
+  // The button shows the move (press in, stay down, let go) while the
+  // hold line is up. Reduced motion keeps it still; the voice still says it.
+  const demoHold = showHoldLine && !prefersReducedMotion;
   const showContinue = phase === 'done';
 
   // Mouth glow suppressed under reduced-motion.
@@ -406,7 +444,8 @@ export default function TeachBreathBeat({
               onPointerUp={endHold}
               onPointerLeave={endHold}
               onPointerCancel={endHold}
-              className="w-28 h-28 rounded-full border-[3px] border-ink bg-sun text-ember flex items-center justify-center select-none"
+              data-demo={demoHold ? 'hold' : undefined}
+              className={`w-28 h-28 rounded-full border-[3px] border-ink bg-sun text-ember flex items-center justify-center select-none${demoHold ? ' tbb-demo' : ''}`}
               style={{
                 boxShadow: phase === 'inhaling' ? '0 1px 0 var(--color-ink)' : '0 6px 0 var(--color-ink)',
                 transform: phase === 'inhaling' ? 'translateY(5px)' : 'translateY(0)',
@@ -462,6 +501,12 @@ export default function TeachBreathBeat({
           50%      { opacity: 1; transform: scale(1.08); }
         }
         .tbb-tick { animation: tbbTick 1.2s ease-in-out infinite; }
+        @keyframes tbbPressDemo {
+          0%, 18%   { transform: translateY(0); box-shadow: 0 6px 0 var(--color-ink); }
+          28%, 72%  { transform: translateY(5px) scale(0.96); box-shadow: 0 1px 0 var(--color-ink); }
+          82%, 100% { transform: translateY(0); box-shadow: 0 6px 0 var(--color-ink); }
+        }
+        .tbb-demo { animation: tbbPressDemo 2.4s ease-in-out infinite; }
       `}</style>
     </>
   );
