@@ -21,8 +21,10 @@ import useReducedMotion from './bilderbuch/useReducedMotion';
  *
  * Every image fails gracefully: on error it falls back to ronki/calm.webp,
  * and if that is missing too it renders nothing visible (no broken-image
- * icon). Known-missing files are remembered for the session so a screen
- * with ten Ronkis does not fire ten 404s per render.
+ * icon). Failures are remembered per instance only, and the chain starts
+ * over on remount and when the device comes back online, so one flaky
+ * load on a tablet never hides Ronki for the rest of the session
+ * (Astra code review R1, 25 Sep 2026).
  */
 
 const ART_BASE = `${import.meta.env.BASE_URL}art/bilderbuch/`;
@@ -53,15 +55,16 @@ const IDLE_CLASS = {
 
 const CALM = `${ART_BASE}ronki/calm.webp`;
 
-/** Files that already failed once this session. */
-const MISSING = new Set();
-
 /** Resolve the art file for a mood and stage (exported for tests and callers). */
 export function resolveRonkiArt({ mood = 'normal', stage = 2, animated = false, reduced = false } = {}) {
   const moodKey = MOOD_TO_ART[mood] || 'calm';
   const st = Number.isFinite(stage) ? stage : 2;
   if (st <= 0) return `${ART_BASE}eggs/egg-cream.webp`;
-  if (st === 1) return `${ART_BASE}ronki/baby.webp`;
+  // The hatchling art has one face; any other mood keeps its own
+  // expression (drawn smaller by the caller) so feelings still read in
+  // the first days (Astra code review R2).
+  if (st === 1 && (moodKey === 'calm' || moodKey === 'happy')) return `${ART_BASE}ronki/baby.webp`;
+  if (st === 1) return `${ART_BASE}ronki/${moodKey}.webp`;
   if (animated && !reduced && (moodKey === 'calm' || moodKey === 'happy')) {
     return `${ART_BASE}loops/ronki-idle.webp`;
   }
@@ -70,29 +73,25 @@ export function resolveRonkiArt({ mood = 'normal', stage = 2, animated = false, 
   return `${ART_BASE}ronki/${moodKey}.webp`;
 }
 
-function firstAvailable(list, from = 0) {
-  for (let i = from; i < list.length; i += 1) {
-    if (!MISSING.has(list[i])) return i;
-  }
-  return list.length;
-}
-
 /**
- * useArtSource: walks a list of candidate URLs, skipping the ones known
- * to be missing, and moves on when the current one errors.
+ * useArtSource: walks a list of candidate URLs and moves on when the
+ * current one errors. The position resets when the list changes and when
+ * the browser reports it is back online.
  */
 function useArtSource(candidates) {
   const key = candidates.join('|');
-  const [idx, setIdx] = useState(() => firstAvailable(candidates));
+  const [idx, setIdx] = useState(0);
   useEffect(() => {
-    setIdx(firstAvailable(candidates));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    setIdx(0);
   }, [key]);
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    const retry = () => setIdx(0);
+    window.addEventListener('online', retry);
+    return () => window.removeEventListener('online', retry);
+  }, []);
   const src = candidates[idx];
-  const onError = () => {
-    if (src) MISSING.add(src);
-    setIdx((i) => firstAvailable(candidates, i + 1));
-  };
+  const onError = () => setIdx((i) => i + 1);
   return { src, onError, exhausted: idx >= candidates.length };
 }
 

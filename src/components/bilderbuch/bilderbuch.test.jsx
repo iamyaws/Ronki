@@ -16,7 +16,11 @@ describe('resolveRonkiArt', () => {
   });
   it('uses the stage files for egg, baby, grown and legendary', () => {
     expect(resolveRonkiArt({ stage: 0 })).toMatch(/eggs\/egg-cream\.webp$/);
-    expect(resolveRonkiArt({ stage: 1, mood: 'sad' })).toMatch(/ronki\/baby\.webp$/);
+    expect(resolveRonkiArt({ stage: 1 })).toMatch(/ronki\/baby\.webp$/);
+    expect(resolveRonkiArt({ stage: 1, mood: 'gut' })).toMatch(/ronki\/baby\.webp$/);
+    // a hatchling keeps its feelings visible (Astra code review R2)
+    expect(resolveRonkiArt({ stage: 1, mood: 'sad' })).toMatch(/ronki\/heavy\.webp$/);
+    expect(resolveRonkiArt({ stage: 1, mood: 'besorgt' })).toMatch(/ronki\/worried\.webp$/);
     expect(resolveRonkiArt({ stage: 4 })).toMatch(/ronki\/grown\.webp$/);
     expect(resolveRonkiArt({ stage: 5 })).toMatch(/ronki\/legendary\.webp$/);
     expect(resolveRonkiArt({ stage: 4, mood: 'gut' })).toMatch(/ronki\/happy\.webp$/);
