@@ -7,7 +7,7 @@ const ITEMS = [
   { label: 'Keine Werbung. Nie.', detail: 'Ronki verdient kein Geld mit der Aufmerksamkeit von Kindern.' },
   { label: 'Keine Loot-Boxen, keine Glücksspiel-Mechaniken.', detail: 'Belohnungen sind vorhersehbar und an reale Aktionen gebunden.' },
   { label: 'Keine Push-Benachrichtigungen.', detail: 'Ronki wartet geduldig bei sich. Er ruft dir nicht durchs Haus hinterher.' },
-  { label: 'Keine Daten-Weitergabe an Dritte.', detail: 'Keine Cookies, kein personenbezogenes Tracking. Supabase und Plausible, beide in der EU.' },
+  { label: 'Keine Daten-Weitergabe an Dritte.', detail: 'Keine Cookies, kein personenbezogenes Tracking. Supabase und Umami, beide mit Datenverarbeitung in der EU.' },
 ];
 
 export function AntiFeatures() {

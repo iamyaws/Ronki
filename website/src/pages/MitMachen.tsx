@@ -383,7 +383,7 @@ function CTACard({
     : { to: href };
   // Tag which CTA was clicked — eyebrow doubles as event name
   // (short, stable, 1:1 with what's on the page). All three land in
-  // Plausible as 'Mitmachen CTA' with a `cta` prop for filtering.
+  // Umami as 'Mitmachen CTA' with a `cta` prop for filtering.
   linkProps.onClick = () =>
     trackEvent('Mitmachen CTA', { cta: eyebrow.toLowerCase() });
 

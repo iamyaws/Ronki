@@ -72,7 +72,8 @@ const CONCERNS: Concern[] = [
         <p>
           Ronki ist DSGVO-konform und läuft auf EU-Servern: Supabase in der
           EU-Region, Vercel mit Edge-Servern in Frankfurt. Keine Google
-          Analytics, keine Plausible, keine Meta-Pixel. Keine Werbung, nie.
+          Analytics, keine Meta-Pixel. Besuche auf der Website zählen wir
+          anonym und ohne Cookies mit Umami. Keine Werbung, nie.
         </p>
         <p>
           Wir speichern so wenig wie möglich und nur, was für den Betrieb
