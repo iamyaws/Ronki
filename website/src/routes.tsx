@@ -26,6 +26,9 @@ const AppCheckResult = lazy(() => import('./pages/tools/AppCheckResult'));
 const SchlafensRechner = lazy(() => import('./pages/tools/SchlafensRechner'));
 const FamilienCharter = lazy(() => import('./pages/tools/FamilienCharter'));
 const KonsolenCheck = lazy(() => import('./pages/tools/KonsolenCheck'));
+// The block library. Internal reference page: noindex, not linked from
+// the navigation or the footer, not in the sitemap, not prerendered.
+const Styleguide = lazy(() => import('./pages/Styleguide'));
 // Private print-only utility pages; not in footer, not in sitemap, not in robots.
 const PrintA6Flyer = lazy(() => import('./pages/PrintA6Flyer'));
 const PrintA6FlyerKids = lazy(() => import('./pages/PrintA6FlyerKids'));
@@ -88,6 +91,7 @@ export function AppRoutes() {
         <Route path="/vorlagen/adhs" element={<VorlageAdhs />} />
         <Route path="/installieren" element={<Installieren />} />
         <Route path="/profil-erstellen" element={<ProfilErstellen />} />
+        <Route path="/styleguide" element={<Styleguide />} />
         <Route path="/print/a6-flyer" element={<PrintA6Flyer />} />
         <Route path="/print/a6-flyer-kids" element={<PrintA6FlyerKids />} />
         <Route path="/print/a6-flyer-kids-hatchling" element={<PrintA6FlyerKidsHatchling />} />

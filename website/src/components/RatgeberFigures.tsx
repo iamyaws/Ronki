@@ -9,13 +9,13 @@
 import { ReactNode } from 'react';
 
 const COLOR = {
-  tealDark: '#1A3C3F',
-  teal: '#2D5A5E',
-  sage: '#50A082',
-  mustard: '#FCD34D',
-  mustardDeep: '#D97706',
-  cream: '#FDF8F0',
-  ink: '#1A2022',
+  tealDark: '#040812',
+  teal: '#0544B0',
+  sage: '#0544B0',
+  mustard: '#FDD134',
+  mustardDeep: '#EE4F35',
+  cream: '#FFFFFF',
+  ink: '#040812',
 } as const;
 
 /* ─────────── Shared figure wrapper ─────────────────────────────────────── */
@@ -584,11 +584,11 @@ export function RatgeberFiguresStyles() {
   return (
     <style>{`
       .ratgeber-figure--custom .ratgeber-figure__canvas {
-        background: linear-gradient(180deg, rgba(253,248,240,0.7) 0%, rgba(253,248,240,0.4) 100%);
+        background: linear-gradient(180deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.4) 100%);
         border-radius: 1.25rem;
         padding: 1.5rem 1rem;
-        ring: 1px solid rgba(80, 160, 130, 0.15);
-        box-shadow: 0 8px 24px -12px rgba(26, 60, 63, 0.1);
+        ring: 1px solid rgba(5, 68, 176, 0.15);
+        box-shadow: 0 8px 24px -12px rgba(4, 8, 18, 0.1);
       }
       @media (min-width: 640px) {
         .ratgeber-figure--custom .ratgeber-figure__canvas {
@@ -619,7 +619,7 @@ export function RatgeberFiguresStyles() {
         right: 2rem;
         top: 0;
         height: 2px;
-        background: repeating-linear-gradient(to right, #50A082 0 6px, transparent 6px 12px);
+        background: repeating-linear-gradient(to right, #0544B0 0 6px, transparent 6px 12px);
         opacity: 0.5;
       }
       .rg-timeline__stops {
@@ -660,7 +660,7 @@ export function RatgeberFiguresStyles() {
           top: 0;
           bottom: 0;
           width: 2px;
-          background: repeating-linear-gradient(to bottom, #50A082 0 4px, transparent 4px 9px);
+          background: repeating-linear-gradient(to bottom, #0544B0 0 4px, transparent 4px 9px);
           opacity: 0.3;
         }
       }
@@ -668,7 +668,7 @@ export function RatgeberFiguresStyles() {
         font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
         font-weight: 700;
         font-size: 0.75rem;
-        color: #2D5A5E;
+        color: #0544B0;
         letter-spacing: 0.08em;
         margin-bottom: 0.4rem;
         text-align: center;
@@ -684,8 +684,8 @@ export function RatgeberFiguresStyles() {
         width: 14px;
         height: 14px;
         border-radius: 50%;
-        background: #FDF8F0;
-        border: 2px solid #FCD34D;
+        background: #FFFFFF;
+        border: 2px solid #FDD134;
         position: relative;
         z-index: 1;
       }
@@ -695,14 +695,14 @@ export function RatgeberFiguresStyles() {
         }
       }
       .rg-timeline__stop.is-highlight .rg-timeline__dot {
-        background: #FCD34D;
-        box-shadow: 0 0 0 4px rgba(252, 211, 77, 0.25);
+        background: #FDD134;
+        box-shadow: 0 0 0 4px rgba(253, 209, 52, 0.25);
       }
       .rg-timeline__label {
         font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
         font-weight: 700;
         font-size: 0.95rem;
-        color: #1A3C3F;
+        color: #040812;
         margin-top: 0.6rem;
         line-height: 1.2;
       }
@@ -734,20 +734,20 @@ export function RatgeberFiguresStyles() {
         border-radius: 1rem;
       }
       .rg-compare__col--yes {
-        background: rgba(80, 160, 130, 0.1);
-        color: #1A3C3F;
+        background: rgba(5, 68, 176, 0.1);
+        color: #040812;
       }
       .rg-compare__col--yes .rg-compare__mark {
-        background: #50A082;
+        background: #0544B0;
         color: #fff;
       }
       .rg-compare__col--no {
-        background: rgba(26, 60, 63, 0.92);
-        color: #FDF8F0;
+        background: rgba(4, 8, 18, 0.92);
+        color: #FFFFFF;
       }
       .rg-compare__col--no .rg-compare__mark {
-        background: #FCD34D;
-        color: #1A3C3F;
+        background: #FDD134;
+        color: #040812;
       }
       .rg-compare__label {
         font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
@@ -759,7 +759,7 @@ export function RatgeberFiguresStyles() {
         opacity: 0.85;
       }
       .rg-compare__col--no .rg-compare__label {
-        color: #FCD34D;
+        color: #FDD134;
       }
       .rg-compare__list {
         list-style: none;
@@ -779,7 +779,7 @@ export function RatgeberFiguresStyles() {
         line-height: 1.4;
       }
       .rg-compare__col--no .rg-compare__list li {
-        color: rgba(253, 248, 240, 0.95);
+        color: rgba(255, 255, 255, 0.95);
       }
       .rg-compare__mark {
         flex-shrink: 0;

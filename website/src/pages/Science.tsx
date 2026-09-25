@@ -112,14 +112,14 @@ export default function Science() {
           >
             <Link
               to="/"
-              className="inline-flex items-center gap-2 text-sm text-teal-dark/60 hover:text-teal-dark transition-colors mb-10"
+              className="inline-flex items-center gap-2 text-sm text-ink/60 hover:text-ink transition-colors mb-10"
             >
               <span aria-hidden>&larr;</span> Zurück
             </Link>
             <p className="text-xs uppercase tracking-[0.2em] text-teal font-medium mb-6">
               Auf Forschung gebaut
             </p>
-            <h1 className="font-display font-bold text-4xl sm:text-5xl lg:text-[3.75rem] leading-[1.04] tracking-tight text-teal-dark">
+            <h1 className="font-display font-bold text-4xl sm:text-5xl lg:text-[3.75rem] leading-[1.04] tracking-tight text-ink">
               Wir haben zuerst gelesen.{' '}
               <em className="italic text-sage">Dann programmiert.</em>
             </h1>
@@ -144,12 +144,12 @@ export default function Science() {
             viewport={{ once: true }}
             transition={{ duration: 0.7 }}
           >
-            <p className="text-[0.7rem] uppercase tracking-[0.2em] text-teal-dark/60 font-semibold mb-6">
+            <p className="text-[0.7rem] uppercase tracking-[0.2em] text-ink/60 font-semibold mb-6">
               Erstmal ehrlich
             </p>
             <h2
               id="problem-heading"
-              className="font-display font-bold text-3xl sm:text-4xl leading-[1.08] tracking-tight text-teal-dark mb-8"
+              className="font-display font-bold text-3xl sm:text-4xl leading-[1.08] tracking-tight text-ink mb-8"
             >
               Deinem Kind wird die Aufmerksamkeit entzogen.
             </h2>
@@ -164,7 +164,7 @@ export default function Science() {
                 sind, sondern weil diese Mechaniken exakt für ihre Entwicklungsphase optimiert
                 wurden.
               </p>
-              <p className="font-display font-semibold text-teal-dark">
+              <p className="font-display font-semibold text-ink">
                 Ronki ist bewusst in die andere Richtung gebaut.
               </p>
               <p>
@@ -190,12 +190,12 @@ export default function Science() {
             transition={{ duration: 0.7 }}
             className="mb-16"
           >
-            <p className="text-[0.7rem] uppercase tracking-[0.2em] text-teal-dark/60 font-semibold mb-6">
+            <p className="text-[0.7rem] uppercase tracking-[0.2em] text-ink/60 font-semibold mb-6">
               Vier bewusste Entscheidungen
             </p>
             <h2
               id="choices-heading"
-              className="font-display font-bold text-3xl sm:text-4xl leading-[1.08] tracking-tight text-teal-dark"
+              className="font-display font-bold text-3xl sm:text-4xl leading-[1.08] tracking-tight text-ink"
             >
               Was wir gemacht haben, und warum.
             </h2>
@@ -221,7 +221,7 @@ export default function Science() {
                   </span>
                   <span className="h-px flex-1 bg-teal/15" aria-hidden />
                 </div>
-                <p className="font-display font-bold text-2xl sm:text-3xl leading-[1.15] tracking-tight text-teal-dark mb-4">
+                <p className="font-display font-bold text-2xl sm:text-3xl leading-[1.15] tracking-tight text-ink mb-4">
                   {c.action}
                 </p>
                 <p className="text-sm sm:text-base text-ink/70 leading-relaxed max-w-2xl mb-3">
@@ -246,10 +246,10 @@ export default function Science() {
             viewport={{ once: true }}
             transition={{ duration: 0.7 }}
           >
-            <p className="text-[0.7rem] uppercase tracking-[0.2em] text-teal-dark/60 font-semibold mb-6">
+            <p className="text-[0.7rem] uppercase tracking-[0.2em] text-ink/60 font-semibold mb-6">
               Woran wir uns messen
             </p>
-            <h2 className="font-display font-bold text-2xl sm:text-3xl leading-[1.12] tracking-tight text-teal-dark mb-6">
+            <h2 className="font-display font-bold text-2xl sm:text-3xl leading-[1.12] tracking-tight text-ink mb-6">
               Nicht daran, wie lange dein Kind in der App hängt.
             </h2>
             <p className="text-base sm:text-lg text-ink/75 leading-relaxed max-w-2xl">
@@ -260,7 +260,7 @@ export default function Science() {
                     href={a.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-display font-semibold text-teal-dark underline decoration-teal/30 underline-offset-4 hover:decoration-teal hover:text-teal transition-colors"
+                    className="font-display font-semibold text-ink underline decoration-teal/30 underline-offset-4 hover:decoration-teal hover:text-teal transition-colors"
                     aria-label={`${a.label}, externe Seite öffnen`}
                   >
                     {a.label}
@@ -286,12 +286,12 @@ export default function Science() {
             transition={{ duration: 0.7 }}
             className="mb-8"
           >
-            <p className="text-[0.7rem] uppercase tracking-[0.2em] text-teal-dark/60 font-semibold mb-4">
+            <p className="text-[0.7rem] uppercase tracking-[0.2em] text-ink/60 font-semibold mb-4">
               Für Eltern, die nachlesen wollen
             </p>
             <h2
               id="sources-heading"
-              className="font-display font-bold text-2xl sm:text-3xl leading-[1.12] tracking-tight text-teal-dark"
+              className="font-display font-bold text-2xl sm:text-3xl leading-[1.12] tracking-tight text-ink"
             >
               Quellen
             </h2>
@@ -314,7 +314,7 @@ export default function Science() {
                   className="group flex items-start gap-3 hover:text-teal transition-colors"
                 >
                   <span className="flex-1">
-                    <span className="block font-display font-semibold text-sm sm:text-base text-teal-dark group-hover:text-teal transition-colors leading-snug">
+                    <span className="block font-display font-semibold text-sm sm:text-base text-ink group-hover:text-teal transition-colors leading-snug">
                       {s.title}
                     </span>
                     <span className="block mt-1 text-xs sm:text-sm text-ink/60 leading-relaxed">

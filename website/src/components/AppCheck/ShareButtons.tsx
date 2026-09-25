@@ -49,7 +49,7 @@ export function ShareButtons({ appName, url }: Props) {
           type="button"
           onClick={handleCopy}
           aria-label={copied ? 'Link wurde kopiert' : 'Permalink kopieren'}
-          className="rounded-lg border border-teal/30 bg-cream px-3 py-2 text-sm text-teal-dark font-medium hover:bg-teal-dark hover:text-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-cream transition-colors"
+          className="rounded-lg border border-teal/30 bg-cream px-3 py-2 text-sm text-ink font-medium hover:bg-teal-dark hover:text-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-cream transition-colors"
         >
           {copied ? 'Kopiert!' : 'Kopieren'}
         </button>
@@ -66,13 +66,13 @@ export function ShareButtons({ appName, url }: Props) {
           href={whatsappHref}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 rounded-full bg-teal/10 px-4 py-2 text-sm text-teal-dark font-medium hover:bg-teal hover:text-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-cream transition-colors"
+          className="inline-flex items-center gap-2 rounded-full bg-teal/10 px-4 py-2 text-sm text-ink font-medium hover:bg-teal hover:text-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-cream transition-colors"
         >
           WhatsApp
         </a>
         <a
           href={emailHref}
-          className="inline-flex items-center gap-2 rounded-full bg-teal/10 px-4 py-2 text-sm text-teal-dark font-medium hover:bg-teal hover:text-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-cream transition-colors"
+          className="inline-flex items-center gap-2 rounded-full bg-teal/10 px-4 py-2 text-sm text-ink font-medium hover:bg-teal hover:text-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-cream transition-colors"
         >
           Email
         </a>

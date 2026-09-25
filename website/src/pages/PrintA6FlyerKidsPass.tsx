@@ -65,9 +65,9 @@ export default function PrintA6FlyerKidsPass() {
             <svg className="emblem-ring" viewBox="0 0 180 180" aria-hidden>
               <defs>
                 <radialGradient id="emblemBg" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stopColor="#FDE589" stopOpacity="0.5" />
-                  <stop offset="80%" stopColor="#FDE589" stopOpacity="0.12" />
-                  <stop offset="100%" stopColor="#FDE589" stopOpacity="0" />
+                  <stop offset="0%" stopColor="#FFE68A" stopOpacity="0.5" />
+                  <stop offset="80%" stopColor="#FFE68A" stopOpacity="0.12" />
+                  <stop offset="100%" stopColor="#FFE68A" stopOpacity="0" />
                 </radialGradient>
               </defs>
               <circle cx="90" cy="90" r="88" fill="url(#emblemBg)" />
@@ -76,7 +76,7 @@ export default function PrintA6FlyerKidsPass() {
                 cy="90"
                 r="78"
                 fill="none"
-                stroke="#FCD34D"
+                stroke="#FDD134"
                 strokeWidth="1.2"
                 strokeDasharray="2 3"
               />
@@ -85,12 +85,12 @@ export default function PrintA6FlyerKidsPass() {
                 cy="90"
                 r="70"
                 fill="none"
-                stroke="#FCD34D"
+                stroke="#FDD134"
                 strokeWidth="0.6"
                 opacity="0.6"
               />
               {/* 8-point star flourish behind dragon */}
-              <g fill="#FCD34D" opacity="0.35">
+              <g fill="#FDD134" opacity="0.35">
                 <polygon points="90,10 93,60 90,75 87,60" />
                 <polygon points="90,170 93,120 90,105 87,120" />
                 <polygon points="10,90 60,93 75,90 60,87" />
@@ -259,16 +259,16 @@ export default function PrintA6FlyerKidsPass() {
         /* ── FRONT (COVER) ─────────────────────────────── */
         .pass-front {
           background:
-            radial-gradient(ellipse 140% 90% at 50% 10%, #2D5A5E 0%, transparent 70%),
-            radial-gradient(ellipse 100% 70% at 50% 100%, rgba(26,60,63,1) 0%, transparent 60%),
-            #1A3C3F;
-          color: #FDF8F0;
+            radial-gradient(ellipse 140% 90% at 50% 10%, #0544B0 0%, transparent 70%),
+            radial-gradient(ellipse 100% 70% at 50% 100%, rgba(4,8,18,1) 0%, transparent 60%),
+            #040812;
+          color: #FFFFFF;
         }
         .pass-front::before {
           content: "";
           position: absolute;
           inset: 4mm;
-          border: 0.4mm solid rgba(252,211,77,0.55);
+          border: 0.4mm solid rgba(253,209,52,0.55);
           border-radius: 1.5mm;
           pointer-events: none;
         }
@@ -276,7 +276,7 @@ export default function PrintA6FlyerKidsPass() {
           content: "";
           position: absolute;
           inset: 5mm;
-          border: 0.2mm solid rgba(252,211,77,0.22);
+          border: 0.2mm solid rgba(253,209,52,0.22);
           border-radius: 1mm;
           pointer-events: none;
         }
@@ -290,26 +290,26 @@ export default function PrintA6FlyerKidsPass() {
         .corner-orn.tl {
           top: 4mm; left: 4mm;
           background:
-            linear-gradient(#FCD34D, #FCD34D) top left / 100% 0.4mm no-repeat,
-            linear-gradient(#FCD34D, #FCD34D) top left / 0.4mm 100% no-repeat;
+            linear-gradient(#FDD134, #FDD134) top left / 100% 0.4mm no-repeat,
+            linear-gradient(#FDD134, #FDD134) top left / 0.4mm 100% no-repeat;
         }
         .corner-orn.tr {
           top: 4mm; right: 4mm;
           background:
-            linear-gradient(#FCD34D, #FCD34D) top right / 100% 0.4mm no-repeat,
-            linear-gradient(#FCD34D, #FCD34D) top right / 0.4mm 100% no-repeat;
+            linear-gradient(#FDD134, #FDD134) top right / 100% 0.4mm no-repeat,
+            linear-gradient(#FDD134, #FDD134) top right / 0.4mm 100% no-repeat;
         }
         .corner-orn.bl {
           bottom: 4mm; left: 4mm;
           background:
-            linear-gradient(#FCD34D, #FCD34D) bottom left / 100% 0.4mm no-repeat,
-            linear-gradient(#FCD34D, #FCD34D) bottom left / 0.4mm 100% no-repeat;
+            linear-gradient(#FDD134, #FDD134) bottom left / 100% 0.4mm no-repeat,
+            linear-gradient(#FDD134, #FDD134) bottom left / 0.4mm 100% no-repeat;
         }
         .corner-orn.br {
           bottom: 4mm; right: 4mm;
           background:
-            linear-gradient(#FCD34D, #FCD34D) bottom right / 100% 0.4mm no-repeat,
-            linear-gradient(#FCD34D, #FCD34D) bottom right / 0.4mm 100% no-repeat;
+            linear-gradient(#FDD134, #FDD134) bottom right / 100% 0.4mm no-repeat,
+            linear-gradient(#FDD134, #FDD134) bottom right / 0.4mm 100% no-repeat;
         }
 
         .pass-front-inner {
@@ -328,7 +328,7 @@ export default function PrintA6FlyerKidsPass() {
           font-size: 6.5pt;
           font-weight: 700;
           letter-spacing: 0.22em;
-          color: rgba(252,211,77,0.85);
+          color: rgba(253,209,52,0.85);
           margin: 0 0 5mm;
           line-height: 1.4;
         }
@@ -359,7 +359,7 @@ export default function PrintA6FlyerKidsPass() {
           font-size: 22pt;
           font-weight: 900;
           letter-spacing: 0.18em;
-          color: #FCD34D;
+          color: #FDD134;
           margin: 0 0 1mm;
           line-height: 1;
           text-shadow: 0 0.5mm 1mm rgba(0,0,0,0.4);
@@ -369,14 +369,14 @@ export default function PrintA6FlyerKidsPass() {
           font-size: 8.5pt;
           font-weight: 600;
           font-style: italic;
-          color: rgba(253,248,240,0.78);
+          color: rgba(255,255,255,0.78);
           margin: 0 0 6mm;
           display: flex;
           align-items: center;
           gap: 2mm;
         }
         .pass-tagline .star {
-          color: #FCD34D;
+          color: #FDD134;
           font-style: normal;
           font-size: 7pt;
         }
@@ -387,28 +387,28 @@ export default function PrintA6FlyerKidsPass() {
           gap: 2mm;
           margin: auto 0 4mm;
           padding: 2mm 4mm;
-          background: rgba(252,211,77,0.08);
-          border: 0.3mm solid rgba(252,211,77,0.4);
+          background: rgba(253,209,52,0.08);
+          border: 0.3mm solid rgba(253,209,52,0.4);
           border-radius: 1.5mm;
         }
         .pn-label {
           font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
           font-size: 9pt;
           font-weight: 800;
-          color: #FCD34D;
+          color: #FDD134;
           letter-spacing: 0.08em;
         }
         .pn-line {
           display: inline-block;
           width: 16mm;
-          border-bottom: 0.4mm solid rgba(252,211,77,0.7);
+          border-bottom: 0.4mm solid rgba(253,209,52,0.7);
           height: 5mm;
         }
         .pn-total {
           font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
           font-size: 8pt;
           font-weight: 600;
-          color: rgba(252,211,77,0.65);
+          color: rgba(253,209,52,0.65);
           letter-spacing: 0.04em;
         }
 
@@ -416,22 +416,22 @@ export default function PrintA6FlyerKidsPass() {
           font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
           font-size: 8.5pt;
           font-weight: 500;
-          color: rgba(253,248,240,0.75);
+          color: rgba(255,255,255,0.75);
           margin: 0;
           letter-spacing: 0.04em;
         }
         .issued-by strong {
-          color: #FCD34D;
+          color: #FDD134;
           font-weight: 800;
           letter-spacing: 0.08em;
         }
 
         /* ── BACK (INSIDE) ─────────────────────────────── */
         .pass-back {
-          background: #FDF8F0;
+          background: #FFFFFF;
           background-image:
-            radial-gradient(ellipse 100% 60% at 0% 0%, rgba(252,211,77,0.15) 0%, transparent 60%),
-            radial-gradient(ellipse 90% 50% at 100% 100%, rgba(80,160,130,0.18) 0%, transparent 55%);
+            radial-gradient(ellipse 100% 60% at 0% 0%, rgba(253,209,52,0.15) 0%, transparent 60%),
+            radial-gradient(ellipse 90% 50% at 100% 100%, rgba(5,68,176,0.18) 0%, transparent 55%);
         }
         .pass-back::before {
           content: "";
@@ -466,7 +466,7 @@ export default function PrintA6FlyerKidsPass() {
           font-weight: 800;
           line-height: 1.1;
           letter-spacing: -0.01em;
-          color: #1A3C3F;
+          color: #040812;
           margin: 0 0 4mm;
           text-align: center;
         }
@@ -490,14 +490,14 @@ export default function PrintA6FlyerKidsPass() {
           font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
           font-size: 8pt;
           font-weight: 700;
-          color: #1A3C3F;
+          color: #040812;
           white-space: nowrap;
           flex-shrink: 0;
         }
         .field-line {
           flex: 1;
           height: 4mm;
-          border-bottom: 0.4mm solid rgba(26,60,63,0.4);
+          border-bottom: 0.4mm solid rgba(4,8,18,0.4);
         }
         .field-line.short { flex: 0 0 22mm; }
 
@@ -524,7 +524,7 @@ export default function PrintA6FlyerKidsPass() {
           font-family: 'Be Vietnam Pro', system-ui, sans-serif;
           font-size: 8.5pt;
           line-height: 1.35;
-          color: #1A3C3F;
+          color: #040812;
         }
         .rules strong {
           color: #A83E2C;
@@ -572,13 +572,13 @@ export default function PrintA6FlyerKidsPass() {
         .back-foot {
           font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
           font-size: 7pt;
-          color: rgba(26,60,63,0.55);
+          color: rgba(4,8,18,0.55);
           margin: 0;
           text-align: center;
           letter-spacing: 0.04em;
         }
         .back-foot strong {
-          color: #1A3C3F;
+          color: #040812;
           font-weight: 800;
         }
 
@@ -616,8 +616,8 @@ const instructionBarStyle: React.CSSProperties = {
   position: 'sticky',
   top: 16,
   zIndex: 20,
-  background: '#1A3C3F',
-  color: '#FDF8F0',
+  background: '#040812',
+  color: '#FFFFFF',
   padding: '10px 18px',
   borderRadius: 999,
   fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
@@ -632,8 +632,8 @@ const instructionBarStyle: React.CSSProperties = {
 
 const printBtnStyle: React.CSSProperties = {
   marginLeft: 'auto',
-  background: '#FCD34D',
-  color: '#1A3C3F',
+  background: '#FDD134',
+  color: '#040812',
   border: 0,
   padding: '6px 14px',
   borderRadius: 999,

@@ -59,14 +59,14 @@ export default function HowItWorks() {
           >
             <Link
               to="/"
-              className="inline-flex items-center gap-2 text-sm text-teal-dark/60 hover:text-teal-dark transition-colors mb-8"
+              className="inline-flex items-center gap-2 text-sm text-ink/60 hover:text-ink transition-colors mb-8"
             >
               <span aria-hidden>&larr;</span> Zurück
             </Link>
             <p className="text-xs uppercase tracking-[0.2em] text-teal font-medium mb-6">
               So funktioniert Ronki
             </p>
-            <h1 className="font-display font-bold text-4xl sm:text-5xl lg:text-6xl leading-[1.04] tracking-tight text-teal-dark">
+            <h1 className="font-display font-bold text-4xl sm:text-5xl lg:text-6xl leading-[1.04] tracking-tight text-ink">
               Ein Begleiter, der sich{' '}
               <em className="italic text-sage">überflüssig</em> macht.
             </h1>
@@ -95,12 +95,12 @@ export default function HowItWorks() {
             transition={{ duration: 0.7 }}
             className="mb-14"
           >
-            <p className="text-xs uppercase tracking-[0.2em] text-teal-dark/85 mb-6 font-semibold">
+            <p className="text-xs uppercase tracking-[0.2em] text-ink/85 mb-6 font-semibold">
               Drei Phasen
             </p>
             <h2
               id="phases-heading"
-              className="font-display font-bold text-3xl sm:text-4xl lg:text-5xl leading-[1.08] tracking-tight text-teal-dark"
+              className="font-display font-bold text-3xl sm:text-4xl lg:text-5xl leading-[1.08] tracking-tight text-ink"
             >
               Vom ersten Tag bis zur Selbstständigkeit.
             </h2>
@@ -124,7 +124,7 @@ export default function HowItWorks() {
                     {phase.label}
                   </span>
                 </div>
-                <h3 className="font-display font-bold text-xl sm:text-2xl text-teal-dark leading-tight mb-3">
+                <h3 className="font-display font-bold text-xl sm:text-2xl text-ink leading-tight mb-3">
                   {phase.title}
                 </h3>
                 <p className="text-sm sm:text-base text-ink/70 leading-relaxed max-w-2xl">
@@ -151,7 +151,7 @@ export default function HowItWorks() {
           >
             <h2
               id="parents-heading"
-              className="font-display font-bold text-3xl sm:text-4xl lg:text-5xl leading-[1.08] tracking-tight text-teal-dark"
+              className="font-display font-bold text-3xl sm:text-4xl lg:text-5xl leading-[1.08] tracking-tight text-ink"
             >
               Deine Rolle: Vertrauen statt Kontrolle.
             </h2>
@@ -195,7 +195,7 @@ export default function HowItWorks() {
           >
             <h2
               id="not-heading"
-              className="font-display font-bold text-3xl sm:text-4xl lg:text-5xl leading-[1.08] tracking-tight text-teal-dark"
+              className="font-display font-bold text-3xl sm:text-4xl lg:text-5xl leading-[1.08] tracking-tight text-ink"
             >
               Was Ronki bewusst nicht ist.
             </h2>
@@ -209,7 +209,7 @@ export default function HowItWorks() {
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true, margin: '-10%' }}
                 transition={{ duration: 0.4, delay: i * 0.06 }}
-                className="inline-block rounded-xl border border-teal/15 bg-cream/60 backdrop-blur-sm px-5 py-3 text-sm sm:text-base font-display font-semibold text-teal-dark/80"
+                className="inline-block rounded-xl border border-teal/15 bg-cream/60 backdrop-blur-sm px-5 py-3 text-sm sm:text-base font-display font-semibold text-ink/80"
               >
                 {item}
               </motion.span>

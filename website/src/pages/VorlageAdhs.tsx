@@ -42,7 +42,7 @@ export default function VorlageAdhs() {
       eyebrow="Ein Schritt"
       title="Mein Morgen, ein Schritt nach dem anderen"
       description="Sechs Schritte, immer in derselben Reihenfolge. Eine Wäscheklammer wandert am Rand nach unten und zeigt, was jetzt dran ist. Keine Uhr, kein Punktestand."
-      accent="#0369a1"
+      accent="#0544B0"
       footerLine="ronki.de/vorlagen"
       pageTitle="Morgenroutine bei ADHS: Vorlage zum Ausdrucken"
       pageIntro="Ein Plan aus Bildern für Kinder mit ADHS oder schwachen Exekutivfunktionen. Druck diese Seite direkt aus, ohne Anmeldung, oder hol dir das fertige PDF."

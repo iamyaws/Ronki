@@ -250,7 +250,7 @@ export function CardFront({ dragon }: { dragon: Dragon }) {
           <svg className="portrait-frame" viewBox="0 0 200 140" preserveAspectRatio="none" aria-hidden>
             <defs>
               <linearGradient id="portraitBg" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#FDE589" />
+                <stop offset="0%" stopColor="#FFE68A" />
                 <stop offset="100%" stopColor="#F2BC5B" />
               </linearGradient>
             </defs>
@@ -393,7 +393,7 @@ export const cardCss = `
 
   /* ── CARD FRONT ─────────────────────────────────── */
   .card-front {
-    background: #1A3C3F;
+    background: #040812;
     padding: 4mm;
   }
 
@@ -403,9 +403,9 @@ export const cardCss = `
     border-radius: 4mm;
     overflow: hidden;
     background:
-      radial-gradient(ellipse 140% 100% at 30% 20%, #2D5A5E 0%, transparent 60%),
-      radial-gradient(ellipse 120% 80% at 80% 80%, #50A082 0%, transparent 55%),
-      #1A3C3F;
+      radial-gradient(ellipse 140% 100% at 30% 20%, #0544B0 0%, transparent 60%),
+      radial-gradient(ellipse 120% 80% at 80% 80%, #0544B0 0%, transparent 55%),
+      #040812;
     z-index: 1;
   }
   .holo-stripe {
@@ -415,8 +415,8 @@ export const cardCss = `
       115deg,
       transparent 30%,
       rgba(255,232,138,0.25) 42%,
-      rgba(252,211,77,0.35) 48%,
-      rgba(80,160,130,0.3) 52%,
+      rgba(253,209,52,0.35) 48%,
+      rgba(5,68,176,0.3) 52%,
       rgba(255,255,255,0.15) 58%,
       transparent 68%
     );
@@ -432,11 +432,11 @@ export const cardCss = `
     height: 100%;
     border-radius: 3.5mm;
     padding: 4mm 4mm 3.5mm;
-    background: linear-gradient(180deg, rgba(26,60,63,0.35), rgba(26,60,63,0.15));
-    border: 0.5mm solid rgba(252,211,77,0.6);
+    background: linear-gradient(180deg, rgba(4,8,18,0.35), rgba(4,8,18,0.15));
+    border: 0.5mm solid rgba(253,209,52,0.6);
     box-shadow:
-      inset 0 0 0 0.3mm rgba(252,211,77,0.25),
-      inset 0 0 8mm rgba(26,60,63,0.4);
+      inset 0 0 0 0.3mm rgba(253,209,52,0.25),
+      inset 0 0 8mm rgba(4,8,18,0.4);
     display: flex;
     flex-direction: column;
     gap: 3mm;
@@ -455,7 +455,7 @@ export const cardCss = `
     font-size: 6.5pt;
     font-weight: 800;
     letter-spacing: 0.18em;
-    color: #FCD34D;
+    color: #FDD134;
     margin: 0 0 0.8mm;
     text-transform: uppercase;
   }
@@ -464,7 +464,7 @@ export const cardCss = `
     font-size: 22pt;
     font-weight: 900;
     letter-spacing: 0.04em;
-    color: #FDF8F0;
+    color: #FFFFFF;
     margin: 0;
     line-height: 0.9;
     text-shadow: 0 0.5mm 1mm rgba(0,0,0,0.3);
@@ -479,8 +479,8 @@ export const cardCss = `
     text-overflow: clip;
   }
   .card-hp {
-    background: #FCD34D;
-    color: #1A3C3F;
+    background: #FDD134;
+    color: #040812;
     border-radius: 2mm;
     padding: 1.2mm 2.2mm;
     display: flex;
@@ -504,10 +504,10 @@ export const cardCss = `
     aspect-ratio: 200/140;
     border-radius: 2.5mm;
     overflow: hidden;
-    background: #FDE589;
-    border: 0.4mm solid #FCD34D;
+    background: #FFE68A;
+    border: 0.4mm solid #FDD134;
     box-shadow:
-      inset 0 0 0 0.2mm rgba(26,60,63,0.2),
+      inset 0 0 0 0.2mm rgba(4,8,18,0.2),
       0 1mm 3mm rgba(0,0,0,0.3);
   }
   .portrait-frame {
@@ -539,7 +539,7 @@ export const cardCss = `
     position: absolute;
     width: 4mm;
     height: 4mm;
-    border: 0.4mm solid #FCD34D;
+    border: 0.4mm solid #FDD134;
     opacity: 0.8;
     z-index: 2;
   }
@@ -554,9 +554,9 @@ export const cardCss = `
     flex-direction: column;
     gap: 1.8mm;
     padding: 2.5mm 3mm;
-    background: rgba(253,248,240,0.94);
+    background: rgba(255,255,255,0.94);
     border-radius: 2.5mm;
-    border: 0.3mm solid rgba(252,211,77,0.4);
+    border: 0.3mm solid rgba(253,209,52,0.4);
   }
   .ability {
     display: flex;
@@ -568,7 +568,7 @@ export const cardCss = `
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-weight: 700;
     font-size: 9pt;
-    color: #1A3C3F;
+    color: #040812;
     letter-spacing: -0.01em;
   }
   .ab-bar { display: flex; gap: 1mm; }
@@ -579,12 +579,12 @@ export const cardCss = `
     display: inline-block;
   }
   .dot.on {
-    background: #FCD34D;
+    background: #FDD134;
     box-shadow: inset 0 0 0 0.3mm #A83E2C;
   }
   .dot.off {
     background: transparent;
-    box-shadow: inset 0 0 0 0.3mm rgba(26,60,63,0.25);
+    box-shadow: inset 0 0 0 0.3mm rgba(4,8,18,0.25);
   }
 
   /* Footer */
@@ -601,7 +601,7 @@ export const cardCss = `
     font-size: 8pt;
     font-weight: 900;
     letter-spacing: 0.16em;
-    color: #FCD34D;
+    color: #FDD134;
     margin: 0;
     text-shadow: 0 0.3mm 0.5mm rgba(0,0,0,0.4);
   }
@@ -609,24 +609,24 @@ export const cardCss = `
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-size: 7.5pt;
     font-weight: 500;
-    color: rgba(253,248,240,0.75);
+    color: rgba(255,255,255,0.75);
     margin: 0;
   }
-  .set-info strong { color: #FDF8F0; font-weight: 800; }
+  .set-info strong { color: #FFFFFF; font-weight: 800; }
 
   /* ── CARD BACK ─────────────────────────────────── */
   .card-back {
-    background: #FDF8F0;
+    background: #FFFFFF;
     background-image:
-      radial-gradient(ellipse 90% 60% at 100% 0%, rgba(80,160,130,0.18) 0%, transparent 60%),
-      radial-gradient(ellipse 90% 50% at 0% 100%, rgba(252,211,77,0.22) 0%, transparent 55%);
+      radial-gradient(ellipse 90% 60% at 100% 0%, rgba(5,68,176,0.18) 0%, transparent 60%),
+      radial-gradient(ellipse 90% 50% at 0% 100%, rgba(253,209,52,0.22) 0%, transparent 55%);
   }
   .card-back::before {
     content: "";
     position: absolute;
     top: 0; left: 0; right: 0;
     height: 4mm;
-    background: linear-gradient(90deg, #50A082, #FCD34D);
+    background: linear-gradient(90deg, #0544B0, #FDD134);
   }
   .card-back-inner {
     height: 100%;
@@ -641,7 +641,7 @@ export const cardCss = `
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-size: 7.5pt;
     font-weight: 800;
-    color: #50A082;
+    color: #0544B0;
     letter-spacing: 0.22em;
     text-transform: uppercase;
     margin: 0 0 2.5mm;
@@ -653,7 +653,7 @@ export const cardCss = `
     font-size: 17pt;
     line-height: 1.08;
     letter-spacing: -0.02em;
-    color: #1A3C3F;
+    color: #040812;
     margin: 0 0 1.5mm;
   }
 
@@ -662,7 +662,7 @@ export const cardCss = `
     font-weight: 700;
     font-size: 10.5pt;
     font-style: italic;
-    color: #50A082;
+    color: #0544B0;
     margin: 0 0 4mm;
   }
 
@@ -674,7 +674,7 @@ export const cardCss = `
     padding: 3mm 3mm;
     background: rgba(255,255,255,0.6);
     border-radius: 2mm;
-    border: 0.3mm solid rgba(252,211,77,0.45);
+    border: 0.3mm solid rgba(253,209,52,0.45);
     width: 100%;
     margin: 0 0 4mm;
   }
@@ -688,7 +688,7 @@ export const cardCss = `
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-size: 8pt;
     font-weight: 800;
-    color: #1A3C3F;
+    color: #040812;
     white-space: nowrap;
     flex-shrink: 0;
     letter-spacing: 0.01em;
@@ -696,7 +696,7 @@ export const cardCss = `
   .sign-line {
     flex: 1;
     height: 4mm;
-    border-bottom: 0.4mm solid rgba(26,60,63,0.4);
+    border-bottom: 0.4mm solid rgba(4,8,18,0.4);
   }
 
   /* 3-step parent instruction */
@@ -722,8 +722,8 @@ export const cardCss = `
     width: 6.5mm;
     height: 6.5mm;
     border-radius: 50%;
-    background: #50A082;
-    color: #FDF8F0;
+    background: #0544B0;
+    color: #FFFFFF;
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-weight: 800;
     font-size: 9pt;
@@ -737,7 +737,7 @@ export const cardCss = `
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-weight: 600;
     font-size: 9pt;
-    color: #1A3C3F;
+    color: #040812;
     line-height: 1.25;
   }
   .bstep-text strong { color: #A83E2C; font-weight: 800; }
@@ -753,33 +753,33 @@ export const cardCss = `
     width: 20mm;
     height: 20mm;
     border-radius: 2mm;
-    border: 0.4mm solid rgba(26,60,63,0.15);
+    border: 0.4mm solid rgba(4,8,18,0.15);
   }
   .back-qr-text { text-align: left; }
   .qr-hint-lg {
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-weight: 800;
     font-size: 9pt;
-    color: #1A3C3F;
+    color: #040812;
     margin: 0;
     line-height: 1.1;
   }
   .qr-hint-sm {
     font-family: 'Be Vietnam Pro', system-ui, sans-serif;
     font-size: 8pt;
-    color: rgba(26,60,63,0.65);
+    color: rgba(4,8,18,0.65);
     margin: 0.5mm 0 0;
   }
 
   .back-foot {
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-size: 6.5pt;
-    color: rgba(26,60,63,0.55);
+    color: rgba(4,8,18,0.55);
     margin: auto 0 0;
     text-align: center;
     letter-spacing: 0.04em;
   }
-  .back-foot strong { color: #1A3C3F; font-weight: 800; }
+  .back-foot strong { color: #040812; font-weight: 800; }
 `;
 
 /* ── Local: A6 preview + print CSS ───────────────────────── */
@@ -869,8 +869,8 @@ const instructionBarStyle: React.CSSProperties = {
   position: 'sticky',
   top: 16,
   zIndex: 20,
-  background: '#1A3C3F',
-  color: '#FDF8F0',
+  background: '#040812',
+  color: '#FFFFFF',
   padding: '10px 18px',
   borderRadius: 999,
   fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
@@ -885,8 +885,8 @@ const instructionBarStyle: React.CSSProperties = {
 
 const printBtnStyle: React.CSSProperties = {
   marginLeft: 'auto',
-  background: '#FCD34D',
-  color: '#1A3C3F',
+  background: '#FDD134',
+  color: '#040812',
   border: 0,
   padding: '6px 14px',
   borderRadius: 999,
@@ -900,6 +900,6 @@ const printBtnStyle: React.CSSProperties = {
 const rollBtnStyle: React.CSSProperties = {
   ...printBtnStyle,
   marginLeft: 'auto',
-  background: '#50A082',
-  color: '#FDF8F0',
+  background: '#0544B0',
+  color: '#FFFFFF',
 };

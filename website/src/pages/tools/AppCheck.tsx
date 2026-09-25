@@ -129,7 +129,7 @@ export default function AppCheck() {
         <div className="max-w-3xl mx-auto">
           <Link
             to="/tools"
-            className="inline-flex items-center gap-2 text-sm text-teal-dark/60 hover:text-teal-dark focus:outline-none focus-visible:text-teal-dark focus-visible:underline underline-offset-4 transition-colors mb-8"
+            className="inline-flex items-center gap-2 text-sm text-ink/60 hover:text-ink focus:outline-none focus-visible:text-ink focus-visible:underline underline-offset-4 transition-colors mb-8"
           >
             <span aria-hidden>←</span> Werkzeuge
           </Link>
@@ -149,7 +149,7 @@ export default function AppCheck() {
                 <p className="text-xs uppercase tracking-[0.2em] text-teal font-semibold mb-4">
                   Schritt 1 von 3
                 </p>
-                <h1 className="font-display font-bold text-3xl sm:text-4xl text-teal-dark leading-tight">
+                <h1 className="font-display font-bold text-3xl sm:text-4xl text-ink leading-tight">
                   Welche App willst du <em className="italic text-sage">prüfen</em>?
                 </h1>
               </header>
@@ -208,7 +208,7 @@ export default function AppCheck() {
                 <p className="text-xs uppercase tracking-[0.2em] text-teal font-semibold mb-4">
                   Schritt 3 von 3 · Ergebnis
                 </p>
-                <h1 className="font-display font-bold text-3xl sm:text-4xl text-teal-dark leading-tight">
+                <h1 className="font-display font-bold text-3xl sm:text-4xl text-ink leading-tight">
                   Deine <em className="italic text-sage">Bewertung</em>.
                 </h1>
               </header>
@@ -218,7 +218,7 @@ export default function AppCheck() {
               {error && (
                 <div
                   role="alert"
-                  className="rounded-xl bg-cream/80 border border-teal/30 p-4 text-sm text-teal-dark"
+                  className="rounded-xl bg-cream/80 border border-teal/30 p-4 text-sm text-ink"
                 >
                   {error}
                 </div>
@@ -249,7 +249,7 @@ export default function AppCheck() {
                 <button
                   type="button"
                   onClick={handleRestart}
-                  className="inline-flex items-center gap-2 rounded-full border border-teal/30 px-6 py-3 text-sm text-teal-dark font-display font-medium hover:bg-teal-dark hover:text-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-cream transition-colors"
+                  className="inline-flex items-center gap-2 rounded-full border border-teal/30 px-6 py-3 text-sm text-ink font-display font-medium hover:bg-teal-dark hover:text-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-cream transition-colors"
                 >
                   Andere App prüfen
                 </button>
@@ -279,7 +279,7 @@ function Landing({
         <p className="text-xs uppercase tracking-[0.2em] text-teal font-semibold">
           Werkzeug für Eltern
         </p>
-        <h1 className="font-display font-bold text-4xl sm:text-5xl lg:text-6xl leading-[1.04] tracking-tight text-teal-dark">
+        <h1 className="font-display font-bold text-4xl sm:text-5xl lg:text-6xl leading-[1.04] tracking-tight text-ink">
           Welche App will <em className="italic text-sage">dein Kind</em>?
         </h1>
         <p className="text-base sm:text-lg text-ink/75 max-w-2xl leading-relaxed">
@@ -321,7 +321,7 @@ function Landing({
             Person in unserer Datenbank.{' '}
             <a
               href="/datenschutz"
-              className="text-teal underline underline-offset-2 hover:text-teal-dark focus:outline-none focus-visible:text-teal-dark focus-visible:decoration-2"
+              className="text-teal underline underline-offset-2 hover:text-ink focus:outline-none focus-visible:text-ink focus-visible:decoration-2"
             >
               Was wir genau speichern
             </a>
@@ -358,7 +358,7 @@ function ScoreBandPreview({ reduced }: { reduced: boolean | null }) {
       label: 'Relativ ruhig',
       hint: 'Wenig Druck-Mechaniken sichtbar.',
       cardClass: 'bg-sage/15 ring-sage/35',
-      labelClass: 'text-teal-dark',
+      labelClass: 'text-ink',
       rangeClass: 'text-teal',
     },
     {
@@ -366,7 +366,7 @@ function ScoreBandPreview({ reduced }: { reduced: boolean | null }) {
       label: 'Hingucken und begleiten',
       hint: 'Einige Pattern sind da, lassen sich bändigen.',
       cardClass: 'bg-mustard-soft/55 ring-mustard/40',
-      labelClass: 'text-teal-dark',
+      labelClass: 'text-ink',
       rangeClass: 'text-teal',
     },
     {

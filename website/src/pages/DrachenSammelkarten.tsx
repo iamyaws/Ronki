@@ -43,14 +43,14 @@ export default function DrachenSammelkarten() {
           >
             <Link
               to="/"
-              className="inline-flex items-center gap-2 text-sm text-teal-dark/60 hover:text-teal-dark transition-colors mb-8"
+              className="inline-flex items-center gap-2 text-sm text-ink/60 hover:text-ink transition-colors mb-8"
             >
               <span aria-hidden>←</span> Zurück
             </Link>
             <p className="text-xs uppercase tracking-[0.2em] text-teal font-medium mb-6">
               Für dein Sammelalbum
             </p>
-            <h1 className="font-display font-bold text-4xl sm:text-5xl lg:text-6xl leading-[1.04] tracking-tight text-teal-dark">
+            <h1 className="font-display font-bold text-4xl sm:text-5xl lg:text-6xl leading-[1.04] tracking-tight text-ink">
               Drachen-Sammelkarten{' '}
               <em className="italic text-sage whitespace-nowrap">zum Ausdrucken</em>.
             </h1>
@@ -75,14 +75,14 @@ export default function DrachenSammelkarten() {
             <Link
               to="/print/a6-flyer-kids-card"
               className="group relative flex flex-col rounded-2xl bg-white overflow-hidden h-full"
-              style={{ boxShadow: '0 8px 28px -12px rgba(45,90,94,0.18)' }}
+              style={{ boxShadow: '0 8px 28px -12px rgba(4,8,18,0.18)' }}
             >
               <div className="h-1.5 w-full bg-sage" />
               <div className="p-6 sm:p-7 flex-1 flex flex-col">
                 <span className="self-start inline-flex items-center rounded-full px-3 py-1 text-[10px] font-display font-bold uppercase tracking-[0.15em] mb-4 bg-sage-soft/50 text-sage">
                   Eine Karte
                 </span>
-                <h2 className="font-display font-bold text-xl sm:text-2xl text-teal-dark leading-tight mb-3">
+                <h2 className="font-display font-bold text-xl sm:text-2xl text-ink leading-tight mb-3">
                   Eine zufällige Karte
                 </h2>
                 <p className="text-sm text-ink/70 leading-relaxed mb-6 flex-1">
@@ -106,14 +106,14 @@ export default function DrachenSammelkarten() {
             <Link
               to="/print/sheet-a4-kids-card"
               className="group relative flex flex-col rounded-2xl bg-white overflow-hidden h-full"
-              style={{ boxShadow: '0 8px 28px -12px rgba(45,90,94,0.18)' }}
+              style={{ boxShadow: '0 8px 28px -12px rgba(4,8,18,0.18)' }}
             >
               <div className="h-1.5 w-full bg-mustard" />
               <div className="p-6 sm:p-7 flex-1 flex flex-col">
                 <span className="self-start inline-flex items-center rounded-full px-3 py-1 text-[10px] font-display font-bold uppercase tracking-[0.15em] mb-4 bg-mustard-soft/50 text-ochre">
                   Komplett-Set
                 </span>
-                <h2 className="font-display font-bold text-xl sm:text-2xl text-teal-dark leading-tight mb-3">
+                <h2 className="font-display font-bold text-xl sm:text-2xl text-ink leading-tight mb-3">
                   2 A4-Bögen, 8 Karten
                 </h2>
                 <p className="text-sm text-ink/70 leading-relaxed mb-6 flex-1">
@@ -142,7 +142,7 @@ export default function DrachenSammelkarten() {
             <p className="text-xs uppercase tracking-[0.2em] text-teal font-medium mb-4">
               Das Sammel-Set
             </p>
-            <h2 className="font-display font-bold text-3xl sm:text-4xl text-teal-dark">
+            <h2 className="font-display font-bold text-3xl sm:text-4xl text-ink">
               Neun Drachen.{' '}
               <em className="italic text-sage">Ein Album.</em>
             </h2>
@@ -156,7 +156,7 @@ export default function DrachenSammelkarten() {
                 viewport={{ once: true, margin: '-10%' }}
                 transition={{ duration: 0.5, delay: (i % 3) * 0.06, ease: EASE_OUT }}
                 className="rounded-2xl bg-white overflow-hidden"
-                style={{ boxShadow: '0 6px 20px -10px rgba(45,90,94,0.15)' }}
+                style={{ boxShadow: '0 6px 20px -10px rgba(4,8,18,0.15)' }}
               >
                 <Link
                   to={`/print/a6-flyer-kids-card?d=${d.slug}`}
@@ -166,7 +166,7 @@ export default function DrachenSammelkarten() {
                     className="relative aspect-square overflow-hidden"
                     style={{
                       background:
-                        'radial-gradient(ellipse 100% 100% at 50% 30%, #FDE589 0%, #F2BC5B 100%)',
+                        'radial-gradient(ellipse 100% 100% at 50% 30%, #FFE68A 0%, #F2BC5B 100%)',
                     }}
                   >
                     <img
@@ -184,14 +184,14 @@ export default function DrachenSammelkarten() {
                     <p className="text-[10px] uppercase tracking-[0.15em] text-teal/60 font-display font-semibold mb-1.5">
                       {d.type}
                     </p>
-                    <h3 className="font-display font-bold text-lg sm:text-xl text-teal-dark leading-tight mb-2">
+                    <h3 className="font-display font-bold text-lg sm:text-xl text-ink leading-tight mb-2">
                       {d.name}
                     </h3>
                     <div className="flex items-center justify-between gap-2">
                       <span className="text-xs text-ink/55">
                         HP {d.hp}
                       </span>
-                      <span className="text-[10px] font-display font-bold text-ochre tracking-wider">
+                      <span className="text-[10px] font-display font-bold text-cobalt tracking-wider">
                         {d.rarity}
                       </span>
                     </div>
@@ -212,10 +212,10 @@ export default function DrachenSammelkarten() {
             viewport={{ once: true }}
             className="text-center mb-10"
           >
-            <p className="text-[0.7rem] uppercase tracking-[0.2em] text-teal-dark/60 font-semibold mb-4">
+            <p className="text-[0.7rem] uppercase tracking-[0.2em] text-ink/60 font-semibold mb-4">
               So drucke ich das
             </p>
-            <h2 className="font-display font-bold text-2xl sm:text-3xl text-teal-dark">
+            <h2 className="font-display font-bold text-2xl sm:text-3xl text-ink">
               Fünf Schritte, acht Karten.
             </h2>
           </motion.div>
@@ -250,13 +250,13 @@ export default function DrachenSammelkarten() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: i * 0.06, ease: EASE_OUT }}
                 className="flex items-start gap-4 sm:gap-5 p-4 sm:p-5 rounded-2xl bg-white"
-                style={{ boxShadow: '0 4px 14px -10px rgba(45,90,94,0.18)' }}
+                style={{ boxShadow: '0 4px 14px -10px rgba(4,8,18,0.18)' }}
               >
                 <span className="flex-shrink-0 w-9 h-9 rounded-full bg-sage text-cream font-display font-bold text-base flex items-center justify-center">
                   {i + 1}
                 </span>
                 <div className="flex-1 pt-0.5">
-                  <h3 className="font-display font-bold text-base sm:text-lg text-teal-dark mb-1 leading-tight">
+                  <h3 className="font-display font-bold text-base sm:text-lg text-ink mb-1 leading-tight">
                     {step.t}
                   </h3>
                   <p className="text-sm text-ink/70 leading-relaxed">{step.d}</p>
@@ -314,7 +314,7 @@ export default function DrachenSammelkarten() {
                 onClick={() => trackEvent('Compendium Click', { source: 'sammelkarten_teaser' })}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-full px-6 py-3.5 bg-mustard text-teal-dark font-display font-bold text-sm shadow-sm hover:shadow-md transition-all hover:gap-3"
+                className="inline-flex items-center gap-2 rounded-full px-6 py-3.5 bg-white text-ink font-display font-bold text-sm transition-all hover:gap-3"
               >
                 Compendium öffnen
                 <span aria-hidden>↗</span>

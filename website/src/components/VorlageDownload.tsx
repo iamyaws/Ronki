@@ -11,6 +11,10 @@ import { trackEvent } from '../lib/analytics';
  * and printable without giving us anything. The PDF is the convenient
  * version. Both routes are visible at the same time, the checkbox is not
  * pre-ticked, and there is no countdown, no "nur heute", no fake scarcity.
+ *
+ * This is the one action card on a template page, so it carries the
+ * inverted cobalt block from the Bilderbuch specimen: white input, white
+ * boxes with a cobalt check, white pill with ink text.
  */
 
 /** Stored verbatim in leads.consent_text so we can prove what was agreed to. */
@@ -40,6 +44,13 @@ interface Props {
   /** Route of the clean print page for the no-email path. */
   printHref: string;
 }
+
+/** Cobalt tick drawn on the white box. Same path as the specimen's check. */
+const CHECK_MARK =
+  "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><path d='M10 34 C 16 40 21 45 26 50 C 34 36 44 24 55 14' fill='none' stroke='%230544B0' stroke-width='9' stroke-linecap='round' stroke-linejoin='round'/></svg>\")";
+
+const BOX_CLASS =
+  'mt-0.5 h-7 w-7 shrink-0 cursor-pointer appearance-none rounded-lg border-[2.5px] border-white bg-white bg-[length:22px_22px] bg-center bg-no-repeat';
 
 export function VorlageDownload({ source, pdfHref, title, printHref }: Props) {
   const emailId = useId();
@@ -78,22 +89,21 @@ export function VorlageDownload({ source, pdfHref, title, printHref }: Props) {
     <section
       id="pdf"
       aria-labelledby={`${emailId}-heading`}
-      className="scroll-mt-24 rounded-2xl border border-teal/15 bg-white/70 p-6 sm:p-8"
-      style={{ boxShadow: '0 10px 30px -18px rgba(45,90,94,0.3)' }}
+      className="scroll-mt-24 rounded-[28px] border-[3px] border-cobalt bg-cobalt p-6 sm:p-8 text-white"
     >
-      <p className="text-[0.7rem] uppercase tracking-[0.2em] text-teal font-semibold mb-3">
+      <p className="bb-hand text-2xl uppercase text-sun leading-none mb-2">
         Als PDF zum Ausdrucken
       </p>
       <h2
         id={`${emailId}-heading`}
-        className="font-display font-bold text-xl sm:text-2xl text-teal-dark leading-tight"
+        className="font-display font-bold text-2xl sm:text-3xl text-white leading-tight"
       >
         {title} als fertiges PDF
       </h2>
 
       {status.kind === 'done' ? (
         <div className="mt-4">
-          <p role="status" className="text-base text-teal-dark leading-relaxed">
+          <p role="status" className="text-base text-white/90 leading-relaxed">
             {status.alreadyKnown
               ? 'Dich kennen wir schon. Hier ist die Vorlage.'
               : 'Fertig. Hier ist die Vorlage.'}
@@ -102,19 +112,21 @@ export function VorlageDownload({ source, pdfHref, title, printHref }: Props) {
             href={pdfHref}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-4 inline-flex items-center gap-2 rounded-full bg-teal-dark px-6 py-3.5 text-cream font-display font-bold text-sm shadow-sm hover:shadow-md hover:bg-teal transition-all"
+            className="bb-press mt-4 inline-flex items-center gap-3 rounded-full bg-sun px-6 py-3.5 text-ink font-display font-bold text-base"
           >
             {title} als PDF öffnen
-            <span aria-hidden>→</span>
+            <svg aria-hidden viewBox="0 0 64 64" className="h-4 w-4">
+              <use href="#bb-arrow" />
+            </svg>
           </a>
-          <p className="mt-4 text-sm text-ink/65 leading-relaxed">
+          <p className="mt-4 text-sm text-white/90 leading-relaxed">
             Das PDF öffnet sich direkt. Wir schicken dir erst dann Mails, wenn es wirklich
             Neues gibt.
           </p>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-4" noValidate>
-          <p className="text-sm text-ink/70 leading-relaxed">
+          <p className="text-sm text-white/90 leading-relaxed">
             Eine Seite A4, zum Aufhängen an den Kühlschrank. Trag deine E-Mail ein, dann
             öffnen wir dir das PDF.
           </p>
@@ -122,7 +134,7 @@ export function VorlageDownload({ source, pdfHref, title, printHref }: Props) {
           <div className="flex flex-col gap-1.5">
             <label
               htmlFor={emailId}
-              className="text-xs uppercase tracking-[0.15em] text-teal-dark/60 font-semibold"
+              className="text-xs uppercase tracking-[0.1em] text-white font-display font-bold"
             >
               E-Mail
             </label>
@@ -135,7 +147,7 @@ export function VorlageDownload({ source, pdfHref, title, printHref }: Props) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="deine@email.de"
-              className="w-full rounded-xl border-2 border-teal/25 bg-cream px-4 py-3 text-base text-teal-dark placeholder:text-teal-dark/35 focus:border-teal focus:outline-none transition-colors"
+              className="w-full rounded-full border-[2.5px] border-white bg-white px-5 py-3 text-base text-ink placeholder:text-ink/40 focus:outline-none"
             />
           </div>
 
@@ -145,14 +157,15 @@ export function VorlageDownload({ source, pdfHref, title, printHref }: Props) {
               type="checkbox"
               checked={consent}
               onChange={(e) => setConsent(e.target.checked)}
-              className="mt-1 h-5 w-5 shrink-0 rounded border-2 border-teal/40 accent-teal"
+              className={BOX_CLASS}
+              style={consent ? { backgroundImage: CHECK_MARK } : undefined}
             />
-            <label htmlFor={consentId} className="text-sm text-ink/75 leading-relaxed">
+            <label htmlFor={consentId} className="text-sm text-white/90 leading-relaxed">
               Ich bin einverstanden, dass Ronki meine E-Mail-Adresse speichert, um mir die
               Vorlage bereitzustellen. Details in der{' '}
               <Link
                 to="/datenschutz#vorlagen"
-                className="underline decoration-mustard underline-offset-4 hover:text-teal-dark"
+                className="text-white underline decoration-sun decoration-2 underline-offset-4"
               >
                 Datenschutzerklärung
               </Link>
@@ -166,14 +179,15 @@ export function VorlageDownload({ source, pdfHref, title, printHref }: Props) {
               type="checkbox"
               checked={wantsUpdates}
               onChange={(e) => setWantsUpdates(e.target.checked)}
-              className="mt-1 h-5 w-5 shrink-0 rounded border-2 border-teal/40 accent-teal"
+              className={BOX_CLASS}
+              style={wantsUpdates ? { backgroundImage: CHECK_MARK } : undefined}
             />
-            <label htmlFor={updatesId} className="text-sm text-ink/60 leading-relaxed">
+            <label htmlFor={updatesId} className="text-sm text-white/90 leading-relaxed">
               Optional: Ja, informiert mich gelegentlich über Neues bei Ronki (höchstens
               einmal im Monat, jederzeit abbestellbar per Mail an{' '}
               <a
                 href="mailto:hallo@ronki.de"
-                className="underline decoration-mustard underline-offset-4"
+                className="text-white underline decoration-sun decoration-2 underline-offset-4"
               >
                 hallo@ronki.de
               </a>
@@ -185,18 +199,21 @@ export function VorlageDownload({ source, pdfHref, title, printHref }: Props) {
           <button
             type="submit"
             disabled={!ready || status.kind === 'submitting'}
-            className="self-start inline-flex items-center gap-2 rounded-full bg-teal-dark px-6 py-3.5 text-cream font-display font-bold text-sm shadow-sm transition-all enabled:hover:shadow-md enabled:hover:bg-teal disabled:opacity-40 disabled:cursor-not-allowed"
+            className="bb-press self-start inline-flex items-center gap-3 rounded-full bg-sun px-6 py-3.5 text-ink font-display font-bold text-base disabled:bg-white/15 disabled:text-white/70 disabled:cursor-not-allowed"
           >
             {status.kind === 'submitting' ? '…' : 'PDF öffnen'}
+            <svg aria-hidden viewBox="0 0 64 64" className="h-4 w-4">
+              <use href="#bb-arrow" />
+            </svg>
           </button>
 
           {status.kind === 'invalid' && (
-            <p role="alert" className="text-sm text-sage">
+            <p role="alert" className="text-sm font-medium text-sun">
               Bitte gib eine gültige E-Mail-Adresse ein.
             </p>
           )}
           {status.kind === 'error' && (
-            <p role="alert" className="text-sm text-sage">
+            <p role="alert" className="text-sm font-medium text-sun">
               Verbindung zum Server fehlt. Versuch es gleich nochmal oder druck die Seite
               direkt.
             </p>
@@ -204,12 +221,21 @@ export function VorlageDownload({ source, pdfHref, title, printHref }: Props) {
         </form>
       )}
 
-      <p className="mt-6 border-t border-teal/10 pt-4 text-sm text-ink/65 leading-relaxed">
+      <svg
+        aria-hidden
+        viewBox="0 0 600 6"
+        preserveAspectRatio="none"
+        className="mt-6 h-1.5 w-full text-white opacity-60"
+      >
+        <use href="#bb-dash" />
+      </svg>
+
+      <p className="mt-4 text-sm text-white/90 leading-relaxed">
         Ohne E-Mail:{' '}
         <Link
           to={printHref}
           onClick={() => trackEvent('Vorlage Download', { vorlage: source, weg: 'druck' })}
-          className="underline decoration-mustard underline-offset-4 hover:text-teal-dark"
+          className="text-white underline decoration-sun decoration-2 underline-offset-4"
         >
           Diese Seite ist selbst schon druckbar
         </Link>

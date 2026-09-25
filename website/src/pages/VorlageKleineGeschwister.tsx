@@ -37,7 +37,7 @@ export default function VorlageKleineGeschwister() {
       eyebrow="Für die Kleinen"
       title="Mein Tag"
       description="Ganz einfach, nur mit Bildern. Dein kleines Kind malt den großen Kreis aus, wenn es fertig ist."
-      accent="#50a082"
+      accent="#0544B0"
       bigIcons
       pageTitle="Routine-Vorlage für Kleinkinder (2 bis 4 Jahre) zum Ausdrucken"
       pageIntro="Vier große Bilder, kein Text. Für die Kleinen, die sehen, wie das große Geschwisterkind abhakt, und mitmachen wollen. Druck diese Seite direkt aus, ohne Anmeldung, oder hol dir das fertige PDF."
