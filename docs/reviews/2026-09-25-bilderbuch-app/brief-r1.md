@@ -20,7 +20,9 @@ Marc asked to make the new "Bilderbuch" design live in the real PWA, benchmarked
 ## What to review
 
 - The app diff only: `git diff design/bilderbuch...design/bilderbuch-app -- src public index.html` (the website commits underneath are already reviewed).
-- The renders at 390 x 844 in `docs/reviews/2026-09-25-bilderbuch-app/renders/` (one PNG per screen, named by screen). Judge the design from the renders, the code from the diff.
+- The renders at 390 x 844 in `docs/reviews/2026-09-25-bilderbuch-app/renders/` (one JPG per screen, numbered in flow order: 01 to 10 onboarding and hatch, 20s expedition, 30s home and the day, 40s evening, 50s profile, 60s diary, 70 book; `-full` files are whole pages, `-tablet` files 768 x 1024). Judge the design from the renders, the code from the diff.
+- Changed after the renders were taken: each egg now has its own hatch clip, end frame and hatchling shell (render 05/06 show the cream clip under a red egg); the idle and cheer loops are cropped like the stills; the "Einrichten" pill on the home screen is hidden; the thank-you bubble lasts 3 s.
+- Already reviewed: your code review round 1 on the foundation (`astra-code-r1.launch.txt`, response in `response-code-r1.md`). R1 and R2 are fixed; R3 is answered PARTLY (Ronki stays red-orange, the egg choice now shows in the egg and the shell hat). Do not repeat those unless the fix is wrong.
 
 ## The questions
 
