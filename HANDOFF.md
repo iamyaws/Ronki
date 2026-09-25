@@ -53,11 +53,16 @@ Growth engine approved by Marc: spec [docs/strategy/2026-09-25-growth-engine-des
 
 **Design note:** the Bilderbuch site went live at 19:49 UTC through PR 14 (section above), while this work was under way. All branches below were brought up to date with that `main`; share pictures and the launch kit use the Bilderbuch look. PR 18 (design/bilderbuch alone) became redundant and shows as merged.
 
-**Open PRs (Fable cannot merge; the permission system blocks it, Marc merges):**
+**PRs (Marc, 26 Sep: "merge into main for the work that you feel is all green and ready to move"; Fable merges what is green and reviewed, drafts wait):**
 - PR 15 `foundation/2026-09-25`: daily keep-alive, gate 1 on 15 Dec, home title, article update dates, spec, plan, keyword map. Astra code review: no findings.
 - PR 16 `launch/share-previews` (stacked on 15): share pictures of the real sheets on the four template pages, short links `/morgen`, `/li`, `/ig`, `/tt`, `/yt` in the root `vercel.json` with a host rule (both Vercel projects read the root file; project root is `.`). Check after merge: `curl -I https://www.ronki.de/morgen`.
 - PR 17 `analytics/umami` (draft, stacked on 16): Umami helper, script tag with placeholder id, privacy copy. `website/tests/umami-snippet.test.ts` fails until the real id is in.
-- PR 19 `content/zeitumstellung`: new Ratgeber article /ratgeber/zeitumstellung-kinder for the clock change on 25 Oct 2026 (keyword map move 3), five opened sources, two re-checked by Fable. Independent of 15 to 17.
+- PR 19 `content/zeitumstellung`: new Ratgeber article /ratgeber/zeitumstellung-kinder for the clock change on 25 Oct 2026 (keyword map move 3), five opened sources, two re-checked by Fable. Astra rep 3 found four points (step cadence against the autumn source, one overstated study claim, an unsourced meal rule, spring advice cited as autumn); all fixed. Independent of 15 to 17.
+- PR 20 `mail/brevo-doi` (draft, stacked on 17): Brevo double opt-in. Migration `20260926000100_leads_brevo_doi.sql` NOT applied (trigger via pg_net, key and ids from Vault, inert until set), `scripts/brevo-setup.mjs`, `/bestaetigt` page, privacy copy naming Brevo. Waits for Marc's account, DKIM at GoDaddy, key in `.env.local`. Must not merge before Brevo is live (the privacy text names it).
+
+**Launch kit (Bilderbuch look, reviewed):** `C:\Users\öööö\ronki\launch\2026-09-26\KIT.md` with carousel, story, share picture and the app icon as profile picture; art copied from `public/art/bilderbuch/`; renderer `launch/tools/carousel.mjs`. Astra reps 1 to 3 closed.
+
+**Follow-ups found tonight:** the live template page promises a timetable ("Nach ein paar Wochen macht dein Kind die Schritte..."; Astra R2-01, site copy, Marc's call); the no-email print route could sit above the email form (R2-02); the printable sheets still use emoji-style icons while the app and the kit use the new task pictures (regenerate `website/public/vorlagen/*` with `scripts/print-vorlagen.mjs` once the sheets use the art).
 
 **Next steps, in order:** Marc merges 15, then 16 (and 19 any time); Umami signup, id into PR 17, merge, check a live pageview; messages from the kit (Sunday evening); Instagram, TikTok, YouTube accounts and first posts; LinkedIn Monday; Brevo double opt-in during the week (plan Task 8). Week of 28 Sep: Abendroutine refresh (keyword map #1), clock-change page before 25 Oct, character sheet, render script.
 
