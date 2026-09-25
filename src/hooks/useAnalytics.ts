@@ -34,7 +34,9 @@ export function useAnalytics() {
   }, [enabled]);
 
   const track = useCallback((name: EventName, props?: EventProps) => {
-    if (!enabled) return;
+    // Finch pass: raw track gates itself (sends when on, holds events
+    // before a consent choice, drops after a no), so the hook no longer
+    // drops funnel events sent before the parent step.
     rawTrack(name, props);
   }, [enabled]);
 

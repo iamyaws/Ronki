@@ -6,6 +6,7 @@ import SFX from '../utils/sfx';
 import { triggerHaptic } from '../lib/haptics';
 import VoiceAudio from '../utils/voiceAudio';
 import DoodleIcon from './bilderbuch/DoodleIcon';
+import { featureOn, extrasOn } from '../config/features';
 
 // Map nav tab IDs to their voice line base IDs (Apr 2026 voice pass).
 // playLocalized resolves to de_/en_ at play time. Cooldown gates this
@@ -20,19 +21,19 @@ const NAV_VOICE_MAP = {
 };
 const NAV_VOICE_COOLDOWN_MS = 12000; // min gap between any two nav-tap voice lines
 
-// Pflege merged into Ronki's page (April 2026) — care actions
+// Pflege merged into Ronki's page (April 2026), care actions
 // (Füttern/Streicheln/Spielen) now live at the top of RonkiProfile.
 // The 'care' view route stays in App.jsx so eggTriggers + dreamHighlights
 // + any in-app links that still point at 'care' keep working.
 //
 // Progressive disclosure (Apr 2026, see backlog_progressive_hub_disclosure.md):
 // Tabs that aren't yet earned render DIMMED with a padlock overlay instead
-// of being hidden. Tapping a locked tab doesn't navigate — it surfaces a
+// of being hidden. Tapping a locked tab doesn't navigate, it surfaces a
 // one-line hint sheet with the exact unlock requirement + current progress.
 // Hector feedback: "hidden tabs feel off, grey them out and tell me when
 // they open." Unlock criteria live in data/tabUnlocks.ts.
 //
-// Dev override: ?reveal=all or ?reveal=N still forces unlock state so
+// Dev override (DEV builds only): ?reveal=all forces unlock state so
 // Marc can preview any stage without touching Louis's real save.
 // Icons are Bilderbuch doodles (DoodleIcon names), drawn in the marker
 // style of the boards: a little house for the Nest, the sun for Heute,
@@ -46,18 +47,37 @@ const TAB_KEYS = [
   { id: 'shop',    key: 'nav.shop',    icon: 'bag' },
 ];
 
+/**
+ * The tabs this child sees (Finch pass, 26 Sep 2026, base design
+ * section 7). Two by default: Nest and Ronki, both always open. The old
+ * day strip tab only with FEATURES.dayStrip. Tagebuch and Laden come back
+ * with the parent "Extras zeigen" toggle, with their old unlock rules.
+ */
+export function visibleTabs(state) {
+  const extras = extrasOn(state);
+  return TAB_KEYS.filter((tab) => {
+    if (tab.id === 'quests') return featureOn('dayStrip');
+    if (tab.id === 'journal' || tab.id === 'shop') return extras;
+    return true;
+  });
+}
+
 function useRevealOverride() {
-  // Dev preview: ?reveal=all → everything unlocked regardless of state.
+  // Dev preview: ?reveal=all: everything unlocked regardless of state.
   // Everything else falls through to real state, so natural unlocks (first
-  // task → Ronki, first mood + 3 tasks → Tagebuch, 50 Sterne → Laden) still
-  // fire as the kid plays — Marc's preview workflow needs that to verify
+  // task to Ronki, first mood + 3 tasks to Tagebuch, 50 Sterne to Laden) still
+  // fire as the kid plays, Marc's preview workflow needs that to verify
   // the unlock ceremony actually plays.
   //
   // Note: the old ?reveal=0 "force everything locked" mode was dropped
   // because it masked real state changes, making it impossible to preview
   // an unlock firing. To preview the locked look now, start a fresh
   // profile via onboarding (or clear IndexedDB).
+  //
+  // Fix round 1 (Astra FC-10): DEV builds only. A production build ignores
+  // the query, so it can never bypass the unlock rules on a real device.
   const [param] = useState(() => {
+    if (!import.meta.env.DEV) return null;
     if (typeof window === 'undefined') return null;
     return new URLSearchParams(window.location.search).get('reveal');
   });
@@ -72,11 +92,11 @@ export default function NavBar({ active = 'quests', onNavigate }) {
   // Locked hint state: null OR { tabId, anchorX } so the hint bubble can
   // anchor its pointer at the tapped tab instead of dead-centering.
   const [lockedHintFor, setLockedHintFor] = useState(null);
-  const btnRefsRef = useRef({}); // tabId → button element
+  const btnRefsRef = useRef({}); // tabId: button element
 
   // Auto-dismiss the hint after 3.5s so a kid who taps something locked
   // doesn't need to know they have to close the sheet manually. Also
-  // dismiss on any outside pointerdown WITHOUT intercepting the click —
+  // dismiss on any outside pointerdown WITHOUT intercepting the click:
   // the previous full-viewport backdrop was eating the next tap, so the
   // kid had to tap twice to switch tabs. Using `capture: false` means the
   // tapped element still receives its own event.
@@ -102,27 +122,30 @@ export default function NavBar({ active = 'quests', onNavigate }) {
 
   const handleTap = (tab, locked) => {
     if (locked) {
+      // Without FEATURES.tabUnlocks there is no hint sheet: a locked
+      // Extras tab only answers with the soft bump, never with a list of
+      // what is missing (Finch pass: no progress nagging for the child).
       // Locked tab: gentle bump (warning haptic + soft pop) so the kid
       // FEELS the tap was registered, even though navigation didn't fire.
-      // Without this the locked-tab tap felt dead — kid would think the
+      // Without this the locked-tab tap felt dead, kid would think the
       // app froze.
       try { triggerHaptic('warning'); } catch {}
       SFX.play('pop');
       const el = btnRefsRef.current[tab.id];
       const rect = el?.getBoundingClientRect();
       const anchorX = rect ? rect.left + rect.width / 2 : window.innerWidth / 2;
-      setLockedHintFor({ tabId: tab.id, anchorX });
+      if (featureOn('tabUnlocks')) setLockedHintFor({ tabId: tab.id, anchorX });
       return;
     }
     // Unlocked tap: light haptic + soft pop SFX. Marc 27 Apr 2026:
     // "there should also either be sounds and/or haptics when i click
-    // buttons like nav" — both, light. Phones without a haptic engine
+    // buttons like nav", both, light. Phones without a haptic engine
     // ignore the call silently; muted devices skip the SFX. Either way,
     // the device-capable kid gets a confirming tactile beat.
     try { triggerHaptic('light'); } catch {}
     SFX.play('tap');
     setLockedHintFor(null);
-    // Ronki nav-tap voice — gated by 12s cooldown across all tabs so it
+    // Ronki nav-tap voice, gated by 12s cooldown across all tabs so it
     // doesn't fire on rapid switching. Probabilistic (1-in-3) on top so
     // even within-cooldown taps are sometimes silent. Result: Ronki
     // chimes in maybe once per minute of normal navigation, never spammy.
@@ -144,7 +167,7 @@ export default function NavBar({ active = 'quests', onNavigate }) {
 
   // Anchor math: sheet is up to 360px wide, clamped 16px from each viewport
   // edge, ideally centered on the tapped tab. Triangle points at the exact
-  // tab center (anchorX) — even if the sheet has to shift to stay onscreen,
+  // tab center (anchorX), even if the sheet has to shift to stay onscreen,
   // the triangle stays at the anchor.
   let sheetLeft = 0;
   let sheetWidth = 0;
@@ -159,11 +182,11 @@ export default function NavBar({ active = 'quests', onNavigate }) {
 
   return (
     <>
-      {/* Locked-tab hint sheet — floats just above the nav, points at the
+      {/* Locked-tab hint sheet, floats just above the nav, points at the
            tapped tab with a gentle bounce. Auto-dismisses after 3.5s or
-           on any outside pointerdown. No backdrop — the previous version
+           on any outside pointerdown. No backdrop, the previous version
            intercepted the next tap which broke tab switching. */}
-      {lockedHintFor && hintUnlock && (
+      {featureOn('tabUnlocks') && lockedHintFor && hintUnlock && (
           <div
             id="nav-lock-hint-sheet"
             className="fixed z-[56]"
@@ -240,19 +263,20 @@ export default function NavBar({ active = 'quests', onNavigate }) {
             paddingBottom: 'max(18px, env(safe-area-inset-bottom, 18px))',
           }}
         >
-          {TAB_KEYS.map(tab => {
+          {visibleTabs(state).map(tab => {
             const isActive = tab.id === active;
             const unlocked = forceUnlockAll || isTabUnlocked(tab.id, state);
-            // Never lock the currently-active tab — it would strand the
+            // Never lock the currently-active tab, it would strand the
             // user inside a tab they can't reopen by tapping it.
             const locked = !unlocked && !isActive;
             const label = t(tab.key);
             // Sparkle pulse on tabs that have unlocked but whose coachmark
-            // hasn't been dismissed yet — draws the eye to the new surface
+            // hasn't been dismissed yet, draws the eye to the new surface
             // until the kid actually opens it. Hub + Quests are never
             // "new" so skip them. Dropped once coachmark is marked seen.
             const hasCoachmark = tab.id === 'ronki' || tab.id === 'journal' || tab.id === 'shop';
-            const isFreshUnlock = hasCoachmark
+            const isFreshUnlock = featureOn('tabUnlocks')
+              && hasCoachmark
               && unlocked
               && !isActive
               && !(state?.tabCoachmarksSeen || {})[tab.id];

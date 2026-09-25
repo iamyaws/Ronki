@@ -24,6 +24,15 @@ function openDB(): Promise<IDBDatabase> {
   });
 }
 
+/** Per token: did this session's last cloud read reach the server? (Astra FC-01) */
+const cloudReadStatus = new Map<string, 'ok' | 'failed'>();
+
+/** Set just before a stale page reloads (useTripClock). From then on this
+ *  page writes nothing, locally or to the cloud: its in-memory state may be
+ *  older than what another device saved (review fix round 1, SAVES-1). */
+let writesFrozen = false;
+
+
 const storage = {
   // ── Local (IndexedDB with localStorage fallback) ──
   async load(): Promise<GameState | null> {
@@ -58,7 +67,18 @@ const storage = {
     }
   },
 
+  /** Stop every write from this page (see writesFrozen). One way: only a reload clears it. */
+  freezeWrites(): void {
+    writesFrozen = true;
+  },
+
+  /** True once freezeWrites() ran on this page. */
+  writesFrozen(): boolean {
+    return writesFrozen;
+  },
+
   async save(state: GameState): Promise<void> {
+    if (writesFrozen) return;
     // Apr 2026 fix: writes go to BOTH IndexedDB AND localStorage every
     // time, and the IDB write awaits transaction commit before resolving.
     //
@@ -166,15 +186,36 @@ const storage = {
       // profile_get returns null when there is no row, which is the
       // same "no cloud state yet" case the old maybeSingle() returned.
       const { data, error } = await supabase.rpc('profile_get', { p_token: token });
-      if (error || !data) return null;
+      // Finch pass (26 Sep 2026, Astra FC-01): remember whether the read
+      // really reached the server. A failed read and "no row" both return
+      // null, but only a successful read may let local state be written
+      // to this card (see cloudReadOk).
+      if (error) {
+        cloudReadStatus.set(token, 'failed');
+        return null;
+      }
+      cloudReadStatus.set(token, 'ok');
+      if (!data) return null;
       return ((data as { state?: GameState }).state as GameState) || null;
     } catch {
+      cloudReadStatus.set(token, 'failed');
       return null;
     }
   },
 
+  /**
+   * True once a cloud read for this token has reached the server in this
+   * session (a row or a real "no row"). Until then nothing local may be
+   * written to the card: a failed read must never turn into an overwrite
+   * of an existing dragon (Astra FC-01, Finch pass 26 Sep 2026).
+   */
+  cloudReadOk(token: string): boolean {
+    return cloudReadStatus.get(token) === 'ok';
+  },
+
   async cloudSaveByToken(token: string, state: GameState): Promise<void> {
     if (!token || !/^[a-f0-9]{32}$/.test(token)) return;
+    if (writesFrozen) return;
     try {
       // profile_upsert stamps updated_at server-side and records today
       // in profile_activity, which is what the active-family counter
@@ -187,6 +228,7 @@ const storage = {
       // Silent fail, local IndexedDB + localStorage are the fallback
     }
   },
+
 
   // ── Sync: resolve local vs cloud, return best state ──
   async syncLoad(userId: string): Promise<GameState | null> {
@@ -244,7 +286,9 @@ const storage = {
     const owner = getLocalProfileOwner();
     if (local && owner && owner !== token) {
       local = null;
-      if (!cloud) await this.clear();
+      // Only a read that really found no row may clear the other card's
+      // cache; a failed read keeps it (verifier H, Finch pass).
+      if (!cloud && this.cloudReadOk(token)) await this.clear();
     }
     claimLocalProfile(token);
 
@@ -256,7 +300,12 @@ const storage = {
       // local state wins on date and overwrites the parent's seed.
       const localPristine = !(local as any).onboardingDone && !(local as any).parentOnboardingDone;
       const cloudFurther = !!(cloud as any).onboardingDone || !!(cloud as any).parentOnboardingDone;
-      if (localPristine && cloudFurther) {
+      // Finch pass (verifier C): with egg first, a local state can be hatched
+      // and even through the parent step while the card already holds a
+      // dragon. An unfinished local state never beats an onboarded card.
+      const localUnfinished = !(local as any).onboardingDone;
+      const cloudOnboarded = !!(cloud as any).onboardingDone;
+      if ((localPristine && cloudFurther) || (localUnfinished && cloudOnboarded)) {
         this.save(cloud);
         return cloud;
       }
@@ -275,8 +324,10 @@ const storage = {
 
     if (local && !cloud) {
       // Existing local profile getting tagged with a token for the
-      // first time, migrate to cloud.
-      this.cloudSaveByToken(token, local);
+      // first time, migrate to cloud. Only when the read really found no
+      // row: after a failed read the card may hold a dragon we could not
+      // see, so local stays local (Astra FC-01).
+      if (this.cloudReadOk(token)) this.cloudSaveByToken(token, local);
       return local;
     }
 

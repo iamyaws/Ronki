@@ -4,6 +4,40 @@ _Single source of truth: done, in flight, backlog. Update before any /compact an
 
 ---
 
+## Finch pass (25-26 September 2026, overnight)
+
+Marc's ask (25 Sep, late): reduce the features, learn from Finch's onboarding and from what makes Finch work (his screen recording, the App Breakdown #55 video, the screensdesign teardown), build what Ronki is missing, keep its essence, make it sticky and at least on par with Finch; "fully authorized to make changes to the app"; "ship it to main when it's tested". Ultracode was on.
+
+**What changed for a child.**
+- **Egg first, no card wall.** Every family starts at the egg shelf; "Ich habe schon eine Karte" is a quiet link. After the name, Ronki asks the child's name and sends them for Mama or Papa; the parent step (about 45 s: name, routine pictures pre-ticked, evening start, optional PIN, consent, a home-screen tip) comes after the hatch, on the same tablet. The card path (`?p=` link or scan) works as before and now greets a known child ("Und dich kenn ich schon, Louisa!").
+- **Teach through success.** Round 1 of the first breath always gives a spark, round 2 always a flame; a spoken hold instruction.
+- **One Nest screen.** Ronki in his room, his fire (one flame per routine task, day 1 starts half warm), one big spoken task picture ("Jetzt" card with "Geschafft" and a quiet "Später"), a small task row, the treasure shelf, a face button (feelings any time), a parent lock. Two tabs: Nest and Ronki.
+- **One adventure a day, anchored to a routine.** A full morning fire sends Ronki out ("Tschüss! Jetzt geht dein Tag los."); the Nest is empty while he is away; at the family's evening start he is back in the nest with a treasure and a spoken story (14 hand-written trips in a fixed order); if the morning did not fill the fire, a full evening fire sends him on a dream trip, back at breakfast. TonightRitual retells today's trip and names the next one ("Als Nächstes flieg ich zur Lichtung.").
+- **Growth counts adventures.** catEvo moves only when a treasure is opened, at most one stage per treasure (6 adventures to Jungtier); stepping stones and a spoken count show the next look. Nothing ever shrinks.
+- **Ronki's passport** replaces the heavy profile: name, "Der Freund von {Kind}", "Kann Feuer pusten. {Kind} hat es ihm gezeigt.", adventures, the stones, the found-only treasure shelf.
+- **Less.** Behind switches in `src/config/features.ts` (code kept): the old day strip, the old profile, the map screen, friend takeovers, praise toasts, tab unlocks, the victory screen, the kid install sheet, the random sad days, the room style sheet. Behind the parent "Extras zeigen" toggle (off for everyone, Louis included): Tagebuch, Laden, Spielzeug.
+- **Guardrails.** Removed: the hidden streak that made Ronki proud after 7/14/21 days in a row, the `besorgt` absence face, "happy only when all tasks are done", random sad days on the Nest, the rotating praise toast. Ronki's warmth never depends on tasks.
+- **Voice.** 94 new Ronki lines in Harry's voice (onboarding, Nest, fire, trips, growth, the 13 task asks word for word), every one Whisper-checked.
+
+**Parents.** The lock on the Nest opens the PIN gate (the dashboard no longer hides behind 50 Sterne); "PIN ändern" now uses the real PIN; new "Ronkis Tag" section (routine pictures, evening start, Ferien, Extras); the Übersicht shows adventures and where Ronki is.
+
+**Sync safety (found in review, fixed).** Nothing is written to a card before a cloud read for it has reached the server in this session (a failed read, or a card this session never loaded, writes nothing and the page reloads to resolve it; local saving never stops). A stale tab (hidden more than 5 minutes, a new day, a sleep without a visibility event, or a save timer that fired far too late) freezes its writes and reloads before it can write. An unfinished local hatch never beats a card that already has a dragon. A stamp-based conflict check was built and then backed out the same night: an independent verifier showed it made the common case worse (a parent phone that only opens the app turned the child's next tap into a reload that dropped it). Checked with two real browser tabs against the local Supabase mock: a passive second device no longer disturbs the active one.
+
+**Docs of the run.** Research: `docs/research/2026-09-25-finch-teardown.md`, `docs/research/2026-09-26-ronki-feature-census.md`. Spec: `docs/specs/2026-09-26-finch-pass-spec.md` (rulings R1 to R15) on the base `docs/reviews/2026-09-26-finch-pass/design-finch-faithful.md`. Reviews and responses: `docs/reviews/2026-09-26-finch-pass/` (Astra spar, three designs and judges, Astra code rounds 1 and 2, the Claude review workflow, fix round 1, own reads).
+
+**Tests.** 598 app tests green (about 250 before), `check:names` clean, both builds green, tsc unchanged at 23 pre-existing errors.
+
+**Open for Marc.**
+1. Louis loses games, Tagebuch and Laden by default: Eltern-Bereich, Familie, "Extras zeigen" brings them back in one tap.
+2. Every save without a chosen routine now gets the default (5 morning, 4 evening) from the next day, Louis included; change it in "Ronkis Tag".
+3. Two of your own task asks were flagged by the guardrail reviewer as need-framing ("Allein ist es so still im Zimmer", "sonst werd ich ganz steif"); kept as your lines, your call.
+4. Backend, not done: two devices that both change the same card within the same few seconds are still last-writer-wins, as before this pass. The proper fix is a compare-and-swap RPC (`profile_upsert_if(p_token, p_state, p_expected_updated_at)`), a small Supabase migration plus a client change; worth it before any family uses two devices at once. Also: the `telemetry_events` insert policy is `TO authenticated` while the app never signs in, so client events are correct but may not land.
+5. Known limit: day keys stay UTC app-wide, so the day rolls over at 01:00 or 02:00 local time, not at midnight.
+6. Content runway: 14 trips; a daily child reaches trip 15 after about 2.5 weeks, then trips repeat honestly ("Da war ich schon mal"). The next story wave should land before then.
+7. German is the default language until a parent picks English (Ronki's new lines exist only in German). `?onboardingPreview=1` now works only in DEV builds (it reset real saves).
+
+---
+
 ## Bilderbuch in the app (25 September 2026)
 
 **LIVE since 25 Sep 2026, 19:49 UTC** (Marc: "push to main"). PR #14 merged as `770092c` (website and app together). Checked after the Vercel production deploys: app.ronki.de bundle `index-XpNMOyqB.js` to `index-Cr2hEU5F.js` (name chips, old-save split, feelings entry, 1 s guard, task pictures inside; theme #0544B0; hatch clips, name recordings and icons served); ronki.de (redirects to www.ronki.de) bundle `index-BVdpiTzB.js` to `index-BzYYt3Jw.js` (Bilderbuch markers inside, hero art served). No Supabase change was needed. First thing after go-live: open the parent area on Louis's tablet and answer the child-name note if it shows.
@@ -53,13 +87,22 @@ Growth engine approved by Marc: spec [docs/strategy/2026-09-25-growth-engine-des
 
 **Design note:** the Bilderbuch site went live at 19:49 UTC through PR 14 (section above), while this work was under way. All branches below were brought up to date with that `main`; share pictures and the launch kit use the Bilderbuch look. PR 18 (design/bilderbuch alone) became redundant and shows as merged.
 
-**Open PRs (Fable cannot merge; the permission system blocks it, Marc merges):**
-- PR 15 `foundation/2026-09-25`: daily keep-alive, gate 1 on 15 Dec, home title, article update dates, spec, plan, keyword map. Astra code review: no findings.
-- PR 16 `launch/share-previews` (stacked on 15): share pictures of the real sheets on the four template pages, short links `/morgen`, `/li`, `/ig`, `/tt`, `/yt` in the root `vercel.json` with a host rule (both Vercel projects read the root file; project root is `.`). Check after merge: `curl -I https://www.ronki.de/morgen`.
-- PR 17 `analytics/umami` (draft, stacked on 16): Umami helper, script tag with placeholder id, privacy copy. `website/tests/umami-snippet.test.ts` fails until the real id is in.
-- PR 19 `content/zeitumstellung`: new Ratgeber article /ratgeber/zeitumstellung-kinder for the clock change on 25 Oct 2026 (keyword map move 3), five opened sources, two re-checked by Fable. Independent of 15 to 17.
+**PRs (Marc, 26 Sep: "merge into main for the work that you feel is all green and ready to move"; Fable merges what is green and reviewed, drafts wait):**
+- PR 15 `foundation/2026-09-25`: **MERGED 25 Sep, 20:04 UTC.** Daily keep-alive, gate 1 on 15 Dec, home title, article update dates, spec, plan, keyword map. Astra code review: no findings. Live check: bundle `index-BzYYt3Jw.js` to `index-BnlLcAq_.js`, new home title served, manual keep-alive run on main green (two RPCs).
+- PR 19 `content/zeitumstellung`: **MERGED 25 Sep.** New Ratgeber article /ratgeber/zeitumstellung-kinder for the clock change on 25 Oct 2026 (keyword map move 3), five opened sources, two re-checked by Fable. Astra rep 3 found four points (step cadence against the autumn source, one overstated study claim, an unsourced meal rule, spring advice cited as autumn); all fixed; Astra code review no findings. Live: HTTP 200, crawler title, in the sitemap. Marc: request indexing in Search Console.
+- PR 16 `launch/share-previews`: **MERGED 25 Sep.** Share pictures of the real sheets on the four template pages, short links `/morgen`, `/li`, `/ig`, `/tt`, `/yt` in the root `vercel.json` with a host rule (both Vercel projects read the root file; project root is `.`). Astra code review no findings. Live: all five links answer 307 to the morning template with their UTM tags (`/li` needed a few seconds on one edge), `ronki.de/morgen` goes via www, `app.ronki.de/morgen` is untouched, `og:image` on /vorlagen/morgenroutine is the new share picture.
+- PR 17 `analytics/umami` (draft, now on main): Umami helper, script tag with placeholder id, privacy copy, "Vorlage Drucken" event. `website/tests/umami-snippet.test.ts` fails until the real id is in.
+- PR 20 `mail/brevo-doi` (draft, stacked on 17): Brevo double opt-in. Migration `20260926000100_leads_brevo_doi.sql` NOT applied (trigger via pg_net, key and ids from Vault, inert until set), `scripts/brevo-setup.mjs`, `/bestaetigt` page, privacy copy naming Brevo. Waits for Marc's account, DKIM at GoDaddy, key in `.env.local`. Must not merge before Brevo is live (the privacy text names it).
 
-**Next steps, in order:** Marc merges 15, then 16 (and 19 any time); Umami signup, id into PR 17, merge, check a live pageview; messages from the kit (Sunday evening); Instagram, TikTok, YouTube accounts and first posts; LinkedIn Monday; Brevo double opt-in during the week (plan Task 8). Week of 28 Sep: Abendroutine refresh (keyword map #1), clock-change page before 25 Oct, character sheet, render script.
+**Launch kit (Bilderbuch look, reviewed):** `C:\Users\öööö\ronki\launch\2026-09-26\KIT.md` with carousel, story, share picture and the app icon as profile picture; art copied from `public/art/bilderbuch/`; renderer `launch/tools/carousel.mjs`. Astra reps 1 to 3 closed.
+
+**Printables redesign (26 Sep, options only, waits for Marc's pick):** Marc: the live PDFs do not reflect the new look. Four options in `C:\Users\öööö\ronki\launch\vorlagen-optionen\` (REVIEW.md, out/ with PNG and A4 PDF, generator options.mjs), all with Ronki and the app's task pictures: A checklist "Mein Morgen mit Ronki" (Fable's pick as the standard for all four templates), B "Ronkis Weg zur Tür", C week grid (open call: visible empty rings vs the streak ban), D parent pin "Ruhigere Morgen: 6 Dinge, die helfen" (lines copied from the Morgenroutine article). Rollout after the pick: print routes, on-screen sheets, evening, toddler and ADHS versions, then `scripts/print-vorlagen.mjs` and `scripts/og-vorlagen.mjs`.
+
+**Next three tools (26 Sep, lined up, nothing built):** decision page `C:\Users\öööö\ronki\launch\research\2026-09-26-tools-lineup.md` (research on real parent voices, a concept workflow, Astra rep 4 with a market check). 1 Ranzen-Packplan (build first; free timetable generators exist but make no packing list), 2 Nachmittagsplan (fits the family's real afternoon; a fixed after-school PDF exists elsewhere), 3 Abend mit zwei Kindern. The morning clock plan becomes an optional block of the new morning sheet; the screen-time plan was dropped. Building waits for Marc's go (new task, own plan; the research task used about 1.04M Claude tokens, over the 800k cap).
+
+**Follow-ups found tonight:** the live template page promises a timetable ("Nach ein paar Wochen macht dein Kind die Schritte..."; Astra R2-01, site copy, Marc's call); the no-email print route could sit above the email form (R2-02); the printable sheets still use emoji-style icons while the app and the kit use the new task pictures (regenerate `website/public/vorlagen/*` with `scripts/print-vorlagen.mjs` once the sheets use the art).
+
+**Next steps, in order:** Umami signup, id into PR 17, merge, check a live pageview; Search Console: request indexing for /ratgeber/zeitumstellung-kinder; messages from the kit (Sunday evening); Instagram, TikTok, YouTube accounts and first posts; LinkedIn Monday; Brevo double opt-in during the week (plan Task 8). Week of 28 Sep: Abendroutine refresh (keyword map #1), clock-change page before 25 Oct, character sheet, render script.
 
 **Gates:** gate 1 (pull) 15 Dec 2026, gate 2 (reach) 15 Mar 2027 counting all unpaid visitors by source. Umami Hobby keeps six months of data: note the monthly numbers in this file.
 

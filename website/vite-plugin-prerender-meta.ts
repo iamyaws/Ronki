@@ -133,6 +133,13 @@ const ROUTES: RouteMeta[] = [
     ogImage: '/og-ratgeber-abendroutine.jpg',
   },
   {
+    path: '/ratgeber/zeitumstellung-kinder',
+    title: 'Zeitumstellung im Herbst: So kommt dein Kind gut durch die Umstellung · Ratgeber · Ronki',
+    description:
+      'Zeitumstellung mit Kindern im Herbst: zwei Wege durch den 25. Oktober, ein Plan in kleinen Schritten und was hilft, wenn dein Kind um 5 Uhr wach ist.',
+    ogImage: '/og-ratgeber-abendroutine.jpg',
+  },
+  {
     path: '/ratgeber/zaehneputzen-ohne-streit',
     title: 'Zähneputzen ohne Streit · Ratgeber · Ronki',
     description:

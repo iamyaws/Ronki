@@ -17,8 +17,12 @@ import {
   track,
   getDeviceId,
   setAnalyticsEnabled,
+  setAnalyticsConsent,
+  isConsentDecided,
   _resetForTests,
   _flushForTests,
+  _consentBufferSizeForTests,
+  _reinitForTests,
 } from './analytics';
 
 /**
@@ -267,6 +271,144 @@ describe('analytics', () => {
       track('quest.complete', { questId: 'q1', anchor: 'morning' });
       await flushAndSettle();
       expect(fromSpy).toHaveBeenCalledWith('telemetry_events');
+    });
+  });
+
+  // ── Consent timing (Finch pass, 26 Sep 2026) ─────────────────────
+  // The onboarding funnel starts before the parent step. Until a consent
+  // choice exists on this device, events wait in memory; a yes sends
+  // them, a no drops them, and nothing leaves the device before a yes.
+  describe('consent buffer', () => {
+    function freshDevice() {
+      _resetForTests();
+      localStorage.clear();
+      sessionStorage.clear();
+      _reinitForTests(); // no stored flag: enabled false, no choice yet
+    }
+
+    it('holds events before any consent choice instead of dropping them', async () => {
+      freshDevice();
+      expect(isConsentDecided()).toBe(false);
+      track('onboarding.landing.view');
+      track('onboarding.egg.pick', { variant: 'amber' });
+      await flushAndSettle();
+      expect(insertSpy).not.toHaveBeenCalled();
+      expect(_consentBufferSizeForTests()).toBe(2);
+    });
+
+    it('the default "off" mirror before the parent step keeps them held', async () => {
+      freshDevice();
+      track('onboarding.egg.pick', { variant: 'amber' });
+      setAnalyticsEnabled(false); // useAnalytics mirroring the default
+      track('onboarding.name.confirm', { source: 'chip' });
+      await flushAndSettle();
+      expect(insertSpy).not.toHaveBeenCalled();
+      expect(_consentBufferSizeForTests()).toBe(2);
+    });
+
+    it('flushes the held events through the normal path on a yes', async () => {
+      freshDevice();
+      track('onboarding.egg.pick', { variant: 'amber', nickname: 'Funki' } as any);
+      track('ronki.hatch');
+      setAnalyticsConsent(true);
+      expect(_consentBufferSizeForTests()).toBe(0);
+      track('onboarding.parent.done');
+      await flushAndSettle();
+      const rows = lastInsertedRows();
+      expect(rows.map(r => r.name)).toEqual(['onboarding.egg.pick', 'ronki.hatch', 'onboarding.parent.done']);
+      expect(rows[0].props).toEqual({ variant: 'amber' });
+      expect(isConsentDecided()).toBe(true);
+    });
+
+    it('a mirrored yes (setAnalyticsEnabled(true)) also flushes them', async () => {
+      freshDevice();
+      track('ronki.hatch');
+      setAnalyticsEnabled(true);
+      await flushAndSettle();
+      expect(lastInsertedRows().map(r => r.name)).toEqual(['ronki.hatch']);
+    });
+
+    it('drops the held events on a no and sends nothing after', async () => {
+      freshDevice();
+      track('onboarding.landing.view');
+      track('ronki.hatch');
+      setAnalyticsConsent(false);
+      expect(_consentBufferSizeForTests()).toBe(0);
+      track('first.task.complete', { block: 'morning', kind: 'wake' });
+      expect(_consentBufferSizeForTests()).toBe(0);
+      await flushAndSettle();
+      expect(insertSpy).not.toHaveBeenCalled();
+      // a later yes does not bring the dropped events back
+      setAnalyticsConsent(true);
+      await flushAndSettle();
+      expect(insertSpy).not.toHaveBeenCalled();
+    });
+
+    it('caps the buffer at 50, keeping the newest', async () => {
+      freshDevice();
+      for (let i = 0; i < 60; i++) track('quest.complete', { questId: `q${i}` });
+      expect(_consentBufferSizeForTests()).toBe(50);
+      setAnalyticsConsent(true);
+      await flushAndSettle();
+      const rows = lastInsertedRows();
+      expect(rows).toHaveLength(50);
+      expect(rows[0].props.questId).toBe('q10');
+      expect(rows[49].props.questId).toBe('q59');
+    });
+
+    it('never holds unknown event names', () => {
+      freshDevice();
+      // @ts-expect-error unknown name
+      track('not.an.event');
+      expect(_consentBufferSizeForTests()).toBe(0);
+    });
+
+    it('remembers the choice across a reload: after a no, nothing is held', () => {
+      freshDevice();
+      setAnalyticsConsent(false);
+      _reinitForTests();
+      expect(isConsentDecided()).toBe(true);
+      track('ronki.hatch');
+      expect(_consentBufferSizeForTests()).toBe(0);
+    });
+
+    it('keeps the held timestamp of each event', async () => {
+      freshDevice();
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2026-09-28T07:10:00Z'));
+      track('onboarding.egg.pick', { variant: 'amber' });
+      vi.setSystemTime(new Date('2026-09-28T07:14:00Z'));
+      setAnalyticsConsent(true);
+      vi.useRealTimers();
+      await flushAndSettle();
+      expect(lastInsertedRows()[0].ts).toBe('2026-09-28T07:10:00.000Z');
+    });
+  });
+
+  // ── Finch pass event names and props ─────────────────────────────
+  describe('Finch pass events', () => {
+    it('accepts the funnel names and keeps every earlier name', async () => {
+      const names = [
+        'onboarding.landing.view', 'onboarding.egg.pick', 'onboarding.name.confirm',
+        'onboarding.parent.done', 'onboarding.scan.start', 'onboarding.scan.result',
+        'onboarding.teachfire.complete', 'onboarding.firstday.done', 'first.task.complete',
+        'quest.skip', 'expedition.start', 'expedition.return', 'memento.received',
+        'companion.sit', 'companion.tap', 'tonight.start', 'tonight.complete',
+      ] as const;
+      for (const n of names) track(n);
+      await flushAndSettle();
+      expect(lastInsertedRows().map(r => r.name)).toEqual([...names]);
+    });
+
+    it('quest.complete carries block and kind, expedition.start its kind, ronki.evolve its stage', async () => {
+      track('quest.complete', { block: 'morning', kind: 'teeth_am', anchor: 'morning' });
+      track('expedition.start', { biome: 'morgenwald', kind: 'night' });
+      track('ronki.evolve', { stage: 2 });
+      await flushAndSettle();
+      const rows = lastInsertedRows();
+      expect(rows[0].props).toEqual({ block: 'morning', kind: 'teeth_am', anchor: 'morning' });
+      expect(rows[1].props).toEqual({ biome: 'morgenwald', kind: 'night' });
+      expect(rows[2].props).toEqual({ stage: 2 });
     });
   });
 });

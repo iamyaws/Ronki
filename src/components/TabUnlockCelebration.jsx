@@ -5,17 +5,18 @@ import { useTranslation } from '../i18n/LanguageContext';
 import { TAB_UNLOCKS } from '../data/tabUnlocks';
 import { useCelebrationQueue } from '../context/CelebrationQueue';
 import VoiceAudio from '../utils/voiceAudio';
+import { featureOn } from '../config/features';
 
 /**
- * TabUnlockCelebration — lightweight onboarding scaffolding for the
+ * TabUnlockCelebration, lightweight onboarding scaffolding for the
  * grey-locked NavBar (see data/tabUnlocks.ts).
  *
  * Two one-shot surfaces per tab, both persisted so they never re-fire:
- *   1. Unlock toast — a small gold pill at the top of the viewport that
+ *   1. Unlock toast, a small gold pill at the top of the viewport that
  *      says "🔓 Tagebuch freigeschaltet". Fires the first time a tab's
  *      unlock criterion flips true. 3s auto-dismiss. Plays a soft "ding"
  *      via existing SFX.
- *   2. First-tap coachmark — a one-sentence overlay that appears the
+ *   2. First-tap coachmark, a one-sentence overlay that appears the
  *      first time Louis navigates INTO a newly-unlocked tab, explaining
  *      what the tab is FOR. Single tap dismisses.
  *
@@ -25,7 +26,14 @@ import VoiceAudio from '../utils/voiceAudio';
  * Mount once at the app level; pass the current `view` so the coachmark
  * knows which tab the user just opened.
  */
-export default function TabUnlockCelebration({ view }) {
+export default function TabUnlockCelebration(props) {
+  // Finch pass (26 Sep 2026): two tabs, both always open, so there is
+  // nothing to unlock and no toast or coachmark (FEATURES.tabUnlocks).
+  if (!featureOn('tabUnlocks')) return null;
+  return <TabUnlockCelebrationInner {...props} />;
+}
+
+function TabUnlockCelebrationInner({ view }) {
   const { state, actions } = useTask();
   const { t } = useTranslation();
   const { enqueue } = useCelebrationQueue();
@@ -68,7 +76,7 @@ export default function TabUnlockCelebration({ view }) {
     );
     const prev = prevUnlockedRef.current;
     prevUnlockedRef.current = nowUnlocked;
-    if (!prev) return; // first render — don't retroactively toast
+    if (!prev) return; // first render, don't retroactively toast
 
     const seen = state.tabUnlocksSeen || {};
     for (const tabId of nowUnlocked) {
@@ -81,7 +89,7 @@ export default function TabUnlockCelebration({ view }) {
         kind: 'toast',
         ttl: 3200,
         sfx: 'pop',
-        // Unlock is a milestone moment — let it through even in the
+        // Unlock is a milestone moment, let it through even in the
         // day-1/2 quiet window so the kid sees the feedback after their
         // very first completed tasks.
         bypassQuietHours: true,
@@ -89,11 +97,11 @@ export default function TabUnlockCelebration({ view }) {
           <TabUnlockToast unlock={unlock} t={t} onDismiss={dismiss} />
         ),
       });
-      // Ronki celebrates the unlock — short toast voiceline (Apr 2026
+      // Ronki celebrates the unlock, short toast voiceline (Apr 2026
       // voice pass). Files at de_nav_unlock_{ronki|journal|shop}.
       VoiceAudio.playLocalized(`nav_unlock_${tabId}`, 200);
       actions.markTabUnlockSeen?.(tabId);
-      break; // only one unlock per state tick — others queue naturally on next flip
+      break; // only one unlock per state tick, others queue naturally on next flip
     }
   }, [state, actions, enqueue, t]);
 
@@ -104,7 +112,7 @@ export default function TabUnlockCelebration({ view }) {
   // can't trigger the old coachmark. The `cancelled` flag is belt-and-
   // braces for the async gap between clearTimeout being called and the
   // browser actually running our callback (theoretically zero, but
-  // defensive — if the JS timer loop mis-schedules after cleanup, the
+  // defensive, if the JS timer loop mis-schedules after cleanup, the
   // flag stops the stale call from taking effect).
   useEffect(() => {
     if (!state) return;
@@ -136,7 +144,7 @@ export default function TabUnlockCelebration({ view }) {
   // Anchor the coachmark pointer at the target nav button. The card itself
   // stays visually centered (fine for readability), but the arrow moves to
   // point at whichever tab we're explaining. Without this, the pointer was
-  // stuck at the card's horizontal center — which on a 5-tab navbar lands
+  // stuck at the card's horizontal center, which on a 5-tab navbar lands
   // roughly on the middle (Ronki) tab, so the Tagebuch unlock "Here's your
   // Tagebuch!" arrow was pointing at Ronki. Embarrassing, fixed.
   const [pointerLeftPx, setPointerLeftPx] = useState(null);
@@ -164,7 +172,7 @@ export default function TabUnlockCelebration({ view }) {
       {/* Unlock toast is rendered by CelebrationQueue via `TabUnlockToast`
            below. This wrapper now only handles the first-tap coachmark. */}
 
-      {/* First-tap coachmark — full-screen scrim + bottom card. Single tap
+      {/* First-tap coachmark, full-screen scrim + bottom card. Single tap
            anywhere dismisses. Localized. */}
       {coachUnlock && createPortal(
         <div
@@ -211,7 +219,7 @@ export default function TabUnlockCelebration({ view }) {
               </button>
             </div>
           </div>
-          {/* Pointer triangle anchored at the target nav button — fixed
+          {/* Pointer triangle anchored at the target nav button, fixed
                to the viewport so its left-coordinate is in the same
                coordinate system as the tab button we measured. Falls
                back to viewport-center if measurement hasn't resolved
@@ -262,7 +270,7 @@ export default function TabUnlockCelebration({ view }) {
 }
 
 /**
- * TabUnlockToast — the gold pill at the top of the viewport, rendered
+ * TabUnlockToast, the gold pill at the top of the viewport, rendered
  * by CelebrationQueue. The queue owns dismiss timing; this component is
  * a pure presenter. Entry animation plays via tabUnlockToastIn; the
  * exit animation is skipped for now because the queue tears the node
@@ -272,7 +280,7 @@ function TabUnlockToast({ unlock, t, onDismiss }) {
   // Marc flag 24 Apr 2026: top-center pill was covering the PinnedRonki
   // in the topbar. Moved to top-right below the Sterne pill, sliding in
   // from offscreen-right, with a small confetti burst for celebration.
-  // 12 confetti particles — fixed positions + staggered delays + mixed
+  // 12 confetti particles, fixed positions + staggered delays + mixed
   // sizes. Pure CSS, no external deps.
   const confettiParticles = Array.from({ length: 12 }).map((_, i) => {
     // Distribute angles across 360° with slight jitter, distances 40-90px

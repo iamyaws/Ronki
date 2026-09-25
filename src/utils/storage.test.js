@@ -287,3 +287,77 @@ describe('storage syncLoadByToken sibling guard', () => {
     expect(localStorage.getItem('ronki_local_owner')).toBe(CARD_A);
   });
 });
+
+// Finch pass (26 Sep 2026, Astra FC-01): a local hatch must never be
+// pushed onto a card whose cloud read failed. Egg first means a device
+// often holds a hatched, not yet onboarded local state when a card is
+// scanned; a transient profile_get error used to upload it over the card.
+describe('storage syncLoadByToken after a failed cloud read', () => {
+  const T1 = 'b'.repeat(32);
+  const T2 = 'c'.repeat(32);
+  beforeEach(() => {
+    rpcMock.mockReset();
+  });
+
+  it('keeps a local hatch local when profile_get errors (no profile_upsert)', async () => {
+    mockStore['hdx2_drachennest'] = { kidIntroSeen: true, companionName: 'Funki', onboardingDone: false };
+    rpcMock.mockImplementation(async (fn) => (fn === 'profile_get'
+      ? { data: null, error: { message: 'network down' } }
+      : { data: null, error: null }));
+    const result = await storage.syncLoadByToken(T1);
+    expect(result).toMatchObject({ companionName: 'Funki' });
+    expect(storage.cloudReadOk(T1)).toBe(false);
+    expect(rpcMock.mock.calls.filter(([fn]) => fn === 'profile_upsert')).toHaveLength(0);
+  });
+
+  it('still migrates local to the card when the read really found no row', async () => {
+    mockStore['hdx2_drachennest'] = { kidIntroSeen: true, companionName: 'Funki', onboardingDone: false };
+    rpcMock.mockImplementation(async () => ({ data: null, error: null }));
+    await storage.syncLoadByToken(T2);
+    expect(storage.cloudReadOk(T2)).toBe(true);
+    expect(rpcMock.mock.calls.filter(([fn]) => fn === 'profile_upsert')).toHaveLength(1);
+  });
+});
+
+// Finch pass (verifier C and H): with egg first a device can hold an
+// unfinished local hatch when a card with a dragon is scanned.
+describe('storage syncLoadByToken: an unfinished local state never beats an onboarded card', () => {
+  const T = '4'.repeat(32);
+  beforeEach(() => { rpcMock.mockReset(); });
+
+  it('the card dragon wins over a local hatch that went through the parent step today', async () => {
+    const today = '2026-09-28';
+    mockStore['hdx2_drachennest'] = { kidIntroSeen: true, parentOnboardingDone: true, onboardingDone: false, companionName: 'Funki', lastDate: today };
+    rpcMock.mockImplementation(async (fn) => (fn === 'profile_get'
+      ? { data: { state: { onboardingDone: true, companionName: 'Glut', catEvo: 9, lastDate: '2026-09-27' } }, error: null }
+      : { data: null, error: null }));
+    const result = await storage.syncLoadByToken(T);
+    expect(result).toMatchObject({ companionName: 'Glut', catEvo: 9 });
+    expect(rpcMock.mock.calls.filter(([fn]) => fn === 'profile_upsert')).toHaveLength(0);
+  });
+
+  it("a failed read never clears another card's local cache (sibling guard)", async () => {
+    // Let the previous test's unawaited save(cloud) land first.
+    await new Promise(r => setTimeout(r, 30));
+    localStorage.setItem('ronki_local_owner', '5'.repeat(32));
+    mockStore['hdx2_drachennest'] = { onboardingDone: true, companionName: 'Geschwister' };
+    rpcMock.mockImplementation(async () => ({ data: null, error: { message: 'down' } }));
+    await storage.syncLoadByToken(T);
+    expect(mockStore['hdx2_drachennest']).toMatchObject({ companionName: 'Geschwister' });
+  });
+});
+
+// Review fix round 1 (SAVES-1): a stale page that is about to reload
+// writes nothing. Last in this file on purpose: the freeze is one way.
+describe('storage.freezeWrites', () => {
+  it('blocks the local save and the cloud save from then on', async () => {
+    rpcMock.mockReset();
+    rpcMock.mockResolvedValue({ data: null, error: null });
+    storage.freezeWrites();
+    expect(storage.writesFrozen()).toBe(true);
+    await storage.save({ onboardingDone: true, marker: 'stale' });
+    expect(mockStore['hdx2_drachennest']).toBeUndefined();
+    await storage.cloudSaveByToken('d'.repeat(32), { marker: 'stale' });
+    expect(rpcMock).not.toHaveBeenCalled();
+  });
+});
