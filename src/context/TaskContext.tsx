@@ -2240,9 +2240,18 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const updateFamilyConfig = useCallback((config: FamilyConfig) => {
-    // A parent saving the family settings has seen the child's name, so
-    // the check prompt from the name split goes away.
-    setState(prev => prev ? { ...prev, familyConfig: config, childNameNeedsCheck: undefined } : prev);
+    setState(prev => {
+      if (!prev) return prev;
+      // The check note from the name split goes away only when the child's
+      // name really changes. Other settings (tooth brushing, Zeig-Moment)
+      // save through here too and must not dismiss it unseen (Astra round 2,
+      // 25 Sep 2026). A parent keeps a correct name with "Stimmt so".
+      const before = (prev.familyConfig?.childName || '').trim();
+      const after = (config?.childName || '').trim();
+      return after !== before
+        ? { ...prev, familyConfig: config, childNameNeedsCheck: undefined }
+        : { ...prev, familyConfig: config };
+    });
   }, []);
 
   const patchState = useCallback((partial: Partial<TaskState>) => {

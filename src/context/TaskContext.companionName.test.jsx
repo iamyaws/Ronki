@@ -106,6 +106,28 @@ describe('completeOnboarding never names the child', () => {
   });
 });
 
+describe('the child-name check note', () => {
+  it('survives unrelated family settings and clears only when the name changes', async () => {
+    const base = createInitialState();
+    saved = {
+      ...base, onboardingDone: true, companionVariant: 'teal', heroName: 'Funki',
+      familyConfig: { ...(base.familyConfig || {}), childName: 'Funki' },
+    };
+    let api;
+    function Grab() { api = useTask(); return null; }
+    render(<TaskProvider><Grab /></TaskProvider>);
+    await waitFor(() => expect(api?.state?.childNameNeedsCheck).toBe(true));
+    // e.g. the tooth-brushing mode saves the family config with the same name
+    await act(async () => { api.actions.updateFamilyConfig({ ...api.state.familyConfig, toothbrushMode: 'timer' }); });
+    expect(api.state.childNameNeedsCheck).toBe(true);
+    // a parent puts the child's real name in
+    await act(async () => { api.actions.updateFamilyConfig({ ...api.state.familyConfig, childName: 'Louis' }); });
+    expect(api.state.childNameNeedsCheck).toBeUndefined();
+    expect(api.state.familyConfig.childName).toBe('Louis');
+    expect(api.state.companionName).toBe('Funki');
+  });
+});
+
 describe('cleanNickname', () => {
   it('trims, caps at 18 characters without splitting emoji, and rejects non-strings', () => {
     expect(cleanNickname('  Funki  ')).toBe('Funki');

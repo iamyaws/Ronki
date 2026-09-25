@@ -573,7 +573,16 @@ function FamilyTab({ state, actions, lang }) {
             <p className="rounded-xl px-4 py-3 font-body text-on-surface"
                style={{ background: 'var(--color-sky-wash)', border: '2px solid var(--color-ink)', fontSize: 15, lineHeight: 1.45, margin: 0 }}>
               Bitte kurz prüfen: Steht hier der Name eures Kindes? Früher landete hier aus Versehen der Name, den euer Kind Ronki gegeben hat
-              {state.companionName ? ` („${state.companionName}“)` : ''}. Der ist jetzt Ronkis Spitzname.
+              {state.companionName ? ` („${state.companionName}“)` : ''}. Der ist jetzt Ronkis Spitzname. Falsch? Einfach ändern und speichern.
+              {' '}
+              <button
+                type="button"
+                onClick={() => actions.patchState?.({ childNameNeedsCheck: undefined })}
+                className="font-headline font-semibold underline"
+                style={{ background: 'none', border: 'none', padding: 0, color: 'var(--color-cobalt)', cursor: 'pointer' }}
+              >
+                Stimmt so
+              </button>
             </p>
           )}
           <FieldRow label="Name">
