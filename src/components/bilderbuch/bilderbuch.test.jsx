@@ -22,6 +22,12 @@ describe('resolveRonkiArt', () => {
     expect(resolveRonkiArt({ stage: 1, mood: 'sad' })).toMatch(/ronki\/heavy\.webp$/);
     expect(resolveRonkiArt({ stage: 1, mood: 'besorgt' })).toMatch(/ronki\/worried\.webp$/);
     expect(resolveRonkiArt({ stage: 4 })).toMatch(/ronki\/grown\.webp$/);
+    // the picked egg shows in the egg and in the hatchling's shell hat
+    expect(resolveRonkiArt({ stage: 0, variant: 'sunset' })).toMatch(/eggs\/egg-ember\.webp$/);
+    expect(resolveRonkiArt({ stage: 1, variant: 'teal' })).toMatch(/ronki\/baby-cobalt\.webp$/);
+    expect(resolveRonkiArt({ stage: 1, variant: 'forest' })).toMatch(/ronki\/baby\.webp$/);
+    expect(resolveRonkiArt({ stage: 1, variant: 'rose' })).toMatch(/ronki\/baby\.webp$/);
+    expect(resolveRonkiArt({ stage: 2, variant: 'amber' })).toMatch(/ronki\/calm\.webp$/);
     expect(resolveRonkiArt({ stage: 5 })).toMatch(/ronki\/legendary\.webp$/);
     expect(resolveRonkiArt({ stage: 4, mood: 'gut' })).toMatch(/ronki\/happy\.webp$/);
   });

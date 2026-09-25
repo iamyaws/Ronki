@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { useTask } from '../../context/TaskContext';
 import { getCatStage } from '../../utils/helpers';
 import { track } from '../../lib/analytics';
-import MoodChibi, { resolveRonkiArt } from '../MoodChibi';
+import MoodChibi from '../MoodChibi';
 import VoiceAudio from '../../utils/voiceAudio';
 import {
   PillButton,
@@ -11,7 +11,6 @@ import {
   PaperCard,
   DoodleIcon,
   SceneLoop,
-  useReducedMotion,
 } from '../bilderbuch';
 import RonkiSpeechBubble from './RonkiSpeechBubble';
 import { SunCheck } from './RoomHubBits';
@@ -53,6 +52,8 @@ const ROOM_TAP_COOLDOWN_MS = 7000;
 const POSTER_W = 720;
 const POSTER_H = 1280;
 const SCENE_POS_Y = 0.34;
+/** The room style sheet waits until the painted room can show a pick. */
+const SHOW_ROOM_STYLE = false;
 const POSTER = `${import.meta.env.BASE_URL}art/bilderbuch/loops/zuhause-poster.webp`;
 const LOOP = `${import.meta.env.BASE_URL}art/bilderbuch/loops/zuhause.mp4`;
 
@@ -103,7 +104,6 @@ const ANCHOR_LABEL = {
 
 export default function RoomHub({ onNavigate }) {
   const { state, actions } = useTask();
-  const reduced = useReducedMotion();
   // The "Karte" tile and the window both open the Expedition surface.
   const [showExpedition, setShowExpedition] = useState(false);
   const [showPresence, setShowPresence] = useState(false);
@@ -135,10 +135,6 @@ export default function RoomHub({ onNavigate }) {
   }, []);
   const geo = sceneGeometry(box.w, box.h);
 
-  // The idle loop draws Ronki smaller inside its frame than the stills
-  // do (about 80 percent, feet a little higher), so the cut-out is
-  // scaled up from its feet when the loop is what MoodChibi shows.
-  const ronkiIsLoop = resolveRonkiArt({ mood, stage: stageIdx, animated: true, reduced }).includes('/loops/');
 
   const quests = state?.quests || [];
   const undoneByAnchor = ['morning', 'evening', 'bedtime'].map(anchor => {
@@ -288,14 +284,9 @@ export default function RoomHub({ onNavigate }) {
                   transformOrigin: '50% 100%',
                 }}
               >
-                <div
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    transform: ronkiIsLoop ? 'translateY(6.5%) scale(1.22)' : undefined,
-                    transformOrigin: '50% 100%',
-                  }}
-                >
+                {/* The loops are cropped like the stills (25 Sep 2026), so the
+                    idle loop and the still draw Ronki at the same size. */}
+                <div style={{ width: '100%', height: '100%' }}>
                   <MoodChibi
                     size={100}
                     variant={variant}
@@ -510,8 +501,11 @@ export default function RoomHub({ onNavigate }) {
         <Fundstuecke expeditionLog={state?.expeditionLog || []} />
       </section>
 
-      {/* Einrichten: the room style sheet, the second choice on this page. */}
-      <section className="flex justify-center" style={{ padding: '16px 16px 0' }}>
+      {/* Einrichten: the room style sheet. Hidden since 25 Sep 2026: the
+          painted room no longer repaints from state.caveStyle, so a pick
+          would change nothing a kid can see. The saved choice and the
+          sheet stay; flip SHOW_ROOM_STYLE when the room can show it. */}
+      {SHOW_ROOM_STYLE && <section className="flex justify-center" style={{ padding: '16px 16px 0' }}>
         <PillButton
           tone="secondary"
           icon="scribble"
@@ -520,7 +514,7 @@ export default function RoomHub({ onNavigate }) {
         >
           Einrichten
         </PillButton>
-      </section>
+      </section>}
 
       <style>{`
         @keyframes rh-heart {

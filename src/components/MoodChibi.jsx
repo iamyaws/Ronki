@@ -12,7 +12,9 @@ import useReducedMotion from './bilderbuch/useReducedMotion';
  *   mood      'normal' | 'gut' | 'tired' | 'sad' | 'besorgt' | 'magisch'
  *             (the new names calm/happy/sleepy/heavy/worried/proud work too)
  *   bare      no sky-wash circle behind the art
- *   variant   accepted, ignored: Ronki is always red-orange now
+ *   variant   the egg the kid picked (see VARIANT_TO_EGG): picks the egg
+ *             at stage 0 and the shell hat of the hatchling; Ronki himself
+ *             is always red-orange
  *   stage     0 egg | 1 baby | 2, 3 mood set | 4 grown | 5 legendary
  *   face      tighter crop on the head, for small portraits
  *   animated  play loops/ronki-idle.webp when the mood is calm or happy,
@@ -55,15 +57,31 @@ const IDLE_CLASS = {
 
 const CALM = `${ART_BASE}ronki/calm.webp`;
 
+/**
+ * The egg a kid picked lives on as the old companionVariant id (MeetRonki
+ * writes it). Ronki is always red-orange; the egg shows in the egg itself
+ * and in the shell hat of the hatchling. Old ids without an egg of their
+ * own (rose, violet) get the cream egg.
+ */
+export const VARIANT_TO_EGG = {
+  forest: 'cream',
+  sunset: 'ember',
+  amber: 'sun',
+  teal: 'cobalt',
+};
+
 /** Resolve the art file for a mood and stage (exported for tests and callers). */
-export function resolveRonkiArt({ mood = 'normal', stage = 2, animated = false, reduced = false } = {}) {
+export function resolveRonkiArt({ mood = 'normal', stage = 2, animated = false, reduced = false, variant } = {}) {
   const moodKey = MOOD_TO_ART[mood] || 'calm';
   const st = Number.isFinite(stage) ? stage : 2;
-  if (st <= 0) return `${ART_BASE}eggs/egg-cream.webp`;
+  const egg = VARIANT_TO_EGG[variant] || 'cream';
+  if (st <= 0) return `${ART_BASE}eggs/egg-${egg}.webp`;
   // The hatchling art has one face; any other mood keeps its own
   // expression (drawn smaller by the caller) so feelings still read in
   // the first days (Astra code review R2).
-  if (st === 1 && (moodKey === 'calm' || moodKey === 'happy')) return `${ART_BASE}ronki/baby.webp`;
+  if (st === 1 && (moodKey === 'calm' || moodKey === 'happy')) {
+    return egg === 'cream' ? `${ART_BASE}ronki/baby.webp` : `${ART_BASE}ronki/baby-${egg}.webp`;
+  }
   if (st === 1) return `${ART_BASE}ronki/${moodKey}.webp`;
   if (animated && !reduced && (moodKey === 'calm' || moodKey === 'happy')) {
     return `${ART_BASE}loops/ronki-idle.webp`;
@@ -122,7 +140,7 @@ export default function MoodChibi({
   size = 180,
   mood = 'normal',
   bare = false,
-  variant, // eslint-disable-line no-unused-vars
+  variant,
   stage = 2,
   face = false,
   animated = false,
@@ -132,10 +150,11 @@ export default function MoodChibi({
 }) {
   const reduced = useReducedMotion();
   const moodKey = MOOD_TO_ART[mood] || 'calm';
-  const primary = resolveRonkiArt({ mood, stage, animated, reduced });
+  const primary = resolveRonkiArt({ mood, stage, animated, reduced, variant });
   const isLoop = primary.includes('/loops/');
-  const still = isLoop ? resolveRonkiArt({ mood, stage }) : null;
-  const candidates = [primary, still, CALM].filter((v, i, a) => v && a.indexOf(v) === i);
+  const still = isLoop ? resolveRonkiArt({ mood, stage, variant }) : null;
+  const plain = variant ? resolveRonkiArt({ mood, stage }) : null;
+  const candidates = [primary, still, plain, CALM].filter((v, i, a) => v && a.indexOf(v) === i);
 
   const isEgg = stage <= 0;
   const isBaby = stage === 1;

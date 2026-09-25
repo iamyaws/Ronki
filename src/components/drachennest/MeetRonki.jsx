@@ -46,9 +46,14 @@ import {
 const ART = `${import.meta.env.BASE_URL}art/bilderbuch/`;
 const ROOM_POSTER = `${ART}scenes/zuhause.webp`;
 const ROOM_LOOP = `${ART}loops/zuhause.mp4`;
-const HATCH_POSTER = `${ART}loops/hatch-poster.webp`;
-const HATCH_CLIP = `${ART}loops/hatch.mp4`;
-const HATCH_END = `${ART}loops/hatch-end.webp`;
+/**
+ * One hatch clip per egg, so the egg the kid picked is the egg that
+ * cracks (25 Sep 2026). The cream egg keeps the original file names.
+ */
+export function hatchAssets(egg) {
+  const base = egg && egg !== 'cream' ? `${ART}loops/hatch-${egg}` : `${ART}loops/hatch`;
+  return { poster: `${base}-poster.webp`, clip: `${base}.mp4`, end: `${base}-end.webp` };
+}
 
 /**
  * The four eggs. `variant` is the companionVariant id written to state,
@@ -225,7 +230,7 @@ export default function MeetRonki({ onComplete }) {
                 {cur.text}
               </SpeechBubble>
             )}
-            <MoodChibi stage={1} mood="normal" size={phase === 'close' ? 260 : 220} bare label="Ronki" />
+            <MoodChibi stage={1} mood="normal" variant={EGGS.find(e => e.id === picked)?.variant} size={phase === 'close' ? 260 : 220} bare label="Ronki" />
           </div>
 
           {phase === 'name' && (
@@ -372,6 +377,7 @@ function HatchStage({ egg, phase, onEnded }) {
   const [stillStep, setStillStep] = useState(0);
   const doneRef = useRef(false);
   const box = useCoverBox(stageRef, POSTER.w, POSTER.h);
+  const assets = hatchAssets(egg);
 
   const finish = useCallback(() => {
     if (doneRef.current) return;
@@ -429,12 +435,12 @@ function HatchStage({ egg, phase, onEnded }) {
 
   return (
     <div ref={stageRef} className="absolute inset-0 overflow-hidden bg-paper mr-fade" aria-hidden="true">
-      <img src={HATCH_POSTER} alt="" draggable={false} decoding="async" style={layer} />
+      <img src={assets.poster} alt="" draggable={false} decoding="async" style={layer} />
 
       {mode === 'clip' && (
         <video
           ref={videoRef}
-          src={HATCH_CLIP}
+          src={assets.clip}
           muted
           playsInline
           preload="auto"
@@ -448,7 +454,7 @@ function HatchStage({ egg, phase, onEnded }) {
       )}
 
       <img
-        src={HATCH_END}
+        src={assets.end}
         alt=""
         draggable={false}
         decoding="async"
@@ -469,7 +475,7 @@ function HatchStage({ egg, phase, onEnded }) {
                 : 'none',
           }}
         >
-          <RonkiArt pose={showCracked ? 'egg-cracked' : `egg-${egg}`} size={eggPx || 1} style={{ width: '100%', height: '100%' }} />
+          <RonkiArt pose={showCracked && egg === 'cream' ? 'egg-cracked' : `egg-${egg}`} size={eggPx || 1} style={{ width: '100%', height: '100%' }} />
         </div>
       )}
     </div>
