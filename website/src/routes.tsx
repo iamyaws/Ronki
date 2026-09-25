@@ -59,6 +59,7 @@ const RatgeberEinschulungSelbststaendigkeit = lazy(() => import('./pages/ratgebe
 const RatgeberMorgenroutineGrundschulkind = lazy(() => import('./pages/ratgeber/MorgenroutineGrundschulkind'));
 const RatgeberElternBereich = lazy(() => import('./pages/ratgeber/ElternBereich'));
 const RatgeberMorgenroutineAdhs = lazy(() => import('./pages/ratgeber/MorgenroutineAdhs'));
+const RatgeberZeitumstellungKinder = lazy(() => import('./pages/ratgeber/ZeitumstellungKinder'));
 const Impressum = lazy(() => import('./pages/Impressum'));
 const Datenschutz = lazy(() => import('./pages/Datenschutz'));
 const AGB = lazy(() => import('./pages/AGB'));
@@ -127,6 +128,7 @@ export function AppRoutes() {
         <Route path="/ratgeber/morgenroutine-grundschulkind" element={<RatgeberMorgenroutineGrundschulkind />} />
         <Route path="/ratgeber/eltern-bereich" element={<RatgeberElternBereich />} />
         <Route path="/ratgeber/morgenroutine-adhs" element={<RatgeberMorgenroutineAdhs />} />
+        <Route path="/ratgeber/zeitumstellung-kinder" element={<RatgeberZeitumstellungKinder />} />
         <Route path="/en" element={<HomeEN />} />
         <Route path="/impressum" element={<Impressum />} />
         <Route path="/datenschutz" element={<Datenschutz />} />
