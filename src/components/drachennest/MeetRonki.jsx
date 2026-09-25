@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from
 import { useTask } from '../../context/TaskContext';
 import { track } from '../../lib/analytics';
 import VoiceAudio from '../../utils/voiceAudio';
+import { lineText } from '../../data/ronkiLines';
 import MoodChibi, { RonkiArt } from '../MoodChibi';
 import {
   ChoiceTile,
@@ -33,7 +34,18 @@ import {
  *   meet      Ronki peeks out of the shell and says his first line in a
  *             speech bubble.
  *   name      white page, Ronki asks for his name, one cobalt pill.
- *   close     Ronki says good night, tap anywhere to finish.
+ *   close     Finch pass (26 Sep 2026, base 2.1 screen 6): Ronki says
+ *             his new name and asks the child's. A family without a card
+ *             (needsParent) hears "Jetzt brauch ich kurz Mama oder Papa"
+ *             and the pill "Mama oder Papa ist da" hands the tablet to
+ *             the parent step. A card family (childName known) hears
+ *             "Und dich kenn ich schon" and confirms with "Ja, das bin
+ *             ich". Both pills are visible at once. The old "Bis morgen.
+ *             Versprochen." and the missing meet_close_01 are gone.
+ *
+ * Egg first for everyone: a quiet "Ich habe schon eine Karte" on the
+ * approach and the shelf opens the card scan (prop onWantsCard; hidden
+ * when absent).
  *
  * Phases, timers, voice lines, analytics and the onComplete payload are
  * the ones of the previous version. The old six colourways collapse to
@@ -83,8 +95,21 @@ const LINES = {
   hatch: null,
   meet: { who: 'Ronki', text: 'Hallo. Ich hab auf dich gewartet. Glaub ich.' },
   name: { who: 'Ronki', text: 'Hm, wie soll ich heißen?' },
-  close: { who: 'Ronki', text: 'Bis morgen. Versprochen.' },
+  close: { who: 'Ronki', text: '' },
 };
+
+/** Gap between the two voiced lines of the close (askname, then getparent). */
+const GETPARENT_DELAY_MS = 2600;
+/** How long "Schön, dass du da bist!" plays before the chain moves on. */
+const YES_TO_DONE_MS = 1900;
+/**
+ * The close pills ignore taps for a moment after the close appears
+ * (KIDUX-4, fix round 1): "so soll er heißen" and the close pill sit at
+ * the bottom of the same column, so a double tap would skip the spoken
+ * handoff. Same guard as HandoffBackCard and FirstDayIntro; no countdown
+ * is shown.
+ */
+const TAP_GUARD_MS = 450;
 
 /**
  * Name chips (PRD 5.2, Marc 25 Sep 2026): the kid gives Ronki a nickname
@@ -103,13 +128,16 @@ export const NAME_CHIPS = [
   { id: 'knisti', name: 'Knisti' },
 ];
 
-/** The close line says the nickname back, so the pick lands. */
-function closeLine(nick) {
-  return nick ? `Ich bin ${nick}! Bis morgen. Versprochen.` : LINES.close.text;
-}
-
-export default function MeetRonki({ onComplete }) {
+export default function MeetRonki({ onComplete, onWantsCard, needsParent, childName }) {
   useTask();
+  const kind = (childName || '').trim();
+  // Without an explicit prop: a known child name means a card family.
+  const askParent = typeof needsParent === 'boolean' ? needsParent : !kind;
+  const [saidYes, setSaidYes] = useState(false);
+  const finishedRef = useRef(false);
+  const closeShownAt = useRef(0);
+  const yesTimer = useRef(null);
+  useEffect(() => () => { if (yesTimer.current) clearTimeout(yesTimer.current); }, []);
   const [phase, setPhase] = useState('approach');
   const [picked, setPicked] = useState(null);
   const [name, setName] = useState('');
@@ -147,17 +175,22 @@ export default function MeetRonki({ onComplete }) {
       return () => VoiceAudio.stop();
     }
     if (phase === 'close') {
-      // de_meet_close_01 is still queued; until it lands playLocalized
-      // fails silently and the on-screen line carries the moment.
-      VoiceAudio.playLocalized('meet_close_01', 600);
+      // Names are never voiced (R11): the recordings leave them out.
+      if (askParent) {
+        VoiceAudio.playLocalized('meet_askname_01', 400);
+        const t = setTimeout(() => VoiceAudio.playLocalized('meet_getparent_01'), GETPARENT_DELAY_MS);
+        return () => { clearTimeout(t); VoiceAudio.stop(); };
+      }
+      VoiceAudio.playLocalized('meet_knowname_01', 400);
       return () => VoiceAudio.stop();
     }
     return undefined;
-  }, [phase]);
+  }, [phase, askParent]);
 
   const pickEgg = (eggId) => {
     if (phase !== 'shelf') return;
     setPicked(eggId);
+    track('onboarding.egg.pick');
     setPhase('wobble');
     setVoiceKey(v => v + 1);
   };
@@ -179,18 +212,34 @@ export default function MeetRonki({ onComplete }) {
   const confirmName = () => {
     const trimmed = name.trim();
     if (!trimmed) return;
+    track('onboarding.name.confirm');
+    closeShownAt.current = Date.now();
     setPhase('close');
     setVoiceKey(v => v + 1);
   };
 
+  const tooSoonAfterClose = () => Date.now() - closeShownAt.current < TAP_GUARD_MS;
+
   const finish = () => {
     if (!picked || !name.trim()) return;
+    if (finishedRef.current) return;
+    if (tooSoonAfterClose()) return;
+    finishedRef.current = true;
     track('ronki.hatch');
     // completeOnboarding is intentionally NOT called here: TeachFireStep
     // runs after this surface and flips onboardingDone. See App.jsx
     // OnboardingChain.
     const egg = EGGS.find(e => e.id === picked);
     onComplete?.({ companionVariant: egg?.variant || 'forest', companionName: name.trim() });
+  };
+
+  // Card family: "Ja, das bin ich" plays "Schön, dass du da bist!", then on.
+  const confirmKnown = () => {
+    if (saidYes) return;
+    if (tooSoonAfterClose()) return;
+    setSaidYes(true);
+    VoiceAudio.playLocalized('meet_yes_01');
+    yesTimer.current = setTimeout(finish, YES_TO_DONE_MS);
   };
 
   const cur = LINES[phase];
@@ -259,13 +308,39 @@ export default function MeetRonki({ onComplete }) {
           }}
         >
           <div className="flex-1 flex flex-col items-center justify-center gap-5 w-full max-w-sm">
-            {cur && (
+            {phase === 'name' && cur && (
               <SpeechBubble key={voiceKey} side="bottom" size="lg" className="mr-line-in" style={{ maxWidth: 300 }}>
-                {phase === 'close' ? closeLine(name.trim()) : cur.text}
+                {cur.text}
               </SpeechBubble>
             )}
+            {phase === 'close' && askParent && (
+              <div className="flex flex-col items-center gap-7 w-full">
+                <SpeechBubble side="bottom" size="lg" className="mr-line-in" style={{ maxWidth: 300 }}>
+                  {lineText('meet_askname_01', { nick: name.trim() })}
+                </SpeechBubble>
+                <SpeechBubble
+                  side="bottom"
+                  size="lg"
+                  rotate={0.8}
+                  className="mr-line-in"
+                  style={{ maxWidth: 300, animationDelay: `${GETPARENT_DELAY_MS - 400}ms` }}
+                >
+                  {lineText('meet_getparent_01')}
+                </SpeechBubble>
+              </div>
+            )}
+            {phase === 'close' && !askParent && (
+              <div className="flex flex-col items-center gap-4 w-full">
+                {kind && (
+                  <p className="bb-display text-4xl text-center m-0 break-words" style={{ maxWidth: 320 }}>{kind}</p>
+                )}
+                <SpeechBubble key={saidYes ? 'yes' : 'know'} side="bottom" size="lg" className="mr-line-in" style={{ maxWidth: 300 }}>
+                  {saidYes ? lineText('meet_yes_01') : lineText('meet_knowname_01', { kind })}
+                </SpeechBubble>
+              </div>
+            )}
             {/* Smaller on the name page so the chips fit on a phone. */}
-            <MoodChibi stage={1} mood="normal" variant={EGGS.find(e => e.id === picked)?.variant} size={phase === 'close' ? 260 : 150} bare label="Ronki" />
+            <MoodChibi stage={1} mood={phase === 'close' ? 'gut' : 'normal'} variant={EGGS.find(e => e.id === picked)?.variant} size={phase === 'close' ? 200 : 150} bare label="Ronki" />
           </div>
 
           {phase === 'name' && (
@@ -335,12 +410,41 @@ export default function MeetRonki({ onComplete }) {
               </div>
             </div>
           )}
+
+          {/* The close: one pill, visible at once. */}
+          {phase === 'close' && (
+            <div className="w-full max-w-sm" style={{ paddingTop: 12 }}>
+              {askParent ? (
+                <PillButton full size="lg" arrow onClick={finish}>
+                  Mama oder Papa ist da
+                </PillButton>
+              ) : (
+                <PillButton full size="lg" arrow onClick={confirmKnown}>
+                  Ja, das bin ich
+                </PillButton>
+              )}
+            </div>
+          )}
         </div>
       )}
 
       {/* Captions for the silent beats, on the scene or the white page. */}
       {cur && cur.who === null && phase !== 'shelf' && (
-        <Caption key={voiceKey} text={cur.text} />
+        <Caption key={voiceKey} text={cur.text} raised={!!onWantsCard && phase === 'approach'} />
+      )}
+
+      {/* The parent's way to a card, quiet, on the first two screens. */}
+      {onWantsCard && (phase === 'approach' || phase === 'shelf') && (
+        <div
+          className="absolute left-0 right-0 flex justify-center"
+          style={{ bottom: 'calc(10px + env(safe-area-inset-bottom, 0px))', zIndex: 3 }}
+        >
+          <span className={phase === 'approach' ? 'rounded-full bg-white px-4' : ''}>
+            <QuietLink tone="ink" onClick={onWantsCard}>
+              Ich habe schon eine Karte
+            </QuietLink>
+          </span>
+        </div>
       )}
 
       {/* Ronki's first line, above the shell. */}
@@ -358,23 +462,6 @@ export default function MeetRonki({ onComplete }) {
 
       {/* "spricht" only while a voiced line plays. */}
       {(phase === 'meet' || phase === 'close') && <Speaking />}
-
-      {phase === 'close' && (
-        <button
-          type="button"
-          onClick={finish}
-          aria-label="tippen zum schließen"
-          className="absolute inset-0 flex items-end justify-center bg-transparent border-0 cursor-pointer"
-          style={{ paddingBottom: 'calc(28px + env(safe-area-inset-bottom, 0px))' }}
-        >
-          <span
-            className="font-headline font-semibold text-lg text-cobalt mr-line-in"
-            style={{ animationDelay: '3000ms', animationFillMode: 'backwards' }}
-          >
-            tippen zum schließen
-          </span>
-        </button>
-      )}
 
       <style>{`
         @keyframes mr-lineIn {
@@ -411,11 +498,11 @@ export default function MeetRonki({ onComplete }) {
 }
 
 /* Storybook caption: a paper card at the bottom, a little off straight. */
-function Caption({ text }) {
+function Caption({ text, raised = false }) {
   return (
     <div
       className="absolute left-0 right-0 flex justify-center px-6 mr-line-in"
-      style={{ bottom: 'calc(36px + env(safe-area-inset-bottom, 0px))', pointerEvents: 'none' }}
+      style={{ bottom: `calc(${raised ? 76 : 36}px + env(safe-area-inset-bottom, 0px))`, pointerEvents: 'none' }}
     >
       <PaperCard tone="paper" pad="md" style={{ transform: 'rotate(-1deg)', maxWidth: 320 }}>
         <p className="bb-display text-center text-2xl m-0">{text}</p>

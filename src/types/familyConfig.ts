@@ -84,6 +84,13 @@ export interface FamilyConfig {
    *  is true. Default 'mama'. Single-vouch keeps the moment simple:
    *  kid shows ONE grown-up, not "did BOTH see". */
   zeigMomentParent?: 'mama' | 'papa';
+  /** Finch pass (26 Sep 2026): which task kinds the child does with Ronki
+   *  in the morning and the evening. Absent = DEFAULT_ROUTINE
+   *  (src/data/taskKinds.ts). Set in the parent step and the dashboard. */
+  routine?: import('../data/taskKinds').RoutineConfig;
+  /** Finch pass: when the family's evening starts ('17:00' to '18:30').
+   *  Ronki's day trip returns at this time. Absent = '17:00'. */
+  eveningStart?: import('../loop/types').EveningStart;
 }
 
 // ── Generic default template (Louis-specifics moved to seed-only flow) ──

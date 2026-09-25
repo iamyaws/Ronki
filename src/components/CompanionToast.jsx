@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from '../i18n/LanguageContext';
 import RonkiPortrait from './RonkiPortrait';
 import DoodleIcon from './bilderbuch/DoodleIcon';
+import { featureOn } from '../config/features';
 
 // Doodle per message (Bilderbuch, 25 Sep 2026): the drawn marks replace
 // the Material glyphs. Keys and timing are unchanged.
@@ -14,7 +15,14 @@ const MESSAGES = [
   { key: 'toast.growing', icon: 'leaf', tone: 'text-leaf' },
 ];
 
-export default function CompanionToast({ trigger }) {
+export default function CompanionToast(props) {
+  // Finch pass (26 Sep 2026): no rotating praise lines after a task
+  // (PRD 6, no praise slot machine). FEATURES.praiseToast brings it back.
+  if (!featureOn('praiseToast')) return null;
+  return <CompanionToastInner {...props} />;
+}
+
+function CompanionToastInner({ trigger }) {
   const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
   const [msg, setMsg] = useState(MESSAGES[0]);

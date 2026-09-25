@@ -1,0 +1,13 @@
+{
+  "parentOnboardingDone": true,
+  "parentHandoffBackSeen": true,
+  "parentPin": "2580",
+  "parentPinIsDefault": false,
+  "analyticsEnabled": true,
+  "familyConfig": {
+    "childName": "Mia",
+    "siblings": []
+  },
+  "kidIntroSeen": false,
+  "onboardingDone": false
+}

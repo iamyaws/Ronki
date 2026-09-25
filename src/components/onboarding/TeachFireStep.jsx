@@ -12,6 +12,10 @@ import TeachBreathBeat, { ONBOARDING_FLAME_COPY } from './TeachBreathBeat';
  * Bilderbuch cut (25 Sep 2026): a sky ground. Breathing together is a
  * whole moment and may be blue; the teal wash image is gone.
  *
+ * Finch pass (26 Sep 2026): teach through success. The spark, the
+ * learned line and the "Weiter" pill live in TeachBreathBeat (onboarding
+ * flame branch); the chain fires onboarding.teachfire.complete.
+ *
  * Still the onboarding entry point with the same prop signature
  * (variant, t, ProgressBar, onComplete). Onboarding persists
  * `state.taughtSignature` + `state.taughtAt` + `state.taughtBreaths.flame`

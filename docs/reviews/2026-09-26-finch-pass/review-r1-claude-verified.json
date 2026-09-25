@@ -1,0 +1,281 @@
+{
+ "SAVES-1": {
+  "severity": "BLOCKER",
+  "file": null,
+  "line": null,
+  "claim": null,
+  "scenario": null,
+  "verified_evidence": "src/hooks/useTripClock.ts 38-58: tick() runs on every visibilitychange to visible and every 30 s, calling actions.checkNewDay() and arriveTrip() on the in-memory state. TaskContext.tsx 2424-2430: checkNewDay runs applyDayTransition(prev), which sets lastDate: today() (TaskContext ~1653). That state change triggers the autosave effect (TaskContext 1460-1505), and 1.5 s later it calls cloudSaveByToken(token, {...localRaw, ...state}). On the stale device localRaw is that device's own old copy, so nothing newer gets merged in. The new FC-01 guard (commit 9c53ffd, TaskContext 1483) only fires when cloudReadOk(token) is false, and it is already true for the whole session once the 12:00 load read succeeded. So the stale row goes through. storage.ts syncLoadByToken: `if (localDate > cloudDate)` keeps local only when strictly newer, so the tablet (lastDate yesterday) takes the cloud row (lastDate today) and runs save(cloud) over its newer local state. On main (13f14e6) nothing ran the day transition while the app was open. The only timer that wrote was Expedition.jsx's rangerArrived poll, which ran only while that screen was mounted. So an idle glance never wrote before this pass. The same-day case also breaks: a stale phone snapshot with an away trip that is due runs arriveTrip on resume and writes it. The tie rule then lets that stale cloud row beat the tablet's afternoon progress.",
+  "fix": "In useTripClock, record when the tab was hidden. On visibilitychange to visible, if dayKey(now) differs from state.lastDate, or the tab was hidden for more than about 5 minutes, call window.location.reload() instead of tick(). That way syncLoadByToken resolves against the cloud before any day transition or arrival runs. Keep the in-place checkNewDay/arriveTrip only for the 30 s interval while the tab stays visible, and skip the interval tick when document.visibilityState is not 'visible'. Add a test: a provider whose stale state has yesterday's lastDate resumes from hidden, and no profile_upsert fires before a reload."
+ },
+ "SAVES-2": {
+  "severity": "SHOULD",
+  "file": null,
+  "line": null,
+  "claim": null,
+  "scenario": null,
+  "verified_evidence": "The only savePendingHatch call is in OnboardingChain.jsx 107-117, inside NoProfileLanding's onBeforeOpen, and that only runs on the scan or code-field path (NoProfileLanding.jsx 104). The ?p= link path: AuthGate (App.jsx 708-710) calls getActiveToken(), which stores the URL token and strips it (profileToken.ts 73-88). No stash is written. TaskProvider then runs syncLoadByToken(token). On a fresh device getLocalProfileOwner() is null, so the local copy is kept as this card's. The hatched local state has kidIntroSeen and companionName but no onboardingDone or parentOnboardingDone (egg first, before the parent step), so localPristine is true. The website seed has parentOnboardingDone, so cloudFurther is true. The cloud wins and save(cloud) overwrites local. In OnboardingChain 68-77, takePendingHatch finds no stash and returns null, so the child is back at MeetRonki without the named dragon. Design 2.3 lists 'share link opened directly' as a supported path, and 2.4 promises that a local hatch is carried into a card that has not hatched yet. R7 kept that promise only for the scan path.",
+  "fix": "Keep storage.ts untouched (R7). Before the URL token is consumed, write the stash when it applies. The simplest place is AuthGate's mount effect, which runs before TaskProvider mounts because useAuth starts with loading=true. There: const urlTok = readTokenFromUrl(); if urlTok differs from the stored token, read the local mirror synchronously (JSON.parse(localStorage.getItem('hdx2_drachennest'))). If it has kidIntroSeen and a companionName, has no onboardingDone, and getLocalProfileOwner() is null or equals urlTok, call savePendingHatch({ companionName, companionVariant, token: urlTok }). Only then call getActiveToken(). The existing takePendingHatch rules then apply unchanged. Add a test for the ?p= path."
+ },
+ "SAVES-3": {
+  "severity": "COULD",
+  "file": null,
+  "line": null,
+  "claim": null,
+  "scenario": null,
+  "verified_evidence": "TaskContext 1460-1505: the local save runs after 400 ms, the cloud save after 1500 ms, and both are cleared on every state change. departTrip (TaskContext 2300-2338) and receiveTreasure (2358-2370) do not change lastDate. So on a same-day cold start both copies carry today's date, and syncLoadByToken's strict `localDate > cloudDate` check hands the tie to the cloud. If the app is killed, or on iOS backgrounded (timers pause) and then evicted, before the 1.5 s cloud timer fires, the next cold start that day restores the pre-departure or pre-treasure cloud row over the newer local copy. The DepartureSheet or the treasure then replays. adventureCount is not doubled, because the restored row is from before the receive. The debounce and the tie rule already existed on main, so this pass does not add the mechanism. It does make it more likely, because the departure is now the last tap of the morning session. The result is a replayed moment, not lost progress, so COULD fits.",
+  "fix": "In TaskProvider, add a listener for visibilitychange to 'hidden' and for pagehide. It clears cloudTimer and, if there is an active token and storage.cloudReadOk(token) is true (keep the FC-01 guard), immediately calls storage.cloudSaveByToken(token, {...localRaw, ...stateRef.current}) as a best effort. Use a stateRef so the listener sees the latest state. storage.ts stays untouched."
+ },
+ "LOOP-1": {
+  "severity": "COULD",
+  "file": null,
+  "line": null,
+  "claim": null,
+  "scenario": null,
+  "verified_evidence": "returnBeat.js nestBeat, day block: `if (!firstDay && morning.total > 0 && morning.full && !tripToday)` returns 'departure'; otherwise 'stay'. The departure only happens when the child taps (RoomHub bye() -> departTrip('day') from DepartureCard or DepartureSheet); nothing departs on its own. isFirstDay stays true until adventureCount > 0. So on a morning install where the fire got full but nobody tapped before 11:00 (12:00 at weekends), the 30 s tick switches the mode to 'stay', the effect `if (mode !== 'departure') setDepartureOpen(false)` closes the sheet, and contextLineFor gives fd_start_day_01. On day 2+ the same state still departs. The guard cannot protect an afternoon install either: fireOfBlock gives bonus = floor(total/2), so full always needs at least ceil(total/2) real done morning tasks, and the Nest's day block only offers afternoonTasks (evening/hobby anchors). Downgraded to COULD: it needs day 1 plus no tap, and the child still gets the evening dream trip (lastTripDate is not today) and a treasure at breakfast.",
+  "fix": "In nestBeat's day branch, drop `!firstDay &&`, or keep a guard that is actually about the afternoon install: `(!firstDay || morning.lit - morning.bonus > 0)`. Add a returnBeat test: onboardingDate = today, adventureCount 0, enough morning slots done for full with the bonus, now 13:30 on a weekday, expect mode 'departure'."
+ },
+ "LOOP-2": {
+  "severity": "SHOULD",
+  "file": null,
+  "line": null,
+  "claim": null,
+  "scenario": null,
+  "verified_evidence": "TonightRitual.jsx: fireComplete() (completeTonight + departTrip('night') when hook.dream) runs only from the curtain timer (12000 ms after startCurtain) or a tap in the 'curtain' phase. The close button (`phase !== 'black'`, calls onClose) and ESC unmount the component, and the unmount cleanup clears curtainTimerRef, so nothing is committed. The hook line 'night_trip_01' plays when the 'hook' phase starts, about 6.5 s plus 12 s before the commit. The base design (design-finch-faithful.md line 117) says 'the dream trip starts on close', and the header comment 'Closing early changes nothing' goes against that once the promise was spoken. Scenario confirmed: the hook is heard, the parent taps X during the lullaby, and there is no trip, no eveningRitualCompletedAt, and Ronki is home with nothing at breakfast. If the PWA is killed during the curtain, the same happens.",
+  "fix": "Commit when the promise is made: at the start of startCurtain (the hook was shown), or when handleTap enters 'hook' with hook.dream, call actions.completeTonight() and, if hook.dream, actions.departTrip('night'), guarded by completeFiredRef. Keep track('tonight.complete') at the black phase if analytics needs 'watched to the end'. Closing before the hook still changes nothing."
+ },
+ "LOOP-3": {
+  "severity": "SHOULD",
+  "file": null,
+  "line": null,
+  "claim": null,
+  "scenario": null,
+  "verified_evidence": "RoomHub.jsx: the greeting effect (`greetDue && greetedRef.current !== today` -> sayPassing(greetId) + actions.markGreeted()) and the context-line effect (VoiceAudio.playLocalized(contextId) whenever contextId changes; spokenRef is reset to null in the `today` effect) do not check document.visibilityState or any user presence. RoomHub's own setInterval(30 s) and useTripClock's checkNewDay tick keep running while the Nest stays open. The day key is UTC (clock.ts dayKey), so it rolls over at 02:00 CEST / 01:00 CET. applyDayTransition rebuilds quests with done:false, and greetingFor gives a line because greetedDate is still yesterday. If the ritual was not done, the block is 'evening', the evening fire becomes 0 of n, the mode is 'fire', and at 02:00 the greeting plus task_ask_dinner play, and greetedDate is stamped. If the ritual was done, the block is 'night' until 04:00 (greetDue is false), then at 04:00 the morning greeting plus task_ask_wake play. Either way the child opening at 07:00 gets no return line, because greetedDate === today. It needs the Nest to stay mounted overnight (a screen left on, or a page that is still alive in the background), a case the code comments name on purpose ('the tablet sat on it overnight').",
+  "fix": "Gate automatic speech and markGreeted on presence: skip both when document.visibilityState !== 'visible', and do not speak for clock-only mode changes between the evening start and 06:00. Mark 'present' on pointerdown or on a visibilitychange to visible, then run the greeting and the context line; reset greetedRef and spokenRef on presence, not only on the day key. At minimum, call markGreeted only after a user interaction or a visible mount."
+ },
+ "LOOP-4": {
+  "severity": "COULD",
+  "file": null,
+  "line": null,
+  "claim": null,
+  "scenario": null,
+  "verified_evidence": "clock.ts dayKey = toISOString().slice(0,10) (UTC). TaskContext checkNewDay (polled every 30 s by useTripClock) compares prev.lastDate to dayKey(now), and applyDayTransition rebuilds quests. dayPhase keeps the evening block until 04:00 local. So at 01:00 CET / 02:00 CEST, during the evening block, the evening tasks done so far are wiped and the fire drops back. A dream trip after that point stamps lastTripDate with the new key, so the next morning's full fire gets tripToday true and no send-off. The impact is small: the dream trip still brings a treasure at 05:00, and it only affects children awake past 01:00/02:00.",
+  "fix": "For the loop's own keys (checkNewDay trigger, lastTripDate, greetedDate), use the local date of (now minus 4 h), which matches DAY_START, or at least let checkNewDay roll over only when blockAt(now) is not 'evening' or 'night'. Stamp a night trip's lastTripDate with the date of eveningStartFor(now)."
+ },
+ "LOOP-5": {
+  "severity": "COULD",
+  "file": null,
+  "line": null,
+  "claim": null,
+  "scenario": null,
+  "verified_evidence": "checkNewDay: `if (prev.lastDate === dayKey(clockNow())) return prev; return applyDayTransition(prev);`, with the same inequality in the load path. A backwards key runs a full transition: quests are rebuilt with done:false, sm is recomputed, and lastGapDays = max(0, daysBetween(...)) = 0. Correcting the clock runs a second transition, with a gap measured from the wrong date. departTrip stamps lastTripDate from the wrong clock. arriveTrip only settles when now >= returnAt, so a trip sent while the clock was ahead stays away until that time. Rare (it needs a wrong device clock), and before this pass the load path already compared with !==, but the 30 s poll is new.",
+  "fix": "Transition only when dayKey(now) > prev.lastDate (ISO date strings compare correctly), in checkNewDay and in the load path. In arriveTrip and tripDue, treat a returnAt more than 24 h in the future as due."
+ },
+ "LOOP-6": {
+  "severity": "COULD",
+  "file": null,
+  "line": null,
+  "claim": null,
+  "scenario": null,
+  "verified_evidence": "ParentalDashboard RonkisTagSection: the Ferien switch calls patchState({ vacMode: v }) only (with the label 'Ab morgen kommen die Ferien-Aufgaben.'), so today's quests keep their s_* ids. A later same-day routine change calls setRoutine -> questsForRoutine(prev, r), which builds buildDay(!!prev.vacMode = true), giving ids v_wake, v_breakfast and so on (constants.ts), and looks them up in a map keyed by the old s_* ids. None match, so every main quest comes back done:false and the fire drops to 0 lit. Part of the claim is wrong: applyDayTransition only updates sm for the ids in s.quests (now v_*), so the s_* streaks are left as they were, not zeroed.",
+  "fix": "In questsForRoutine, fall back to matching by taskKind(id) (and anchor) when the id is missing, carrying done, completions and streak over. Or build with the vacMode that produced today's list (derived from the prefix of the current main quests) until the next day transition, which matches the switch's own 'ab morgen' promise."
+ },
+ "LOOP-7": {
+  "severity": "COULD",
+  "file": null,
+  "line": null,
+  "claim": null,
+  "scenario": null,
+  "verified_evidence": "Rehydration (TaskContext ~1365): `lastTripDate: typeof raw.lastTripDate === 'string' ? raw.lastTripDate : null`. On main there is no lastTripDate, so a save whose expedition left today on the old path (away/waiting, or already home with a log entry from today) loads with lastTripDate null. After the treasure is received, tonightHook sees lastTripDate !== today and a full evening fire, so hook.dream is true, and departTrip('night') passes its `prev.lastTripDate === key` guard: two trips on ship day. Only the ship night is affected, and the extra effect is a second treasure.",
+  "fix": "In rehydration, when lastTripDate is absent, backfill it from dayKey(expedition.departedAt) for an away or waiting trip, or else from the ts of the last expeditionLog entry, when that is today."
+ },
+ "INTEGRATION-1": {
+  "severity": "SHOULD",
+  "file": null,
+  "line": null,
+  "claim": null,
+  "scenario": null,
+  "verified_evidence": "Confirmed in code. App.jsx ~749-761 mounts <TaskProvider> + <OnboardingChain previewLoop /> for ?onboardingPreview=1 with no import.meta.env.DEV gate (the comment at 725-731 says it stays public in production on purpose). TaskProvider's load effect (TaskContext.tsx 1134-1139) reads the real save via getActiveToken() -> storage.syncLoadByToken, and the save effect (1474-1502) writes back to local and cloudSaveByToken. In OnboardingChain.jsx the previewLoop effect (lines 80-93) runs before `if (!state || phase === 'done') return null;` (line 95), so on an onboarded save it fires after 2200 ms and patches onboardingDone, kidIntroSeen, parentOnboardingDone and parentHandoffBackSeen to false. Rehydrate keeps that (TaskContext.tsx 1221: onboardingDone: raw.onboardingDone || false; 1227/1264 use ?? so an explicit false survives), so the next normal open lands on the egg on every device sharing the token. If the tester continues, MeetRonki re-patches companionName/companionVariant, and CombinedParentSetup (lines 78-86) sends parentPin null / parentPinIsDefault true when the PIN is blank, analyticsEnabled = the box, familyConfig.siblings [], and the chain now also calls setRoutine(fc.routine) and setEveningStart, which replaces a family's tuned routine. In a fresh browser the parent step mints a token and claimLocalProfile. Main (13f14e6 App.jsx 882-894) had the same reset effect and the same PIN/siblings/analytics payload, so this is pre-existing; the pass adds the routine/eveningStart overwrite. Only reachable by someone opening the preview URL, but that URL is the documented cross-device smoke test, so opening it on a family tablet after tonight's deploy is plausible. Not a BLOCKER because no family reaches it by normal use.",
+  "fix": "Make the preview non-destructive: in the preview branch render a TaskProvider variant with an in-memory store (no storage.load/save, no token, no cloud save), or in OnboardingChain skip the previewLoop reset when the loaded save was already onboarded at mount (capture state.onboardingDone on first load in a ref) and skip token minting/claimLocalProfile when previewLoop is set. Simplest for tonight: gate the ?onboardingPreview=1 branch behind import.meta.env.DEV or a staging hostname."
+ },
+ "INTEGRATION-2": {
+  "severity": "COULD",
+  "file": null,
+  "line": null,
+  "claim": null,
+  "scenario": null,
+  "verified_evidence": "grep -rn expeditionMap src returns only src/config/features.ts:17 and :33. The diff of src/components/drachennest/RoomHub.jsx removes `import Expedition from './Expedition'`, the showExpedition state, the Karte tile and the Expedition mount outright rather than gating them. Other flags (dayStrip, friends, tabUnlocks, roomStyle, badDays, victory, praiseToast, legacyProfile) are read via FEATURES.x or featureOn(). So flipping expeditionMap to true changes nothing, contradicting the file header's promise that any switched-off surface comes back by flipping one value. No family is affected today because the flag is false.",
+  "fix": "Either gate the removed RoomHub Karte tile and `{showExpedition && <Expedition .../>}` on FEATURES.expeditionMap, or delete the expeditionMap flag and change its comment so it does not claim the surface is reversible by a switch."
+ },
+ "INTEGRATION-3": {
+  "severity": "COULD",
+  "file": null,
+  "line": null,
+  "claim": null,
+  "scenario": null,
+  "verified_evidence": "LanguageContext.tsx getInitialLang (38-51) picks 'en' when navigator.languages starts with en and nothing is saved. The diff of AlphaBanner.jsx removes the DE/EN toggle; the only remaining setLang caller is ParentalDashboard.jsx SettingsTab (1889), behind the PIN. CombinedParentSetup has no language control (no lang/setLang references). Onboarding mixes sources: MeetRonki and FirstDayIntro speak via lineText() (German Finch lines), while HandoffBackCard renders t('handoff.parentToKid.title') as the h1 next to lineText('handoff_back_01'), and TeachFireStep/TeachBreathBeat and NavBar use t(). So an English-set device shows English headings and nav next to German speech bubbles, with no way to fix it before the dashboard. Cosmetic confusion, no stuck state.",
+  "fix": "Add a one-line Sprache row (DE / EN) to CombinedParentSetup that calls setLang, or force 'de' in getInitialLang while only German Finch lines exist. Both keep R-ruling intact (no kid-tappable switch in the banner)."
+ },
+ "GUARDRAILS-1": {
+  "severity": "SHOULD",
+  "file": null,
+  "line": null,
+  "claim": null,
+  "scenario": null,
+  "verified_evidence": "Confirmed in code. On main, complete() and completeHabit() both queued syncRonkiMood, and RonkiProfile (the Ronki tab) called it on mount, so a stale mood expired on the first task of the next day. On this branch complete() no longer calls it (TaskContext.tsx:1895-1896 comment). The remaining callers are RonkiProfile.jsx:272 (only mounted when FEATURES.legacyProfile, which is false in config/features.ts:31; App.jsx:465 renders RonkiPassport instead) and completeHabit (DailyHabits is only mounted inside TaskList, which App.jsx:393-412 no longer routes to). The load path at TaskContext.tsx:1285-1286 resets only 'besorgt'. applyDayTransition (1547 onward) has no ronkiMood reference. No other writer resets ronkiMood outside the hidden RonkiProfile and pickRonkiSadReaction. Readers: RoomHub.jsx:170-171 (override only when lastGapDays >= 2), RonkiPassport.jsx:68, PinnedRonki.jsx:61, RonkiPortrait.jsx:52 all use ambientMood, which passes sad/tired/gut/magisch through (MoodChibi.jsx:57-60). So a family whose last session on main was a bad day (sad or tired, ronkiMoodSetDate in the past) and who opens daily sees a tired or heavy Ronki on the Nest and passport indefinitely. featureOn('badDays') is off, so this is exactly the sad-dragon-for-no-reason R10 removed. Stale gut and magisch faces also freeze, which keeps a task and streak reward on his face. Not a BLOCKER: it needs the last pre-update session to have been a bad day (roughly one in 14 to 21 days per family), and the app keeps working.",
+  "fix": "Run the expiry step on load and on day change. In the rehydrate block (TaskContext.tsx:1285-1286) write ronkiMood 'normal' and ronkiMoodSetDate undefined whenever raw.ronkiMood is not 'normal' and raw.ronkiMoodSetDate !== today() (and always for 'besorgt'). Do the same inside applyDayTransition so a tab left open over midnight also clears. Simpler equivalent: call syncRonkiMood once after setState(s) in the load effect and from checkNewDay. Add a rehydrate test with ronkiMood 'tired', ronkiMoodSetDate yesterday, expecting 'normal' without any manual syncRonkiMood call."
+ },
+ "GUARDRAILS-2": {
+  "severity": "COULD",
+  "file": null,
+  "line": null,
+  "claim": null,
+  "scenario": null,
+  "verified_evidence": "Partly confirmed. finchLines.de.json:58 task_ask_wake ('Allein ist es so still im Zimmer') and :65 task_ask_move ('sonst werd ich ganz steif') do frame Ronki's own comfort as depending on the child doing the task, and wake is in DEFAULT_ROUTINE.morning (taskKinds.ts:38-40) so it plays on the Jetzt card every morning. breakfast (:61) and water (:59) state a Ronki need but pair it with a shared action, which is milder. Two parts of the claim do not hold: task_ask_teeth_pm (:68) says the dinner stays stuck between the child's teeth, which is a natural consequence for the child, not a threat to Ronki; and move is not in the default routine, so it only plays if a parent picks it. No mechanic backs any of these lines (Ronki's mood no longer follows tasks, R10), and response-spar row 8 scoped its AGREE to mood mechanics, not copy. So this is a copy tone issue against the spirit of row 8, not a mechanical guardrail break.",
+  "fix": "Rewrite task_ask_wake and task_ask_move as invitations with no need or 'sonst', for example wake 'Stehst du mit mir auf? Dann gucken wir zusammen raus.' and move 'Hüpfen wir ein bisschen? Ich hüpf mit.' Optionally soften breakfast ('Frühstücken wir? Ich bin gespannt, was es gibt.'). Leave teeth_pm as is. Delete the old de_task_ask_wake.mp3 and de_task_ask_move.mp3 (and breakfast if changed) and regenerate with scripts/gen-finch-voice.py."
+ },
+ "GUARDRAILS-3": {
+  "severity": "COULD",
+  "file": null,
+  "line": null,
+  "claim": null,
+  "scenario": null,
+  "verified_evidence": "Confirmed. fire.ts fireOfBlock: bonus = floor(total/2) on day 1, lit = min(total, done + bonus), full = lit >= total. With the 5-task default morning, 3 done gives full. returnBeat.js:94 then returns mode 'departure'. RoomHub.jsx:640-642 still renders TaskRow for mode 'departure' with currentId null, and TaskRow.jsx draws a flame sticker only when q.done, so 2 of 5 pictures show as plain, tappable, undone tasks under the DepartureCard. Tapping one only sets pickedId, and no NowCard renders in departure mode, so the tap does nothing visible. Only day 1 is affected (outside day 1 full requires every slot done). The tasks stay doable later in away mode (RoomHub.jsx:629-633).",
+  "fix": "In RoomHub.jsx:640 render TaskRow only for mode === 'fire', or pass the bonus count to TaskRow and draw the first `fire.bonus` undone slots with the flame sticker (matching FireBowl), so the row matches the full fire."
+ },
+ "GUARDRAILS-4": {
+  "severity": "COULD",
+  "file": null,
+  "line": null,
+  "claim": null,
+  "scenario": null,
+  "verified_evidence": "Confirmed. voiceAudio.ts readLang() returns 'en' only when localStorage 'ronki-lang' is exactly 'en', and playLocalized builds `${lang}_${id}` with no fallback; play() fails silently on a missing file. All 65 finchLines ids exist only as de_*.mp3 (checked with a node script; no en_ versions for task_ask, fire_, trip_ or meet_hello). LanguageContext only persists the key in setLang (LanguageContext.tsx:88), so browser auto-detect does not trigger this; only a device where someone explicitly switched to EN. The banner switch removed in AlphaBanner.jsx was a kid-reachable way to set it; the remaining switch is in ParentalDashboard.jsx:1889 behind the PIN. Small population, but on such a device the whole new loop is silent while the bubbles show German.",
+  "fix": "In playLocalized, when lang is 'en', fall back to de_<id> if the en file errors (attach an 'error' listener that retries once with the de_ id), or route every id from finchLines.de.json straight to de_. Alternatively reset ronki-lang to 'de' once in the Finch migration."
+ },
+ "GUARDRAILS-5": {
+  "severity": "COULD",
+  "file": null,
+  "line": null,
+  "claim": null,
+  "scenario": null,
+  "verified_evidence": "Confirmed. FeelingsSheet.jsx REPLY_FOR[0] = 'mood_sad_01', whose text is 'Hey... ich bin heut auch leise. Sollen wir einfach zusammen sein?' (companion/lines/de.ts:77). SIT_OFFER contains 0, so pick(0) plays that reply and 3600 ms later plays mood_sit_offer_01 'Magst du kurz bei mir sitzen?' (finchLines.de.json:29), and the sheet shows the sit offer bubble plus the 'Bei Ronki sitzen' pill. So a child who taps Traurig hears two questions in a row toward the same activity. For Besorgt (index 1) the reply 'Du kannst's mir erzählen, oder einfach da sein' is not a question, so only Traurig doubles up. Redundant and a little pushy, not harmful; the child can still tap Später or close.",
+  "fix": "For index 0 skip the timed mood_sit_offer_01 voice (keep its bubble and pill), or map Traurig to a reply without a question. Minimal change in pick(): only schedule the sit_offer voice when idx !== 0."
+ },
+ "GUARDRAILS-6": {
+  "severity": "COULD",
+  "file": null,
+  "line": null,
+  "claim": null,
+  "scenario": null,
+  "verified_evidence": "Confirmed but pre-existing and outside this diff. public/audio/ronki has no de_slowdown_01.mp3, useQuietAttention.ts:41 calls playLocalized('slowdown_01', 400), and App.jsx:260 mounts the hook; the file was not changed in 13f14e6..HEAD. play() fails silently, so nothing breaks: the brake line just never sounds. I also checked every playLocalized id added in the diff and all 65 finchLines ids against public/audio/ronki: none missing, which supports the finding's statement that there are no other voice gaps.",
+  "fix": "Not a blocker for tonight. Either record de_slowdown_01.mp3 with the existing voice script, or remove the call in useQuietAttention.ts:41 if the brake is no longer wanted in the two-tab app."
+ },
+ "KIDUX-1": {
+  "severity": "SHOULD",
+  "file": null,
+  "line": null,
+  "claim": null,
+  "scenario": null,
+  "verified_evidence": "NowCard.jsx:27-30 clears busyRef whenever quest.id changes. RoomHub.jsx:617 and :625 render <NowCard> with no key, so it is the same instance and the Geschafft pill stays in the same spot. complete() (TaskContext.tsx:1689) goes through setState; React 18 commits a discrete-event update and runs its passive effects before the next discrete event, so busyRef is already false when a second tap lands 150 ms later. index.html sets user-scalable=no, so a double tap fires two clicks. The second click completes the next task (for example s_dress), which lights a flame for a task that was not done (breaks R1). The NowCard test at line 38 ('a new task on the card can be completed again') shows exactly this sequence.",
+  "fix": "Keep a lastTapAt ref in NowCard and ignore Geschafft for about 700 ms after any completion, measured from the tap and not reset by the quest change (as TAP_GUARD_MS does in FirstDayIntro). Or give NowCard key={quest.id} plus a short fade-in during which the pill is disabled. Add a test that clicks, rerenders with the next quest, clicks again within the guard, and expects complete to have been called once."
+ },
+ "KIDUX-2": {
+  "severity": "SHOULD",
+  "file": null,
+  "line": null,
+  "claim": null,
+  "scenario": null,
+  "verified_evidence": "TonightRitual.jsx:134-144 only auto-advances enter and lookup. The story phase moves on only through handleTap (203-207), and its only cue is the unvoiced QuietLink 'Tippen wenn du müde bist' (323-325), which also only fades in after 4 s. fireComplete (182-188), which calls completeTonight() and departTrip('night'), runs only at curtain end (196-199) or on a tap during the curtain (210-218). The X (268-283) stays visible through hook and curtain and just calls onClose, and App.jsx:453 only runs setView('hub'). So with hook.dream, after the child has heard night_trip_01 ('Heute Nacht flieg ich im Traum los. Zum Frühstück bin ich wieder da.'), closing during the 6.5 s hook or the 12 s curtain drops the dream trip. After 04:00 the evening cannot be redone, so there is no treasure at breakfast.",
+  "fix": "Call fireComplete() when the hook phase starts, at least when hook.dream is true (or at hook start for every case), and keep the curtain and black phases as presentation only. Advance story to hook by itself once the story line has ended (for example a timeout of about 15 s from story start), so a child who cannot read the tap hint still reaches the end."
+ },
+ "KIDUX-3": {
+  "severity": "SHOULD",
+  "file": null,
+  "line": null,
+  "claim": null,
+  "scenario": null,
+  "verified_evidence": "TeachBreathBeat.jsx:187 plays the intro through VoiceAudio.playNarrator, which is a no-op because readNarratorMuted() returns true (voiceAudio.ts:27-41, 62). No other voice plays in intro or in the round-1 prompt (183-195). The round-1 prompt text is t('onboarding.teach.tryFail') = 'Er will Feuer machen … schafft's aber nicht.' (lines 267-280, de.json:407), a failure line shown before any try. A release under MIN_HOLD_MS (220 ms) goes silently back to 'prompt' (215-218). HEAD commit 6fce300 added de_teach_fire_hold_01.mp3 and the line teach_fire_hold_01 'Drück ganz lange auf den Knopf. Und dann lass los!' to finchLines.de.json, but nothing in src plays it (grep finds it only in the JSON). A pre-reader who taps quickly gets no spoken instruction and no feedback.",
+  "fix": "In TeachBreathBeat, when phase becomes 'prompt' with attemptNum 1 on the onboarding flame, call VoiceAudio.playLocalized('teach_fire_hold_01', 300) and show lineText('teach_fire_hold_01') in place of tryFail. After a hold shorter than MIN_HOLD_MS, play teach_fire_hold_01 again (with a short cooldown)."
+ },
+ "KIDUX-4": {
+  "severity": "COULD",
+  "file": null,
+  "line": null,
+  "claim": null,
+  "scenario": null,
+  "verified_evidence": "MeetRonki.jsx:195-208: confirmName sets phase 'close' right away. The close pill (401-413) has no tap guard. Both the name pill (sticky, bottom of the column) and the close pill (below the flex-1 block) sit at the bottom of the same column, so a double tap on 'so soll er heißen' lands on 'Mama oder Papa ist da', and finish() (211-221) runs at once because picked and name are set. meet_getparent_01 is only scheduled 2.6 s into close (170-173) and the effect cleanup stops it. CombinedParentSetup.jsx never calls VoiceAudio. Downgraded because it needs a double tap, happens once per family, and the next screen needs a parent anyway, so nothing breaks. The cost is that the child never hears the spoken handoff the spec designed.",
+  "fix": "Add the 450 ms TAP_GUARD pattern (a shownAt ref set when phase becomes 'close') to finish and confirmKnown. Optionally play meet_getparent_01 once when CombinedParentSetup mounts in the onboarding chain."
+ },
+ "KIDUX-5": {
+  "severity": "SHOULD",
+  "file": null,
+  "line": null,
+  "claim": null,
+  "scenario": null,
+  "verified_evidence": "On the last morning task, onTaskDone calls sayPassing('fire_lit_01', 2400) (RoomHub.jsx:284), which plays at 0 and sets passingUntil to about t+2400. In the same render the mode becomes 'departure', and the context effect (244-249) schedules fire_full_morning_01 at max(400, passingUntil - now), about 2.4 s. ffprobe gives de_fire_full_morning_01.mp3 a length of 3.90 s, so it runs to about 6.3 s. The departure effect (263-267) opens the sheet at DEPARTURE_DELAY_MS = 3800 ms. StepStones (speakOnMount, StepStones.jsx:35-36) then calls playLocalized(grow line, 300) at about 4.1 s, and VoiceAudio.play calls this.stop() (voiceAudio.ts play/doPlay). The line is cut after about 1.7 s ('Mein Feuer ist ganz warm!' survives, 'Jetzt kann ich losfliegen.' does not), every departure. The fixed sheet also covers the bubble text.",
+  "fix": "Open the sheet after the context line ends: set the delay to about 2400 + 3900 + 400 ms (roughly 6.7 s), or schedule it from the audio 'ended' event (a VoiceAudio play-with-callback for Ronki lines). A cheaper fix is to raise StepStones' speakOnMount delay while departure is open so it starts after the line."
+ },
+ "KIDUX-6": {
+  "severity": "SHOULD",
+  "file": null,
+  "line": null,
+  "claim": null,
+  "scenario": null,
+  "verified_evidence": "The dashboard Ferien switch (ParentalDashboard.jsx:642-647, line 'Ab morgen kommen die Ferien-Aufgaben.') calls patchState({ vacMode: v }) and leaves today's quests alone, so they stay s_*. setRoutine (TaskContext.tsx:2372-2382) calls questsForRoutine (873-880), which runs buildDay(!!prev.vacMode, routine). With vacMode now true, buildDay uses VACATION_QUESTS (helpers.ts:34), whose ids are v_* (constants.ts:81-94). old.get(q.id) misses every one, so every main quest comes back fresh with done false and the done s_* quests are dropped. A parent who turns Ferien on and then changes the routine in the same session resets today's fire to cold. Turning Ferien off during the holidays does the same the other way round.",
+  "fix": "In questsForRoutine, pick the source list from today's main quests (v_ prefix present means vacation), not from prev.vacMode. Or match old quests by taskKind across prefixes and carry over done, completions and streak. vacMode then only takes effect at the next day transition, which is what the switch label promises."
+ },
+ "KIDUX-7": {
+  "severity": "COULD",
+  "file": null,
+  "line": null,
+  "claim": null,
+  "scenario": null,
+  "verified_evidence": "returnBeat.js:98-107: in the day block, departure needs !firstDay. isFirstDay (fire.ts:48-50) is true all install day while adventureCount is 0. Morning ends at 12:00 on weekends and in the holidays (dayPhase morningEndMinutes). Saturday install at 11:30, fire full at 11:57: mode 'departure'. If the child has not tapped Tschüss by 12:00 (sheet closed with X, departureDismissed), the 30 s tick moves the block to 'day', nestBeat returns 'stay', RoomHub line 258 closes the sheet, and Ronki says fd_start_day_01. R4 promises morning installs 'Ronki leaves when full'. Only a narrow window on day 1 is affected.",
+  "fix": "Apply the day-1 no-send-off only when onboarding finished in the day block (store the install block, or the onboarding time, and compare it with the morning end). Otherwise let a morning fire that is full keep the departure."
+ },
+ "KIDUX-9": {
+  "severity": "COULD",
+  "file": null,
+  "line": null,
+  "claim": null,
+  "scenario": null,
+  "verified_evidence": "RoomHub.jsx:183 sitLoud is set by FeelingsSheet onPick (772) and cleared only on a day change (318). BeiRonkiSein onClose (781) only hides the overlay. After the child has sat with Ronki, 'Bei Ronki sitzen' stays the loud item (610-614) and NowCard stays secondary (loud={!loudSit}, 617) for the rest of the mount. R5 says 'for that open', so this follows the ruling's literal wording, but the reason for the offer is used up after the sit.",
+  "fix": "On BeiRonkiSein close, call setSitLoud(false) when sitLoud was true (the sit took place)."
+ },
+ "KIDUX-10": {
+  "severity": "COULD",
+  "file": null,
+  "line": null,
+  "claim": null,
+  "scenario": null,
+  "verified_evidence": "TonightRitual.jsx:329-353: the black phase has no timer. handleTap ignores taps in 'black'. The only exit is the small white 'Schließen' QuietLink. App.jsx:453 keeps view 'tonight' until onClose, and nothing in App resets the view on a date change or on visibilitychange (grep finds no reload or setView on resume). A PWA resumed in the morning without being killed still shows 'Schlaf gut.' over the Nest and its TreasureCard.",
+  "fix": "In TonightRitual, once phase is 'black', call onClose after about 20 s, or on visibilitychange when blockAt(now) is no longer evening or night."
+ },
+ "KIDUX-11": {
+  "severity": "COULD",
+  "file": null,
+  "line": null,
+  "claim": null,
+  "scenario": null,
+  "verified_evidence": "greetedDate is written only by markGreeted (TaskContext.tsx:2408). completeOnboarding does not set it (the only writes are 942 init, 1372 load, 2408). So greetingFor (returnBeat.js:37-43) returns returnLineFor(0, 'morning') = greet_day_01 'Guten Morgen! Ich hab von dir geträumt.' on the first Nest open after a morning install. On a dream-trip morning, mode 'waiting' is not excluded from greetDue (RoomHub.jsx:230), so greet_day_01 plays at 0 and trip_back_night_01 ('Guten Morgen! Heute Nacht bin ich im Traum geflogen...') plays at about 3.6 s. Two 'Guten Morgen!' lines in a row.",
+  "fix": "Set greetedDate to today's key in completeOnboarding. In RoomHub, skip the greeting when mode is 'waiting' (the return line already greets), or at least when tripKind is 'night'."
+ },
+ "KIDUX-12": {
+  "severity": "COULD",
+  "file": null,
+  "line": null,
+  "claim": null,
+  "scenario": null,
+  "verified_evidence": "contextLineFor (RoomHub.jsx:136) returns home_stay_01 (or fd_start_day_01) in 'stay' mode, whatever cardQuest is. Yet lines 624-625 render a loud NowCard for the afternoon task (afternoonTasks, anchor evening or hobby). The task's own ask line, for example task_ask_move from taskAskLineId, is never spoken, so a pre-reader gets a loud Geschafft card that nothing explains.",
+  "fix": "In contextLineFor, for mode 'stay' with a cardQuest, return taskAskLineId(cardQuest.id) and fall back to home_stay_01 or fd_start_day_01. Or play home_stay_01 as a passing line first and then the ask."
+ },
+ "KIDUX-13": {
+  "severity": "COULD",
+  "file": null,
+  "line": null,
+  "claim": null,
+  "scenario": null,
+  "verified_evidence": "RoomHub.jsx:460-468: the parent lock is 40 x 40 px, 10 px from the 52 px face button (gap 10, line 449). It sits below the 44 px minimum used for other controls (TonightRitual close 48, PillButton minimum 56). A miss on it opens the child's feelings sheet, which is harmless and can be closed.",
+  "fix": "Keep the visual circle at 40 px but give the button a 44 to 48 px hit area (padding or a transparent ::before), or widen the gap."
+ }
+}

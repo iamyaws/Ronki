@@ -15,7 +15,17 @@ import { SPECIAL_QUESTS } from '../data/specialQuests';
 import { MINT_SEQUENCE } from '../data/mintGames';
 import storage from '../utils/storage';
 import { useAuth } from './AuthContext';
-import { track } from '../lib/analytics';
+import { track, setAnalyticsConsent } from '../lib/analytics';
+import type { EventName, EventProps } from '../lib/analytics';
+import { featureOn } from '../config/features';
+import { now as clockNow, dayKey, daysBetween } from '../loop/clock';
+import { blockAt, dayTripReturnAt, eveningStartFor, nightTripReturnAt } from '../loop/dayPhase';
+import { evoAfterTreasure, stageOf } from '../loop/growth';
+import { EVENING_STARTS } from '../loop/types';
+import type { LoopActions, TripKind, EveningStart } from '../loop/types';
+import { tripAt } from '../data/trips';
+import { normalizeRoutine, taskKind } from '../data/taskKinds';
+import type { RoutineConfig } from '../data/taskKinds';
 
 // ── Fire-breath progression ──
 /**
@@ -156,6 +166,9 @@ export interface ExpeditionMemento {
   location: string;      // "Ein kleiner Pfad hinter den Birken"
   quote: string;         // "Im Morgenwald hat es nach nassem Moos gerochen…"
   ts: string;            // ISO collected-at
+  /** Finch pass: the trip ('t01'...) this treasure came from (src/data/trips.ts).
+   *  Absent on mementos from before the pass. */
+  tripId?: string;
 }
 
 // ── Minimal state shape for the task list ──
@@ -257,11 +270,38 @@ export interface TaskState {
     departedAt?: string;
     returnAt?: string;
     pendingMemento?: ExpeditionMemento;
+    /** Finch pass: a day trip (full morning fire) or a dream trip (full evening fire). */
+    kind?: TripKind;
+    /** Finch pass: the trip id ('t01'...) picked at departure. */
+    tripId?: string;
   };
   /** Past expedition mementos. Renders as the Naturtagebuch shelf
-   *  inside the expedition surface. Capped at 24 to keep storage
-   *  bounded (one daily memento → roughly a month of trips). */
+   *  inside the expedition surface. Capped at 60 since the Finch pass
+   *  (was 24; one treasure a day, about two months). */
   expeditionLog?: ExpeditionMemento[];
+
+  // ── Finch pass loop fields (26 Sep 2026, src/loop/types.ts LoopStateFields) ──
+  /** Opened treasures so far. Old saves: backfilled from expeditionLog.length. */
+  adventureCount?: number;
+  /** Day key (clock.dayKey) of the last departure; one trip per day. A
+   *  dream trip is stamped with the day of the evening it belongs to. */
+  lastTripDate?: string | null;
+  /** ISO time of the last departure. A new trip needs 6 hours after it
+   *  (Astra FC-08: day keys are UTC, so the key alone can let a second
+   *  trip through around UTC midnight). */
+  lastTripAt?: string | null;
+  /** Index into TRIPS of the next trip (wraps after 14). Old saves: 0. */
+  tripCursor?: number;
+  /** Trip ids whose treasure is on the shelf, in order found. */
+  treasuresFound?: string[];
+  /** Highest stage index whose GrowthBeat was shown. Old saves: stage of their catEvo. */
+  stageSeen?: number;
+  /** Whole days between the previous played day and today (set by the day transition). */
+  lastGapDays?: number;
+  /** Day key when today's return line was played. */
+  greetedDate?: string | null;
+  /** Parent "Extras zeigen" toggle. Default false. */
+  extrasEnabled?: boolean;
   /** ISO timestamp of the most recent quest completion. Used by the
    *  PWA prompt gate (and any future "quiet after task" guard) to
    *  hold modal-class notifications back during the inline beat that
@@ -305,8 +345,9 @@ export interface TaskState {
   gamesPlayedToday: string[];
   birthdayEpic: { done: string[]; completed: boolean };
   earnedTraits: string[];
-  /** ISO date (YYYY-MM-DD) when evening ritual was last completed. Resets daily. */
-  eveningRitualCompletedAt?: string;
+  /** ISO time when TonightRitual last finished (completeTonight). Older
+   *  saves may hold a plain YYYY-MM-DD. blockAt() reads it for the night block. */
+  eveningRitualCompletedAt?: string | null;
   /** Current Ronki stamina for minigames (0..minigameStaminaMax). Recharges
    *  +1 every RECHARGE_MINUTES. Only consumed when minigameAccessMode !== 'frei'. */
   ronkiStamina?: number;
@@ -551,7 +592,7 @@ interface TaskComputed {
   xpProgress: { cur: number; need: number };
 }
 
-interface TaskActions {
+interface TaskActions extends LoopActions {
   complete: (id: string) => void;
   setMood: (period: string, val: number) => void;
   drinkWater: () => void;
@@ -774,6 +815,182 @@ function pickMorgenwaldMemento(log: ExpeditionMemento[]): ExpeditionMemento {
   };
 }
 
+// ── Finch pass loop helpers (26 Sep 2026) ──
+
+/** Treasures kept in expeditionLog (was 24 before the Finch pass, then 60).
+ *  The log is the shelf and the passport's keepsakes, so the cap sits far
+ *  above any real family (one treasure a day is under 400 a year; each
+ *  entry is a few hundred bytes). Astra FC-02. */
+/** No longer applied (Astra FC-02, round 2): keepsakes are never dropped. Kept for callers. */
+export const EXPEDITION_LOG_CAP = Number.POSITIVE_INFINITY;
+
+const homeExpedition = (): NonNullable<TaskState['expedition']> => ({ state: 'home', biome: 'morgenwald' });
+
+type RonkiMood = NonNullable<TaskState['ronkiMood']>;
+
+/** Ronki's ambient mood after the expiry step (spec R10, Astra FC-04):
+ *  a mood set on an earlier day, and any 'besorgt', go back to normal.
+ *  Runs on load and in the day transition, so no retired mood (a sad or
+ *  tired bad day, a streak 'magisch') stays on his face. */
+export function expireMood(
+  mood: unknown,
+  setDate: unknown,
+  day: string,
+): { ronkiMood: RonkiMood; ronkiMoodSetDate: string | undefined } {
+  const m = (typeof mood === 'string' ? mood : 'normal') as RonkiMood;
+  const d = typeof setDate === 'string' ? setDate : undefined;
+  if (m === 'besorgt' || (m !== 'normal' && d !== day)) return { ronkiMood: 'normal', ronkiMoodSetDate: undefined };
+  return { ronkiMood: m, ronkiMoodSetDate: d };
+}
+
+/** A non-negative whole number from a save, or the fallback. */
+function wholeOr(value: unknown, fallback: number): number {
+  return typeof value === 'number' && Number.isFinite(value) && value >= 0 ? Math.floor(value) : fallback;
+}
+
+/** The expedition from a save. 'leaving' (legacy, no memento was ever
+ *  picked for it) loads as home; 'away' and 'waiting' stay exactly as
+ *  saved, including an old returnAt and pendingMemento. */
+export function migrateExpedition(raw: unknown): NonNullable<TaskState['expedition']> {
+  if (!raw || typeof raw !== 'object') return homeExpedition();
+  const e = raw as NonNullable<TaskState['expedition']>;
+  if (e.state === 'leaving') return homeExpedition();
+  if (e.state !== 'home' && e.state !== 'away' && e.state !== 'waiting' && e.state !== 'night-away') return homeExpedition();
+  return e;
+}
+
+/** Hours a new trip needs after the last departure (Astra FC-08). */
+export { TRIP_MIN_GAP_MS, tripAllowed } from '../loop/tripRules';
+import { TRIP_MIN_GAP_MS, tripAllowed } from '../loop/tripRules';
+
+/** A returnAt further ahead than this is a wrong clock: the trip is due (LOOP-5). */
+const TRIP_MAX_AHEAD_MS = 24 * 3600 * 1000;
+
+/** True when an away trip may come home at `t`: returnAt passed, is
+ *  unreadable, or lies more than a day ahead (a trip sent while the
+ *  device clock ran ahead must not stay out for days). */
+export function tripIsDue(e: { returnAt?: string } | null | undefined, t: Date): boolean {
+  const r = e?.returnAt ? Date.parse(e.returnAt) : NaN;
+  if (!Number.isFinite(r)) return true;
+  return t.getTime() >= r || r - t.getTime() > TRIP_MAX_AHEAD_MS;
+}
+
+/** ISO time as a Date, or null. */
+function parseIso(v: unknown): Date | null {
+  if (typeof v !== 'string') return null;
+  const ms = Date.parse(v);
+  return Number.isFinite(ms) ? new Date(ms) : null;
+}
+
+/** lastTripDate and lastTripAt for a loaded save (LOOP-7). A save from
+ *  before the Finch pass has neither: a trip that is away or waiting
+ *  used up the day it left, and a treasure opened today (the last shelf
+ *  entry is stamped at its departure) used up today. */
+export function tripStampsFromSave(raw: any, todayKey: string): { lastTripDate: string | null; lastTripAt: string | null } {
+  const savedDate = typeof raw?.lastTripDate === 'string' ? raw.lastTripDate : null;
+  const savedAt = parseIso(raw?.lastTripAt);
+  const e = raw?.expedition;
+  const outDeparted = e && (e.state === 'away' || e.state === 'waiting') ? parseIso(e.departedAt) : null;
+  const log = Array.isArray(raw?.expeditionLog) ? raw.expeditionLog : [];
+  const lastLogTs = log.length ? parseIso(log[log.length - 1]?.ts) : null;
+  const fromLog = lastLogTs && dayKey(lastLogTs) === todayKey ? lastLogTs : null;
+  const legacy = outDeparted || fromLog;
+  return {
+    lastTripDate: savedDate ?? (legacy ? dayKey(legacy) : null),
+    lastTripAt: savedAt ? savedAt.toISOString() : (legacy ? legacy.toISOString() : null),
+  };
+}
+
+type LoopEvent = [EventName, EventProps?];
+
+/** Opening a treasure (receiveTreasure, and the old receiveMemento path):
+ *  the memento goes to the shelf, one more adventure, the next trip,
+ *  and catEvo grows by at most one stage (spec R6, src/loop/growth.ts). */
+function openTreasure(prev: TaskState, memento: ExpeditionMemento, tripIdHint?: string): { next: TaskState; events: LoopEvent[] } {
+  // No cap: every keepsake stays on the shelf (Astra FC-02, round 2).
+  const log = [...(prev.expeditionLog || []), memento];
+  const tripId = memento.tripId || tripIdHint;
+  const found = Array.isArray(prev.treasuresFound) ? prev.treasuresFound : [];
+  // A repeat after trip 14 goes to the shelf but adds no new treasure.
+  const treasuresFound = tripId && !found.includes(tripId) ? [...found, tripId] : found;
+  const adventureCount = wholeOr(prev.adventureCount, (prev.expeditionLog || []).length) + 1;
+  // Only trips from TRIPS move the cursor; an old random memento does not
+  // use up a story.
+  const tripCursor = wholeOr(prev.tripCursor, 0) + (tripId ? 1 : 0);
+  const prevEvo = prev.catEvo || 0;
+  const catEvo = Math.max(prevEvo, evoAfterTreasure(prevEvo, adventureCount));
+  const events: LoopEvent[] = [['memento.received', { biome: memento.biome || 'morgenwald' }]];
+  const fromStage = stageOf(prevEvo);
+  const toStage = stageOf(catEvo);
+  if (toStage > fromStage) events.push(['ronki.evolve', { stage: toStage, toStage }]);
+  return {
+    next: {
+      ...prev,
+      expedition: homeExpedition(),
+      expeditionLog: log,
+      treasuresFound,
+      adventureCount,
+      tripCursor,
+      catEvo,
+    },
+    events,
+  };
+}
+
+/** Today's main quests for a routine. Today's list keeps the holiday or
+ *  school set that built it (the Ferien switch says "ab morgen"), read
+ *  from the ids of today's main quests; only without any main quest does
+ *  prev.vacMode decide. Every quest of the same kind carries over its
+ *  done, completions and streak, across the s_/v_ prefix too (LOOP-6,
+ *  KIDUX-6). Side quests stay as they are. */
+function questsForRoutine(prev: TaskState, routine: RoutineConfig): Quest[] {
+  const prevMain = (prev.quests || []).filter(q => !q.sideQuest);
+  const vacToday = prevMain.some(q => q.id.startsWith('v_'))
+    ? true
+    : prevMain.some(q => q.id.startsWith('s_')) ? false : !!prev.vacMode;
+  const old = new Map(prevMain.map(q => [q.id, q] as const));
+  const oldByKind = new Map<string, Quest>();
+  for (const q of prevMain) {
+    const k = taskKind(q.id);
+    if (k && !oldByKind.has(`${q.anchor}:${k}`)) oldByKind.set(`${q.anchor}:${k}`, q);
+  }
+  const main = buildDay(vacToday, routine)
+    .filter(q => !q.sideQuest)
+    .map(q => {
+      const same = old.get(q.id);
+      if (same) return same;
+      const k = taskKind(q.id);
+      const kin = k ? oldByKind.get(`${q.anchor}:${k}`) : undefined;
+      if (kin) return { ...q, done: kin.done, completions: kin.completions, streak: kin.streak };
+      return { ...q, streak: (prev.sm || {})[q.id] || 0 };
+    });
+  const sides = (prev.quests || []).filter(q => q.sideQuest);
+  return [...main, ...sides];
+}
+
+/** A cloud save timer later than this slept with the device (Astra SAVES-1-R2). */
+const CLOUD_SAVE_LATE_MS = 5 * 60 * 1000;
+
+/**
+ * Reload so the normal load resolves a card this session could not see
+ * (Finch pass, FC-01-R2). Loop guard: at most one such reload a minute;
+ * a second one is scheduled for when the minute is up, never skipped, so
+ * a session is never left without cloud saves for good (verifier B).
+ */
+function scheduleCardReload(token: string): void {
+  const reload = () => { try { window.location.reload(); } catch { /* ignore */ } };
+  try {
+    const key = `ronki_cloud_reload_${token.slice(0, 8)}`;
+    const last = Number(sessionStorage.getItem(key) || 0);
+    const wait = last ? 60_000 - (Date.now() - last) : 0;
+    const go = () => { try { sessionStorage.setItem(key, String(Date.now())); } catch { /* ignore */ } reload(); };
+    if (wait <= 0) go();
+    else setTimeout(go, wait);
+  } catch {
+    reload();
+  }
+}
+
 const TaskContext = createContext<TaskContextValue | null>(null);
 
 export function useTask() {
@@ -797,7 +1014,7 @@ export function cleanNickname(value: unknown): string | undefined {
 
 export function createInitialState(): TaskState {
   return {
-    quests: buildDay(false),
+    quests: buildDay(false, DEFAULT_FAMILY_CONFIG.routine),
     sm: {},
     lastDate: new Date().toISOString().slice(0, 10),
     vacMode: false,
@@ -827,6 +1044,16 @@ export function createInitialState(): TaskState {
     caveStyle: { wallpaper: 'warm-amber', floor: 'amber' },
     expedition: { state: 'home', biome: 'morgenwald' },
     expeditionLog: [],
+    // Finch pass loop fields.
+    adventureCount: 0,
+    lastTripDate: null,
+    lastTripAt: null,
+    tripCursor: 0,
+    treasuresFound: [],
+    stageSeen: 0,
+    lastGapDays: 0,
+    greetedDate: null,
+    extrasEnabled: false,
     loginBonusClaimed: false,
     onboardingDone: false,
     // Onboarding-parent-first rework (23 Apr 2026): three new gates drive
@@ -921,20 +1148,76 @@ export function createInitialState(): TaskState {
 
 export function TaskProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
-  const [state, setState] = useState<TaskState | null>(null);
+  const [state, setStateRaw] = useState<TaskState | null>(null);
   const [loading, setLoading] = useState(true);
+  // Loop telemetry (Finch pass): an action attaches its events to the
+  // state object it returns; they fire once, after that state commits.
+  // Updaters can run twice (StrictMode) or be chained in one render, so a
+  // closure flag is not reliable; events ride on the state instead, are
+  // carried forward to the next state, and fire at most once by id.
+  const pendingEvents = useRef(new WeakMap<object, Array<{ id: number; name: EventName; props?: EventProps }>>());
+  const firedEvents = useRef(new Set<number>());
+  const eventSeq = useRef(0);
+  const setState = useCallback((update: React.SetStateAction<TaskState | null>) => {
+    setStateRaw(prev => {
+      const next = typeof update === 'function'
+        ? (update as (p: TaskState | null) => TaskState | null)(prev)
+        : update;
+      if (prev && next && next !== prev) {
+        const carried = pendingEvents.current.get(prev);
+        if (carried && carried.length > 0) {
+          const own = pendingEvents.current.get(next) || [];
+          const ownIds = new Set(own.map(e => e.id));
+          pendingEvents.current.set(next, [...carried.filter(e => !ownIds.has(e.id)), ...own]);
+        }
+      }
+      return next;
+    });
+  }, []);
+  const withEvents = useCallback((next: TaskState, events: LoopEvent[]): TaskState => {
+    if (events.length === 0) return next;
+    const list = pendingEvents.current.get(next) || [];
+    pendingEvents.current.set(next, [
+      ...list,
+      ...events.map(([name, props]) => ({ id: ++eventSeq.current, name, props })),
+    ]);
+    return next;
+  }, []);
+  useEffect(() => {
+    if (!state) return;
+    const list = pendingEvents.current.get(state);
+    if (!list) return;
+    pendingEvents.current.delete(state);
+    for (const e of list) {
+      if (firedEvents.current.has(e.id)) continue;
+      firedEvents.current.add(e.id);
+      try { track(e.name, e.props); } catch { /* telemetry never breaks the app */ }
+    }
+  }, [state]);
   const [celebration, setCelebration] = useState<CelebrationEvent | null>(null);
   const [toastTrigger, setToastTrigger] = useState(0);
   const celebQueue = useRef<CelebrationEvent[]>([]);
   const [celebTick, setCelebTick] = useState(0);
   const saveTimer = useRef<ReturnType<typeof setTimeout>>();
   const cloudTimer = useRef<ReturnType<typeof setTimeout>>();
+  // SAVES-3: the latest state and whether a debounced save still waits,
+  // so leaving the page (pagehide, tab hidden) can write it at once.
+  const stateRef = useRef<TaskState | null>(null);
+  stateRef.current = state;
+  const localSavePending = useRef(false);
+  const cloudSavePending = useRef(false);
+  // Finch pass (Astra FC-01-R2): set when the card holds a row this session
+  // never loaded; cloud writes stay off until the page reloads.
+  const cloudBlockedUntilReload = useRef(false);
   // Forward-reference to syncRonkiMood so earlier-declared callbacks
   // (e.g. `complete`) can trigger it without hitting the TDZ. Assigned
   // below once syncRonkiMood is declared.
   const syncRonkiMoodRef = useRef<(() => void) | null>(null);
 
   const queueCelebration = useCallback((evt: CelebrationEvent) => {
+    // Finch pass: the full-screen victory takeover is behind its switch
+    // (the departure is the day's moment).
+    if (evt.type === 'victory' && !featureOn('victory')) return;
     celebQueue.current.push(evt);
     setCelebTick(t => t + 1); // trigger effect
   }, []);
@@ -981,7 +1264,7 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
         // Give it today's quests so it takes the normal rehydration path
         // below instead of being treated as a fresh start and overwritten.
         if (raw && !raw.quests && (raw as any).parentOnboardingDone) {
-          raw = { ...raw, quests: buildDay(false) } as GameState & TaskState;
+          raw = { ...raw, quests: buildDay(!!(raw as any).vacMode, (raw as any).familyConfig?.routine) } as GameState & TaskState;
         }
       } catch (err) {
         // eslint-disable-next-line no-console
@@ -1052,7 +1335,8 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
             : { wallpaper: 'warm-amber', floor: 'amber' },
           // Drachennest expedition state: default to home/morgenwald with an
           // empty log for legacy saves that pre-date the field.
-          expedition: (raw as any).expedition || { state: 'home', biome: 'morgenwald' },
+          // Finch pass: 'leaving' loads as home; away and waiting stay as saved.
+          expedition: migrateExpedition((raw as any).expedition),
           expeditionLog: (raw as any).expeditionLog || [],
           lastTaskCompletionAt: (raw as any).lastTaskCompletionAt,
           loginBonusClaimed: raw.loginBonusClaimed || false,
@@ -1119,8 +1403,10 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
           // Bonding Agent migration — saves predating Apr 2026 don't have
           // these fields. Default to normal mood + schedule a first bad
           // day 14-21d out so returning users aren't ambushed on next open.
-          ronkiMood: (raw as any).ronkiMood || 'normal',
-          ronkiMoodSetDate: (raw as any).ronkiMoodSetDate,
+          // Finch pass (spec R10, Astra FC-04): 'besorgt' is gone, and a
+          // mood from an earlier day (an old bad day, a streak 'magisch')
+          // expires at load, as syncRonkiMood would.
+          ...expireMood((raw as any).ronkiMood, (raw as any).ronkiMoodSetDate, today()),
           ronkiNextBadDayDate: (raw as any).ronkiNextBadDayDate || scheduleNextBadRonkiDay(new Date()),
           ronkiLearnedSkills: (raw as any).ronkiLearnedSkills || [],
           ronkiSkillPractice: (raw as any).ronkiSkillPractice || {},
@@ -1196,6 +1482,20 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
           // were silently dropped on every reload.
           // QA flag 24 Apr 2026 (C1): persistence bug.
           garden: (raw as any).garden,
+          // ── Finch pass loop fields (26 Sep 2026). Defaults for old
+          // saves; catEvo is never moved here (spec R6).
+          adventureCount: wholeOr((raw as any).adventureCount, Array.isArray((raw as any).expeditionLog) ? (raw as any).expeditionLog.length : 0),
+          // A save from before the pass: a trip out today, or a treasure
+          // from today, used up today's trip (LOOP-7).
+          ...tripStampsFromSave(raw, today()),
+          tripCursor: wholeOr((raw as any).tripCursor, 0),
+          treasuresFound: Array.isArray((raw as any).treasuresFound)
+            ? (raw as any).treasuresFound.filter((t: unknown) => typeof t === 'string')
+            : [],
+          stageSeen: wholeOr((raw as any).stageSeen, getCatStage(raw.catEvo || 0)),
+          lastGapDays: wholeOr((raw as any).lastGapDays, 0),
+          greetedDate: typeof (raw as any).greetedDate === 'string' ? (raw as any).greetedDate : null,
+          extrasEnabled: (raw as any).extrasEnabled === true,
         };
         // One-time migration: reset inflated HP from old economy
         if (!raw._v2_economy_reset) {
@@ -1249,8 +1549,9 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
             }
           }
         }
-        // Day transition: rebuild quests if date changed
-        if (s.lastDate !== today()) {
+        // Day transition: rebuild quests when the day moved forward. A
+        // clock that went back never runs a transition (LOOP-5).
+        if (!s.lastDate || s.lastDate < today()) {
           s = applyDayTransition(s);
         }
         // Ensure boss exists
@@ -1285,7 +1586,9 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!state) return;
     clearTimeout(saveTimer.current);
+    localSavePending.current = true;
     saveTimer.current = setTimeout(async () => {
+      localSavePending.current = false;
       // Merge into full GameState for storage compatibility
       const raw = await storage.load() as GameState | null;
       const merged = { ...(raw || {}), ...state } as GameState;
@@ -1299,7 +1602,36 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
     const activeToken = getActiveToken();
     if (activeToken) {
       clearTimeout(cloudTimer.current);
+      cloudSavePending.current = true;
+      const scheduledAt = Date.now();
       cloudTimer.current = setTimeout(async () => {
+        cloudSavePending.current = false;
+        // A timer that fires far too late means the device slept (Astra
+        // SAVES-1-R2): another device may have played meanwhile, so this
+        // page reloads instead of writing what it held before the sleep.
+        if (Date.now() - scheduledAt > CLOUD_SAVE_LATE_MS) {
+          storage.freezeWrites();
+          try { window.location.reload(); } catch { /* ignore */ }
+          return;
+        }
+        // Finch pass (Astra FC-01): nothing is written to a card before a
+        // cloud read for it has reached the server in this session. A
+        // failed read writes nothing (local keeps everything). A token made
+        // on this device is probed once: "no row" lets the save through.
+        if (!storage.cloudReadOk(activeToken)) {
+          const probe = await storage.cloudLoadByToken(activeToken);
+          if (!storage.cloudReadOk(activeToken)) return; // still offline
+          if (probe) {
+            // The card holds a state this session never loaded (FC-01-R2):
+            // never write over it. Cloud writes stay off until the page
+            // reloads and the normal load resolves the card; local saves
+            // go on, so nothing the child does is lost meanwhile.
+            cloudBlockedUntilReload.current = true;
+            scheduleCardReload(activeToken);
+            return;
+          }
+        }
+        if (cloudBlockedUntilReload.current) return;
         const raw = await storage.load() as GameState | null;
         const merged = { ...(raw || {}), ...state } as GameState;
         await storage.cloudSaveByToken(activeToken, merged);
@@ -1318,6 +1650,55 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
       clearTimeout(cloudTimer.current);
     };
   }, [state, user]);
+
+  // ── Leaving the page writes a waiting save at once (SAVES-3). The
+  // debounced cloud save (1.5 s) dies with a killed or evicted tab, and on
+  // a same-day tie the next cold start would take the older cloud row and
+  // replay the departure or the treasure. Only a save that still waits is
+  // written, and the cloud only after a read reached it (Astra FC-01). ──
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof document === 'undefined') return;
+    const flush = () => {
+      const s = stateRef.current;
+      if (!s) return;
+      const localDue = localSavePending.current;
+      const token = cloudSavePending.current ? getActiveToken() : null;
+      // Only right after a checked save confirmed this device is current;
+      // a page leaving must not push a state that fell behind (round 2).
+      const cloudDue = !!token && storage.cloudReadOk(token) && !cloudBlockedUntilReload.current;
+      if (!localDue && !cloudDue) return;
+      // The synchronous local mirror (storage.ts writes it on every save)
+      // stands in for the async storage.load() merge of the timers.
+      let mirror: GameState | null = null;
+      try { mirror = JSON.parse(localStorage.getItem('hdx2_drachennest') || 'null'); } catch { /* private mode */ }
+      const merged = { ...(mirror || {}), ...s } as GameState;
+      if (localDue) {
+        clearTimeout(saveTimer.current);
+        localSavePending.current = false;
+        try { void storage.save(merged); } catch { /* best effort */ }
+      }
+      if (cloudDue && token) {
+        clearTimeout(cloudTimer.current);
+        cloudSavePending.current = false;
+        try { void storage.cloudSaveByToken(token, merged); } catch { /* best effort */ }
+      }
+    };
+    const onVisibility = () => { if (document.visibilityState === 'hidden') flush(); };
+    document.addEventListener('visibilitychange', onVisibility);
+    window.addEventListener('pagehide', flush);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('pagehide', flush);
+    };
+  }, []);
+
+  // ── Consent timing (Finch pass): the parent step (or the website card)
+  // settles the consent choice. Before it, funnel events wait in memory
+  // in src/lib/analytics.ts; a yes sends them, a no drops them. ──
+  useEffect(() => {
+    if (!state?.parentOnboardingDone) return;
+    try { setAnalyticsConsent(!!state.analyticsEnabled); } catch { /* never breaks the app */ }
+  }, [state?.parentOnboardingDone, state?.analyticsEnabled]);
 
   // ── Arc on-accept hydration: tag routine beats onto matching quests ──
   useEffect(() => {
@@ -1368,7 +1749,6 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
     let activeMissions = [...(s.activeMissions || [])];
     let completedMissions = [...(s.completedMissions || [])];
     let missionHp = 0;
-    let missionEvo = 0;
     const gearAwarded: string[] = [];
 
     activeMissions = activeMissions.map(m => {
@@ -1385,7 +1765,6 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
       if (newProg >= def.target && !completedMissions.includes(m.id)) {
         completedMissions.push(m.id);
         missionHp += def.reward.hp;
-        missionEvo += def.reward.evo;
         // Award gear for this mission
         const gear = GEAR_ITEMS.find(g => g.missionId === def.id);
         if (gear && !gearAwarded.includes(gear.id)) gearAwarded.push(gear.id);
@@ -1395,10 +1774,12 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
     });
     // Remove completed missions from active
     activeMissions = activeMissions.filter(m => !completedMissions.includes(m.id) || !s.completedMissions?.includes(m.id));
-    s = { ...s, hp: (s.hp || 0) + missionHp, catEvo: (s.catEvo || 0) + missionEvo, gearInventory: [...(s.gearInventory || []), ...gearAwarded] };
+    // Finch pass (Astra FC-03, spec R6): a legacy mission keeps its record,
+    // HP and gear, but Ronki grows only when a treasure is opened.
+    s = { ...s, hp: (s.hp || 0) + missionHp, gearInventory: [...(s.gearInventory || []), ...gearAwarded] };
 
-    // Rebuild quests for today, preserve streaks
-    const quests = buildDay(s.vacMode).map(q => ({
+    // Rebuild quests for today (filtered by the family routine, spec R15), preserve streaks
+    const quests = buildDay(s.vacMode, s.familyConfig?.routine).map(q => ({
       ...q,
       streak: newSm[q.id] || 0,
     }));
@@ -1430,14 +1811,24 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
     };
     const dreamHighlights = buildHighlights(dreamSnap);
 
+    // Finch pass: whole days since the previous played day (return lines
+    // notice the return, never the absence), and a legacy 'leaving' trip
+    // settles at home.
+    const lastGapDays = Math.max(0, daysBetween(s.lastDate, today()));
+    const expedition = s.expedition?.state === 'leaving' ? homeExpedition() : s.expedition;
+
     return {
       ...s,
       quests,
       sm: newSm,
+      lastGapDays,
+      expedition,
       chestsClaimed,
       activeMissions,
       completedMissions,
       lastDate: today(),
+      // A tab left open over midnight expires yesterday's mood too (FC-04).
+      ...expireMood(s.ronkiMood, s.ronkiMoodSetDate, today()),
       dt: 0,
       moodAM: null,
       moodPM: null,
@@ -1478,6 +1869,8 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
       if (!prev) return prev;
       const q = prev.quests.find(q => q.id === id);
       if (!q) return prev;
+      // A done quest stays done; a second tap counts nothing (Finch pass).
+      if (q.done) return prev;
 
       const quests = prev.quests.map(quest => {
         if (quest.id !== id) return quest;
@@ -1661,16 +2054,24 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
       // + Ronki burp. The PWA gate now waits 8s after this stamp.
       const lastTaskCompletionAt = new Date().toISOString();
 
-      return { ...prev, quests, dt, hp, drachenEier: screenMin, xp: newXp, boss, bossTrophies, bossDmgToday, orbs, heroStats, totalTasksDone, unlockedBadges, arcEngine, bossKilledToday, arcBeatAdvancedToday, totalQuestCompletions, pendingRitual, ronkiVitals, careTokens, expedition, lastTaskCompletionAt };
+      // Telemetry (Finch pass, census 7): the live surface finally reports
+      // completions. `block` is the part of the day, `kind` the task kind.
+      const nowT = clockNow();
+      const block = blockAt(nowT, {
+        eveningStart: prev.familyConfig?.eveningStart,
+        vacation: !!prev.vacMode,
+        tonightDoneAt: prev.eveningRitualCompletedAt,
+      });
+      const kind = taskKind(id) || (q.sideQuest ? 'side' : 'other');
+      const events: LoopEvent[] = [['quest.complete', { questId: id, anchor: q.anchor, block, kind }]];
+      if ((prev.totalTasksDone || 0) === 0) events.push(['first.task.complete', { block, kind }]);
+
+      const next = { ...prev, quests, dt, hp, drachenEier: screenMin, xp: newXp, boss, bossTrophies, bossDmgToday, orbs, heroStats, totalTasksDone, unlockedBadges, arcEngine, bossKilledToday, arcBeatAdvancedToday, totalQuestCompletions, pendingRitual, ronkiVitals, careTokens, expedition, lastTaskCompletionAt };
+      return withEvents(next, events);
     });
     setToastTrigger(t => t + 1);
-    // Re-evaluate organic mood triggers right after the completion
-    // lands — fixes the case where Louis is ALREADY on the Hub tab
-    // when he ticks the last main quest of the day: without this
-    // call, Hub's mount effect has already run (empty deps), so the
-    // 'gut' flip wouldn't fire until he navigated away and back.
-    // syncRonkiMood is idempotent per day so extra calls are safe.
-    queueMicrotask(() => syncRonkiMoodRef.current?.());
+    // Finch pass (spec R10): Ronki's mood no longer follows task
+    // completion, so complete() no longer re-runs syncRonkiMood.
   }, []);
 
   // ── Set mood ──
@@ -1720,7 +2121,6 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
       let activeMissions = [...(prev.activeMissions || [])];
       let completedMissions = [...(prev.completedMissions || [])];
       let bonusHp = 0;
-      let bonusEvo = 0;
       const newGear: string[] = [];
       activeMissions = activeMissions.map(m => {
         const def = WEEKLY_MISSIONS.find(wm => wm.id === m.id);
@@ -1729,7 +2129,6 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
         if (newProg >= def.target && !completedMissions.includes(m.id)) {
           completedMissions.push(m.id);
           bonusHp += def.reward.hp;
-          bonusEvo += def.reward.evo;
           const gear = GEAR_ITEMS.find(g => g.missionId === def.id);
           if (gear && !(prev.gearInventory || []).includes(gear.id)) newGear.push(gear.id);
           queueCelebration({ type: 'victory', payload: { mission: def.title, hp: def.reward.hp, evo: def.reward.evo } });
@@ -1742,7 +2141,8 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
         // Water sip: +1 HP (was +2). Kept small-positive so the bar
         // fill still mints a tangible point but 6 sips = +6/day, not +12.
         hp: (prev.hp || 0) + 1 + bonusHp,
-        catEvo: (prev.catEvo || 0) + bonusEvo,
+        // Finch pass (Astra FC-03): no catEvo from a mission; growth comes
+        // only from opened treasures (spec R6).
         activeMissions,
         completedMissions,
         gearInventory: [...(prev.gearInventory || []), ...newGear],
@@ -1818,9 +2218,15 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
         ...prev,
         onboardingDone: true,
         onboardingDate: prev.onboardingDate || new Date().toISOString().slice(0, 10),
+        // The child just met Ronki: no "Ich hab von dir geträumt" return
+        // line on the first Nest open (KIDUX-11, own read O1).
+        greetedDate: dayKey(clockNow()),
         eggType: cfg?.eggType || prev.eggType,
         heroGender: cfg?.heroGender || prev.heroGender || null,
         catEvo: babyEvo,
+        // Finch pass: the hatch itself shows the baby look, so no
+        // GrowthBeat for it later.
+        stageSeen: Math.max(wholeOr(prev.stageSeen, 0), stageOf(babyEvo)),
         // Piece 3: one-pick-forever colorway. Only set if the onboarding flow
         // actually passed one through (re-pick flow + initial onboarding do).
         companionVariant: cfg?.companionVariant || prev.companionVariant,
@@ -1998,12 +2404,8 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const rangerDeparted = useCallback(() => {
-    // Track only on real state transitions (not no-op guards). Closure
-    // flag is set inside the updater because setState is synchronous;
-    // by the time setState returns, the flag reflects whether the
-    // transition actually fired.
-    let didDepart = false;
-    let biome: 'morgenwald' = 'morgenwald';
+    // Legacy path (hidden Expedition screen). Telemetry rides on the
+    // returned state (see withEvents) so it fires once per real departure.
     setState(prev => {
       if (!prev) return prev;
       const e = prev.expedition || { state: 'home' as const, biome: 'morgenwald' as const };
@@ -2017,10 +2419,11 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
       today14.setHours(14, 0, 0, 0);
       const returnDate = today14 > now && today14 < fourLater ? today14 : fourLater;
       const memento = pickMorgenwaldMemento(prev.expeditionLog || []);
-      didDepart = true;
-      biome = e.biome || 'morgenwald';
-      return {
+      const next: TaskState = {
         ...prev,
+        // Finch pass: the old path also uses up today's trip.
+        lastTripDate: dayKey(now),
+        lastTripAt: now.toISOString(),
         expedition: {
           state: 'away' as const,
           biome: 'morgenwald' as const,
@@ -2029,34 +2432,29 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
           pendingMemento: memento,
         },
       };
+      return withEvents(next, [['expedition.start', { biome: e.biome || 'morgenwald' }]]);
     });
-    if (didDepart) track('expedition.start', { biome });
   }, []);
 
   const rangerArrived = useCallback(() => {
-    let didArrive = false;
-    let biome: 'morgenwald' = 'morgenwald';
     setState(prev => {
       if (!prev) return prev;
       const e = prev.expedition;
       if (!e || e.state !== 'away') return prev;
-      didArrive = true;
-      biome = e.biome || 'morgenwald';
-      return { ...prev, expedition: { ...e, state: 'waiting' as const } };
+      return withEvents(
+        { ...prev, expedition: { ...e, state: 'waiting' as const } },
+        [['expedition.return', { biome: e.biome || 'morgenwald' }]],
+      );
     });
-    if (didArrive) track('expedition.return', { biome });
   }, []);
 
   const receiveMemento = useCallback(() => {
-    let didReceive = false;
-    let biome: 'morgenwald' = 'morgenwald';
+    // Legacy path (hidden Expedition screen). Since the Finch pass an
+    // opened memento counts as an adventure here too (openTreasure), so
+    // adventureCount always equals the treasures the child opened.
     setState(prev => {
       if (!prev) return prev;
       const e = prev.expedition;
-      if (e?.pendingMemento) {
-        didReceive = true;
-        biome = e.biome || 'morgenwald';
-      }
       // Vitals decay back to a baseline 70 each on adventure return
       // (Marc 25 Apr 2026 — Funken loop redesign). Without this the
       // kid would only need to fill vitals once forever; the trip
@@ -2071,15 +2469,163 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
           ronkiVitals: tiredVitals,
         };
       }
-      const log = [...(prev.expeditionLog || []), e.pendingMemento].slice(-24);
+      const opened = openTreasure(prev, e.pendingMemento, e.tripId);
+      return withEvents({ ...opened.next, ronkiVitals: tiredVitals }, opened.events);
+    });
+  }, []);
+
+  // ── Finch pass loop actions (26 Sep 2026, src/loop/types.ts LoopActions) ──
+  // Every action is an idempotent guard: in the wrong state it is a no-op.
+
+  /** home -> away. One trip per day; the trip at tripCursor. */
+  const departTrip = useCallback((kind: TripKind) => {
+    if (kind !== 'day' && kind !== 'night') return;
+    setState(prev => {
+      if (!prev) return prev;
+      const e = prev.expedition || homeExpedition();
+      if (e.state !== 'home') return prev;
+      const t = clockNow();
+      // One trip a day (tripAllowed): a dream trip belongs to the evening
+      // it starts in, also after midnight (Astra FC-08, LOOP-4), and day
+      // keys are UTC, so never two departures within 6 hours.
+      if (!tripAllowed(prev, kind, t)) return prev;
+      const key = kind === 'night' ? dayKey(eveningStartFor(t, prev.familyConfig?.eveningStart)) : dayKey(t);
+      const trip = tripAt(wholeOr(prev.tripCursor, 0));
+      const back = kind === 'day'
+        ? dayTripReturnAt(t, prev.familyConfig?.eveningStart)
+        : nightTripReturnAt(t);
+      const ts = t.toISOString();
+      const pendingMemento: ExpeditionMemento = {
+        id: `${ts}-${trip.id}`,
+        ts,
+        emoji: trip.emoji,
+        name: trip.treasure,
+        biome: 'morgenwald',
+        location: trip.place,
+        quote: trip.story,
+        tripId: trip.id,
+      };
+      const next: TaskState = {
+        ...prev,
+        lastTripDate: key,
+        // The actual departure time; the gap rule (tripRules) measures
+        // between real departures (Astra FC-08, round 2).
+        lastTripAt: ts,
+        expedition: {
+          state: 'away',
+          biome: 'morgenwald',
+          kind,
+          tripId: trip.id,
+          departedAt: ts,
+          returnAt: back.toISOString(),
+          pendingMemento,
+        },
+      };
+      return withEvents(next, [['expedition.start', { biome: 'morgenwald', kind }]]);
+    });
+  }, []);
+
+  /** away -> waiting once now >= returnAt (useTripClock calls this anywhere in the app). */
+  const arriveTrip = useCallback(() => {
+    setState(prev => {
+      if (!prev) return prev;
+      const e = prev.expedition;
+      if (!e || e.state !== 'away') return prev;
+      // A trip without a readable return time, or one more than a day
+      // ahead (wrong clock), comes home rather than stay out (LOOP-5).
+      if (!tripIsDue(e, clockNow())) return prev;
+      return withEvents(
+        { ...prev, expedition: { ...e, state: 'waiting' } },
+        [['expedition.return', { biome: e.biome || 'morgenwald' }]],
+      );
+    });
+  }, []);
+
+  /** waiting -> home with the treasure. A second call is a no-op. */
+  const receiveTreasure = useCallback(() => {
+    setState(prev => {
+      if (!prev) return prev;
+      const e = prev.expedition;
+      if (!e || e.state !== 'waiting') return prev;
+      // A waiting trip without a treasure (never written by this code)
+      // would block every later trip: settle it at home, count nothing.
+      if (!e.pendingMemento) return { ...prev, expedition: homeExpedition() };
+      const opened = openTreasure(prev, e.pendingMemento, e.tripId);
+      return withEvents(opened.next, opened.events);
+    });
+  }, []);
+
+  /** Parent routine: writes familyConfig.routine and rebuilds today's quests. */
+  const setRoutine = useCallback((routine: RoutineConfig) => {
+    setState(prev => {
+      if (!prev) return prev;
+      const r = normalizeRoutine(routine);
       return {
         ...prev,
-        expedition: { state: 'home' as const, biome: 'morgenwald' as const },
-        expeditionLog: log,
-        ronkiVitals: tiredVitals,
+        familyConfig: { ...prev.familyConfig, routine: r },
+        quests: questsForRoutine(prev, r),
       };
     });
-    if (didReceive) track('memento.received', { biome });
+  }, []);
+
+  /** Parent evening start ('17:00' to '18:30'). */
+  const setEveningStart = useCallback((value: EveningStart) => {
+    if (!EVENING_STARTS.includes(value)) return;
+    setState(prev => {
+      if (!prev || prev.familyConfig?.eveningStart === value) return prev;
+      const next: TaskState = { ...prev, familyConfig: { ...prev.familyConfig, eveningStart: value } };
+      // A day trip that is out comes home at the new evening start (the
+      // picker promises that). The trip clock brings him home at once if
+      // that time already passed. A waiting treasure and a dream trip keep
+      // their times (Astra FC-09).
+      const e = prev.expedition;
+      if (e && e.state === 'away' && e.kind === 'day') {
+        const left = parseIso(e.departedAt) || clockNow();
+        next.expedition = { ...e, returnAt: dayTripReturnAt(left, value).toISOString() };
+      }
+      return next;
+    });
+  }, []);
+
+  /** The GrowthBeat for this stage was shown. Never goes down. */
+  const markStageSeen = useCallback((stage: number) => {
+    if (typeof stage !== 'number' || !Number.isFinite(stage)) return;
+    setState(prev => {
+      if (!prev) return prev;
+      const v = Math.floor(stage);
+      return v > wholeOr(prev.stageSeen, 0) ? { ...prev, stageSeen: v } : prev;
+    });
+  }, []);
+
+  /** Today's return line was played. */
+  const markGreeted = useCallback(() => {
+    setState(prev => {
+      if (!prev) return prev;
+      const key = dayKey(clockNow());
+      return prev.greetedDate === key ? prev : { ...prev, greetedDate: key };
+    });
+  }, []);
+
+  /** TonightRitual finished: the night block starts. */
+  const completeTonight = useCallback(() => {
+    setState(prev => prev ? { ...prev, eveningRitualCompletedAt: clockNow().toISOString() } : prev);
+  }, []);
+
+  /** Parent "Extras zeigen" toggle. */
+  const setExtras = useCallback((on: boolean) => {
+    const v = !!on;
+    setState(prev => (!prev || prev.extrasEnabled === v) ? prev : { ...prev, extrasEnabled: v });
+  }, []);
+
+  /** The load path's day transition, when the day changed while the app stayed open. */
+  const checkNewDay = useCallback(() => {
+    setState(prev => {
+      if (!prev) return prev;
+      // Only forward: a clock set back (or a key from another device's
+      // clock) never rebuilds the day (LOOP-5).
+      if (prev.lastDate && dayKey(clockNow()) <= prev.lastDate) return prev;
+      return applyDayTransition(prev);
+    });
   }, []);
 
   // ── Save journal (also archives to history) ──
@@ -2417,88 +2963,38 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   // ── Bonding Agent: Ronki mood scheduler ──
-  // Called from Hub + RonkiProfile mount, and after every quest complete.
-  // Responsibilities:
-  //   1. Expire yesterday's non-normal mood — ronkiMoodSetDate !== today
-  //      flips back to 'normal'. (Moods are one-day events.)
-  //   2. Organic triggers (Apr 2026 expansion) — idempotent per day:
-  //      · magisch  → streak milestone (7/14/21/30/50/75/100 days)
-  //      · gut      → all main quests done today
-  //      · besorgt  → kid just opened after 2+ days away
-  //   3. Scheduled bad day — keep existing sad/tired pick.
-  // Priority: magisch > gut > besorgt > scheduled-bad. Once one fires,
-  // others short-circuit until the next day.
+  // Called from Hub + RonkiProfile mount.
+  // Finch pass (26 Sep 2026, spec R10): Ronki's warmth never depends on
+  // tasks. Removed: the hidden streak 'magisch' (7/14/21... days of a
+  // per-quest streak), 'gut' only when all main quests are done, and the
+  // 'besorgt' step after two days away. What is left:
+  //   1. A mood set on an earlier day expires back to 'normal'; a stored
+  //      'besorgt' always does.
+  //   2. The scheduled bad day (random sad or tired) runs only when
+  //      featureOn('badDays') (off: its comfort UI is unreachable).
   const syncRonkiMood = useCallback(() => {
     setState(prev => {
       if (!prev) return prev;
       const t = today();
       let next = prev;
 
-      // Step 1 — expire yesterday's non-normal mood
-      if (next.ronkiMood && next.ronkiMood !== 'normal' && next.ronkiMoodSetDate !== t) {
+      // Step 1: expire an earlier day's mood, and any 'besorgt'.
+      if (next.ronkiMood === 'besorgt'
+        || (next.ronkiMood && next.ronkiMood !== 'normal' && next.ronkiMoodSetDate !== t)) {
         next = { ...next, ronkiMood: 'normal', ronkiMoodSetDate: undefined };
       }
 
-      // Don't overwrite an already-set mood from earlier today.
-      const alreadySetToday =
-        next.ronkiMoodSetDate === t && (next.ronkiMood || 'normal') !== 'normal';
-
-      if (!alreadySetToday) {
-        // Step 2a — magisch on streak milestones.
-        //
-        // Code-review fix (22 Apr 2026): `state.streak` is not a field
-        // on TaskState (the `streak` prop in the schema belongs to a
-        // Quest, not the user). The prior milestone check read
-        // `next.streak` which was always undefined → dead code. Derive
-        // an effective day-streak from the max-consistent quest in
-        // `sm` (skill-map of per-quest consecutive-day counts). A kid
-        // keeping their routine for 7 days will have at least one
-        // quest at streak=7 in sm. Not perfect ("best quest streak"
-        // ≠ "session streak") but fires at the intended moments
-        // without a schema migration.
-        const smVals = Object.values(next.sm || {});
-        const effectiveStreak = smVals.length > 0
-          ? Math.max(...smVals.map(v => Number(v) || 0))
-          : 0;
-        const STREAK_MILESTONES = new Set([7, 14, 21, 30, 50, 75, 100, 150, 200, 365]);
-        if (STREAK_MILESTONES.has(effectiveStreak)) {
-          next = { ...next, ronkiMood: 'magisch', ronkiMoodSetDate: t };
-        }
-        // Step 2b — gut when all main quests done today
-        else {
-          const mainQuests = (next.quests || []).filter(q => !q.sideQuest);
-          const mainAllDone = mainQuests.length > 0 && mainQuests.every(q => q.done);
-          if (mainAllDone) {
-            next = { ...next, ronkiMood: 'gut', ronkiMoodSetDate: t };
-          }
-        }
-        // Step 2c — besorgt on long absence. QA fix (22 Apr 2026):
-        // old code used `Math.floor((now - last) / 86_400_000)` in
-        // epoch-ms, which silently miscounts across DST transitions
-        // (spring-forward: legitimate 2-day gap reads as 1). Switch
-        // to YYYY-MM-DD string parsing + UTC day-count so DST doesn't
-        // suppress the trigger.
-        if ((next.ronkiMood || 'normal') === 'normal' && next.lastDate) {
-          const dayNum = (iso: string) => {
-            const [y, m, d] = iso.split('-').map(Number);
-            return Date.UTC(y, (m || 1) - 1, d || 1) / 86_400_000;
+      // Step 2: scheduled bad day, only behind its switch.
+      if (featureOn('badDays')) {
+        const due = next.ronkiNextBadDayDate && t >= next.ronkiNextBadDayDate;
+        if ((next.ronkiMood || 'normal') === 'normal' && due) {
+          next = {
+            ...next,
+            ronkiMood: pickBadRonkiMood(),
+            ronkiMoodSetDate: t,
+            ronkiNextBadDayDate: scheduleNextBadRonkiDay(new Date()),
           };
-          const daysSince = dayNum(t) - dayNum(next.lastDate);
-          if (daysSince >= 2) {
-            next = { ...next, ronkiMood: 'besorgt', ronkiMoodSetDate: t };
-          }
         }
-      }
-
-      // Step 3 — scheduled bad day (existing). Only if nothing else fired.
-      const due = next.ronkiNextBadDayDate && t >= next.ronkiNextBadDayDate;
-      if ((next.ronkiMood || 'normal') === 'normal' && due) {
-        next = {
-          ...next,
-          ronkiMood: pickBadRonkiMood(),
-          ronkiMoodSetDate: t,
-          ronkiNextBadDayDate: scheduleNextBadRonkiDay(new Date()),
-        };
       }
 
       return next === prev ? prev : next;
@@ -2772,7 +3268,7 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
   })() : emptyComputed;
 
   return (
-    <TaskContext.Provider value={{ state, computed, actions: { complete, setMood, drinkWater, feedCompanion, petCompanion, playCompanion, collectLoginBonus, completeOnboarding, teachBreath, dismissPendingRitual, setEmojiCode, addFriend, markWinkSeen, recordWinkSent, setCaveStyle, setExpedition, startExpedition, rangerDeparted, rangerArrived, receiveMemento, saveJournal, redeemReward, dismissCelebration, startMission, abandonMission, addHP, claimGameReward, consumeStamina, restoreStamina, equipGear, unequipGear, updateBirthdayEpic, updateFamilyConfig, patchState, completeSpecialQuest, recordViewVisit, spawnEgg, collectEgg, fireCelebration, createQuestLine, updateQuestLine, completeQuestLineDay, archiveQuestLine, logFeeling, claimMintBadge, recordMintGamePlay, syncRonkiMood, pickRonkiSadReaction, practiceSkill, markLearnBannerSeen, markTabUnlockSeen, markTabCoachmarkSeen, completeHabit, addCrystals, spendCrystals, giftCrystalToFreund, plantSeed, placeDecor, moveDecor, removeDecor, witnessPlant }, loading, celebration, toastTrigger }}>
+    <TaskContext.Provider value={{ state, computed, actions: { complete, setMood, drinkWater, feedCompanion, petCompanion, playCompanion, collectLoginBonus, completeOnboarding, teachBreath, dismissPendingRitual, setEmojiCode, addFriend, markWinkSeen, recordWinkSent, setCaveStyle, setExpedition, startExpedition, rangerDeparted, rangerArrived, receiveMemento, saveJournal, redeemReward, dismissCelebration, startMission, abandonMission, addHP, claimGameReward, consumeStamina, restoreStamina, equipGear, unequipGear, updateBirthdayEpic, updateFamilyConfig, patchState, completeSpecialQuest, recordViewVisit, spawnEgg, collectEgg, fireCelebration, createQuestLine, updateQuestLine, completeQuestLineDay, archiveQuestLine, logFeeling, claimMintBadge, recordMintGamePlay, syncRonkiMood, pickRonkiSadReaction, practiceSkill, markLearnBannerSeen, markTabUnlockSeen, markTabCoachmarkSeen, completeHabit, addCrystals, spendCrystals, giftCrystalToFreund, plantSeed, placeDecor, moveDecor, removeDecor, witnessPlant, departTrip, arriveTrip, receiveTreasure, setRoutine, setEveningStart, markStageSeen, markGreeted, completeTonight, setExtras, checkNewDay }, loading, celebration, toastTrigger }}>
       {children}
     </TaskContext.Provider>
   );
