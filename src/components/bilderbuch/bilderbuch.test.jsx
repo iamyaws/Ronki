@@ -36,6 +36,9 @@ describe('resolveRonkiArt', () => {
     expect(resolveRonkiArt({ animated: true, mood: 'sad' })).toMatch(/ronki\/heavy\.webp$/);
     expect(resolveRonkiArt({ animated: true, stage: 1 })).toMatch(/ronki\/baby\.webp$/);
     expect(resolveRonkiArt({ animated: true, reduced: true })).toMatch(/ronki\/calm\.webp$/);
+    // grown and legendary keep their look with motion on (Astra design review R4)
+    expect(resolveRonkiArt({ animated: true, stage: 4 })).toMatch(/ronki\/grown\.webp$/);
+    expect(resolveRonkiArt({ animated: true, stage: 5 })).toMatch(/ronki\/legendary\.webp$/);
   });
 });
 

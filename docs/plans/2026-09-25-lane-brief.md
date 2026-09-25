@@ -29,7 +29,7 @@ Everything else is read-only for you, in particular `src/components/bilderbuch/*
 5. Every Ronki comes from `MoodChibi`, `RonkiPortrait` or `RonkiArt`; no CSS dragons, no `art/companion/*`, `art/dragon*` or other old painterly Ronki files. Other creatures (Freunde, micropedia) may keep their old art for now.
 6. Icons: `DoodleIcon`, not Material Symbols, on every screen you touch.
 7. Kid copy stays as it is unless it is broken; any copy you add is first-grader German (short, concrete, imperative). No em-dashes anywhere, in copy, comments or code.
-8. Motion guardrails for ages 5 to 8 (from the research memo): celebrations under 1.5 s, nothing flashes more than three times a second, everything honours `prefers-reduced-motion` (use `useReducedMotion` from the bilderbuch folder), Ronki is never sad or disappointed because a task was skipped, sound stays off by default.
+8. Motion guardrails for ages 5 to 8 (from the research memo): celebrations under 1.5 s, nothing flashes more than three times a second, everything honours `prefers-reduced-motion` (use `useReducedMotion` from the bilderbuch folder), Ronki is never sad or disappointed because a task was skipped. (Correction after Astra's design review: the app's voice is on by default by Marc's April 2026 decision, because the voice lines are the reading aid; do not change the default.)
 9. Behaviour stays: state, storage, analytics events, routing, timers, voice lines, unlock rules. This is a visual layer. If a visual change needs a behaviour change, stop and report it instead.
 10. Readability: body text at least the existing kid scale (16 px floor for labels), transient text visible at least 3 s.
 

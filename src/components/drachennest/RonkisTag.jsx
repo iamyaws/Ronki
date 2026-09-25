@@ -60,10 +60,13 @@ function artFor(quest) {
   const icon = (quest?.icon || '').toLowerCase();
   const all = `${id} ${name} ${icon}`;
   if (/aufsteh|wach|wake|morgen-start|bett kommen|aus dem bett/.test(all)) return 'sun';
-  if (/zahn|tooth|brush/.test(all))         return 'toothbrush';
+  // 'zähn' too: "Zähne putzen" never matched 'zahn', so teeth fell back
+  // to the sparkle (found 25 Sep 2026).
+  if (/zahn|zähn|tooth|teeth|brush/.test(all)) return 'toothbrush';
   if (/pyjama|schlafan/.test(all))           return 'pajama';
   if (/anzieh|kleid|wäsche|clothes|shirt/.test(all)) return 'shirt';
-  if (/wasser|water|trinken|cup|wasch/.test(all)) return 'water';
+  if (/wasch|gesicht|seife|dusch/.test(all))  return 'wash';
+  if (/wasser|water|trinken|cup/.test(all))  return 'water';
   if (/essen|food|frühstück|mahlzeit|brot/.test(all)) return 'plate';
   if (/lese|book|buch|vorles/.test(all))     return 'book';
   if (/hausaufgab|schule|homework/.test(all)) return 'homework';
@@ -81,6 +84,7 @@ const DOODLE = {
   sun:        { name: 'sun', color: 'var(--color-sun)', filled: true },
   toothbrush: { name: 'sparkle', color: 'var(--color-sky)', filled: true },
   water:      { name: 'drop', color: 'var(--color-cobalt)', filled: true },
+  wash:       { name: 'drop', color: 'var(--color-sky)', filled: true },
   plate:      { name: 'egg', color: 'var(--color-ink)', filled: false },
   book:       { name: 'book', color: 'var(--color-ink)', filled: false },
   homework:   { name: 'scribble', color: 'var(--color-cobalt)', filled: false },
@@ -222,12 +226,25 @@ export default function RonkisTag({ onClose, onOpenExpedition, onOpenTonight }) 
     setCheer(c => ({ key: c.key + 1, big: false }));
   };
 
-  const readAloud = () => {
-    VoiceAudio.playNarrator('tag_intro_01', 0);
-  };
+  // Open on the block that is "now": in the afternoon or evening the
+  // morning picture and its cards would otherwise push the current task
+  // below the fold (Astra design review R3). Order and rules unchanged.
+  const stripRef = useRef(null);
+  useEffect(() => {
+    if (phase === 'morning') return undefined;
+    const t = setTimeout(() => {
+      const box = stripRef.current;
+      const el = box?.querySelector('[data-current-block="true"]');
+      if (!box || !el) return;
+      const top = el.getBoundingClientRect().top - box.getBoundingClientRect().top + box.scrollTop - 76;
+      box.scrollTo({ top: Math.max(0, top), behavior: 'auto' });
+    }, 120);
+    return () => clearTimeout(t);
+  }, [phase]);
 
   return (
     <div
+      ref={stripRef}
       role="dialog"
       aria-modal="true"
       aria-label="Ronkis Tag"
@@ -246,9 +263,9 @@ export default function RonkisTag({ onClose, onOpenExpedition, onOpenTonight }) 
             title="Ronkis Tag"
             onBack={onClose}
             backLabel="Zurück zur Höhle"
-            right="sound"
-            onRight={readAloud}
-            rightLabel="Vorlesen"
+            /* No read-aloud button: the narrator track is hard-muted
+               since 27 Apr 2026, so it would do nothing (Astra design
+               review R2). Bring it back with a Ronki voice line. */
             className="bg-white"
             style={{ top: 0 }}
           />
@@ -395,7 +412,7 @@ function firstUndone(list) {
 
 function StripSection({ children, icon, iconColor, hint, current, done }) {
   return (
-    <div className="flex items-center" style={{ gap: 10, margin: '26px 2px 12px' }}>
+    <div className="flex items-center" data-current-block={current ? 'true' : undefined} style={{ gap: 10, margin: '26px 2px 12px' }}>
       <span className="flex items-center" style={{ color: iconColor }}>
         <DoodleIcon name={icon} size={26} filled={icon !== 'leaf'} />
       </span>
@@ -530,13 +547,48 @@ function TaskDoodle({ quest, phase, state, variant, stageIdx, compact = false })
         opacity: state === 'past' ? 0.6 : 1,
       }}
     >
-      <DoodleIcon name={d.name} size={icon} filled={d.filled} />
+      <TaskPicture kind={kind} size={compact ? 34 : 64} fallback={d} />
       {inScene && !compact && (
         <span className="absolute" style={{ right: -10, bottom: -10 }}>
           <MoodChibi size={40} variant={variant} stage={stageIdx} mood={sleepy ? 'tired' : 'normal'} face />
         </span>
       )}
     </div>
+  );
+}
+
+// ── TaskPicture: what the task is, drawn (Astra design review R2) ─
+// A first grader reads the picture, not the word, so each task family
+// has its own crayon picture from the Ronki art set (tasks sheet,
+// Higgsfield, 25 Sep 2026). Unknown tasks keep the sparkle doodle.
+const TASK_ART = {
+  sun: 'wake', toothbrush: 'toothbrush', water: 'water', wash: 'wash',
+  plate: 'plate', book: 'book', homework: 'homework', pajama: 'pajama',
+  shirt: 'shirt', bag: 'bag', move: 'move', nightlight: 'nightlight',
+};
+const TASK_ART_BASE = `${import.meta.env.BASE_URL}art/bilderbuch/tasks/`;
+
+function TaskPicture({ kind, size, fallback }) {
+  const [failed, setFailed] = useState(false);
+  const file = TASK_ART[kind];
+  if (!file || failed) {
+    const d = fallback || DOODLE.badge;
+    return (
+      <span style={{ color: d.color, lineHeight: 0 }}>
+        <DoodleIcon name={d.name} size={Math.round(size * 0.72)} filled={d.filled} />
+      </span>
+    );
+  }
+  return (
+    <img
+      src={`${TASK_ART_BASE}${file}.webp`}
+      alt=""
+      draggable={false}
+      decoding="async"
+      loading="lazy"
+      onError={() => setFailed(true)}
+      style={{ width: size, height: size, objectFit: 'contain', display: 'block' }}
+    />
   );
 }
 
@@ -548,12 +600,11 @@ function CollapsedGrid({ quests }) {
   return (
     <div className="grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
       {quests.map(q => {
-        const d = DOODLE[artFor(q)] || DOODLE.badge;
+        const kind = artFor(q);
+        const d = DOODLE[kind] || DOODLE.badge;
         return (
           <PaperCard key={q.id} tone="white" pad="sm" className="relative flex flex-col items-center gap-1 text-center min-w-0" style={{ opacity: q.done ? 0.85 : 1 }}>
-            <span style={{ color: d.color }}>
-              <DoodleIcon name={d.name} size={30} filled={d.filled} />
-            </span>
+            <TaskPicture kind={kind} size={40} fallback={d} />
             <span
               className="font-headline font-semibold text-ink w-full"
               style={{
@@ -583,7 +634,9 @@ function AnchorCompleteCard({ onOpenExpedition }) {
     <PaperCard tone="sun" pad="md" lift className="relative overflow-visible" style={{ marginTop: 20 }}>
       <StickerBurst active={burst} size={300} count={22} onDone={() => setBurst(false)} />
       <div className="flex items-center gap-3">
-        <RonkiArt pose="cheer" animated size={96} />
+        {/* The still cheer with a short bob; the 4 s cheer clip broke the
+            1.5 s rule for celebrations (Astra design review R5). */}
+        <RonkiArt pose="cheer" idle="bb-idle-bob" size={96} />
         <div className="min-w-0 flex-1">
           <div className="bb-hand text-ink uppercase" style={{ fontSize: 18, lineHeight: 1 }}>Morgen ist gemacht</div>
           <div className="font-headline font-semibold text-ink" style={{ fontSize: 18, lineHeight: 1.3, marginTop: 6 }}>

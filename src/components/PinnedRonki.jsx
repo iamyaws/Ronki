@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import MoodChibi from './MoodChibi';
+import MoodChibi, { ambientMood as toAmbient } from './MoodChibi';
 import { useQuestEater } from './QuestEater';
 import { useTask } from '../context/TaskContext';
 import { SpeechBubble, MotionTicks } from './bilderbuch';
@@ -58,7 +58,7 @@ export default function PinnedRonki({
   const blockTotal = blockQuests.length;
   const pct = blockTotal > 0 ? blockDone / blockTotal : 0;
   const allDone = blockTotal > 0 && blockDone === blockTotal;
-  const ambientMood = state?.ronkiMood || 'normal';
+  const ambientMood = toAmbient(state?.ronkiMood);
   const variant = state?.companionVariant || 'amber';
   const pillRef = useRef(null);
   useEffect(() => {

@@ -40,12 +40,13 @@ describe('RonkisTag (Bilderbuch)', () => {
   });
 
   it('paints the day on white with the shared top bar, block headers and paper cards', () => {
-    const { getByText, getByLabelText, container, queryByText } = render(
+    const { getByText, getByLabelText, queryByLabelText, container, queryByText } = render(
       <RonkisTag onClose={() => {}} onOpenExpedition={() => {}} onOpenTonight={() => {}} />,
     );
     expect(getByText('Ronkis Tag')).toBeTruthy();
     expect(getByLabelText('Zurück zur Höhle')).toBeTruthy();
-    expect(getByLabelText('Vorlesen')).toBeTruthy();
+    // no dead read-aloud button while the narrator is muted (Astra design review R2)
+    expect(queryByLabelText('Vorlesen')).toBeNull();
     expect(getByText('Morgen')).toBeTruthy();
     expect(getByText('Abend')).toBeTruthy();
     // The morning scene sits at the top, the old CSS props are gone.
@@ -54,7 +55,8 @@ describe('RonkisTag (Bilderbuch)', () => {
     // Every task is a button with a doodle in it.
     const card = getByLabelText(/Frühstücken/);
     expect(card.tagName).toBe('BUTTON');
-    expect(card.querySelector('svg')).toBeTruthy();
+    // the task shows its own picture: a plate for breakfast (Astra design review R2)
+    expect(card.querySelector('img[src*="tasks/plate"]')).toBeTruthy();
     expect(queryByText('Ein guter Tag.')).toBeNull();
   });
 

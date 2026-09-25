@@ -34,6 +34,7 @@ export default function SceneLoop({
   alt = '',
   fill = true,
   priority = false,
+  paused = false,
   className = '',
   style,
   children,
@@ -67,18 +68,21 @@ export default function SceneLoop({
     };
 
     const onVisibility = () => {
-      if (document.hidden) v.pause();
+      if (document.hidden || paused) v.pause();
       else tryPlay();
     };
 
-    tryPlay();
+    // `paused`: the scene is covered (an overlay is open), so stop
+    // decoding; the last frame stays on screen underneath.
+    if (paused) v.pause();
+    else tryPlay();
     document.addEventListener('visibilitychange', onVisibility);
     return () => {
       cancelled = true;
       document.removeEventListener('visibilitychange', onVisibility);
       v.pause();
     };
-  }, [wantVideo, video]);
+  }, [wantVideo, video, paused]);
 
   const layer = { position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition };
 

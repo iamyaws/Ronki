@@ -10,7 +10,7 @@ import { isDevMode } from '../utils/mode';
 import { getVariant } from '../data/companionVariants';
 import SFX from '../utils/sfx';
 import { useGameAccess } from '../hooks/useGameAccess';
-import MoodChibi, { RonkiArt } from './MoodChibi';
+import MoodChibi, { RonkiArt, ambientMood } from './MoodChibi';
 import { PaperCard, DoodleIcon, ChoiceTile, SpeechBubble, MotionTicks } from './bilderbuch';
 import ChibiFriend, { hasChibiFriend } from './drachennest/ChibiFriend';
 // RealFriends deleted Apr 2026 (cut #10c). Three-emoji-code social
@@ -421,7 +421,7 @@ export default function RonkiProfile({ onNavigate }) {
   // been around for two days; per the Bilderbuch motion guardrails
   // Ronki is never shown worried or sad because something was skipped,
   // so that mood draws as calm here (state is untouched).
-  const heroMood = ronkiMood === 'besorgt' ? 'normal' : ronkiMood;
+  const heroMood = ambientMood(ronkiMood);
   const moodCopy = MOOD_CARD_COPY[ronkiMood] || MOOD_CARD_COPY.normal;
   const quiet = ronkiMood === 'sad' || ronkiMood === 'tired';
 

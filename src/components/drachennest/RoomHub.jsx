@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { useTask } from '../../context/TaskContext';
 import { getCatStage } from '../../utils/helpers';
 import { track } from '../../lib/analytics';
-import MoodChibi from '../MoodChibi';
+import MoodChibi, { ambientMood } from '../MoodChibi';
 import VoiceAudio from '../../utils/voiceAudio';
 import {
   PillButton,
@@ -12,6 +12,7 @@ import {
   DoodleIcon,
   SceneLoop,
 } from '../bilderbuch';
+import FeelingDoodle from '../JournalFeelings';
 import RonkiSpeechBubble from './RonkiSpeechBubble';
 import { SunCheck } from './RoomHubBits';
 import Expedition from './Expedition';
@@ -112,7 +113,7 @@ export default function RoomHub({ onNavigate }) {
 
   const variant = state?.companionVariant || 'forest';
   const stageIdx = getCatStage(state?.catEvo ?? 0);
-  const mood = state?.ronkiMood || 'normal';
+  const mood = ambientMood(state?.ronkiMood);
   const heroName = state?.familyConfig?.childName || state?.heroName || 'du';
 
   // Scene measurement: the frame's box decides how the poster is
@@ -255,7 +256,7 @@ export default function RoomHub({ onNavigate }) {
               height: geo.drawnH,
             }}
           >
-            <SceneLoop poster={POSTER} video={LOOP} priority objectPosition="50% 50%" />
+            <SceneLoop poster={POSTER} video={LOOP} priority objectPosition="50% 50%" paused={showExpedition || showPresence || showStyleSheet} />
 
             {/* Ronki, a cut-out on the cushion. */}
             <button
@@ -293,7 +294,7 @@ export default function RoomHub({ onNavigate }) {
                     stage={stageIdx}
                     mood={mood}
                     bare
-                    animated
+                    animated={!showExpedition && !showPresence && !showStyleSheet}
                     style={{ width: '100%', height: '100%' }}
                   />
                 </div>
@@ -578,16 +579,16 @@ export default function RoomHub({ onNavigate }) {
 
 // ─── Helpers ──────────────────────────────────────────────────
 
-// Ronki asks how the day feels. Six feelings as choice tiles with the
-// shared doodle set (sun for gut, sparkle for magisch, cloud for okay,
-// drop for traurig, tangle for besorgt, moon for müde). One tap picks.
+// Ronki asks how the day feels. Six feelings as choice tiles, drawn
+// with the same FeelingDoodle as the Tagebuch and the Buch, so one
+// feeling has one picture everywhere (Astra design review R7).
 const MOODS = [
-  { idx: 3, label: 'Gut', doodle: 'sun', color: 'var(--color-sun)', filled: true },
-  { idx: 4, label: 'Magisch', doodle: 'sparkle', color: 'var(--color-sun)', filled: true },
-  { idx: 2, label: 'Okay', doodle: 'cloud', color: 'var(--color-sky)', filled: false },
-  { idx: 0, label: 'Traurig', doodle: 'drop', color: 'var(--color-cobalt)', filled: true },
-  { idx: 1, label: 'Besorgt', doodle: 'tangle', color: 'var(--color-worry)', filled: false },
-  { idx: 5, label: 'Müde', doodle: 'moon', color: 'var(--color-night)', filled: true },
+  { idx: 3, label: 'Gut' },
+  { idx: 4, label: 'Magisch' },
+  { idx: 2, label: 'Okay' },
+  { idx: 0, label: 'Traurig' },
+  { idx: 1, label: 'Besorgt' },
+  { idx: 5, label: 'Müde' },
 ];
 
 function RonkiMoodPrompt({ heroName, variant, stageIdx, onPick }) {
@@ -614,12 +615,11 @@ function RonkiMoodPrompt({ heroName, variant, stageIdx, onPick }) {
           <ChoiceTile
             key={m.idx}
             label={m.label}
-            doodle={m.doodle}
-            doodleColor={m.color}
-            filled={m.filled}
             className="w-full"
             onClick={() => onPick(m.idx)}
-          />
+          >
+            <FeelingDoodle idx={m.idx} size={44} />
+          </ChoiceTile>
         ))}
       </div>
     </section>

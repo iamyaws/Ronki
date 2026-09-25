@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import useReducedMotion from './bilderbuch/useReducedMotion';
 
 /**
@@ -46,6 +46,19 @@ export const MOOD_TO_ART = {
   proud: 'proud',
 };
 
+/**
+ * ambientMood: the mood to show for Ronki's everyday state. TaskContext
+ * sets 'besorgt' when a kid comes back after two or more days away; the
+ * no-pressure rule says Ronki never looks worried because a kid was away,
+ * so ambient views show him calm. Feelings exercises that pass 'besorgt'
+ * on purpose (GedankenWolken and friends) do not go through this.
+ * (Astra design review R1, 25 Sep 2026.)
+ */
+export function ambientMood(mood) {
+  if (!mood || mood === 'besorgt' || mood === 'worried') return 'normal';
+  return mood;
+}
+
 const IDLE_CLASS = {
   calm: 'bb-idle-breathe',
   happy: 'bb-idle-bob',
@@ -83,11 +96,14 @@ export function resolveRonkiArt({ mood = 'normal', stage = 2, animated = false, 
     return egg === 'cream' ? `${ART_BASE}ronki/baby.webp` : `${ART_BASE}ronki/baby-${egg}.webp`;
   }
   if (st === 1) return `${ART_BASE}ronki/${moodKey}.webp`;
-  if (animated && !reduced && (moodKey === 'calm' || moodKey === 'happy')) {
-    return `${ART_BASE}loops/ronki-idle.webp`;
-  }
+  // Growth stages come before the idle loop: the loop only exists for
+  // the young Ronki, so a grown or legendary Ronki keeps his own look and
+  // breathes with the CSS idle instead (Astra design review R4).
   if (st >= 5 && moodKey === 'calm') return `${ART_BASE}ronki/legendary.webp`;
   if (st === 4 && moodKey === 'calm') return `${ART_BASE}ronki/grown.webp`;
+  if (animated && !reduced && st <= 3 && (moodKey === 'calm' || moodKey === 'happy')) {
+    return `${ART_BASE}loops/ronki-idle.webp`;
+  }
   return `${ART_BASE}ronki/${moodKey}.webp`;
 }
 
@@ -111,6 +127,51 @@ function useArtSource(candidates) {
   const src = candidates[idx];
   const onError = () => setIdx((i) => i + 1);
   return { src, onError, exhausted: idx >= candidates.length };
+}
+
+/** After this long without a tap anywhere, animated Ronkis rest as stills. */
+const IDLE_CUTOFF_MS = 60000;
+
+/**
+ * useAnimationGate: an animated WebP cannot be paused, so the loop is
+ * only mounted while it is worth decoding: the element is on screen, the
+ * tab is visible, and someone touched the screen in the last minute. Any
+ * tap brings the loop back. (Astra design review R8: weight on cheap
+ * tablets.)
+ */
+function useAnimationGate(ref, wanted) {
+  const [onScreen, setOnScreen] = useState(true);
+  const [pageVisible, setPageVisible] = useState(
+    typeof document === 'undefined' ? true : !document.hidden,
+  );
+  const [awake, setAwake] = useState(true);
+  useEffect(() => {
+    if (!wanted) return undefined;
+    const el = ref.current;
+    let io;
+    if (el && typeof IntersectionObserver !== 'undefined') {
+      io = new IntersectionObserver((entries) => {
+        setOnScreen(entries.some((e) => e.isIntersecting));
+      });
+      io.observe(el);
+    }
+    const onVis = () => setPageVisible(!document.hidden);
+    document.addEventListener('visibilitychange', onVis);
+    let timer = setTimeout(() => setAwake(false), IDLE_CUTOFF_MS);
+    const poke = () => {
+      setAwake(true);
+      clearTimeout(timer);
+      timer = setTimeout(() => setAwake(false), IDLE_CUTOFF_MS);
+    };
+    window.addEventListener('pointerdown', poke, { passive: true });
+    return () => {
+      io?.disconnect();
+      document.removeEventListener('visibilitychange', onVis);
+      window.removeEventListener('pointerdown', poke);
+      clearTimeout(timer);
+    };
+  }, [ref, wanted]);
+  return wanted && onScreen && pageVisible && awake;
 }
 
 function ArtImage({ candidates, label, imgStyle }) {
@@ -149,8 +210,10 @@ export default function MoodChibi({
   style,
 }) {
   const reduced = useReducedMotion();
+  const boxRef = useRef(null);
+  const live = useAnimationGate(boxRef, animated && !reduced);
   const moodKey = MOOD_TO_ART[mood] || 'calm';
-  const primary = resolveRonkiArt({ mood, stage, animated, reduced, variant });
+  const primary = resolveRonkiArt({ mood, stage, animated: live, reduced, variant });
   const isLoop = primary.includes('/loops/');
   const still = isLoop ? resolveRonkiArt({ mood, stage, variant }) : null;
   const plain = variant ? resolveRonkiArt({ mood, stage }) : null;
@@ -176,6 +239,7 @@ export default function MoodChibi({
 
   return (
     <div
+      ref={boxRef}
       aria-hidden={label ? undefined : 'true'}
       className={className}
       style={{ position: 'relative', width: size, height: size, ...style }}

@@ -4,6 +4,37 @@ _Single source of truth: done, in flight, backlog. Update before any /compact an
 
 ---
 
+## Bilderbuch in the app (25 September 2026)
+
+Marc's ask: make the new Bilderbuch design live in the real PWA, benchmarked against Jason Lee's "Watch Me Vibe Code an Animated App with Claude Fable 5.1 + Seedance 2.5" (YouTube, 18 Sep 2026); plan fully and build while he is away. Mid-run steers: subagents on Fable or Opus at high effort, Higgsfield as in the video, fresh research, Astra as reviewer and code reviewer, all work tracked in the shared GitHub repo.
+
+**Where the work lives.** Branch `design/bilderbuch-app` on `iamyaws/Ronki` (pushed after every step), built on `design/bilderbuch` (the website redesign, also pushed now). Working copy: `C:\Users\öööö\ronki-bilderbuch-app` (a standalone clone, see the repair note below). Nothing is merged to `main`; production (app.ronki.de, ronki.de) is unchanged. Vercel builds previews for both projects on every push.
+
+**Docs of the run.** Plan and benchmark table: `docs/plans/2026-09-25-bilderbuch-app-rollout.md`. Lane rules: `docs/plans/2026-09-25-lane-brief.md`. Research: `docs/research/2026-09-25-animated-companion-benchmark.md`. Surface map: `docs/specs/2026-09-25-bilderbuch-app-surface-map.md`. Every generation with prompt and cost: `docs/design-briefs/2026-09-25-higgsfield-log.md`. Reviews: `docs/reviews/2026-09-25-bilderbuch-app/`.
+
+**Done.**
+- Art, the video's way: character sheet first (turnaround, expressions, master cut-out), then 6 moods, 3 growth stages, 5 poses, 4 eggs plus cracked and peeking, 7 scenes, app icon; then Seedance 2.5 loops: the empty room (plants, boat, sun move), the night room (Ronki sleeping), Ronki idle, happy jump and cloud breathing as transparent animated WebP (keyed from green locally), and one hatch clip per egg. 40 images and 9 clips; every image on model at the first try. Spend in the log.
+- Foundation: tokens remapped to Bilderbuch under the old names, self-hosted Fredoka, Gochi Hand, Be Vietnam Pro, Plus Jakarta Sans; primitives in `src/components/bilderbuch/` (PillButton, QuietLink, SpeechBubble, ChoiceTile, TopBar, PaperCard, DoodleIcon, MotionTicks, StickerBurst, SceneLoop, useReducedMotion); `MoodChibi` draws the art (24 callers unchanged); tab bar, banners, PIN pad, toast, celebration, install sheet; new icons.
+- Screens: onboarding and hatch (pick an egg, it trembles, the matching clip cracks it, Ronki peeks out and wears that shell), first breath on sky, home (room loop with Ronki seated in his nest, mood tiles, one pill), the day strip (paper cards with doodles, a 1.4 s cheer with sticker burst instead of Lottie confetti), rewards, sitting with Ronki, the evening (night loop, one story line, quiet links), profile with the growth tree, diary and book as paper, expedition and away loop in the Morgenwald.
+- Reviews: Astra code review round 1 on the foundation (NOT YET, 3 findings; R1 and R2 fixed, R3 answered in part). Astra design review round 1 on the renders: see the reviews folder.
+- Guard: `npm run check:names` (tsc with checkJs, undefined names only). It caught nothing new but would have caught the RoomHub crash I shipped for 20 minutes today and the 22 Apr day-transition bug.
+- Checks at the end of the run: app tests green (222), `check:names` clean, build green, the pre-existing 23 tsc errors unchanged.
+
+**Decisions made in the run (Marc may reverse any of them).**
+1. Ronki is always red-orange. The egg a kid picks shows in the egg, the hatch clip and the hatchling's shell hat; the old `companionVariant` ids stay in state (cream forest, ember sunset, sun amber, cobalt teal), so nothing needs a migration.
+2. Ronki sits on the room video as a transparent cut-out, so he still shows moods; the room itself loops.
+3. Code-drawn sticker burst instead of a LottieFiles download (no new dependency, on style).
+4. A worried Ronki after days away shows as calm on the profile (no guilt for skipping).
+5. "Einrichten" is hidden until the painted room can show a wallpaper pick (`SHOW_ROOM_STYLE` in RoomHub).
+6. The run ends at a preview, not a merge (the Bilderbuch brief asks for a green light before production).
+
+**Open for Marc.**
+1. Walk through the Vercel preview of `ronki-app` on the phone (a Loom with voice, as in the video, is the fastest feedback), then merge `design/bilderbuch-app` into `main` (both website and app go live together).
+2. Repair the old working folder `C:\Users\öööö\ronki`: on 25 Sep a `git worktree prune` removed its link to the main repo (it was registered under its old name `louis-quest-drachennest`). Files and commits are safe (all branches live in `C:\Users\öööö\louis-quest\.git`). Simplest fix: keep using `C:\Users\öööö\ronki-bilderbuch-app` (full clone with the same history and the GitHub remote), or recreate the link from `C:\Users\öööö\louis-quest` with `git worktree add` on a new folder. The auto-mode guard blocked the repair in this session.
+3. Name entry is still free text; the July audit says pre-readers stall there. Name chips are the fix (behaviour change, not done in a visual pass).
+
+**Follow-ups.** Parent dashboard and legal pages still carry hard-coded teal accents (readable, not restyled). Freunde, micropedia creatures, mini-games, bosses and birthday scenes keep their old painterly art. The first-breath fire puff is still a gradient. `CaveStyleSheet` keeps the old look. Belohnungsbank copy still names Funkelzeit (pre-existing). Material Symbols still loads from Google for screens outside the core loop. The Profile's Pflege and Erinnerungen segments and the Buch are restyled but not reachable from any tab (pre-existing). Animated WebP on an old iPad and a Fire HD is untested on a real device.
+
 ## Where things stand (14 September 2026)
 
 Revival check done, nothing built. Full write-up (German): [docs/strategy/2026-09-14-wiederbelebungs-check.md](docs/strategy/2026-09-14-wiederbelebungs-check.md). Raw Search Console export: `docs/analytics/gsc-2026-09-14/`.

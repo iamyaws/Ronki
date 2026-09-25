@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTask } from '../context/TaskContext';
 import { getCatStage } from '../utils/helpers';
-import MoodChibi from './MoodChibi';
+import MoodChibi, { ambientMood } from './MoodChibi';
 
 /**
  * RonkiPortrait — state-aware chibi portrait of the kid's companion.
@@ -47,7 +47,9 @@ export default function RonkiPortrait({
   // (legend) with their own aura/wing treatments. getCatStage already
   // clamps to CAT_STAGES.length - 1.
   const resolvedStage = stage ?? getCatStage(state?.catEvo ?? 0);
-  const resolvedMood = mood ?? state?.ronkiMood ?? 'normal';
+  // An explicit mood prop wins (feelings screens); the ambient state
+  // never shows a worried Ronki after days away.
+  const resolvedMood = mood ?? ambientMood(state?.ronkiMood);
 
   const chibi = (
     <MoodChibi
