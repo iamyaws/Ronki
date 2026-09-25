@@ -101,6 +101,10 @@ export function resolveRonkiArt({ mood = 'normal', stage = 2, animated = false, 
   // breathes with the CSS idle instead (Astra design review R4).
   if (st >= 5 && moodKey === 'calm') return `${ART_BASE}ronki/legendary.webp`;
   if (st === 4 && moodKey === 'calm') return `${ART_BASE}ronki/grown.webp`;
+  // Stage 3 (Stolz): Ronki stands up. proud.webp is his calm look, so
+  // stages 2 and 3 no longer look the same (Finch pass, base design
+  // section 5). It comes before the loop, which is drawn for stage 2.
+  if (st === 3 && moodKey === 'calm') return `${ART_BASE}ronki/proud.webp`;
   if (animated && !reduced && st <= 3 && (moodKey === 'calm' || moodKey === 'happy')) {
     return `${ART_BASE}loops/ronki-idle.webp`;
   }
