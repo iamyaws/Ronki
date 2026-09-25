@@ -32,27 +32,6 @@ const cloudReadStatus = new Map<string, 'ok' | 'failed'>();
  *  older than what another device saved (review fix round 1, SAVES-1). */
 let writesFrozen = false;
 
-/** Per token: the write stamp (`_cloudStamp`) of the cloud row as this
- *  session last saw it, by a read or by its own write. 'none' = the read
- *  found no row. Absent = never read here. A write only goes through while
- *  the row still carries this stamp, so a device that fell behind (another
- *  device wrote meanwhile) never overwrites newer progress (Astra round 2,
- *  SAVES-1-R2 and FC-01-R2). */
-const knownStamp = new Map<string, string | null>();
-/** Per token: when a checked save last confirmed this device was current (ms). */
-const verifiedAt = new Map<string, number>();
-
-function stampOf(state: unknown): string | null {
-  const v = (state as { _cloudStamp?: unknown } | null)?._cloudStamp;
-  return typeof v === 'string' && v ? v : null;
-}
-
-function newStamp(): string {
-  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
-}
-
-/** Result of a checked cloud save. */
-export type CheckedSave = 'saved' | 'conflict' | 'offline' | 'frozen' | 'skipped';
 
 const storage = {
   // ── Local (IndexedDB with localStorage fallback) ──
@@ -216,9 +195,8 @@ const storage = {
         return null;
       }
       cloudReadStatus.set(token, 'ok');
-      const state = data ? (((data as { state?: GameState }).state as GameState) || null) : null;
-      knownStamp.set(token, state ? stampOf(state) : 'none');
-      return state;
+      if (!data) return null;
+      return ((data as { state?: GameState }).state as GameState) || null;
     } catch {
       cloudReadStatus.set(token, 'failed');
       return null;
@@ -242,60 +220,15 @@ const storage = {
       // profile_upsert stamps updated_at server-side and records today
       // in profile_activity, which is what the active-family counter
       // reads. It rejects a malformed token with an error we swallow.
-      // Every write carries a fresh _cloudStamp (see knownStamp).
-      const stamp = newStamp();
-      const res = await supabase.rpc('profile_upsert', {
+      await supabase.rpc('profile_upsert', {
         p_token: token,
-        p_state: { ...(state as unknown as Record<string, unknown>), _cloudStamp: stamp },
+        p_state: state as unknown as Record<string, unknown>,
       });
-      if (!(res as { error?: unknown } | undefined)?.error) knownStamp.set(token, stamp);
     } catch {
       // Silent fail, local IndexedDB + localStorage are the fallback
     }
   },
 
-  /**
-   * The app's normal cloud save (Astra round 2). Reads the row first and
-   * writes only when it still carries the stamp this session last saw:
-   * - 'conflict': another device wrote since, or this session never
-   *   reconciled a row that exists. Nothing is written; the caller freezes
-   *   writes and reloads, so the normal sync merges the newer row.
-   * - 'offline': the read failed. Nothing is written; local keeps everything.
-   * - 'saved': written with a new stamp.
-   */
-  async cloudSaveChecked(token: string, state: GameState): Promise<CheckedSave> {
-    if (!token || !/^[a-f0-9]{32}$/.test(token)) return 'skipped';
-    if (writesFrozen) return 'frozen';
-    const before = knownStamp.has(token) ? knownStamp.get(token) : undefined;
-    let remote: GameState | null = null;
-    try {
-      const { data, error } = await supabase.rpc('profile_get', { p_token: token });
-      if (error) {
-        cloudReadStatus.set(token, 'failed');
-        return 'offline';
-      }
-      cloudReadStatus.set(token, 'ok');
-      remote = data ? (((data as { state?: GameState }).state as GameState) || null) : null;
-    } catch {
-      cloudReadStatus.set(token, 'failed');
-      return 'offline';
-    }
-    const now = remote ? stampOf(remote) : 'none';
-    // Never read here: only a truly empty card (a token made on this
-    // device) may be written blind.
-    const current = before === undefined ? now === 'none' : now === before;
-    if (!current) return 'conflict';
-    if (writesFrozen) return 'frozen';
-    await this.cloudSaveByToken(token, state);
-    verifiedAt.set(token, Date.now());
-    return 'saved';
-  },
-
-  /** True when a checked save confirmed this device was current within `ms`. */
-  recentlyVerified(token: string, ms: number): boolean {
-    const t = verifiedAt.get(token);
-    return typeof t === 'number' && Date.now() - t <= ms;
-  },
 
   // ── Sync: resolve local vs cloud, return best state ──
   async syncLoad(userId: string): Promise<GameState | null> {
@@ -353,7 +286,9 @@ const storage = {
     const owner = getLocalProfileOwner();
     if (local && owner && owner !== token) {
       local = null;
-      if (!cloud) await this.clear();
+      // Only a read that really found no row may clear the other card's
+      // cache; a failed read keeps it (verifier H, Finch pass).
+      if (!cloud && this.cloudReadOk(token)) await this.clear();
     }
     claimLocalProfile(token);
 
@@ -365,7 +300,12 @@ const storage = {
       // local state wins on date and overwrites the parent's seed.
       const localPristine = !(local as any).onboardingDone && !(local as any).parentOnboardingDone;
       const cloudFurther = !!(cloud as any).onboardingDone || !!(cloud as any).parentOnboardingDone;
-      if (localPristine && cloudFurther) {
+      // Finch pass (verifier C): with egg first, a local state can be hatched
+      // and even through the parent step while the card already holds a
+      // dragon. An unfinished local state never beats an onboarded card.
+      const localUnfinished = !(local as any).onboardingDone;
+      const cloudOnboarded = !!(cloud as any).onboardingDone;
+      if ((localPristine && cloudFurther) || (localUnfinished && cloudOnboarded)) {
         this.save(cloud);
         return cloud;
       }

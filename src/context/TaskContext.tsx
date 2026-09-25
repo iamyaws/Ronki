@@ -968,6 +968,29 @@ function questsForRoutine(prev: TaskState, routine: RoutineConfig): Quest[] {
   return [...main, ...sides];
 }
 
+/** A cloud save timer later than this slept with the device (Astra SAVES-1-R2). */
+const CLOUD_SAVE_LATE_MS = 5 * 60 * 1000;
+
+/**
+ * Reload so the normal load resolves a card this session could not see
+ * (Finch pass, FC-01-R2). Loop guard: at most one such reload a minute;
+ * a second one is scheduled for when the minute is up, never skipped, so
+ * a session is never left without cloud saves for good (verifier B).
+ */
+function scheduleCardReload(token: string): void {
+  const reload = () => { try { window.location.reload(); } catch { /* ignore */ } };
+  try {
+    const key = `ronki_cloud_reload_${token.slice(0, 8)}`;
+    const last = Number(sessionStorage.getItem(key) || 0);
+    const wait = last ? 60_000 - (Date.now() - last) : 0;
+    const go = () => { try { sessionStorage.setItem(key, String(Date.now())); } catch { /* ignore */ } reload(); };
+    if (wait <= 0) go();
+    else setTimeout(go, wait);
+  } catch {
+    reload();
+  }
+}
+
 const TaskContext = createContext<TaskContextValue | null>(null);
 
 export function useTask() {
@@ -1183,6 +1206,9 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
   stateRef.current = state;
   const localSavePending = useRef(false);
   const cloudSavePending = useRef(false);
+  // Finch pass (Astra FC-01-R2): set when the card holds a row this session
+  // never loaded; cloud writes stay off until the page reloads.
+  const cloudBlockedUntilReload = useRef(false);
   // Forward-reference to syncRonkiMood so earlier-declared callbacks
   // (e.g. `complete`) can trigger it without hitting the TDZ. Assigned
   // below once syncRonkiMood is declared.
@@ -1577,31 +1603,38 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
     if (activeToken) {
       clearTimeout(cloudTimer.current);
       cloudSavePending.current = true;
+      const scheduledAt = Date.now();
       cloudTimer.current = setTimeout(async () => {
         cloudSavePending.current = false;
-        // Finch pass (Astra FC-01, round 2): a cloud write only goes
-        // through while the card still carries the stamp this session last
-        // saw. A failed read writes nothing (local keeps everything). A
-        // card that another device wrote to since, or that this session
-        // never reconciled, is never overwritten: writes freeze and the
-        // page reloads once, so the normal sync merges the newer row.
+        // A timer that fires far too late means the device slept (Astra
+        // SAVES-1-R2): another device may have played meanwhile, so this
+        // page reloads instead of writing what it held before the sleep.
+        if (Date.now() - scheduledAt > CLOUD_SAVE_LATE_MS) {
+          storage.freezeWrites();
+          try { window.location.reload(); } catch { /* ignore */ }
+          return;
+        }
+        // Finch pass (Astra FC-01): nothing is written to a card before a
+        // cloud read for it has reached the server in this session. A
+        // failed read writes nothing (local keeps everything). A token made
+        // on this device is probed once: "no row" lets the save through.
+        if (!storage.cloudReadOk(activeToken)) {
+          const probe = await storage.cloudLoadByToken(activeToken);
+          if (!storage.cloudReadOk(activeToken)) return; // still offline
+          if (probe) {
+            // The card holds a state this session never loaded (FC-01-R2):
+            // never write over it. Cloud writes stay off until the page
+            // reloads and the normal load resolves the card; local saves
+            // go on, so nothing the child does is lost meanwhile.
+            cloudBlockedUntilReload.current = true;
+            scheduleCardReload(activeToken);
+            return;
+          }
+        }
+        if (cloudBlockedUntilReload.current) return;
         const raw = await storage.load() as GameState | null;
         const merged = { ...(raw || {}), ...state } as GameState;
-        const result = await storage.cloudSaveChecked(activeToken, merged);
-        if (result === 'conflict') {
-          storage.freezeWrites();
-          // Reload to merge the newer row. A loop guard only: if the last
-          // conflict reload was less than a minute ago, stay frozen instead
-          // of reloading again (a genuinely later conflict reloads fine).
-          try {
-            const key = `ronki_cloud_reload_${activeToken.slice(0, 8)}`;
-            const last = Number(sessionStorage.getItem(key) || 0);
-            if (!last || Date.now() - last > 60_000) {
-              sessionStorage.setItem(key, String(Date.now()));
-              window.location.reload();
-            }
-          } catch { /* no sessionStorage: stay frozen, never overwrite */ }
-        }
+        await storage.cloudSaveByToken(activeToken, merged);
       }, 1500);
     } else if (user) {
       clearTimeout(cloudTimer.current);
@@ -1632,7 +1665,7 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
       const token = cloudSavePending.current ? getActiveToken() : null;
       // Only right after a checked save confirmed this device is current;
       // a page leaving must not push a state that fell behind (round 2).
-      const cloudDue = !!token && storage.cloudReadOk(token) && storage.recentlyVerified(token, 20_000);
+      const cloudDue = !!token && storage.cloudReadOk(token) && !cloudBlockedUntilReload.current;
       if (!localDue && !cloudDue) return;
       // The synchronous local mirror (storage.ts writes it on every save)
       // stands in for the async storage.load() merge of the timers.

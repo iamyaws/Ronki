@@ -5,6 +5,7 @@ import { useAnalytics } from '../../hooks/useAnalytics';
 import { track } from '../../lib/analytics';
 import { getActiveToken, generateToken, setActiveToken, claimLocalProfile } from '../../lib/profileToken';
 import { savePendingHatch, takePendingHatch, clearPendingHatch } from '../../lib/pendingHatch';
+import storage from '../../utils/storage';
 import { pickPhase } from './onboardingPhase';
 import MeetRonki from '../drachennest/MeetRonki';
 import NoProfileLanding from '../NoProfileLanding';
@@ -68,9 +69,13 @@ export default function OnboardingChain({ previewLoop, onComplete }) {
   const stashCheckedRef = useRef(false);
   useEffect(() => {
     if (!state || stashCheckedRef.current) return;
-    stashCheckedRef.current = true;
     let token = null;
     try { token = getActiveToken(); } catch { token = null; }
+    // Only once the card was really read (verifier C): after a failed read
+    // the loaded state is the local one, and taking the stash now would
+    // lose it for the load that does see the card. It waits for next time.
+    if (token && !storage.cloudReadOk?.(token)) return;
+    stashCheckedRef.current = true;
     // Bound to the card it was written for: under any other token it is dropped.
     const fields = takePendingHatch(state, { token });
     if (fields) actions.patchState?.(fields);

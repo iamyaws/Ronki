@@ -133,7 +133,7 @@ describe('storage cloud sync by token', () => {
 
     await storage.cloudSaveByToken(TOKEN, state);
 
-    expect(rpcMock).toHaveBeenCalledWith('profile_upsert', { p_token: TOKEN, p_state: { ...state, _cloudStamp: expect.any(String) } });
+    expect(rpcMock).toHaveBeenCalledWith('profile_upsert', { p_token: TOKEN, p_state: state });
   });
 
   it('swallows a failing profile_upsert so local storage stays the fallback', async () => {
@@ -211,7 +211,7 @@ describe('storage syncLoadByToken with a website card seed', () => {
     const result = await storage.syncLoadByToken(TOKEN);
 
     expect(result.familyConfig.childName).toBe('Louis');
-    expect(rpcMock).toHaveBeenCalledWith('profile_upsert', { p_token: TOKEN, p_state: { ...local, _cloudStamp: expect.any(String) } });
+    expect(rpcMock).toHaveBeenCalledWith('profile_upsert', { p_token: TOKEN, p_state: local });
   });
 });
 
@@ -283,7 +283,7 @@ describe('storage syncLoadByToken sibling guard', () => {
     const result = await storage.syncLoadByToken(CARD_A);
 
     expect(result.familyConfig.childName).toBe('Louis');
-    expect(rpcMock).toHaveBeenCalledWith('profile_upsert', { p_token: CARD_A, p_state: { ...childA, _cloudStamp: expect.any(String) } });
+    expect(rpcMock).toHaveBeenCalledWith('profile_upsert', { p_token: CARD_A, p_state: childA });
     expect(localStorage.getItem('ronki_local_owner')).toBe(CARD_A);
   });
 });
@@ -319,49 +319,31 @@ describe('storage syncLoadByToken after a failed cloud read', () => {
   });
 });
 
-// Astra round 2 (SAVES-1-R2, FC-01-R2): the app's cloud save writes only
-// while the card still carries the stamp this session last saw.
-describe('storage.cloudSaveChecked', () => {
-  const T = 'e'.repeat(32);
-  const U = 'f'.repeat(32);
-  const V = '1'.repeat(32);
+// Finch pass (verifier C and H): with egg first a device can hold an
+// unfinished local hatch when a card with a dragon is scanned.
+describe('storage syncLoadByToken: an unfinished local state never beats an onboarded card', () => {
+  const T = '4'.repeat(32);
   beforeEach(() => { rpcMock.mockReset(); });
-  const upserts = () => rpcMock.mock.calls.filter(([fn]) => fn === 'profile_upsert');
 
-  it('writes while the row still carries the stamp this device saw, and moves the stamp on', async () => {
-    rpcMock.mockImplementation(async (fn) => (fn === 'profile_get' ? { data: { state: { lastDate: '2026-09-28', _cloudStamp: 's1' } }, error: null } : { data: null, error: null }));
-    await storage.cloudLoadByToken(T); // this device saw s1
-    expect(await storage.cloudSaveChecked(T, { lastDate: '2026-09-28', x: 1 })).toBe('saved');
-    expect(upserts()).toHaveLength(1);
-    const written = upserts()[0][1].p_state._cloudStamp;
-    expect(written).toMatch(/\w/);
-    // The card now carries our stamp: the next checked save sees it as current.
-    rpcMock.mockImplementation(async (fn) => (fn === 'profile_get' ? { data: { state: { _cloudStamp: written } }, error: null } : { data: null, error: null }));
-    expect(await storage.cloudSaveChecked(T, { x: 2 })).toBe('saved');
+  it('the card dragon wins over a local hatch that went through the parent step today', async () => {
+    const today = '2026-09-28';
+    mockStore['hdx2_drachennest'] = { kidIntroSeen: true, parentOnboardingDone: true, onboardingDone: false, companionName: 'Funki', lastDate: today };
+    rpcMock.mockImplementation(async (fn) => (fn === 'profile_get'
+      ? { data: { state: { onboardingDone: true, companionName: 'Glut', catEvo: 9, lastDate: '2026-09-27' } }, error: null }
+      : { data: null, error: null }));
+    const result = await storage.syncLoadByToken(T);
+    expect(result).toMatchObject({ companionName: 'Glut', catEvo: 9 });
+    expect(rpcMock.mock.calls.filter(([fn]) => fn === 'profile_upsert')).toHaveLength(0);
   });
 
-  it('reports a conflict and writes nothing when another device wrote meanwhile', async () => {
-    rpcMock.mockImplementation(async (fn) => (fn === 'profile_get' ? { data: { state: { _cloudStamp: 'mine' } }, error: null } : { data: null, error: null }));
-    await storage.cloudLoadByToken(U);
-    rpcMock.mockImplementation(async (fn) => (fn === 'profile_get' ? { data: { state: { _cloudStamp: 'theirs' } }, error: null } : { data: null, error: null }));
-    expect(await storage.cloudSaveChecked(U, { stale: true })).toBe('conflict');
-    expect(upserts()).toHaveLength(0);
-  });
-
-  it('never writes blind onto a row this session never read; an empty card may be written', async () => {
-    rpcMock.mockImplementation(async (fn) => (fn === 'profile_get' ? { data: { state: { companionName: 'Glut' } }, error: null } : { data: null, error: null }));
-    expect(await storage.cloudSaveChecked(V, { hatch: true })).toBe('conflict');
-    expect(upserts()).toHaveLength(0);
-    const W = '2'.repeat(32);
-    rpcMock.mockImplementation(async () => ({ data: null, error: null }));
-    expect(await storage.cloudSaveChecked(W, { fresh: true })).toBe('saved');
-    expect(upserts()).toHaveLength(1);
-  });
-
-  it('writes nothing when the read fails', async () => {
-    rpcMock.mockImplementation(async (fn) => (fn === 'profile_get' ? { data: null, error: { message: 'down' } } : { data: null, error: null }));
-    expect(await storage.cloudSaveChecked('3'.repeat(32), { x: 1 })).toBe('offline');
-    expect(upserts()).toHaveLength(0);
+  it("a failed read never clears another card's local cache (sibling guard)", async () => {
+    // Let the previous test's unawaited save(cloud) land first.
+    await new Promise(r => setTimeout(r, 30));
+    localStorage.setItem('ronki_local_owner', '5'.repeat(32));
+    mockStore['hdx2_drachennest'] = { onboardingDone: true, companionName: 'Geschwister' };
+    rpcMock.mockImplementation(async () => ({ data: null, error: { message: 'down' } }));
+    await storage.syncLoadByToken(T);
+    expect(mockStore['hdx2_drachennest']).toMatchObject({ companionName: 'Geschwister' });
   });
 });
 

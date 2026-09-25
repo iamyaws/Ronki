@@ -12,3 +12,14 @@ Round 2 is the last Astra round (PROTOCOL: no round 3). Everything still open af
 | FC-02-R2 | SHOULD: a cap of 500 still drops the oldest keepsake | **AGREE, fixed** | No cap: every keepsake stays. |
 
 Also fixed in this round from the verifier of fix round 1: every write freezes before a stale reload (the greeting, a timer or the leave flush can no longer save old state while the page reloads); a visible tab whose timers slept reloads instead of ticking; the Nest and the ritual ask the engine's own `tripAllowed` (moved to `src/loop/tripRules.ts`), so a send-off is never shown that the engine would refuse.
+
+## After round 2: an independent verifier on the fix (26 Sep, about 01:30)
+
+A Claude verifier ran ten real-storage experiments against the stamp design above and found it NOT SAFE in the common case: every app open wrote a new stamp, so a parent phone that only opened the app turned the child's next tap into a conflict; the conflict reload dropped that tap (the load picks a winner by date, it does not merge); and a second conflict within a minute left a session frozen with nothing saved, local included. So the stamp check was backed out. What ships instead is strictly no worse than main's last-writer-wins and fixes the failure modes both reviews found:
+
+- No write to a card before a cloud read reached it (FC-01); a card this session never loaded writes nothing and reloads, with a scheduled retry instead of a frozen session (FC-01-R2, verifier B); local saving never stops.
+- A stale tab, a sleep, or a save timer that fired more than 5 minutes late freezes and reloads before writing (SAVES-1, SAVES-1-R2).
+- An unfinished local hatch never beats a card that has a dragon, and the hatch stash only applies after a successful read (verifier C); a failed read never clears another card's cache (verifier H).
+- Checked in two real browser tabs against the Supabase mock: the passive second device no longer disturbs the active one; the active device's saves land.
+
+Open for Marc (needs a backend change): true concurrent edits by two devices within seconds stay last-writer-wins, as before this pass. The fix is a compare-and-swap RPC in Supabase.

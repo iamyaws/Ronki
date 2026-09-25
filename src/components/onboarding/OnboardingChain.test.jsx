@@ -18,6 +18,9 @@ vi.mock('../../context/TaskContext', () => ({
   useTask: () => ({ state: h.state, actions: h.actions }),
 }));
 vi.mock('../../i18n/LanguageContext', () => ({ useTranslation: () => ({ t: (k) => k }) }));
+// The card was read in these tests unless a test says otherwise (verifier C).
+const cloudRead = { ok: true };
+vi.mock('../../utils/storage', () => ({ default: { cloudReadOk: () => cloudRead.ok } }));
 vi.mock('../../hooks/useAnalytics', () => {
   h.useAnalytics = vi.fn(() => ({ track: vi.fn(), enabled: false }));
   return { useAnalytics: h.useAnalytics };
@@ -229,6 +232,20 @@ describe('OnboardingChain', () => {
     h.state = seed();
     mount();
     expect(h.actions.patchState).toHaveBeenCalledWith({ kidIntroSeen: true, companionName: 'Knisti', companionVariant: 'teal' });
+  });
+
+  it('after a failed cloud read the stash waits for a load that did read the card (verifier C)', () => {
+    savePendingHatch({ companionName: 'Knisti', companionVariant: 'teal', token: 'c'.repeat(32) });
+    h.token = 'c'.repeat(32);
+    h.state = { ...seed(), kidIntroSeen: true };
+    cloudRead.ok = false;
+    try {
+      mount();
+      expect(h.actions.patchState).not.toHaveBeenCalled();
+      expect(localStorage.getItem(PENDING_HATCH_KEY)).not.toBeNull();
+    } finally {
+      cloudRead.ok = true;
+    }
   });
 
   it('a stash is dropped for a card whose Ronki already hatched', () => {
