@@ -2,134 +2,73 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useTask } from '../context/TaskContext';
 import { useTranslation } from '../i18n/LanguageContext';
 import CooldownButton from './CooldownButton';
-import { DRAGON_ART } from '../utils/helpers';
 import { isDevMode } from '../utils/mode';
+import MoodChibi from './MoodChibi';
+import { StickerBurst, PaperCard, DoodleIcon, MotionTicks } from './bilderbuch';
 
-// ── Confetti Canvas ──
-function ConfettiCanvas() {
-  const ref = useRef(null);
-  useEffect(() => {
-    const canvas = ref.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    const W = canvas.width = window.innerWidth;
-    const H = canvas.height = window.innerHeight;
-    const colors = ['#fcd34d', '#34d399', '#f472b6', '#60a5fa', '#a78bfa', '#fb923c', '#ffffff'];
-    const particles = Array.from({ length: 80 }, () => ({
-      x: Math.random() * W,
-      y: Math.random() * -H,
-      w: 4 + Math.random() * 6,
-      h: 8 + Math.random() * 10,
-      color: colors[Math.floor(Math.random() * colors.length)],
-      vy: 1.5 + Math.random() * 3,
-      vx: (Math.random() - 0.5) * 2,
-      rot: Math.random() * 360,
-      rotSpeed: (Math.random() - 0.5) * 8,
-      opacity: 0.7 + Math.random() * 0.3,
-    }));
-    let raf;
-    const draw = () => {
-      ctx.clearRect(0, 0, W, H);
-      particles.forEach(p => {
-        p.y += p.vy;
-        p.x += p.vx;
-        p.rot += p.rotSpeed;
-        if (p.y > H + 20) { p.y = -20; p.x = Math.random() * W; }
-        ctx.save();
-        ctx.translate(p.x, p.y);
-        ctx.rotate((p.rot * Math.PI) / 180);
-        ctx.globalAlpha = p.opacity;
-        ctx.fillStyle = p.color;
-        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
-        ctx.restore();
-      });
-      raf = requestAnimationFrame(draw);
-    };
-    draw();
-    return () => cancelAnimationFrame(raf);
-  }, []);
-  return <canvas ref={ref} className="fixed inset-0 z-[1] pointer-events-none" />;
+/**
+ * Celebration (Bilderbuch, 25 Sep 2026). Same five moments, same
+ * gating and tapering logic as before; the look is the picture book:
+ * white ground, one big Fredoka headline, a sticker burst instead of
+ * the confetti canvas, paper cards with ink outlines, one cobalt pill.
+ */
+
+// One cobalt pill per screen. CooldownButton guards it for about 1 s,
+// with no numbers and no ring (Marc, 25 Sep 2026).
+const PILL = 'w-full inline-flex items-center justify-center rounded-full bg-cobalt text-white font-headline font-bold text-xl min-h-[60px] px-8 bb-press bb-press--night';
+
+function Burst() {
+  // Fires once on mount; the burst unmounts itself when done.
+  const [on, setOn] = useState(true);
+  return <StickerBurst fixed active={on} size={420} count={30} onDone={() => setOn(false)} />;
 }
 
-// ── Evolution Celebration ──
+function Headline({ children }) {
+  return <h2 className="bb-display text-[2.6rem] text-ink text-center">{children}</h2>;
+}
+
+// ── Evolution ──
 function EvolutionCelebration({ stage, name, emoji, onDismiss }) {
   const { t } = useTranslation();
-  const artFile = DRAGON_ART[stage] || DRAGON_ART[1];
   return (
-    <main className="relative flex flex-col items-center justify-center min-h-dvh px-6 pt-16 pb-24 text-center">
-      <ConfettiCanvas />
-      {/* Gold dust texture */}
-      <img src={import.meta.env.BASE_URL + 'art/bg-gold-dust.png'} alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none" />
-      {/* Background motifs */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-10 -left-10 opacity-5">
-          <span className="material-symbols-outlined" style={{ fontSize: '15rem' }}>energy_savings_leaf</span>
-        </div>
-        <div className="absolute bottom-20 -right-20 opacity-5">
-          <span className="material-symbols-outlined" style={{ fontSize: '20rem' }}>filter_vintage</span>
-        </div>
-      </div>
-
+    <main className="relative flex flex-col items-center justify-center min-h-dvh px-6 pt-20 pb-24 text-center">
+      <Burst />
       <div className="relative w-full max-w-lg mx-auto flex flex-col items-center">
-        {/* Sparkle gradient */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] pointer-events-none z-0"
-             style={{ background: 'radial-gradient(circle, rgba(252,211,77,0.4) 0%, rgba(109,40,217,0) 70%)' }} />
-
-        {/* Evolution illustration */}
-        <div className="relative z-10 mb-8 p-4">
-          <div className="relative w-64 h-64 mx-auto">
-            <div className="absolute inset-0 flex items-center justify-center">
-              <img src={`${import.meta.env.BASE_URL}art/companion/${artFile}.webp`} alt="Evolution"
-                   className="w-full h-full object-contain drop-shadow-2xl" />
-            </div>
-            {/* Floating motifs */}
-            <div className="absolute -top-4 -right-4 text-secondary-container">
-              <span className="material-symbols-outlined text-5xl" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-            </div>
-            <div className="absolute bottom-8 -left-8 text-primary-container opacity-60">
-              <span className="material-symbols-outlined text-4xl">auto_awesome</span>
-            </div>
-          </div>
+        <div className="relative mb-6">
+          <MoodChibi size={240} stage={stage ?? 2} mood="gut" bare />
+          <span className="absolute -top-2 -right-4"><MotionTicks tone="sun" size={34} rotate={-40} /></span>
+          <span className="absolute bottom-6 -left-6 text-cobalt"><DoodleIcon name="sparkle" size={30} filled /></span>
         </div>
 
-        {/* Typography */}
-        <div className="relative z-10 space-y-4 px-4">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-2"
-               style={{ background: 'rgba(252,211,77,0.2)' }}>
-            <span className="material-symbols-outlined text-secondary text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>workspace_premium</span>
-            <span className="text-secondary font-bold text-xs tracking-widest uppercase">{t('celebrate.evolution.label')}</span>
-          </div>
-          <h2 className="font-headline font-bold text-5xl text-primary leading-tight">
-            {t('celebrate.evolution.title')}
-          </h2>
-          <p className="font-body text-xl text-on-surface-variant max-w-md mx-auto leading-relaxed">
-            Dein <span className="font-bold text-primary">Ronki</span> ist jetzt: <span className="font-bold text-primary">{name}</span> {emoji}
+        <div className="space-y-4 px-2">
+          <span className="bb-hand inline-block rounded-[10px] bg-sun px-4 py-1.5 text-lg uppercase leading-none text-ink" style={{ transform: 'rotate(-3deg)' }}>
+            {t('celebrate.evolution.label')}
+          </span>
+          <Headline>{t('celebrate.evolution.title')}</Headline>
+          <p className="font-body text-xl text-ink-soft max-w-md mx-auto leading-relaxed">
+            Dein <span className="font-bold text-cobalt">Ronki</span> ist jetzt: <span className="font-bold text-cobalt">{name}</span> {emoji}
           </p>
         </div>
 
-        {/* Stats cards */}
-        <div className="relative z-10 w-full mt-12 grid grid-cols-2 gap-4">
-          <div className="bg-white p-6 rounded-2xl text-left" style={{ boxShadow: '0 8px 24px rgba(30,27,23,0.04)' }}>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="material-symbols-outlined text-primary">bolt</span>
-              <span className="text-on-surface-variant font-bold text-sm">{t('celebrate.evolution.energy')}</span>
+        <div className="w-full mt-10 grid grid-cols-2 gap-4">
+          <PaperCard tone="paper" pad="md" className="text-left">
+            <div className="flex items-center gap-2 mb-2 text-cobalt">
+              <DoodleIcon name="bolt" size={22} />
+              <span className="font-headline font-semibold text-sm text-ink-soft">{t('celebrate.evolution.energy')}</span>
             </div>
-            <div className="text-2xl font-headline font-bold text-on-surface">+250</div>
-          </div>
-          <div className="bg-white p-6 rounded-2xl text-left translate-y-4" style={{ boxShadow: '0 8px 24px rgba(30,27,23,0.04)' }}>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="material-symbols-outlined text-secondary">favorite</span>
-              <span className="text-on-surface-variant font-bold text-sm">{t('celebrate.evolution.bond')}</span>
+            <div className="text-2xl font-headline font-bold text-ink">+250</div>
+          </PaperCard>
+          <PaperCard tone="sky-wash" pad="md" className="text-left translate-y-3">
+            <div className="flex items-center gap-2 mb-2 text-ember">
+              <DoodleIcon name="heart" size={22} filled />
+              <span className="font-headline font-semibold text-sm text-ink-soft">{t('celebrate.evolution.bond')}</span>
             </div>
-            <div className="text-2xl font-headline font-bold text-on-surface">{t('celebrate.evolution.stage', { stage: (stage || 0) + 1 })}</div>
-          </div>
+            <div className="text-2xl font-headline font-bold text-ink">{t('celebrate.evolution.stage', { stage: (stage || 0) + 1 })}</div>
+          </PaperCard>
         </div>
 
-        {/* CTA — 4s cooldown so Louis absorbs the moment */}
-        <div className="relative z-10 mt-16 w-full px-4">
-          <CooldownButton delay={4} onClick={onDismiss} icon="arrow_forward"
-            className="w-full bg-primary-container text-white py-5 rounded-full font-headline font-bold text-xl"
-            style={{ boxShadow: '0 8px 24px rgba(18,67,70,0.2)' }}>
+        <div className="mt-12 w-full px-2">
+          <CooldownButton delay={4} onClick={onDismiss} icon="arrow_forward" className={PILL}>
             {t('celebrate.evolution.button')}
           </CooldownButton>
         </div>
@@ -138,58 +77,36 @@ function EvolutionCelebration({ stage, name, emoji, onDismiss }) {
   );
 }
 
-// ── Task Completion / Level Up ──
+// ── Level up ──
 function LevelUpCelebration({ level, onDismiss }) {
   const { t } = useTranslation();
   return (
     <main className="min-h-dvh w-full max-w-2xl px-6 pb-32 flex flex-col items-center justify-center relative overflow-hidden mx-auto"
           style={{ paddingTop: 'calc(6rem + env(safe-area-inset-top, 0px))' }}>
-      <ConfettiCanvas />
-      {/* Gold dust texture */}
-      <img src={import.meta.env.BASE_URL + 'art/bg-gold-dust.png'} alt="" className="absolute inset-0 w-full h-full object-cover opacity-30 pointer-events-none" />
-      {/* Ambient blurs */}
-      <div className="absolute -top-12 -left-12 w-64 h-64 rounded-full blur-3xl" style={{ background: 'rgba(252,211,77,0.1)' }} />
-      <div className="absolute bottom-24 -right-12 w-48 h-48 rounded-full blur-2xl" style={{ background: 'rgba(18,67,70,0.05)' }} />
-
-      <div className="relative z-10 w-full flex flex-col items-center text-center">
-        {/* Sparkle checkmark */}
+      <Burst />
+      <div className="relative w-full flex flex-col items-center text-center">
         <div className="relative mb-8">
-          <div className="absolute -inset-8 flex items-center justify-center opacity-40">
-            <span className="material-symbols-outlined text-secondary text-6xl absolute -top-4 -left-4">auto_awesome</span>
-            <span className="material-symbols-outlined text-secondary text-5xl absolute top-8 -right-8">stars</span>
-          </div>
-          <div className="w-32 h-32 bg-white rounded-full flex items-center justify-center relative z-10"
-               style={{ boxShadow: '0 8px 24px rgba(30,27,23,0.06)' }}>
+          <span className="absolute -top-3 -left-6 text-sun"><DoodleIcon name="sparkle" size={30} filled stroke={4} /></span>
+          <span className="absolute top-10 -right-8"><MotionTicks tone="cobalt" size={30} rotate={-20} /></span>
+          <div className="w-36 h-36 rounded-full flex items-center justify-center bg-sun border-[3px] border-ink">
             <div className="flex flex-col items-center">
-              <span className="font-headline font-bold text-5xl text-primary">{level}</span>
-              <span className="font-label text-xs text-on-surface-variant uppercase tracking-widest">{t('celebrate.levelup.label')}</span>
+              <span className="font-headline font-bold text-5xl text-ink leading-none">{level}</span>
+              <span className="font-headline font-semibold text-sm text-ink mt-1">{t('celebrate.levelup.label')}</span>
             </div>
           </div>
         </div>
 
-        {/* Headline */}
-        <h2 className="font-headline font-bold text-5xl text-on-surface mb-6 tracking-tight">{t('celebrate.levelup.title')}</h2>
+        <Headline>{t('celebrate.levelup.title')}</Headline>
 
-        {/* Reward card */}
-        <div className="rounded-2xl p-8 w-full max-w-sm mb-12 flex flex-col items-center relative"
-             style={{ background: '#f9f2ec', boxShadow: '0 8px 24px rgba(30,27,23,0.06)' }}>
-          <div className="absolute bottom-2 right-2 opacity-5 pointer-events-none">
-            <span className="material-symbols-outlined" style={{ fontSize: '60px' }}>filter_vintage</span>
-          </div>
-          <div className="mb-4 relative">
-            <div className="absolute inset-0 rounded-full blur-xl opacity-30" style={{ background: '#fcd34d' }} />
-            <span className="material-symbols-outlined relative z-10 text-secondary" style={{ fontSize: '5rem', fontVariationSettings: "'FILL' 1" }}>military_tech</span>
-          </div>
-          <p className="font-body text-lg text-on-surface/80 leading-relaxed max-w-[240px]">
+        <PaperCard tone="paper" pad="lg" className="w-full max-w-sm mt-6 mb-12 flex flex-col items-center">
+          <div className="mb-3 text-cobalt"><DoodleIcon name="star" size={64} filled stroke={4} /></div>
+          <p className="font-body text-lg text-ink leading-relaxed max-w-[240px]">
             {t('celebrate.levelup.power', { level })}
           </p>
-        </div>
+        </PaperCard>
 
-        {/* CTA — 4s cooldown */}
         <div className="flex flex-col gap-4 w-full max-w-xs">
-          <CooldownButton delay={4} onClick={onDismiss}
-            className="bg-primary-container text-white font-headline font-bold text-xl px-8 py-5 rounded-full"
-            style={{ boxShadow: '0 8px 24px rgba(18,67,70,0.2)' }}>
+          <CooldownButton delay={4} onClick={onDismiss} className={PILL}>
             {t('celebrate.levelup.button')}
           </CooldownButton>
         </div>
@@ -198,63 +115,47 @@ function LevelUpCelebration({ level, onDismiss }) {
   );
 }
 
-// ── Victory / All Quests Done ──
+// ── Victory: all tasks done ──
 function VictoryCelebration({ onDismiss }) {
   const { t } = useTranslation();
-  const { state, computed } = useTask();
+  const { state } = useTask();
+  const done = (state?.quests || []).filter(q => q.done && !q.sideQuest);
 
   return (
-    <main className="min-h-dvh pt-24 pb-32 px-6 flex flex-col items-center justify-center relative overflow-hidden lotus-pattern">
-      <ConfettiCanvas />
-      {/* Ambient glow */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
-        <div className="w-[500px] h-[500px] rounded-full blur-[120px]" style={{ background: '#fcd34d' }} />
-      </div>
-
-      <section className="relative z-10 w-full max-w-lg flex flex-col items-center text-center">
-        {/* Hero illustration */}
-        <div className="relative w-72 h-72 mb-8">
-          <div className="absolute inset-0 rounded-full blur-3xl animate-pulse" style={{ background: 'rgba(252,211,77,0.3)' }} />
-          <div className="relative z-10 w-full h-full flex items-center justify-center">
-            <span className="text-[10rem] drop-shadow-2xl">&#x1f3c6;</span>
-          </div>
+    <main className="min-h-dvh pt-24 pb-32 px-6 flex flex-col items-center justify-center relative overflow-hidden">
+      <Burst />
+      <section className="relative w-full max-w-lg flex flex-col items-center text-center">
+        <div className="relative mb-6">
+          <MoodChibi size={230} mood="magisch" bare />
+          <span className="absolute -top-1 right-0"><MotionTicks tone="sun" size={36} rotate={-50} /></span>
         </div>
 
-        {/* Headline */}
-        <div className="space-y-4 mb-12">
-          <h2 className="font-headline font-bold text-5xl text-primary leading-tight">{t('celebrate.victory.title')}</h2>
-          <p className="text-xl text-on-surface-variant font-body px-4">
-            {t('celebrate.victory.message')}
-          </p>
+        <div className="space-y-3 mb-10">
+          <Headline>{t('celebrate.victory.title')}</Headline>
+          <p className="text-xl text-ink-soft font-body px-4">{t('celebrate.victory.message')}</p>
         </div>
 
-        {/* Quest log summary */}
         <div className="w-full mb-10">
-          <h3 className="font-headline font-bold text-2xl text-on-surface mb-6 text-center">{t('celebrate.victory.summary')}</h3>
-          <div className="rounded-2xl p-6 space-y-3" style={{ background: '#f9f2ec' }}>
-            {(state?.quests || []).filter(q => q.done && !q.sideQuest).slice(0, 5).map(q => (
+          <h3 className="font-headline font-bold text-2xl text-ink mb-4 text-center">{t('celebrate.victory.summary')}</h3>
+          <PaperCard tone="paper" pad="md" className="space-y-3">
+            {done.slice(0, 5).map(q => (
               <div key={q.id} className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: 'rgba(52,211,153,0.15)' }}>
-                  <span className="material-symbols-outlined text-2xl" style={{ color: '#059669', fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-white border-[2.5px] border-ink text-leaf shrink-0">
+                  <DoodleIcon name="check" size={22} stroke={7} />
                 </div>
-                <div className="flex-1 pl-4 text-left" style={{ borderLeft: '2px solid rgba(204,195,215,0.2)' }}>
-                  <p className="font-headline font-bold text-lg text-on-surface">{q.icon} {t('quest.' + q.id)}</p>
-                </div>
+                <p className="font-headline font-semibold text-lg text-ink text-left">{q.icon} {t('quest.' + q.id)}</p>
               </div>
             ))}
-            {(state?.quests || []).filter(q => q.done && !q.sideQuest).length > 5 && (
-              <p className="font-label text-sm text-on-surface-variant text-center">
-                {t('celebrate.victory.more', { count: (state?.quests || []).filter(q => q.done && !q.sideQuest).length - 5 })}
+            {done.length > 5 && (
+              <p className="font-headline text-sm text-ink-soft text-center">
+                {t('celebrate.victory.more', { count: done.length - 5 })}
               </p>
             )}
-          </div>
+          </PaperCard>
         </div>
 
-        {/* CTA — 5s cooldown on victory, biggest moment */}
-        <div className="w-full max-w-sm space-y-4">
-          <CooldownButton delay={5} onClick={onDismiss} icon="redeem"
-            className="w-full py-5 px-8 bg-primary-container text-white font-headline font-bold text-xl rounded-full"
-            style={{ boxShadow: '0 8px 24px rgba(18,67,70,0.2)' }}>
+        <div className="w-full max-w-sm">
+          <CooldownButton delay={5} onClick={onDismiss} icon="redeem" className={PILL}>
             {t('celebrate.victory.button')}
           </CooldownButton>
         </div>
@@ -263,49 +164,28 @@ function VictoryCelebration({ onDismiss }) {
   );
 }
 
-// ── Forscher-Ecke Graduation — all implemented MINT games done ──
-// One-shot moment when Louis finishes the whole sequence. The games then move
-// to the MiniGames tab as stables (see MiniGames "Deine Knobel-Abenteuer").
+// ── Forscher-Ecke graduation: all MINT games done ──
 function ForscherGraduationCelebration({ onDismiss }) {
   const { t } = useTranslation();
   return (
-    <main className="min-h-dvh pt-24 pb-32 px-6 flex flex-col items-center justify-center relative overflow-hidden lotus-pattern">
-      <ConfettiCanvas />
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
-        <div className="w-[460px] h-[460px] rounded-full blur-[120px]" style={{ background: '#34d399' }} />
-      </div>
-
-      <section className="relative z-10 w-full max-w-lg flex flex-col items-center text-center">
-        {/* Hero icon — microscope with soft emerald glow */}
-        <div className="relative w-64 h-64 mb-8">
-          <div className="absolute inset-0 rounded-full blur-3xl animate-pulse"
-               style={{ background: 'rgba(52,211,153,0.35)' }} />
-          <div className="relative z-10 w-full h-full flex items-center justify-center">
-            <span className="text-[9rem] drop-shadow-2xl">&#x1f52c;</span>
+    <main className="min-h-dvh pt-24 pb-32 px-6 flex flex-col items-center justify-center relative overflow-hidden">
+      <Burst />
+      <section className="relative w-full max-w-lg flex flex-col items-center text-center">
+        <div className="relative mb-8">
+          <div className="w-48 h-48 rounded-full bg-sky-wash border-[3px] border-ink flex items-center justify-center">
+            <span className="text-[6rem] leading-none">&#x1f52c;</span>
           </div>
-          <div className="absolute -top-4 -right-4">
-            <span className="material-symbols-outlined text-4xl opacity-70"
-                  style={{ color: '#059669' }}>auto_awesome</span>
-          </div>
-          <div className="absolute bottom-4 -left-4">
-            <span className="material-symbols-outlined text-3xl opacity-50"
-                  style={{ color: '#059669' }}>stars</span>
-          </div>
+          <span className="absolute -top-3 -right-3 text-sun"><DoodleIcon name="sparkle" size={34} filled stroke={4} /></span>
+          <span className="absolute bottom-3 -left-5 text-leaf"><DoodleIcon name="leaf" size={30} filled /></span>
         </div>
 
-        <div className="space-y-4 mb-10">
-          <h2 className="font-headline font-bold text-5xl text-primary leading-tight">
-            {t('celebrate.forscher.title')}
-          </h2>
-          <p className="text-xl text-on-surface-variant font-body px-4">
-            {t('celebrate.forscher.message')}
-          </p>
+        <div className="space-y-3 mb-10">
+          <Headline>{t('celebrate.forscher.title')}</Headline>
+          <p className="text-xl text-ink-soft font-body px-4">{t('celebrate.forscher.message')}</p>
         </div>
 
         <div className="w-full max-w-sm">
-          <CooldownButton delay={4} onClick={onDismiss} icon="sports_esports"
-            className="w-full py-5 px-8 bg-primary-container text-white font-headline font-bold text-xl rounded-full"
-            style={{ boxShadow: '0 8px 24px rgba(18,67,70,0.2)' }}>
+          <CooldownButton delay={4} onClick={onDismiss} icon="sports_esports" className={PILL}>
             {t('celebrate.forscher.button')}
           </CooldownButton>
         </div>
@@ -314,66 +194,33 @@ function ForscherGraduationCelebration({ onDismiss }) {
   );
 }
 
-// ── Chest / Streak Milestone ──
+// ── Chest: milestone ──
 function ChestCelebration({ milestone, reward, onDismiss }) {
   const { t } = useTranslation();
   return (
-    <main className="min-h-dvh pt-24 pb-32 px-6 flex flex-col items-center justify-center relative overflow-hidden lotus-pattern">
-      <ConfettiCanvas />
-      {/* Ambient glow */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
-        <div className="w-[400px] h-[400px] rounded-full blur-[120px]" style={{ background: '#fcd34d' }} />
-      </div>
-
-      <section className="relative z-10 w-full max-w-lg flex flex-col items-center text-center">
-        {/* Chest illustration */}
-        <div className="relative w-64 h-64 mb-8">
-          <div className="absolute inset-0 rounded-full blur-3xl animate-pulse" style={{ background: 'rgba(252,211,77,0.3)' }} />
-          <div className="relative z-10 w-full h-full flex items-center justify-center">
-            <span className="text-[9rem] drop-shadow-2xl">&#x1f381;</span>
+    <main className="min-h-dvh pt-24 pb-32 px-6 flex flex-col items-center justify-center relative overflow-hidden">
+      <Burst />
+      <section className="relative w-full max-w-lg flex flex-col items-center text-center">
+        <div className="relative mb-8">
+          <div className="w-48 h-48 rounded-full bg-sun border-[3px] border-ink flex items-center justify-center text-ink">
+            <DoodleIcon name="gift" size={104} stroke={4} />
           </div>
-          {/* Sparkle accents */}
-          <div className="absolute -top-4 -right-4">
-            <span className="material-symbols-outlined text-secondary text-4xl opacity-60">auto_awesome</span>
-          </div>
-          <div className="absolute bottom-4 -left-4">
-            <span className="material-symbols-outlined text-secondary text-3xl opacity-40">stars</span>
-          </div>
+          <span className="absolute -top-3 -right-3"><MotionTicks tone="cobalt" size={34} rotate={-45} /></span>
+          <span className="absolute bottom-3 -left-5 text-ember"><DoodleIcon name="sparkle" size={28} filled /></span>
         </div>
 
-        {/* Headline */}
-        <div className="space-y-4 mb-10">
-          <h2 className="font-headline font-bold text-5xl text-primary leading-tight">{t('celebrate.chest.title')}</h2>
-          <p className="text-xl text-on-surface-variant font-body px-4">
-            {t('celebrate.chest.daysInRow', { days: milestone })}
-          </p>
+        <div className="space-y-3 mb-10">
+          <Headline>{t('celebrate.chest.title')}</Headline>
+          <p className="text-xl text-ink-soft font-body px-4">{t('celebrate.chest.daysInRow', { days: milestone })}</p>
         </div>
 
-        {/* Reward card */}
-        <div className="w-full bg-white rounded-2xl p-8 relative overflow-hidden mb-10"
-             style={{ boxShadow: '0 8px 24px rgba(30,27,23,0.06)' }}>
-          <div className="absolute bottom-2 right-2 opacity-5 pointer-events-none">
-            <span className="material-symbols-outlined" style={{ fontSize: '80px' }}>local_florist</span>
-          </div>
-          <div className="relative z-10 flex flex-col items-center">
-            <div className="mb-4">
-              <div className="w-20 h-20 rounded-full flex items-center justify-center relative"
-                   style={{ background: 'rgba(252,211,77,0.15)' }}>
-                <div className="absolute inset-0 rounded-full blur-xl opacity-30" style={{ background: '#fcd34d' }} />
-                <span className="material-symbols-outlined relative z-10 text-secondary" style={{ fontSize: '3rem', fontVariationSettings: "'FILL' 1" }}>diamond</span>
-              </div>
-            </div>
-            <p className="font-body text-xl text-on-surface/80 leading-relaxed">
-              {t('celebrate.chest.earned', { reward })}
-            </p>
-          </div>
-        </div>
+        <PaperCard tone="paper" pad="lg" className="w-full mb-10 flex flex-col items-center">
+          <div className="mb-3 text-cobalt"><DoodleIcon name="star" size={56} filled stroke={4} /></div>
+          <p className="font-body text-xl text-ink leading-relaxed">{t('celebrate.chest.earned', { reward })}</p>
+        </PaperCard>
 
-        {/* CTA — 4s cooldown */}
         <div className="w-full max-w-sm">
-          <CooldownButton delay={4} onClick={onDismiss} icon="redeem"
-            className="w-full py-5 px-8 bg-primary-container text-white font-headline font-bold text-xl rounded-full"
-            style={{ boxShadow: '0 8px 24px rgba(18,67,70,0.2)' }}>
+          <CooldownButton delay={4} onClick={onDismiss} icon="redeem" className={PILL}>
             {t('celebrate.chest.button')}
           </CooldownButton>
         </div>
@@ -391,9 +238,9 @@ export default function Celebration() {
   useEffect(() => {
     if (celebration) {
       // Public mode: skip RPG-flavored celebrations entirely (levelUp +
-      // evolution "Ronki hat sich verändert!"). State still updates under
-      // the hood; just don't show modals that contradict the "one stable
-      // companion, no ladder" framing Marc wants in public mode.
+      // evolution). State still updates under the hood; just don't show
+      // modals that contradict the "one stable companion, no ladder"
+      // framing Marc wants in public mode.
       if ((celebration.type === 'levelUp' || celebration.type === 'evolution') && !isDevMode()) {
         skipRef.current = true;
         actions.dismissCelebration();
@@ -402,8 +249,6 @@ export default function Celebration() {
       // Reward tapering: based on days since onboarding, some celebrations
       // are silently skipped in later phases. Evolution/chest always show.
       if (celebration.type === 'victory' || celebration.type === 'levelUp') {
-        // Check habit phase — read onboardingDate from state directly
-        const state = celebration._state; // injected below
         let daysSince = 0;
         try {
           const raw = localStorage.getItem('hdx2');
@@ -417,7 +262,7 @@ export default function Celebration() {
         // Phase 1 (days 1-7): always show. Phase 2 (8-21): 85%. Phase 3 (22-45): 50%. Phase 4 (46+): 15%.
         const prob = daysSince <= 7 ? 1.0 : daysSince <= 21 ? 0.85 : daysSince <= 45 ? 0.5 : 0.15;
         if (Math.random() > prob) {
-          // Silently dismiss — the reward was already given, just skip the animation
+          // Silently dismiss: the reward was already given, just skip the animation
           skipRef.current = true;
           actions.dismissCelebration();
           return;
@@ -438,17 +283,19 @@ export default function Celebration() {
   };
 
   return (
-    <div className="fixed inset-0 z-[500] bg-surface overflow-y-auto transition-all duration-300"
+    <div className="fixed inset-0 z-[500] bg-white overflow-y-auto transition-all duration-300"
          style={{
            opacity: visible ? 1 : 0,
            transform: visible ? 'translateY(0)' : 'translateY(20px)',
          }}>
-      {/* Top bar */}
-      <header className="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-xl flex justify-between items-center px-6 h-16"
+      {/* Top bar: close chevron, headline, nothing else. */}
+      <header className="fixed top-0 w-full z-50 bg-white flex justify-between items-center px-4 h-16 text-ink"
               style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
-        <button onClick={handleDismiss} className="material-symbols-outlined text-primary hover:opacity-80 transition-opacity">close</button>
-        <h1 className="font-headline font-bold text-2xl text-primary">{t('celebrate.header')}</h1>
-        <div className="w-6" />
+        <button type="button" onClick={handleDismiss} aria-label="Schließen" className="flex h-12 w-12 items-center justify-center rounded-full active:scale-95">
+          <DoodleIcon name="close" size={24} stroke={7} />
+        </button>
+        <h1 className="bb-display text-2xl">{t('celebrate.header')}</h1>
+        <div className="w-12" />
       </header>
 
       {celebration.type === 'victory' && <VictoryCelebration onDismiss={handleDismiss} />}

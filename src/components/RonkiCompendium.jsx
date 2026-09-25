@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import MoodChibi from './MoodChibi';
+import MoodChibi, { RonkiArt } from './MoodChibi';
 import CampfireScene from './CampfireScene';
 import FireBreathPuff from './FireBreathPuff';
-import { COMPANION_VARIANTS } from '../data/companionVariants';
 import ChibiFriend, { CHIBI_FRIEND_IDS } from './drachennest/ChibiFriend';
 import { SEED_BY_ID } from '../data/creatures';
 import { FREUNDE } from '../data/freunde';
@@ -62,7 +61,7 @@ const WEATHER_BANDS = [
 
 export default function RonkiCompendium() {
   const [activeMood, setActiveMood] = useState('normal');
-  const [activeVariant, setActiveVariant] = useState('violet');
+  const [activeVariant] = useState('violet');
   const [activeFlavor, setActiveFlavor] = useState(null);
   const [flavorKey, setFlavorKey] = useState(0);
   const [activeWeather, setActiveWeather] = useState(undefined);
@@ -127,96 +126,27 @@ export default function RonkiCompendium() {
         </div>
       </header>
 
-      {/* ── Section 1: Triff die Ronkis ── */}
+      {/* ── Section 1: Aus dem Ei ── */}
+      {/* Bilderbuch (25 Sep 2026): Ronki is always red-orange now, so the
+          old six-colour picker would show six identical dragons. The egg
+          a kid picks stays a choice of egg, not of dragon colour. */}
       <Section
-        kicker="Sechs Farben"
-        title="Triff die Ronkis"
-        subtitle="Jedes Ei wird ein einzigartiger Ronki. Tippe eins an, um ihn oben zu zeigen."
+        kicker="Vier Eier"
+        title="Triff Ronki"
+        subtitle="Du suchst dir ein Ei aus. Heraus kommt immer Ronki, rot wie ein kleines Feuer."
       >
         <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+          display: 'flex',
+          flexWrap: 'wrap',
+          justifyContent: 'center',
+          alignItems: 'flex-end',
           gap: 16,
           maxWidth: 900,
           margin: '0 auto',
         }}>
-          {COMPANION_VARIANTS.map(v => {
-            const isActive = activeVariant === v.id;
-            return (
-              <button key={v.id} onClick={() => setActiveVariant(v.id)}
-                style={{
-                  background: '#fff8f2',
-                  borderRadius: 20,
-                  padding: '16px 12px 14px',
-                  border: isActive ? `2px solid ${v.borderColor}` : '1.5px solid rgba(18,67,70,0.12)',
-                  boxShadow: isActive
-                    ? `0 12px 28px -10px ${v.glowColor}, 0 0 0 4px ${v.glowColor}`
-                    : '0 4px 12px -6px rgba(18,67,70,0.15)',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  transform: isActive ? 'translateY(-3px)' : 'none',
-                }}>
-                <div style={{ width: 100, height: 100, margin: '0 auto' }}>
-                  <MoodChibi size={100} mood="normal" variant={v.id} stage={2} bare />
-                </div>
-                <p style={{
-                  margin: '12px 0 2px',
-                  fontFamily: 'Fredoka, sans-serif',
-                  fontWeight: 500, fontSize: 16,
-                  color: '#124346',
-                }}>
-                  {v.name.de}
-                </p>
-                <p style={{
-                  margin: 0,
-                  fontSize: 10, letterSpacing: '0.22em',
-                  textTransform: 'uppercase', fontWeight: 800,
-                  color: v.borderColor,
-                }}>
-                  {v.id}
-                </p>
-                {/* Per-variant unique traits — three small chips that
-                    distinguish this Ronki from the others. Marc 25 Apr
-                    2026 ask: "ronkis with variations and unique
-                    features that we can randomize or let the kids
-                    pick when evolution happens." This row is the
-                    showcase; the actual on-chibi rendering is a
-                    follow-up pass. */}
-                {v.traits && (
-                  <div style={{
-                    marginTop: 10,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 4,
-                    alignItems: 'stretch',
-                  }}>
-                    {[v.traits.hornAccent, v.traits.cheekMark, v.traits.tailTuft].map(t => (
-                      <div key={t.id} style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 6,
-                        padding: '4px 8px',
-                        borderRadius: 10,
-                        background: `${v.glowColor.replace('0.35', '0.15')}`,
-                        border: `1px solid ${v.borderColor}30`,
-                      }}>
-                        <span style={{ fontSize: 11, lineHeight: 1 }}>{t.emoji}</span>
-                        <span style={{
-                          fontSize: 10,
-                          fontFamily: 'Plus Jakarta Sans, sans-serif',
-                          fontWeight: 700,
-                          color: '#124346',
-                          letterSpacing: '0.02em',
-                        }}>
-                          {t.label.de}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </button>
-            );
-          })}
+          {['egg-cream', 'egg-ember', 'egg-sun', 'egg-cobalt', 'egg-peek'].map(pose => (
+            <RonkiArt key={pose} pose={pose} size={pose === 'egg-peek' ? 140 : 110} />
+          ))}
         </div>
       </Section>
 

@@ -55,22 +55,16 @@ export default function SWUpdateBanner() {
     <div
       role="status"
       aria-live="polite"
-      className="sticky top-0 inset-x-0 z-[61] bg-[#0F2C2E] text-white border-b border-[#FCD34D]/40"
-      style={{
-        paddingTop: 'env(safe-area-inset-top, 0px)',
-        fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
-      }}
+      className="sticky top-0 inset-x-0 z-[61] bg-night text-white font-headline border-b-[2px] border-sun"
+      style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
     >
-      <div className="max-w-lg mx-auto flex items-center gap-2 px-4 py-2 text-[12px] leading-tight">
-        <span
-          aria-hidden
-          className="inline-block w-1.5 h-1.5 rounded-full bg-[#FCD34D] shrink-0 animate-pulse"
-        />
-        <span className="font-semibold tracking-wide">{t('sw.update.title')}</span>
+      <div className="max-w-lg mx-auto flex items-center gap-2 px-4 py-2 text-[13px] leading-tight">
+        <span aria-hidden className="inline-block w-2 h-2 rounded-full bg-sun shrink-0 animate-pulse" />
+        <span className="font-semibold">{t('sw.update.title')}</span>
         <button
           type="button"
           onClick={handleReload}
-          className="ml-auto shrink-0 rounded-full bg-[#FCD34D] text-[#0F2C2E] font-bold tracking-wide px-3 py-1 text-[11px] hover:brightness-110 transition"
+          className="ml-auto shrink-0 rounded-full bg-sun text-ink font-bold px-4 py-1.5 text-[12px] border-[2px] border-ink active:scale-95 transition-transform"
         >
           {t('sw.update.button')}
         </button>

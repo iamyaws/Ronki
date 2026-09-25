@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from '../i18n/LanguageContext';
 import RonkiPortrait from './RonkiPortrait';
+import DoodleIcon from './bilderbuch/DoodleIcon';
 
+// Doodle per message (Bilderbuch, 25 Sep 2026): the drawn marks replace
+// the Material glyphs. Keys and timing are unchanged.
 const MESSAGES = [
-  { key: 'toast.stronger', icon: 'bolt' },
-  { key: 'toast.proud', icon: 'sentiment_very_satisfied' },
-  { key: 'toast.energy', icon: 'local_fire_department' },
-  { key: 'toast.joyful', icon: 'auto_awesome' },
-  { key: 'toast.wellDone', icon: 'military_tech' },
-  { key: 'toast.growing', icon: 'trending_up' },
+  { key: 'toast.stronger', icon: 'bolt', tone: 'text-cobalt' },
+  { key: 'toast.proud', icon: 'heart', tone: 'text-ember' },
+  { key: 'toast.energy', icon: 'flame', tone: 'text-ember' },
+  { key: 'toast.joyful', icon: 'sparkle', tone: 'text-sun-deep' },
+  { key: 'toast.wellDone', icon: 'star', tone: 'text-sun-deep' },
+  { key: 'toast.growing', icon: 'leaf', tone: 'text-leaf' },
 ];
 
 export default function CompanionToast({ trigger }) {
@@ -31,17 +34,14 @@ export default function CompanionToast({ trigger }) {
 
   return (
     <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[300] animate-slide-in-toast pointer-events-none">
-      <div className="flex items-center gap-3 px-5 py-3 rounded-full shadow-xl"
-           style={{ background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(12px)', border: '1.5px solid rgba(18,67,70,0.12)' }}>
-        {/* Variant-aware mini chibi — replaces the amber-only dragon-baby
-             painted portrait so the toast reflects the kid's picked
-             variant (Marc 23 Apr 2026). */}
+      <div className="flex items-center gap-3 pl-3 pr-5 py-2.5 rounded-full bg-white border-[3px] border-ink">
         <div className="shrink-0" style={{ width: 36, height: 36 }}>
-          <RonkiPortrait size={36} />
+          <RonkiPortrait size={36} bare />
         </div>
-        <span className="material-symbols-outlined text-primary text-lg"
-              style={{ fontVariationSettings: "'FILL' 1" }}>{msg.icon}</span>
-        <span className="font-headline font-bold text-base text-on-surface whitespace-nowrap">{t(msg.key)}</span>
+        <span className={msg.tone} aria-hidden="true">
+          <DoodleIcon name={msg.icon} size={22} filled={msg.icon === 'star' || msg.icon === 'heart' || msg.icon === 'sparkle'} />
+        </span>
+        <span className="font-headline font-bold text-lg text-ink whitespace-nowrap">{t(msg.key)}</span>
       </div>
     </div>
   );

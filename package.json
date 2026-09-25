@@ -13,7 +13,8 @@
     "build:web": "vite build --config website/vite.config.ts",
     "preview:web": "vite preview --config website/vite.config.ts",
     "test:web": "vitest run --config website/vite.config.ts",
-    "mock:supabase": "node scripts/mock-supabase.mjs"
+    "mock:supabase": "node scripts/mock-supabase.mjs",
+    "check:names": "node scripts/check-names.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.103.0",
