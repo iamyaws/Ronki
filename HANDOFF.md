@@ -6,6 +6,8 @@ _Single source of truth: done, in flight, backlog. Update before any /compact an
 
 ## Bilderbuch in the app (25 September 2026)
 
+**LIVE since 25 Sep 2026, 19:49 UTC** (Marc: "push to main"). PR #14 merged as `770092c` (website and app together). Checked after the Vercel production deploys: app.ronki.de bundle `index-XpNMOyqB.js` to `index-Cr2hEU5F.js` (name chips, old-save split, feelings entry, 1 s guard, task pictures inside; theme #0544B0; hatch clips, name recordings and icons served); ronki.de (redirects to www.ronki.de) bundle `index-BVdpiTzB.js` to `index-BzYYt3Jw.js` (Bilderbuch markers inside, hero art served). No Supabase change was needed. First thing after go-live: open the parent area on Louis's tablet and answer the child-name note if it shows.
+
 Marc's ask: make the new Bilderbuch design live in the real PWA, benchmarked against Jason Lee's "Watch Me Vibe Code an Animated App with Claude Fable 5.1 + Seedance 2.5" (YouTube, 18 Sep 2026); plan fully and build while he is away. Mid-run steers: subagents on Fable or Opus at high effort, Higgsfield as in the video, fresh research, Astra as reviewer and code reviewer, all work tracked in the shared GitHub repo.
 
 **Where the work lives.** Branch `design/bilderbuch-app` on `iamyaws/Ronki` (pushed after every step), built on `design/bilderbuch` (the website redesign, also pushed now). Working copy: `C:\Users\öööö\ronki-bilderbuch-app` (a standalone clone, see the repair note below). Nothing is merged to `main`; production (app.ronki.de, ronki.de) is unchanged. Vercel builds previews for both projects on every push.
