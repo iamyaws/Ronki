@@ -5,7 +5,6 @@ import StepStones from './StepStones';
 import { localMinutes, minutesOfHHMM } from '../../loop/clock';
 
 const ART = `${import.meta.env.BASE_URL}art/bilderbuch/`;
-const MORGENWALD = `${ART}scenes/morgenwald.webp`;
 const CLOUD_LOOP = `${ART}loops/ronki-cloud.webp`;
 
 const DAY_FROM = 6 * 60;
@@ -49,7 +48,8 @@ export function SunMoonPath({ now, eveningStart, onDark = false, style }) {
  * DepartureSheet: the send-off after a full morning fire (Finch pass,
  * 26 Sep 2026; base design 3.1).
  *
- * Sky ground, the Morgenwald treetops, Ronki on his cloud, the
+ * Sky ground with Ronki on his cloud (no painting behind him: the
+ * Morgenwald scene has its own Ronki in it, own read O2), the
  * sun-to-moon path, the stepping stones to his next look (spoken once),
  * one sun pill "Tschüss, {nick}!". The goodbye line is the school one on
  * weekdays and the free one on weekends and holidays; RoomHub picks it
@@ -94,14 +94,11 @@ export default function DepartureSheet({
       className="bg-sky text-ink"
       style={{ position: 'fixed', inset: 0, zIndex: 80, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}
     >
-      {/* The Morgenwald treetops, Ronki on his cloud in front of them. */}
-      <div aria-hidden="true" style={{ position: 'relative', width: '100%', height: '46dvh', minHeight: 250, overflow: 'hidden', borderBottom: '3px solid var(--color-ink)' }}>
-        <img
-          src={MORGENWALD}
-          alt=""
-          draggable={false}
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: '50% 0%' }}
-        />
+      {/* The open sky, Ronki on his cloud in it. */}
+      <div aria-hidden="true" data-testid="departure-sky" style={{ position: 'relative', width: '100%', height: '46dvh', minHeight: 250, overflow: 'hidden', borderBottom: '3px solid var(--color-ink)' }}>
+        <span style={{ position: 'absolute', left: '8%', top: '10%', color: 'var(--color-sun)', lineHeight: 0 }}>
+          <DoodleIcon name="sun" size={56} filled />
+        </span>
         <div
           className={reduced ? '' : 'bb-idle-bob'}
           style={{ position: 'absolute', left: '50%', top: '18%', width: '52%', maxWidth: 240, transform: 'translateX(-50%)' }}

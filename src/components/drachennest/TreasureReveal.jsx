@@ -7,7 +7,6 @@ import { tripById, isRepeat } from '../../data/trips';
 import { lineText } from '../../data/ronkiLines';
 import { evoAfterTreasure } from '../../loop/growth';
 
-const MORGENWALD = `${import.meta.env.BASE_URL}art/bilderbuch/scenes/morgenwald.webp`;
 const REPEAT_GAP_MS = 3400;
 
 /** What the treasure is: the trip it came from, or an old save's memento. */
@@ -27,7 +26,9 @@ export function treasureOf(expedition) {
  * TreasureReveal: Ronki unwraps what he brought (Finch pass, 26 Sep 2026;
  * base design 3.3).
  *
- * The treasure large on paper over the Morgenwald, its name and place,
+ * The treasure large on paper on the sky ground (not over the Morgenwald
+ * painting, which shows Ronki with the maple leaf; own read O2), its
+ * name and place,
  * and his short story as big text, spoken. A repeat trip (after the 14th)
  * first says honestly "Da war ich schon mal. Aber es war wieder schön."
  * The stepping stones show the way to his next look, counting this
@@ -76,13 +77,6 @@ export default function TreasureReveal({ onDone }) {
       className="bg-sky text-ink"
       style={{ position: 'fixed', inset: 0, zIndex: 85, overflowY: 'auto' }}
     >
-      <img
-        src={MORGENWALD}
-        alt=""
-        aria-hidden="true"
-        draggable={false}
-        style={{ position: 'fixed', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: '50% 0%' }}
-      />
       <div
         className="relative flex flex-col items-center"
         style={{ minHeight: '100dvh', padding: 'calc(20px + env(safe-area-inset-top, 0px)) 16px calc(28px + env(safe-area-inset-bottom, 0px))', gap: 16 }}

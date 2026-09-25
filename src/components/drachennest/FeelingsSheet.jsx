@@ -35,6 +35,9 @@ export const REPLY_FOR = {
 /** After these Ronki offers to sit together (spec R5). */
 export const SIT_OFFER = new Set([0, 1]);
 
+/** Feelings whose spoken reply is itself the question to be together (Traurig). */
+export const REPLY_ASKS = new Set([0]);
+
 /**
  * The reply text of an existing voice line. The recorded worried line was
  * written with a long dash; the text on screen never shows one.
@@ -85,9 +88,14 @@ export default function FeelingsSheet({ askId = 'mood_ask_01', slot, now, onClos
     setPicked(idx);
     onPick?.(idx);
     if (SIT_OFFER.has(idx)) {
-      // The reply first, then the offer to sit together.
+      // The reply first, then the offer to sit together. The Traurig
+      // reply already asks "Sollen wir einfach zusammen sein?", so its
+      // offer stays on screen (bubble and pill) without a second spoken
+      // question (GUARDRAILS-5).
       VoiceAudio.playLocalized(REPLY_FOR[idx], 0);
-      closeTimer.current = setTimeout(() => VoiceAudio.playLocalized('mood_sit_offer_01', 0), 3600);
+      if (!REPLY_ASKS.has(idx)) {
+        closeTimer.current = setTimeout(() => VoiceAudio.playLocalized('mood_sit_offer_01', 0), 3600);
+      }
     } else {
       VoiceAudio.playLocalized(REPLY_FOR[idx], 0);
       closeTimer.current = setTimeout(() => onClose?.(), 4200);

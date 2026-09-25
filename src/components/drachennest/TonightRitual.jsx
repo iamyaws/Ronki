@@ -2,10 +2,12 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useTask } from '../../context/TaskContext';
 import { track } from '../../lib/analytics';
 import VoiceAudio from '../../utils/voiceAudio';
-import { SceneLoop, QuietLink, DoodleIcon, RonkiArt, useReducedMotion } from '../bilderbuch';
+import { SceneLoop, QuietLink, DoodleIcon, useReducedMotion } from '../bilderbuch';
+import MoodChibi from '../MoodChibi';
+import { getCatStage } from '../../utils/helpers';
 import { now as clockNow, dayKey } from '../../loop/clock';
 import { fireOfBlock } from '../../loop/fire';
-import { tripAt } from '../../data/trips';
+import { tripAt, tripById } from '../../data/trips';
 import { lineText } from '../../data/ronkiLines';
 
 // Path to the lullaby audio. Royalty-free 4-bar loop, ~30s.
@@ -34,13 +36,14 @@ const NIGHT_SKY = '#011551';
  * blanket breathing, the star lamp glowing). Above it, in the open
  * sky, one line from Ronki. One quiet way out. No counters.
  *
- * Phases (auto-advance unless noted, timings unchanged):
+ * Phases (all auto-advance; a tap moves on sooner):
  *   enter   (2.4s, title fades in on the night ground)
  *   lookup  (4.4s, the bedroom fades in)
- *   story   (kid taps when ready, the story line fades in)
+ *   story   (the story line fades in; a tap, or about 15s)
  *   hook    (Finch pass: what comes next, about 6.5s or a tap)
  *   curtain (12s, the room dims to night, stars come out, lullaby plays)
- *   black   (final state: sleeping Ronki, "Schlaf gut.", the way out)
+ *   black   (sleeping Ronki, "Schlaf gut.", the way out; closes itself
+ *            after about 20s so a tablet left on never keeps it up)
  *
  * Finch pass (26 Sep 2026, spec 3.4 and R3):
  *   - A close doodle works from the first frame (the census found no
@@ -50,8 +53,15 @@ const NIGHT_SKY = '#011551';
  *     zum Bach.", never a time word); with a full evening fire and no
  *     trip today the dream trip ("Heute Nacht flieg ich im Traum los.");
  *     otherwise "Schlaf gut. Ich bin hier im Nest."
- *   - Reaching the end calls completeTonight() and, for the dream trip,
- *     departTrip('night'). Closing early changes nothing.
+ *   - The evening is done when the hook is shown: completeTonight() and,
+ *     for the dream trip, departTrip('night') run as the promise is
+ *     spoken, so closing during the hook or the lullaby keeps it
+ *     (LOOP-2, KIDUX-2). Closing before the hook changes nothing.
+ *   - After a trip that came back today, the story is today's trip story
+ *     (its text and trip_story_NN voice), the same one the treasure told;
+ *     the ten old lines are for days without one (own read O4).
+ *   - At the end Ronki sleeps in his own look (MoodChibi with the child's
+ *     stage and egg, tired), never the generic pose art (Astra FC-05).
  *
  * Voice lines, analytics events, the story pool and the lullaby are
  * the same as before the Bilderbuch pass.
@@ -73,6 +83,36 @@ export const TONIGHT_STORIES = [
   'Heute hat ein kleiner Wind durch die Höhle geschaut. Ich glaub er hat sich nur kurz ausgeruht.',
   'Wir haben heute viel zusammen erlebt, oder? Ich erinner mich an alles. Versprochen.',
 ];
+
+/**
+ * The trip that came back today, or null. A day trip left today
+ * (lastTripDate) and is back: its treasure waits, or it is on the shelf.
+ * A trip still out, or a dream trip, is not today's story.
+ */
+export function todaysTrip(state, when) {
+  if (!state || state.lastTripDate !== dayKey(when)) return null;
+  const exp = state.expedition || { state: 'home' };
+  if (exp.state === 'waiting') {
+    if (exp.kind === 'night') return null;
+    return tripById(exp.tripId || exp.pendingMemento?.tripId);
+  }
+  if (exp.state === 'home' || exp.state === 'leaving' || !exp.state) {
+    const log = Array.isArray(state.expeditionLog) ? state.expeditionLog : [];
+    const last = log[log.length - 1];
+    if (!last || !last.ts || Number.isNaN(Date.parse(last.ts))) return null;
+    if (dayKey(new Date(last.ts)) !== dayKey(when)) return null;
+    return tripById(last.tripId);
+  }
+  return null;
+}
+
+/** The story of tonight: today's trip story, or one of the ten old lines. */
+export function tonightStory(state, when) {
+  const trip = todaysTrip(state, when);
+  if (trip) return { text: trip.story, voice: trip.storyVoice };
+  const { text, idx } = pickStory();
+  return { text, voice: `tonight_story_${idx}` };
+}
 
 function pickStory() {
   // Stable for the duration of one Tonight session: uses session
@@ -110,6 +150,10 @@ export function tonightHook(state, when) {
 }
 
 const HOOK_MS = 6500;
+/** The story moves to the hook by itself, for a child who cannot read the tap hint. */
+export const STORY_MS = 15000;
+/** The black end closes itself. */
+export const BLACK_MS = 20000;
 
 // Height of the open sky above the scene. The story line lives here,
 // clear of the window and the moon in the painting.
@@ -119,10 +163,14 @@ export default function TonightRitual({ onClose }) {
   const { state, actions } = useTask();
   const [phase, setPhase] = useState('enter');
   const [tapped, setTapped] = useState(false);
-  const [{ text: story, idx: storyIdx }] = useState(() => pickStory());
   // Decided once when the ritual opens, so a state change underneath
-  // (the fire, a trip) cannot swap the line mid-way.
+  // (the fire, a trip, the commit at the hook) cannot swap a line mid-way.
+  const [{ text: story, voice: storyVoice }] = useState(() => tonightStory(state, clockNow()));
   const [hook] = useState(() => tonightHook(state, clockNow()));
+  const [sleepLook] = useState(() => ({
+    stage: getCatStage(state?.catEvo ?? 0),
+    variant: state?.companionVariant || 'forest',
+  }));
   const hookTimerRef = useRef(null);
   // Guards the curtain to black auto-advance. Without it, replay()
   // mid-curtain (or repeated taps) would leave a dangling 12s timer
@@ -130,8 +178,10 @@ export default function TonightRitual({ onClose }) {
   // black during the second viewing. Cleared on tap, replay, unmount.
   const curtainTimerRef = useRef(null);
   const completeFiredRef = useRef(false);
+  const endTrackedRef = useRef(false);
 
-  // Auto-advance into lookup, then story.
+  // Auto-advance into lookup, then story, then (untapped) the hook; the
+  // black end closes itself.
   useEffect(() => {
     if (phase === 'enter') {
       const t = setTimeout(() => setPhase('lookup'), 2400);
@@ -141,6 +191,17 @@ export default function TonightRitual({ onClose }) {
       const t = setTimeout(() => setPhase('story'), 4400);
       return () => clearTimeout(t);
     }
+    if (phase === 'story') {
+      const t = setTimeout(() => enterHook(), STORY_MS);
+      return () => clearTimeout(t);
+    }
+    if (phase === 'black') {
+      const t = setTimeout(() => onClose?.(), BLACK_MS);
+      return () => clearTimeout(t);
+    }
+    return undefined;
+    // enterHook and onClose belong to this mount; the phase drives it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
 
   // Telemetry: fire start once per mount.
@@ -157,11 +218,11 @@ export default function TonightRitual({ onClose }) {
     } else if (phase === 'lookup') {
       VoiceAudio.playLocalized('tonight_invite_01', 200);
     } else if (phase === 'story') {
-      VoiceAudio.playLocalized(`tonight_story_${storyIdx}`, 600);
+      VoiceAudio.playLocalized(storyVoice, 600);
     } else if (phase === 'hook') {
       VoiceAudio.playLocalized(hook.id, 200);
     }
-  }, [phase, storyIdx, hook.id]);
+  }, [phase, storyVoice, hook.id]);
 
   // Cleanup any pending curtain timer on unmount so an early dismiss
   // doesn't fire `tonight.complete` for a moment that didn't finish.
@@ -177,14 +238,21 @@ export default function TonightRitual({ onClose }) {
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
 
-  // The ritual reached its end: the evening is done, and a dream trip
-  // leaves now. Once per mount.
-  const fireComplete = () => {
+  // The hook is shown: the evening is done, and a dream trip leaves now
+  // (the promise was just spoken). Once per mount.
+  const commitEvening = () => {
     if (completeFiredRef.current) return;
     completeFiredRef.current = true;
-    track('tonight.complete');
     actions?.completeTonight?.();
     if (hook.dream) actions?.departTrip?.('night');
+  };
+
+  // The ritual reached its end (analytics; the commit already ran). Once per mount.
+  const fireComplete = () => {
+    commitEvening();
+    if (endTrackedRef.current) return;
+    endTrackedRef.current = true;
+    track('tonight.complete');
   };
 
   const startCurtain = () => {
@@ -200,11 +268,20 @@ export default function TonightRitual({ onClose }) {
     }, 12000);
   };
 
+  // Story to hook, by a tap or by itself. Once per mount.
+  const hookEnteredRef = useRef(false);
+  function enterHook() {
+    if (hookEnteredRef.current) return;
+    hookEnteredRef.current = true;
+    setTapped(true);
+    setPhase('hook');
+    commitEvening();
+    hookTimerRef.current = setTimeout(startCurtain, HOOK_MS);
+  }
+
   const handleTap = () => {
     if (phase === 'story' && !tapped) {
-      setTapped(true);
-      setPhase('hook');
-      hookTimerRef.current = setTimeout(startCurtain, HOOK_MS);
+      enterHook();
     } else if (phase === 'hook') {
       startCurtain();
     } else if (phase === 'curtain') {
@@ -336,7 +413,9 @@ export default function TonightRitual({ onClose }) {
             animation: 'tn-lineIn 2400ms ease 800ms backwards',
           }}
         >
-          <RonkiArt pose="sleep" size={220} idle="bb-idle-slow" />
+          <div data-testid="tonight-sleep">
+            <MoodChibi size={220} variant={sleepLook.variant} stage={sleepLook.stage} mood="tired" bare />
+          </div>
           <div className="bb-display text-white text-center" style={{ fontSize: 44, marginTop: 18 }}>
             Schlaf gut.
           </div>

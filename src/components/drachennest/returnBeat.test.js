@@ -53,15 +53,31 @@ describe('nestBeat', () => {
     expect(nestBeat({ ...base, quests: full }, at('2026-09-28T07:30:00')).mode).toBe('departure');
   });
 
-  it('day block: an unfinished morning stays home (R2), day 1 never departs (R4)', () => {
+  it('day block: an unfinished morning stays home (R2), an afternoon install on day 1 never departs (R4)', () => {
     const now = at('2026-09-28T13:00:00');
     expect(nestBeat({ ...base, quests: MORNING }, now).mode).toBe('stay');
     const full = MORNING.map(x => ({ ...x, done: true }));
     expect(nestBeat({ ...base, quests: full }, now).mode).toBe('departure');
-    const day1 = { ...base, quests: full, onboardingDate: dayKey(now), adventureCount: 0 };
+    // Afternoon install: no real morning task, only the half-warm start.
+    const day1 = { ...base, quests: MORNING, onboardingDate: dayKey(now), adventureCount: 0 };
     const b = nestBeat(day1, now);
     expect(b.mode).toBe('stay');
     expect(b.firstDay).toBe(true);
+  });
+
+  it('day 1 in the day block: a morning the child filled with real tasks still sends him off (LOOP-1)', () => {
+    // Saturday: the morning ends at 12:00. Three real tasks plus the
+    // half-warm start filled the fire; nobody tapped Tschüss before noon.
+    const now = at('2026-09-26T12:05:00');
+    const s = { ...base, onboardingDate: dayKey(now), adventureCount: 0, quests: MORNING.map((x, i) => ({ ...x, done: i < 3 })) };
+    const b = nestBeat(s, now);
+    expect(b.firstDay).toBe(true);
+    expect(b.mode).toBe('departure');
+    expect(b.fire.full).toBe(true);
+    // The same fire full from the head start alone never happens (bonus 2
+    // of 5), and an afternoon install with no real morning task stays home.
+    const none = { ...base, onboardingDate: dayKey(now), adventureCount: 0, quests: MORNING };
+    expect(nestBeat(none, now).mode).toBe('stay');
   });
 
   it('day 1 in the morning block leaves when the half-warm fire fills', () => {

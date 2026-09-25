@@ -61,7 +61,9 @@ describe('FeelingsSheet', () => {
     expect(VoiceAudio.playLocalized).toHaveBeenCalledWith('mood_sad_01', 0);
     expect(getByTestId('feelings-sheet').textContent).toContain(lineText('mood_sit_offer_01'));
     act(() => { vi.advanceTimersByTime(3700); });
-    expect(VoiceAudio.playLocalized).toHaveBeenCalledWith('mood_sit_offer_01', 0);
+    // The sad reply already asks to be together: no second spoken question (GUARDRAILS-5).
+    expect(VoiceAudio.playLocalized).not.toHaveBeenCalledWith('mood_sit_offer_01', 0);
+    expect(VoiceAudio.playLocalized).toHaveBeenCalledTimes(2); // the ask on open, the reply
     // The sheet stays open for the offer.
     act(() => { vi.advanceTimersByTime(5000); });
     expect(onClose).not.toHaveBeenCalled();
@@ -74,6 +76,9 @@ describe('FeelingsSheet', () => {
   it('offers sitting after Besorgt too, and shows its reply without a long dash', () => {
     const { getByText, getByTestId } = render(<FeelingsSheet now={new Date('2026-09-28T18:00:00')} />);
     fireEvent.click(getByText('Besorgt'));
+    // The worried reply is no question, so Ronki asks aloud after it.
+    act(() => { vi.advanceTimersByTime(3700); });
+    expect(VoiceAudio.playLocalized).toHaveBeenCalledWith('mood_sit_offer_01', 0);
     const text = getByTestId('feelings-sheet').textContent;
     expect(text).toContain(lineText('mood_sit_offer_01'));
     expect(text).not.toMatch(/[\u2013\u2014]/);

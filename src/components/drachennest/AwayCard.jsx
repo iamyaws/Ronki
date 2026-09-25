@@ -1,16 +1,19 @@
 import React, { useEffect, useRef, useState } from 'react';
 import VoiceAudio from '../../utils/voiceAudio';
-import { PaperCard, DoodleIcon, RonkiArt } from '../bilderbuch';
+import { PaperCard, DoodleIcon } from '../bilderbuch';
 import { SunMoonPath } from './DepartureSheet';
 import RonkiAwayLoop from './RonkiAwayLoop';
 
 const PEEK_MS = 7000;
+/** The postcard picture: Ronki out in the Morgenwald (own read O2). */
+export const POSTCARD_PICTURE = `${import.meta.env.BASE_URL}art/bilderbuch/scenes/morgenwald.webp`;
 
 /**
  * AwayCard: Ronki's postcard while he is on his day trip (Finch pass,
  * 26 Sep 2026; base design 3.2).
  *
- * A paper postcard with Ronki on his cloud and the sun-to-moon path: when
+ * A paper postcard with the Morgenwald painting (Ronki out in the woods)
+ * and the sun-to-moon path: when
  * the marker reaches the moon, he is home. Tapping it plays "Ich bin
  * unterwegs. Wenn es Abend wird, bin ich wieder da." and opens a short
  * look at him in the Morgenwald (RonkiAwayLoop), which closes by itself
@@ -47,10 +50,21 @@ export default function AwayCard({ now, eveningStart, onPeek }) {
         className="w-full flex flex-col items-center"
         style={{ transform: 'rotate(-1deg)' }}
       >
-        <div className="flex items-center justify-center w-full" style={{ gap: 8 }}>
-          <RonkiArt pose="cloud" size={130} idle="bb-idle-bob" />
-          <span aria-hidden="true" style={{ color: 'var(--color-cobalt)' }}>
-            <DoodleIcon name="sound" size={28} />
+        <div className="relative w-full" style={{ maxWidth: 340 }}>
+          <img
+            src={POSTCARD_PICTURE}
+            alt=""
+            draggable={false}
+            data-testid="postcard-picture"
+            className="block w-full rounded-[18px]"
+            style={{ aspectRatio: '4 / 3', objectFit: 'cover', objectPosition: '50% 35%', border: '2.5px solid var(--color-ink)' }}
+          />
+          <span
+            aria-hidden="true"
+            className="absolute flex items-center justify-center rounded-full bg-white"
+            style={{ right: 8, bottom: 8, width: 40, height: 40, border: '2.5px solid var(--color-ink)', color: 'var(--color-cobalt)' }}
+          >
+            <DoodleIcon name="sound" size={24} />
           </span>
         </div>
         <SunMoonPath now={now} eveningStart={eveningStart} style={{ marginTop: 8 }} />
