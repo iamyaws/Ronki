@@ -3,6 +3,7 @@ import { motion, useReducedMotion } from 'motion/react';
 import MoodChibi from '../MoodChibi';
 import FireBreathPuff from '../FireBreathPuff';
 import VoiceAudio from '../../utils/voiceAudio';
+import { lineText } from '../../data/ronkiLines';
 import { DoodleIcon, MotionTicks, PillButton } from '../bilderbuch';
 
 /**
@@ -26,6 +27,15 @@ import { DoodleIcon, MotionTicks, PillButton } from '../bilderbuch';
  *                    Wrapper decides what to do next (continue onboarding
  *                    → step 7, or dismiss modal + actions.teachBreath).
  *
+ * Onboarding flame (Finch pass, 26 Sep 2026, base 2.1 screen 10): teach
+ * through success. Round 1 always ends in a small spark, never "zu kurz":
+ * "Oh, ein Funke! Nochmal. Ganz lange Luft holen." (teach_fire_spark_01,
+ * ember puff, happy face). Round 2 always makes the flame for any hold
+ * of 0.22 s or more, then "Jaaa! So geht's!" (teach_fire_celebrate_01)
+ * and "Das hast du mir gezeigt. Das vergess ich nie."
+ * (teach_fire_learned_01). Kid words for these beats come from
+ * finchLines.de.json. The ritual flavors keep their old two rounds.
+ *
  * Renders:
  *   · H1 title (from copyKeys.title)
  *   · Chibi stage (360×360) with fire/smoke puff + mouth glow
@@ -44,6 +54,10 @@ import { DoodleIcon, MotionTicks, PillButton } from '../bilderbuch';
 // there is no "too early" branch anymore.
 const MIN_HOLD_MS = 220;
 const SMOKE_TO_PROMPT_DELAY = 2100;
+// The spark line is longer than the old smoke line; let it finish.
+const SPARK_TO_PROMPT_DELAY = 2800;
+// The learned line starts once "Jaaa! So geht's!" has played.
+const LEARNED_VOICE_DELAY = 900;
 const SUCCESS_TO_SOLO_DELAY = 1300;
 const SOLO_TO_DONE_DELAY = 1200;
 const INTRO_DURATION_MS = 2200;
@@ -172,13 +186,11 @@ export default function TeachBreathBeat({
       introPlayedRef.current = true;
       VoiceAudio.playNarrator('teach_fire_intro_01', 400);
     } else if (phase === 'smoke') {
-      VoiceAudio.playLocalized('teach_fire_smoke_01', 200);
-    } else if (phase === 'prompt' && attemptNum === 2) {
-      VoiceAudio.playNarrator('teach_fire_tryagain_01', 200);
+      VoiceAudio.playLocalized('teach_fire_spark_01', 200);
     } else if (phase === 'released') {
       VoiceAudio.playLocalized('teach_fire_celebrate_01', 100);
-    } else if (phase === 'done') {
-      VoiceAudio.playNarrator('teach_fire_done_01', 200);
+    } else if (phase === 'solo') {
+      VoiceAudio.playLocalized('teach_fire_learned_01', LEARNED_VOICE_DELAY);
     }
   }, [phase, attemptNum, isOnboardingFlame]);
 
@@ -206,15 +218,16 @@ export default function TeachBreathBeat({
     }
 
     if (attemptNum === 1) {
-      // Round 1: always smoke. Deterministic per spec.
-      setFireFlavor('smoke');
+      // Round 1: deterministic per spec. Onboarding: a small spark (a
+      // first success). Rituals: the old smoke cough.
+      setFireFlavor(isOnboardingFlame ? 'ember' : 'smoke');
       setFireKey(k => k + 1);
       setPhase('smoke');
 
       const t1 = setTimeout(() => {
         setAttemptNum(2);
         setPhase('prompt');
-      }, SMOKE_TO_PROMPT_DELAY);
+      }, isOnboardingFlame ? SPARK_TO_PROMPT_DELAY : SMOKE_TO_PROMPT_DELAY);
       timersRef.current.push(t1);
     } else {
       // Round 2: always targetFlavor. Celebration → Ronki solo → done.
@@ -238,7 +251,7 @@ export default function TeachBreathBeat({
 
   const isCelebrating = phase === 'released' || phase === 'solo' || phase === 'done';
   const chibiMood =
-    phase === 'smoke' ? 'besorgt' :
+    phase === 'smoke' ? (isOnboardingFlame ? 'gut' : 'besorgt') :
     isCelebrating     ? 'magisch' :
     'normal';
 
@@ -258,6 +271,13 @@ export default function TeachBreathBeat({
     phase === 'smoke'    ? copyKeys.smokeFail :
     phase === 'released' ? copyKeys.celebrate :
                            copyKeys.soloLine;
+  // Onboarding flame: Ronki's own lines from finchLines.de.json. The
+  // spark line stays up for round 2 ("Nochmal. Ganz lange Luft holen.").
+  const lineId = !isOnboardingFlame ? null :
+    (phase === 'smoke' || (phase === 'prompt' && attemptNum === 2)) ? 'teach_fire_spark_01' :
+    (phase === 'solo' || phase === 'done') ? 'teach_fire_learned_01' :
+    null;
+  const copyText = lineId ? lineText(lineId) : t(copyKey);
 
   const showHoldButton = phase === 'prompt' || phase === 'inhaling';
   const showContinue = phase === 'done';
@@ -296,7 +316,9 @@ export default function TeachBreathBeat({
         >
           <MoodChibi
             size={chibiSize}
-            variant={variant.id}
+            // Callers pass the companionVariant id (a string); older
+            // callers passed an object with an id.
+            variant={typeof variant === 'string' ? variant : variant?.id}
             stage={1}
             mood={chibiMood}
             bare
@@ -361,7 +383,7 @@ export default function TeachBreathBeat({
 
       {/* Phase-keyed copy line */}
       <motion.p
-        key={copyKey}
+        key={lineId || copyKey}
         initial={{ opacity: 0.35, y: 4 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.22, ease: 'easeOut' }}
@@ -370,7 +392,7 @@ export default function TeachBreathBeat({
         aria-live="polite"
         aria-atomic="true"
       >
-        {t(copyKey)}
+        {copyText}
       </motion.p>
 
       {/* Action zone: hold button OR continue button */}
