@@ -158,7 +158,7 @@ export default function RoomHub({ onNavigate, onOpenParental, onOpenTonight }) {
   }, []);
   const current = clockNow();
   const beat = nestBeat(state, current);
-  const { mode, fire, block } = beat;
+  const { mode, fire, block, today } = beat;
 
   const nick = state?.companionName || '';
   const kidName = state?.familyConfig?.childName || '';
@@ -228,14 +228,16 @@ export default function RoomHub({ onNavigate, onOpenParental, onOpenTonight }) {
   // The return beat: the first Nest open of the day (spec 3.5).
   const greetId = greetingFor(state, current);
   const greetDue = !!greetId && mode !== 'away' && mode !== 'night';
-  const greetedRef = useRef(false);
+  // Holds the day key of the last greeting, so a Nest left open overnight
+  // greets again the next morning.
+  const greetedRef = useRef(null);
   useEffect(() => {
-    if (!greetDue || greetedRef.current) return;
-    greetedRef.current = true;
+    if (!greetDue || greetedRef.current === today) return;
+    greetedRef.current = today;
     sayPassing(greetId);
     actions?.markGreeted?.();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [greetDue]);
+  }, [greetDue, today]);
 
   const contextId = contextLineFor(beat, cardQuest);
   const spokenRef = useRef(null);
@@ -304,6 +306,29 @@ export default function RoomHub({ onNavigate, onOpenParental, onOpenTonight }) {
   useEffect(() => {
     if (mode === 'departure') departedRef.current = false;
   }, [mode]);
+
+  // A new day while the Nest stays open (the tablet sat on it overnight):
+  // everything that belongs to one day starts fresh (spec 2, Base 3).
+  const dayRef = useRef(today);
+  useEffect(() => {
+    if (dayRef.current === today) return;
+    dayRef.current = today;
+    setDepartureDismissed(false);
+    setDepartureOpen(false);
+    setSitLoud(false);
+    setLaterIds([]);
+    setPickedId(null);
+    setAskAfterTreasure(false);
+    departedRef.current = false;
+    spokenRef.current = null;
+  }, [today]);
+
+  // Into TonightRitual. Falls back to the old route when the host does
+  // not pass onOpenTonight yet.
+  const openTonight = () => {
+    if (onOpenTonight) onOpenTonight();
+    else onNavigate?.('tonight');
+  };
 
   const openFeelings = () => setFeelings({ askId: 'mood_ask_01', slot: undefined });
 
@@ -617,8 +642,10 @@ export default function RoomHub({ onNavigate, onOpenParental, onOpenTonight }) {
           <TaskRow slots={fire.slots} currentId={mode === 'fire' ? cardQuest?.id : null} onPick={id => setPickedId(id)} />
         )}
 
-        {(mode === 'evening' || (mode === 'fire' && block === 'evening')) && (
-          <MoonCard text={moonText} loud={mode === 'evening' && !loudSit} onOpen={() => onOpenTonight?.()} />
+        {/* The way to bed is there from the evening start, at any fire
+            level and while a treasure waits (spec 3.4, never earned). */}
+        {(mode === 'evening' || ((mode === 'fire' || mode === 'waiting') && block === 'evening')) && (
+          <MoonCard text={moonText} loud={mode === 'evening' && !loudSit} onOpen={openTonight} />
         )}
 
         {/* The quiet way to just be with him. */}

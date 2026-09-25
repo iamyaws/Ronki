@@ -236,6 +236,39 @@ describe('RoomHub: one loud item per state', () => {
     expect(onOpenTonight).toHaveBeenCalledTimes(1);
   });
 
+  it('waiting in the evening: the moon card is there quietly, the treasure stays the one loud item', () => {
+    const exp = {
+      state: 'waiting',
+      kind: 'day',
+      tripId: 't03',
+      pendingMemento: { id: 'm1', ts: 'x', emoji: '🪨', name: 'Bachstein', tripId: 't03' },
+    };
+    const { container, onOpenTonight } = setup(MON('17:10'), { expedition: exp });
+    expect(mode(container)).toBe('waiting');
+    expect(loud(container)).toHaveLength(1);
+    expect(loud(container)[0].getAttribute('data-testid')).toBe('treasure-card');
+    const moon = screen.getByTestId('moon-card');
+    expect(moon.getAttribute('data-loud')).toBeNull();
+    fireEvent.click(moon);
+    expect(onOpenTonight).toHaveBeenCalledTimes(1);
+    expect(actions.receiveTreasure).not.toHaveBeenCalled();
+  });
+
+  it('waiting in the day block: no moon card yet', () => {
+    const exp = { state: 'waiting', kind: 'day', tripId: 't03', pendingMemento: { id: 'm1', ts: 'x', emoji: '🪨', name: 'Bachstein' } };
+    setup(MON('13:00'), { expedition: exp });
+    expect(screen.queryByTestId('moon-card')).toBeNull();
+  });
+
+  it('the moon card falls back to onNavigate("tonight") without onOpenTonight', () => {
+    vi.setSystemTime(MON('19:00'));
+    mockState = baseState(MON('19:00'), { quests: quests({ morningDone: 5, eveningDone: 4 }) });
+    const onNavigate = vi.fn();
+    render(<RoomHub onNavigate={onNavigate} />);
+    fireEvent.click(screen.getByTestId('moon-card'));
+    expect(onNavigate).toHaveBeenCalledWith('tonight');
+  });
+
   it('evening fire full: the moon card becomes the loud card', () => {
     const { container } = setup(MON('19:00'), { quests: quests({ morningDone: 5, eveningDone: 4 }) });
     expect(mode(container)).toBe('evening');
@@ -344,6 +377,42 @@ describe('RoomHub: the return beat and growth', () => {
     // The greeting passes, the task ask comes back.
     act(() => { vi.advanceTimersByTime(3700); });
     expect(bubble().textContent).toBe(lineText('task_ask_wake'));
+  });
+
+  it('a Nest left open overnight greets again the next morning, once', () => {
+    const day1 = MON('19:00');
+    setup(day1, { greetedDate: '2026-09-27', quests: quests({ morningDone: 5 }) });
+    actions.markGreeted.mockImplementation(() => { mockState = { ...mockState, greetedDate: dayKey(new Date()) }; });
+    // The evening greeting of day 1 (the mock above only takes effect from now on).
+    expect(actions.markGreeted).toHaveBeenCalledTimes(1);
+    mockState = { ...mockState, greetedDate: dayKey(day1) };
+    VoiceAudio.playLocalized.mockClear();
+    // The tablet stays on the Nest; it is Tuesday morning now.
+    vi.setSystemTime(new Date('2026-09-29T07:10:00'));
+    act(() => {
+      document.dispatchEvent(new Event('visibilitychange'));
+      vi.advanceTimersByTime(30000);
+    });
+    expect(actions.markGreeted).toHaveBeenCalledTimes(2);
+    expect(VoiceAudio.playLocalized).toHaveBeenCalledWith('greet_day_01', 0);
+    act(() => { vi.advanceTimersByTime(30000); });
+    expect(actions.markGreeted).toHaveBeenCalledTimes(2);
+  });
+
+  it("a new day clears yesterday's Später order and the sit card after Traurig", () => {
+    const { container } = setup(MON('07:10'));
+    fireEvent.click(screen.getByText('Später'));
+    expect(screen.getByTestId('now-card').getAttribute('data-quest')).toBe('s_breakfast');
+    fireEvent.click(screen.getByTestId('face-button'));
+    fireEvent.click(screen.getByText('Traurig'));
+    fireEvent.click(screen.getByLabelText('Schließen'));
+    expect(screen.getByTestId('now-card').getAttribute('data-loud')).toBeNull();
+    mockState = { ...mockState, greetedDate: '2026-09-29' };
+    vi.setSystemTime(new Date('2026-09-29T07:10:00'));
+    act(() => { vi.advanceTimersByTime(30000); });
+    expect(screen.getByTestId('now-card').getAttribute('data-quest')).toBe('s_wake');
+    expect(screen.getByTestId('now-card').getAttribute('data-loud')).toBe('true');
+    expect(loud(container)).toHaveLength(1);
   });
 
   it('does not greet again once today is greeted', () => {
