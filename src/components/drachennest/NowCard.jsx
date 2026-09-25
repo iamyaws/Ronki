@@ -4,15 +4,24 @@ import { PillButton, QuietLink, PaperCard, DoodleIcon } from '../bilderbuch';
 import { TASK_LABEL, taskKind, taskPictureUrl } from '../../data/taskKinds';
 
 /**
+ * After a "Geschafft", further taps are ignored for this long, measured
+ * from the tap and not reset when the next task comes onto the card: a
+ * double tap on the same spot must not complete the next task too
+ * (Astra FC-07, KIDUX-1). Nothing counts down on screen.
+ */
+export const TAP_GUARD_MS = 700;
+
+/**
  * NowCard, the "Jetzt" card (Finch pass, 26 Sep 2026; spec R1).
  *
  * The one task the child does next: its picture big, its name small,
  * one pill "Geschafft" and a quiet "Später". Ronki's spoken ask lives in
  * his bubble in the room (RoomHub), not on the card.
  *
- * - "Geschafft" calls actions.complete(id) once (a second tap before the
- *   next task shows is ignored) and then onDone(quest) so the Nest can
- *   cheer and light the flame.
+ * - "Geschafft" calls actions.complete(id) once and then onDone(quest)
+ *   so the Nest can cheer and light the flame. For TAP_GUARD_MS after a
+ *   completion every tap is ignored, also on the next task the card
+ *   switches to (the card is one instance across tasks).
  * - "Später" only moves the task to the end of the row for this session
  *   (onLater); it lights nothing and writes nothing.
  * - `loud` false: the pill is the white secondary one (the away day,
@@ -20,12 +29,11 @@ import { TASK_LABEL, taskKind, taskPictureUrl } from '../../data/taskKinds';
  */
 export default function NowCard({ quest, onDone, onLater, loud = true }) {
   const { actions } = useTask();
-  const busyRef = useRef(false);
+  // When the last "Geschafft" landed; survives the switch to the next task.
+  const lastDoneAt = useRef(-Infinity);
   const [picFailed, setPicFailed] = useState(false);
 
-  // A new task on the card may be completed again.
   useEffect(() => {
-    busyRef.current = false;
     setPicFailed(false);
   }, [quest?.id]);
 
@@ -35,8 +43,10 @@ export default function NowCard({ quest, onDone, onLater, loud = true }) {
   const pic = taskPictureUrl(quest.id);
 
   const done = () => {
-    if (busyRef.current || quest.done) return;
-    busyRef.current = true;
+    if (quest.done) return;
+    const t = Date.now();
+    if (t - lastDoneAt.current < TAP_GUARD_MS) return;
+    lastDoneAt.current = t;
     actions?.complete?.(quest.id);
     onDone?.(quest);
   };

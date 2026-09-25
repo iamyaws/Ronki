@@ -36,6 +36,14 @@ describe('TreasureReveal', () => {
     expect(VoiceAudio.playLocalized).toHaveBeenCalledWith('trip_story_03', 400);
   });
 
+  it('sits on the sky ground, not on the Morgenwald painting with its own Ronki (own read O2)', () => {
+    mockState = { catEvo: 5, adventureCount: 2, tripCursor: 2, expedition: exp('t03') };
+    const { getByTestId } = render(<TreasureReveal />);
+    const reveal = getByTestId('treasure-reveal');
+    expect(reveal.className).toContain('bg-sky');
+    for (const img of reveal.querySelectorAll('img')) expect(img.getAttribute('src')).not.toContain('morgenwald');
+  });
+
   it('a repeat trip first says so honestly, then the story', () => {
     mockState = { catEvo: 20, adventureCount: 14, tripCursor: 16, expedition: exp('t03') };
     const { getByTestId } = render(<TreasureReveal />);

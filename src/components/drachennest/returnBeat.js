@@ -9,7 +9,8 @@
  * Modes:
  *   fire       Ronki home, morning or evening block, the fire is building
  *   departure  morning fire full, no trip today yet: the send-off
- *   stay       Ronki home in the day block (morning not full, or day 1)
+ *   stay       Ronki home in the day block (morning not full, or an
+ *              afternoon install on day 1)
  *   away       Ronki on a day trip: the empty room and the postcard
  *   waiting    Ronki back with a treasure (wins over every other mode)
  *   evening    evening block, fire full or no evening tasks: the moon card
@@ -98,10 +99,13 @@ export function nestBeat(state, now) {
 
   if (block === 'day') {
     // A morning fire that really is full still sends him off after the
-    // block ticked over, except on day 1 (spec R4: no send-off after an
-    // afternoon install). An unfinished morning never does (spec R2).
+    // block ticked over. An unfinished morning never does (spec R2). On
+    // day 1 the half-warm start alone is not enough: an afternoon install
+    // gets no send-off (spec R4), but a morning the child really filled
+    // with tasks does (LOOP-1, KIDUX-7).
     const morning = fireOfBlock(state || {}, 'morning', now);
-    if (!firstDay && morning.total > 0 && morning.full && !tripToday) {
+    const realMorning = morning.lit - morning.bonus > 0;
+    if ((!firstDay || realMorning) && morning.total > 0 && morning.full && !tripToday) {
       return { ...base, fire: morning, mode: 'departure' };
     }
     return { ...base, mode: 'stay' };

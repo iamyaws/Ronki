@@ -11,7 +11,6 @@ import {
   DoodleIcon,
   SceneLoop,
   StickerBurst,
-  RonkiArt,
   useReducedMotion,
 } from '../bilderbuch';
 import RonkiSpeechBubble from './RonkiSpeechBubble';
@@ -44,8 +43,20 @@ const ROOM_TAP_COOLDOWN_MS = 7000;
 const TICK_MS = 30000;
 /** How long a passing line (greeting, "Oh, das wärmt!") stays before the context line returns. */
 const PASSING_MS = 3600;
-/** The send-off sheet opens after Ronki's cheer and his "Mein Feuer ist ganz warm!". */
-const DEPARTURE_DELAY_MS = 3800;
+/**
+ * The send-off sheet opens only after Ronki's "Mein Feuer ist ganz warm!
+ * Jetzt kann ich losfliegen." has finished (KIDUX-5): the line starts
+ * after any passing line (at least 400 ms in), runs about 3.9 s
+ * (ffprobe of de_fire_full_morning_01.mp3), then a short breath. After
+ * the last task that is about 2.4 + 3.9 + 0.4 = 6.7 s, so the stones'
+ * spoken count never cuts the line.
+ */
+export const FIRE_FULL_LINE_MS = 3900;
+const DEPARTURE_BREATH_MS = 400;
+/** A child is "present" this long after a tap or a visible open (LOOP-3). */
+export const PRESENCE_MS = 5 * 60 * 1000;
+/** Hit area of the small header buttons (KIDUX-13). */
+const HIT_PX = 48;
 /** Ronki floats out of the room after "Tschüss". */
 const FLOAT_OUT_MS = 1500;
 
@@ -133,7 +144,10 @@ function contextLineFor(beat, cardQuest) {
   switch (beat.mode) {
     case 'fire': return cardQuest ? taskAskLineId(cardQuest.id) : null;
     case 'departure': return 'fire_full_morning_01';
-    case 'stay': return beat.firstDay ? 'fd_start_day_01' : 'home_stay_01';
+    case 'stay':
+      // With a task on the card Ronki asks for it (KIDUX-12).
+      if (cardQuest) return taskAskLineId(cardQuest.id) || (beat.firstDay ? 'fd_start_day_01' : 'home_stay_01');
+      return beat.firstDay ? 'fd_start_day_01' : 'home_stay_01';
     case 'waiting': return beat.tripKind === 'night' ? 'trip_back_night_01' : 'trip_back_01';
     case 'evening': return beat.fire.total > 0 ? 'fire_full_evening_01' : 'eve_moon_01';
     default: return null;
@@ -192,9 +206,12 @@ export default function RoomHub({ onNavigate, onOpenParental, onOpenTonight }) {
   // tap in the row picks one. Session only, nothing is stored.
   const [laterIds, setLaterIds] = useState([]);
   const [pickedId, setPickedId] = useState(null);
+  // Afternoon tasks only from the day block on: while Ronki is off in
+  // the morning the postcard is the only card, so the child can put the
+  // tablet down before school (own read O3).
   const cardList = mode === 'fire'
     ? orderWithLater(fire.slots, laterIds)
-    : (mode === 'stay' || mode === 'away')
+    : (mode === 'stay' || mode === 'away') && block !== 'morning'
       ? orderWithLater(afternoonTasks(state?.quests), laterIds)
       : [];
   const cardQuest = cardList.find(q => q.id === pickedId) || cardList[0] || null;
@@ -225,28 +242,64 @@ export default function RoomHub({ onNavigate, onOpenParental, onOpenTonight }) {
 
   const overlayOpen = showPresence || showStyleSheet || !!feelings || showReveal || showGrowth || (mode === 'departure' && departureOpen);
 
-  // The return beat: the first Nest open of the day (spec 3.5).
+  // Presence (LOOP-3): Ronki speaks by himself and the day's greeting is
+  // used up only while the tab is visible and a child is there: a visible
+  // open, a return to the tab, or a tap in the last few minutes. A Nest
+  // left on overnight stays quiet when the clock alone changes the state;
+  // the line waits in the bubble and is spoken when the child comes.
+  const presentAtRef = useRef(-Infinity);
+  const [presence, setPresence] = useState(0);
+  useEffect(() => {
+    const visible = () => typeof document === 'undefined' || document.visibilityState !== 'hidden';
+    const mark = () => {
+      if (!visible()) return;
+      const t = Date.now();
+      const stale = t - presentAtRef.current >= PRESENCE_MS;
+      presentAtRef.current = t;
+      // Re-render only when presence starts again, not on every tap.
+      if (stale) setPresence(n => n + 1);
+    };
+    mark();
+    const onVis = () => { if (visible()) mark(); };
+    document.addEventListener('visibilitychange', onVis);
+    window.addEventListener('pointerdown', mark, { passive: true });
+    return () => {
+      document.removeEventListener('visibilitychange', onVis);
+      window.removeEventListener('pointerdown', mark);
+    };
+  }, []);
+  const isPresent = () => {
+    if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return false;
+    return Date.now() - presentAtRef.current < PRESENCE_MS;
+  };
+
+  // The return beat: the first Nest open of the day (spec 3.5). While a
+  // treasure waits, Ronki's "Ich bin wieder da!" is the greeting, so the
+  // day is marked greeted without a second line (KIDUX-11).
   const greetId = greetingFor(state, current);
   const greetDue = !!greetId && mode !== 'away' && mode !== 'night';
   // Holds the day key of the last greeting, so a Nest left open overnight
-  // greets again the next morning.
+  // greets again the next morning (once a child is there).
   const greetedRef = useRef(null);
   useEffect(() => {
     if (!greetDue || greetedRef.current === today) return;
+    if (!isPresent()) return;
     greetedRef.current = today;
-    sayPassing(greetId);
+    if (mode !== 'waiting') sayPassing(greetId);
     actions?.markGreeted?.();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [greetDue, today]);
+  }, [greetDue, today, presence]);
 
   const contextId = contextLineFor(beat, cardQuest);
   const spokenRef = useRef(null);
   useEffect(() => {
     if (!contextId || overlayOpen) return;
     if (spokenRef.current === contextId) return;
+    if (!isPresent()) return;
     spokenRef.current = contextId;
     VoiceAudio.playLocalized(contextId, Math.max(400, passingUntil.current - Date.now()));
-  }, [contextId, overlayOpen]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contextId, overlayOpen, presence]);
 
   const bubbleId = mode === 'away' ? null : (passing || contextId);
   const bubbleText = bubbleId ? lineText(bubbleId, vars) : '';
@@ -262,7 +315,8 @@ export default function RoomHub({ onNavigate, onOpenParental, onOpenTonight }) {
   // The send-off sheet opens after his cheer.
   useEffect(() => {
     if (mode !== 'departure' || departureDismissed) return undefined;
-    const t = setTimeout(() => setDepartureOpen(true), DEPARTURE_DELAY_MS);
+    const lineStart = Math.max(400, passingUntil.current - Date.now());
+    const t = setTimeout(() => setDepartureOpen(true), lineStart + FIRE_FULL_LINE_MS + DEPARTURE_BREATH_MS);
     return () => clearTimeout(t);
   }, [mode, departureDismissed]);
 
@@ -429,8 +483,10 @@ export default function RoomHub({ onNavigate, onOpenParental, onOpenTonight }) {
   const pauseScene = overlayOpen;
   const showFire = (mode === 'fire' || mode === 'departure' || mode === 'evening') && fire.total > 0;
 
-  // Which pose the cut-out wears: back with a wave, cheering at the send-off.
-  const pose = mode === 'waiting' ? 'wave' : mode === 'departure' ? 'cheer' : null;
+  // Back with a treasure and at the send-off Ronki is happy, in his own
+  // look (stage and egg): the Nest scene never shows the generic pose
+  // art (Astra FC-05).
+  const cutoutMood = mode === 'waiting' || mode === 'departure' ? 'happy' : mood;
 
   const loudSit = sitLoud && (mode === 'fire' || mode === 'stay' || mode === 'evening');
   const moonText = lineText('eve_moon_01', vars);
@@ -446,25 +502,33 @@ export default function RoomHub({ onNavigate, onOpenParental, onOpenTonight }) {
         <h1 className="bb-display text-ink min-w-0" style={{ fontSize: 30, margin: 0, overflowWrap: 'anywhere' }}>
           Hallo {heroName}!
         </h1>
-        <div className="flex items-center shrink-0" style={{ gap: 10 }}>
+        <div className="flex items-center shrink-0" style={{ gap: 6 }}>
           <button
             type="button"
             onClick={openFeelings}
             aria-label="Wie geht's dir?"
             data-testid="face-button"
             className="bb-press flex items-center justify-center rounded-full bg-paper"
-            style={{ width: 52, height: 52, border: '2.5px solid var(--color-ink)' }}
+            style={{ width: 52, height: 52, minWidth: HIT_PX, minHeight: HIT_PX, border: '2.5px solid var(--color-ink)' }}
           >
             <DoodleIcon name="heart" size={28} filled style={{ color: 'var(--color-ember)' }} />
           </button>
+          {/* The lock looks small (40 px) but its hit area is 48 px. */}
           <button
             type="button"
             onClick={() => onOpenParental?.()}
             aria-label="Eltern-Bereich"
-            className="flex items-center justify-center rounded-full bg-white text-ink-soft"
-            style={{ width: 40, height: 40, border: '2px solid var(--color-ink-soft)' }}
+            data-testid="parent-lock"
+            className="flex items-center justify-center bg-transparent"
+            style={{ width: HIT_PX, height: HIT_PX, padding: 0, border: 0 }}
           >
-            <DoodleIcon name="lock" size={18} />
+            <span
+              aria-hidden="true"
+              className="flex items-center justify-center rounded-full bg-white text-ink-soft"
+              style={{ width: 40, height: 40, border: '2px solid var(--color-ink-soft)' }}
+            >
+              <DoodleIcon name="lock" size={18} />
+            </span>
           </button>
         </div>
       </header>
@@ -520,19 +584,15 @@ export default function RoomHub({ onNavigate, onOpenParental, onOpenTonight }) {
                   >
                     <div style={{ position: 'relative', width: '100%', height: '100%', animation: reactionAnim, transformOrigin: '50% 100%' }}>
                       <div style={{ width: '100%', height: '100%' }}>
-                        {pose ? (
-                          <RonkiArt pose={pose} animated={pose === 'cheer'} size={100} style={{ width: '100%', height: '100%' }} />
-                        ) : (
-                          <MoodChibi
-                            size={100}
-                            variant={variant}
-                            stage={stageIdx}
-                            mood={mood}
-                            bare
-                            animated={!pauseScene}
-                            style={{ width: '100%', height: '100%' }}
-                          />
-                        )}
+                        <MoodChibi
+                          size={100}
+                          variant={variant}
+                          stage={stageIdx}
+                          mood={cutoutMood}
+                          bare
+                          animated={!pauseScene}
+                          style={{ width: '100%', height: '100%' }}
+                        />
                       </div>
                       {floatingHearts.map(h => (
                         <span
@@ -638,8 +698,11 @@ export default function RoomHub({ onNavigate, onOpenParental, onOpenTonight }) {
 
         {mode === 'waiting' && <TreasureCard onOpen={() => setShowReveal(true)} />}
 
-        {(mode === 'fire' || mode === 'departure') && fire.slots.length > 0 && (
-          <TaskRow slots={fire.slots} currentId={mode === 'fire' ? cardQuest?.id : null} onPick={id => setPickedId(id)} />
+        {/* Only while the fire builds: at the send-off the fire is full,
+            and on day 1 undone pictures under a full fire would read as
+            tasks left over (GUARDRAILS-3). */}
+        {mode === 'fire' && fire.slots.length > 0 && (
+          <TaskRow slots={fire.slots} currentId={cardQuest?.id} onPick={id => setPickedId(id)} />
         )}
 
         {/* The way to bed is there from the evening start, at any fire
@@ -778,7 +841,15 @@ export default function RoomHub({ onNavigate, onOpenParental, onOpenTonight }) {
       {showStyleSheet && <CaveStyleSheet onClose={() => setShowStyleSheet(false)} />}
 
       {/* Presence moment: full-screen sit with Ronki. */}
-      {showPresence && <BeiRonkiSein onClose={() => setShowPresence(false)} />}
+      {showPresence && (
+        <BeiRonkiSein
+          onClose={() => {
+            setShowPresence(false);
+            // The sit took place: the offer after Traurig is used up (KIDUX-9).
+            setSitLoud(false);
+          }}
+        />
+      )}
     </div>
   );
 }
