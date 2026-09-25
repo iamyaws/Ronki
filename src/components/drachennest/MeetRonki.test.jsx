@@ -130,11 +130,13 @@ describe('MeetRonki name chips', () => {
     fireEvent.click(screen.getByText('selbst schreiben'));
     const input = container.querySelector('#mr-name');
     expect(input).toBeTruthy();
-    // switching to typing drops the chip, so nothing is picked by accident
+    // a stray tap on "selbst schreiben" keeps the chip the kid picked
     const confirm = screen.getByText('so soll er heißen').closest('button');
-    expect(confirm.disabled).toBe(true);
-    expect(screen.getByLabelText('Glut: anhören und wählen').getAttribute('aria-pressed')).toBe('false');
+    expect(confirm.disabled).toBe(false);
+    expect(screen.getByLabelText('Glut: anhören und wählen').getAttribute('aria-pressed')).toBe('true');
+    // typing replaces the chip
     fireEvent.change(input, { target: { value: '  Drachi  ' } });
+    expect(screen.getByLabelText('Glut: anhören und wählen').getAttribute('aria-pressed')).toBe('false');
     fireEvent.click(confirm);
     expect(screen.getByText('Ich bin Drachi! Bis morgen. Versprochen.')).toBeTruthy();
     fireEvent.click(screen.getByLabelText('tippen zum schließen'));
@@ -149,5 +151,20 @@ describe('MeetRonki name chips', () => {
     expect(container.querySelector('#mr-name')).toBeNull();
     fireEvent.click(screen.getByText('so soll er heißen').closest('button'));
     expect(screen.getByText('Ich bin Pieks! Bis morgen. Versprochen.')).toBeTruthy();
+  });
+
+  it('caps a typed name at 18 characters without cutting an emoji in half', () => {
+    const { container } = toNamePage();
+    fireEvent.click(screen.getByText('selbst schreiben'));
+    const input = container.querySelector('#mr-name');
+    fireEvent.change(input, { target: { value: 'Abcdefghijklmnopq🐉🐉' } });
+    expect(Array.from(input.value)).toHaveLength(18);
+    expect(input.value.endsWith('🐉')).toBe(true);
+  });
+
+  it('keeps the way on in a sticky bar below the chips', () => {
+    toNamePage();
+    const confirm = screen.getByText('so soll er heißen').closest('button');
+    expect(confirm.closest('.sticky')).not.toBeNull();
   });
 });

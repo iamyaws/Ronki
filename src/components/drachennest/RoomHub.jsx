@@ -138,7 +138,8 @@ export default function RoomHub({ onNavigate }) {
   const variant = state?.companionVariant || 'forest';
   const stageIdx = getCatStage(state?.catEvo ?? 0);
   const mood = ambientMood(state?.ronkiMood);
-  const heroName = state?.familyConfig?.childName || state?.heroName || 'du';
+  // The child's own name; never the dragon's (heroName is gone, 25 Sep 2026).
+  const heroName = state?.familyConfig?.childName || 'du';
 
   // Scene measurement: the frame's box decides how the poster is
   // drawn (cover), and Ronki, the rim and the bubble follow that.

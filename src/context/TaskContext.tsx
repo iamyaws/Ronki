@@ -435,6 +435,12 @@ export interface TaskState {
   pendingRitual?: Exclude<FireBreathFlavor, 'flame'>;
   familyConfig: FamilyConfig;
   _v2_economy_reset?: boolean;
+  /** One-time split of the old onboarding name (25 Sep 2026): the dragon's
+   *  name used to be copied into familyConfig.childName. */
+  _v_companion_name_split?: boolean;
+  /** Set by that split when childName may still hold the dragon's name;
+   *  the parent area asks a parent to check it, saving clears it. */
+  childNameNeedsCheck?: boolean;
   arcEngine?: ArcEngineState;
   bossKilledToday?: boolean;
   arcBeatAdvancedToday?: boolean;
@@ -554,7 +560,7 @@ interface TaskActions {
   petCompanion: () => void;
   playCompanion: () => void;
   collectLoginBonus: () => void;
-  completeOnboarding: (cfg?: { eggType?: string; dragonVariant?: DragonVariant; companionVariant?: string; heroName?: string; heroGender?: string; taughtSignature?: 'fire'; taughtAt?: string }) => void;
+  completeOnboarding: (cfg?: { eggType?: string; dragonVariant?: DragonVariant; companionVariant?: string; heroGender?: string; taughtSignature?: 'fire'; taughtAt?: string }) => void;
   /** Mark a fire-breath flavor as taught. Idempotent — calling twice
    *  with the same flavor won't overwrite the original teach date.
    *  Used by post-onboarding teach rituals (sparkle/heart/ember/
@@ -779,6 +785,15 @@ export function useTask() {
 const today = () => new Date().toISOString().slice(0, 10);
 
 const emptyComputed: TaskComputed = { done: 0, total: 0, allDone: false, pct: 0, byGroup: {}, level: 1, xpProgress: { cur: 0, need: 50 } };
+
+/** A nickname for Ronki from a save: a trimmed string of at most 18
+ *  characters (counted as characters, so an emoji is never cut in half),
+ *  or undefined. */
+export function cleanNickname(value: unknown): string | undefined {
+  if (typeof value !== 'string') return undefined;
+  const trimmed = Array.from(value.trim()).slice(0, 18).join('').trim();
+  return trimmed || undefined;
+}
 
 export function createInitialState(): TaskState {
   return {
@@ -1158,6 +1173,10 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
           // Intentionally left as-is: undefined on pre-variant saves triggers
           // the one-time CompanionVariantMigration modal. Once set, it sticks.
           companionVariant: (raw as any).companionVariant,
+          // The nickname from the hatch (25 Sep 2026). It was saved but not
+          // listed here, so it vanished on every reload (Astra review R1).
+          companionName: cleanNickname((raw as any).companionName),
+          childNameNeedsCheck: (raw as any).childNameNeedsCheck === true ? true : undefined,
           // Onboarding + teach-beat anchors (code-review flag 24 Apr 2026:
           // these were saved but never rehydrated, so the quiet-window
           // math + Wave-3 callback fell back every reload).
@@ -1183,6 +1202,22 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
           s.hp = Math.min(s.hp, 50); // cap at 50 from pre-rebalance inflation
           s.heroStats = s.heroStats || { mut: 0, fokus: 0, ordnung: 0 };
           s._v2_economy_reset = true;
+        }
+        // One-time migration (25 Sep 2026): until now the name the kid gave
+        // Ronki at the hatch travelled as heroName and was copied into
+        // familyConfig.childName, over the child's own name. Where that
+        // happened (heroName equals childName), the name becomes Ronki's
+        // nickname and the parent area asks a parent to check the child's
+        // name. The child's name itself is left alone: guessing wrong would
+        // lose a real name, so a parent decides.
+        if (!raw._v_companion_name_split) {
+          const oldName = cleanNickname((raw as any).heroName);
+          const child = (raw.familyConfig?.childName || '').trim();
+          if (raw.onboardingDone && oldName && !s.companionName && oldName === child) {
+            s.companionName = oldName;
+            s.childNameNeedsCheck = true;
+          }
+          s._v_companion_name_split = true;
         }
         // Migration (fire-breath progression): kids who completed the
         // onboarding teach-beat before taughtBreaths existed still have
@@ -1769,7 +1804,7 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  const completeOnboarding = useCallback((cfg?: { eggType?: string; dragonVariant?: DragonVariant; companionVariant?: string; heroName?: string; heroGender?: string; taughtSignature?: 'fire'; taughtAt?: string }) => {
+  const completeOnboarding = useCallback((cfg?: { eggType?: string; dragonVariant?: DragonVariant; companionVariant?: string; heroGender?: string; taughtSignature?: 'fire'; taughtAt?: string }) => {
     setState(prev => {
       if (!prev) return prev;
       // Onboarding runs the hatch animation in-flow (HatchStep). The
@@ -1803,8 +1838,9 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
           flame: prev.taughtBreaths?.flame || taughtAtIso,
         },
       };
+      // No childName here (25 Sep 2026): the child's name comes only from
+      // the parent setup or the profile card, never from the hatch.
       const familyConfigPatch: Partial<FamilyConfig> = {};
-      if (cfg?.heroName) familyConfigPatch.childName = cfg.heroName;
       if (cfg?.dragonVariant) familyConfigPatch.dragonVariant = cfg.dragonVariant;
       if (Object.keys(familyConfigPatch).length > 0) {
         updated.familyConfig = { ...prev.familyConfig, ...familyConfigPatch };
@@ -2204,7 +2240,9 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const updateFamilyConfig = useCallback((config: FamilyConfig) => {
-    setState(prev => prev ? { ...prev, familyConfig: config } : prev);
+    // A parent saving the family settings has seen the child's name, so
+    // the check prompt from the name split goes away.
+    setState(prev => prev ? { ...prev, familyConfig: config, childNameNeedsCheck: undefined } : prev);
   }, []);
 
   const patchState = useCallback((partial: Partial<TaskState>) => {

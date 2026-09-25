@@ -125,8 +125,9 @@ const PROFILE_QUIPS = {
  */
 export function withNickname(title, nickname) {
   const nick = (nickname || '').trim();
-  if (!nick || nick === 'Ronki' || typeof title !== 'string') return title;
-  return title.replace(/^Ronki\b/, nick);
+  if (!nick || nick.toLowerCase() === 'ronki' || typeof title !== 'string') return title;
+  // A function as the replacement, so a typed "$&" or "$1" stays literal.
+  return title.replace(/^Ronki\b/, () => nick);
 }
 
 function pickProfileQuip(mood, rollKey) {

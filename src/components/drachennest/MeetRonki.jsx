@@ -300,7 +300,9 @@ export default function MeetRonki({ onComplete }) {
                     id="mr-name"
                     type="text"
                     value={chipId ? '' : name}
-                    onChange={e => { setChipId(null); setName(e.target.value.slice(0, 18)); }}
+                    // Count characters, not UTF-16 units, so an emoji at the
+                    // limit is never cut in half.
+                    onChange={e => { setChipId(null); setName(Array.from(e.target.value).slice(0, 18).join('')); }}
                     placeholder="hier tippen"
                     autoFocus
                     autoComplete="off"
@@ -309,14 +311,28 @@ export default function MeetRonki({ onComplete }) {
                   />
                 </>
               ) : (
-                <QuietLink tone="cobalt" onClick={() => { setTyping(true); setChipId(null); setName(''); }}>
+                // A parent's way to type a name: quiet, in ink, and a stray
+                // tap by the kid keeps the chip they already picked.
+                <QuietLink tone="ink" onClick={() => setTyping(true)}>
                   selbst schreiben
                 </QuietLink>
               )}
+            </div>
+          )}
 
-              <PillButton full size="lg" onClick={confirmName} disabled={!name.trim()}>
-                so soll er heißen
-              </PillButton>
+          {/* The way on stays in view after a pick, even on small phones,
+              and hops once when it wakes up (review workflow, 25 Sep 2026). */}
+          {phase === 'name' && (
+            <div
+              className="sticky bottom-0 w-full max-w-sm bg-white"
+              style={{ paddingTop: 12, marginTop: 'auto', zIndex: 2 }}
+            >
+              {/* Adding the class starts the one-shot hop; no remount. */}
+              <div className={name.trim() ? 'bb-hop-once' : ''}>
+                <PillButton full size="lg" onClick={confirmName} disabled={!name.trim()}>
+                  so soll er heißen
+                </PillButton>
+              </div>
             </div>
           )}
         </div>

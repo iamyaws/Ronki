@@ -566,6 +566,16 @@ function FamilyTab({ state, actions, lang }) {
       <SectionCard icon="face" title="Kind" subtitle={draft.childName || 'Name eingeben'}
         expanded={expandedSection === 'child'} onToggle={() => toggle('child')} tint="#124346">
         <div className="space-y-4">
+          {state.childNameNeedsCheck && (
+            // Old onboarding copied the name the kid gave Ronki into the
+            // child's name (fixed 25 Sep 2026). Saving these settings
+            // clears this note (updateFamilyConfig).
+            <p className="rounded-xl px-4 py-3 font-body text-on-surface"
+               style={{ background: 'var(--color-sky-wash)', border: '2px solid var(--color-ink)', fontSize: 15, lineHeight: 1.45, margin: 0 }}>
+              Bitte kurz prüfen: Steht hier der Name eures Kindes? Früher landete hier aus Versehen der Name, den euer Kind Ronki gegeben hat
+              {state.companionName ? ` („${state.companionName}“)` : ''}. Der ist jetzt Ronkis Spitzname.
+            </p>
+          )}
           <FieldRow label="Name">
             <TextInput value={draft.childName} onChange={v => update('childName', v)} placeholder="Name des Kindes" />
           </FieldRow>
@@ -1814,7 +1824,8 @@ function SettingsTab({ lang, setLang, t, actions, state, onOpenFeedback }) {
         <div id="qr-print-card" aria-hidden="true">
           <div className="qr-print-inner">
             <p className="qr-print-eyebrow">Ronki</p>
-            <h2 className="qr-print-name">{state?.heroName || state?.familyConfig?.childName || 'Mein Profil'}</h2>
+            {/* The child's name, never the dragon's (25 Sep 2026). */}
+            <h2 className="qr-print-name">{state?.familyConfig?.childName || 'Mein Profil'}</h2>
             <canvas
               ref={qrPrintCanvasRef}
               className="qr-print-canvas"

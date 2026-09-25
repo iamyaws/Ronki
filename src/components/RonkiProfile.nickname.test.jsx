@@ -20,4 +20,10 @@ describe('withNickname', () => {
     expect(withNickname('Heute ist Ronki müde.', 'Funki')).toBe('Heute ist Ronki müde.');
     expect(withNickname('Ronkis Tag', 'Funki')).toBe('Ronkis Tag');
   });
+
+  it('keeps typed names literal and treats any casing of ronki as no nickname', () => {
+    expect(withNickname('Ronki ist gut drauf.', '$&$&')).toBe('$&$& ist gut drauf.');
+    expect(withNickname('Ronki ist gut drauf.', 'RONKI')).toBe('Ronki ist gut drauf.');
+    expect(withNickname('Ronki ist gut drauf.', 'ronki')).toBe('Ronki ist gut drauf.');
+  });
 });

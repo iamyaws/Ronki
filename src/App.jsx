@@ -960,9 +960,8 @@ function OnboardingChain({ previewLoop, onComplete }) {
       t={t}
       ProgressBar={NoProgressBar}
       onComplete={() => {
-        // No heroName here: completeOnboarding would copy it into the
-        // child's name. The child's name comes only from the parent setup
-        // or the profile card.
+        // No name here: the child's name comes only from the parent setup
+        // or the profile card, Ronki's nickname from MeetRonki above.
         actions.completeOnboarding?.({
           companionVariant: state?.companionVariant || meetData.companionVariant,
           heroGender: null,
@@ -1032,9 +1031,13 @@ function DevHubPrime({ variant = 'forest' }) {
     if (!state.onboardingDone) {
       actions.completeOnboarding({
         companionVariant: variant,
-        heroName: 'Dev',
         heroGender: 'boy',
       });
+      // The dev child is "Dev"; set as the child's name directly, the way
+      // the parent setup does (completeOnboarding no longer names anyone).
+      if (!state.familyConfig?.childName) {
+        actions.updateFamilyConfig?.({ ...(state.familyConfig || {}), childName: 'Dev' });
+      }
     }
     if (!state.kidIntroSeen || !state.parentHandoffBackSeen) {
       actions.patchState?.({
