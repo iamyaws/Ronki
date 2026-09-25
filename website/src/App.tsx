@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AppRoutes } from './routes';
+import { BilderbuchDefs } from './components/primitives/BilderbuchDefs';
 
 function ScrollToTop() {
   const { pathname, hash } = useLocation();
@@ -33,6 +34,9 @@ function ScrollToTop() {
 export default function App() {
   return (
     <>
+      {/* Drawn chevrons, checks, rings, blob and the crayon filter.
+       *  Mounted once for every route, screen and print alike. */}
+      <BilderbuchDefs />
       <ScrollToTop />
       <AppRoutes />
     </>

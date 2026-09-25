@@ -8,8 +8,8 @@
  * - Inline SVG icons, no icon-font dependency
  * - Plus Jakarta Sans + Be Vietnam Pro (poster fonts, not app's Fredoka) so
  *   the mockup reads as "the app's product" rather than a foreign paste-in
- * - Brand palette (#1A3C3F teal, #2D5A5E teal-2, #50A082 sage, #FCD34D mustard,
- *   #FDF8F0 cream)
+ * - Brand palette (#040812 teal, #0544B0 teal-2, #0544B0 sage, #FDD134 mustard,
+ *   #FFFFFF cream)
  * - Shows FEWER elements at BIGGER size than a literal screenshot would
  *
  * Scale model:
@@ -210,14 +210,14 @@ function NavBar({
   );
 }
 
-function MiniRing({ done, total, color = '#FCD34D' }: { done: number; total: number; color?: string }) {
+function MiniRing({ done, total, color = '#FDD134' }: { done: number; total: number; color?: string }) {
   const R = 7;
   const C = 2 * Math.PI * R;
   const pct = total > 0 ? done / total : 0;
   return (
     <div className="pm-mini-ring">
       <svg viewBox="0 0 20 20">
-        <circle cx="10" cy="10" r={R} fill="none" stroke="rgba(26,60,63,0.14)" strokeWidth="2" />
+        <circle cx="10" cy="10" r={R} fill="none" stroke="rgba(4,8,18,0.14)" strokeWidth="2" />
         <circle
           cx="10"
           cy="10"
@@ -383,13 +383,13 @@ function ZahneQuest() {
           <div className="pm-focus-emoji">🪥</div>
           <div className="pm-timer-ring" aria-label="2-Minuten-Timer">
             <svg viewBox="0 0 50 50">
-              <circle cx="25" cy="25" r={R} fill="none" stroke="rgba(26,60,63,0.12)" strokeWidth="3" />
+              <circle cx="25" cy="25" r={R} fill="none" stroke="rgba(4,8,18,0.12)" strokeWidth="3" />
               <circle
                 cx="25"
                 cy="25"
                 r={R}
                 fill="none"
-                stroke="#50A082"
+                stroke="#0544B0"
                 strokeWidth="3"
                 strokeLinecap="round"
                 strokeDasharray={C}
@@ -521,14 +521,14 @@ export function PhoneMockup({ variant, scale = 1, locale = 'de' }: PhoneMockupPr
           --s: var(--mockup-scale, 1);
           width: 100%;
           height: 100%;
-          background: #FDF8F0;
+          background: #FFFFFF;
           background-image:
-            radial-gradient(ellipse 90% 40% at 50% 0%, rgba(252,211,77,0.18) 0%, transparent 70%);
+            radial-gradient(ellipse 90% 40% at 50% 0%, rgba(253,209,52,0.18) 0%, transparent 70%);
           border-radius: calc(3.5mm * var(--s));
           overflow: hidden;
           display: flex;
           flex-direction: column;
-          color: #1A3C3F;
+          color: #040812;
           font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
           -webkit-font-smoothing: antialiased;
           position: relative;
@@ -546,13 +546,13 @@ export function PhoneMockup({ variant, scale = 1, locale = 'de' }: PhoneMockupPr
           display: flex;
           align-items: center;
           gap: calc(0.6mm * var(--s));
-          background: rgba(26,60,63,0.08);
+          background: rgba(4,8,18,0.08);
           padding: calc(0.8mm * var(--s)) calc(1.4mm * var(--s)) calc(0.8mm * var(--s)) calc(1mm * var(--s));
           border-radius: calc(2mm * var(--s));
           font-size: calc(4.5pt * var(--s));
           font-weight: 700;
           letter-spacing: 0.02em;
-          color: #1A3C3F;
+          color: #040812;
         }
         .pm-back svg {
           width: calc(2.2mm * var(--s));
@@ -562,8 +562,8 @@ export function PhoneMockup({ variant, scale = 1, locale = 'de' }: PhoneMockupPr
           display: flex;
           align-items: center;
           gap: calc(0.6mm * var(--s));
-          background: #1A3C3F;
-          color: #FCD34D;
+          background: #040812;
+          color: #FDD134;
           padding: calc(0.8mm * var(--s)) calc(1.6mm * var(--s));
           border-radius: calc(2mm * var(--s));
           font-size: calc(4.5pt * var(--s));
@@ -571,7 +571,7 @@ export function PhoneMockup({ variant, scale = 1, locale = 'de' }: PhoneMockupPr
         .pm-hp b {
           font-weight: 800;
           font-size: calc(5.5pt * var(--s));
-          color: #FDF8F0;
+          color: #FFFFFF;
           letter-spacing: -0.02em;
         }
         .pm-hp-label {
@@ -583,18 +583,18 @@ export function PhoneMockup({ variant, scale = 1, locale = 'de' }: PhoneMockupPr
           width: calc(1.8mm * var(--s));
           height: calc(1.8mm * var(--s));
           border-radius: 50%;
-          background: radial-gradient(circle at 30% 30%, #FFE88A, #FCD34D 60%, #D4A017);
+          background: radial-gradient(circle at 30% 30%, #FFE88A, #FDD134 60%, #D4A017);
           box-shadow: inset 0 0 calc(0.3mm * var(--s)) rgba(255,255,255,0.4);
         }
         .pm-parent-lock {
           width: calc(4mm * var(--s));
           height: calc(4mm * var(--s));
           border-radius: calc(1.2mm * var(--s));
-          background: rgba(26,60,63,0.08);
+          background: rgba(4,8,18,0.08);
           display: flex;
           align-items: center;
           justify-content: center;
-          color: #1A3C3F;
+          color: #040812;
         }
         .pm-parent-lock svg {
           width: calc(2mm * var(--s));
@@ -622,7 +622,7 @@ export function PhoneMockup({ variant, scale = 1, locale = 'de' }: PhoneMockupPr
           font-weight: 700;
           letter-spacing: 0.14em;
           text-transform: uppercase;
-          color: rgba(26,60,63,0.55);
+          color: rgba(4,8,18,0.55);
           margin: 0;
         }
         .pm-h1 {
@@ -630,12 +630,12 @@ export function PhoneMockup({ variant, scale = 1, locale = 'de' }: PhoneMockupPr
           font-weight: 800;
           line-height: 1.1;
           letter-spacing: -0.02em;
-          color: #1A3C3F;
+          color: #040812;
           margin: 0;
         }
         .pm-h1 em {
           font-style: italic;
-          color: #2D5A5E;
+          color: #0544B0;
           font-weight: 700;
         }
         .pm-section-label {
@@ -643,7 +643,7 @@ export function PhoneMockup({ variant, scale = 1, locale = 'de' }: PhoneMockupPr
           font-weight: 700;
           letter-spacing: 0.14em;
           text-transform: uppercase;
-          color: rgba(26,60,63,0.55);
+          color: rgba(4,8,18,0.55);
           margin: calc(0.6mm * var(--s)) 0 calc(0.2mm * var(--s));
         }
 
@@ -654,7 +654,7 @@ export function PhoneMockup({ variant, scale = 1, locale = 'de' }: PhoneMockupPr
         }
         .pm-anchor-morning {
           background: #fffbeb;
-          border: calc(0.15mm * var(--s)) solid rgba(252,211,77,0.45);
+          border: calc(0.15mm * var(--s)) solid rgba(253,209,52,0.45);
         }
         .pm-anchor-evening {
           background: #eef2ff;
@@ -669,7 +669,7 @@ export function PhoneMockup({ variant, scale = 1, locale = 'de' }: PhoneMockupPr
           align-items: center;
           gap: calc(1.2mm * var(--s));
           padding-bottom: calc(1mm * var(--s));
-          border-bottom: calc(0.1mm * var(--s)) solid rgba(26,60,63,0.08);
+          border-bottom: calc(0.1mm * var(--s)) solid rgba(4,8,18,0.08);
           margin-bottom: calc(1mm * var(--s));
         }
         .pm-anchor-morning .pm-anchor-head { border-bottom-color: rgba(217,119,6,0.15); }
@@ -718,13 +718,13 @@ export function PhoneMockup({ variant, scale = 1, locale = 'de' }: PhoneMockupPr
         .pm-anchor-body h3 {
           font-size: calc(6pt * var(--s));
           font-weight: 800;
-          color: #1A3C3F;
+          color: #040812;
           margin: 0;
           letter-spacing: -0.01em;
         }
         .pm-anchor-body p {
           font-size: calc(4.5pt * var(--s));
-          color: rgba(26,60,63,0.6);
+          color: rgba(4,8,18,0.6);
           margin: calc(0.2mm * var(--s)) 0 0;
           font-weight: 500;
         }
@@ -748,7 +748,7 @@ export function PhoneMockup({ variant, scale = 1, locale = 'de' }: PhoneMockupPr
           justify-content: center;
           font-size: calc(4pt * var(--s));
           font-weight: 800;
-          color: #1A3C3F;
+          color: #040812;
         }
 
         /* ── Quest rows ──────────────────────────────────────────── */
@@ -761,8 +761,8 @@ export function PhoneMockup({ variant, scale = 1, locale = 'de' }: PhoneMockupPr
           display: flex;
           align-items: center;
           gap: calc(1mm * var(--s));
-          background: #FDF8F0;
-          border: calc(0.1mm * var(--s)) solid rgba(26,60,63,0.08);
+          background: #FFFFFF;
+          border: calc(0.1mm * var(--s)) solid rgba(4,8,18,0.08);
           border-radius: calc(1.5mm * var(--s));
           padding: calc(0.7mm * var(--s)) calc(1mm * var(--s));
         }
@@ -808,18 +808,18 @@ export function PhoneMockup({ variant, scale = 1, locale = 'de' }: PhoneMockupPr
         .pm-qtitle {
           font-size: calc(5pt * var(--s));
           font-weight: 700;
-          color: #1A3C3F;
+          color: #040812;
           margin: 0;
           letter-spacing: -0.01em;
         }
         .pm-qrow-done .pm-qtitle {
           text-decoration: line-through;
           text-decoration-color: rgba(6,95,70,0.5);
-          color: rgba(26,60,63,0.55);
+          color: rgba(4,8,18,0.55);
         }
         .pm-qhint {
           font-size: calc(4pt * var(--s));
-          color: rgba(26,60,63,0.65);
+          color: rgba(4,8,18,0.65);
           margin: calc(0.2mm * var(--s)) 0 0;
           font-weight: 500;
         }
@@ -827,19 +827,19 @@ export function PhoneMockup({ variant, scale = 1, locale = 'de' }: PhoneMockupPr
           font-size: calc(4.2pt * var(--s));
           font-weight: 800;
           color: #A83E2C;
-          background: rgba(252,211,77,0.28);
+          background: rgba(253,209,52,0.28);
           padding: calc(0.4mm * var(--s)) calc(1mm * var(--s));
           border-radius: calc(1mm * var(--s));
           letter-spacing: -0.01em;
           flex-shrink: 0;
         }
         .pm-qrow-next .pm-qxp {
-          background: #FCD34D;
-          color: #1A3C3F;
+          background: #FDD134;
+          color: #040812;
         }
         .pm-anchor-evening .pm-qrow-next .pm-qxp {
           background: #6366F1;
-          color: #FDF8F0;
+          color: #FFFFFF;
         }
         .pm-qcheck {
           width: calc(2.5mm * var(--s));
@@ -851,7 +851,7 @@ export function PhoneMockup({ variant, scale = 1, locale = 'de' }: PhoneMockupPr
         /* ── Focus card (ZahneQuest) ───────────────────────────── */
         .pm-focus-card {
           background: #F4FAF7;
-          border: calc(0.15mm * var(--s)) solid rgba(80,160,130,0.35);
+          border: calc(0.15mm * var(--s)) solid rgba(5,68,176,0.35);
           border-radius: calc(2.5mm * var(--s));
           padding: calc(1.5mm * var(--s)) calc(1.2mm * var(--s)) calc(1.2mm * var(--s));
           display: flex;
@@ -885,19 +885,19 @@ export function PhoneMockup({ variant, scale = 1, locale = 'de' }: PhoneMockupPr
           font-size: calc(8pt * var(--s));
           font-weight: 800;
           letter-spacing: -0.02em;
-          color: #1A3C3F;
+          color: #040812;
           line-height: 1;
           font-feature-settings: "tnum";
         }
         .pm-timer-label span {
           font-size: calc(3.5pt * var(--s));
-          color: rgba(26,60,63,0.6);
+          color: rgba(4,8,18,0.6);
           font-weight: 600;
           letter-spacing: 0.03em;
         }
         .pm-focus-hint {
           font-size: calc(4.5pt * var(--s));
-          color: rgba(26,60,63,0.7);
+          color: rgba(4,8,18,0.7);
           text-align: center;
           margin: 0;
           font-weight: 500;
@@ -913,14 +913,14 @@ export function PhoneMockup({ variant, scale = 1, locale = 'de' }: PhoneMockupPr
           width: calc(1.8mm * var(--s));
           height: calc(1.8mm * var(--s));
           border-radius: 50%;
-          background: rgba(26,60,63,0.15);
+          background: rgba(4,8,18,0.15);
         }
         .pm-zone-dots span.done {
-          background: #50A082;
+          background: #0544B0;
         }
         .pm-zone-dots span.active {
-          background: #50A082;
-          box-shadow: 0 0 0 calc(0.5mm * var(--s)) rgba(80,160,130,0.25);
+          background: #0544B0;
+          box-shadow: 0 0 0 calc(0.5mm * var(--s)) rgba(5,68,176,0.25);
         }
 
         /* ── Journal / Mood grid ────────────────────────────────── */
@@ -942,11 +942,11 @@ export function PhoneMockup({ variant, scale = 1, locale = 'de' }: PhoneMockupPr
           text-align: right;
           padding: calc(0.4mm * var(--s)) calc(0.8mm * var(--s));
           border-radius: calc(1mm * var(--s));
-          background: rgba(26,60,63,0.05);
+          background: rgba(4,8,18,0.05);
         }
         .pm-journal-date span {
           font-size: calc(3.5pt * var(--s));
-          color: rgba(26,60,63,0.55);
+          color: rgba(4,8,18,0.55);
           font-weight: 600;
           letter-spacing: 0.05em;
           text-transform: uppercase;
@@ -954,7 +954,7 @@ export function PhoneMockup({ variant, scale = 1, locale = 'de' }: PhoneMockupPr
         .pm-journal-date b {
           font-size: calc(5pt * var(--s));
           font-weight: 800;
-          color: #1A3C3F;
+          color: #040812;
           letter-spacing: -0.01em;
         }
         .pm-mood-grid {
@@ -964,7 +964,7 @@ export function PhoneMockup({ variant, scale = 1, locale = 'de' }: PhoneMockupPr
         }
         .pm-mood-tile {
           background: #fff;
-          border: calc(0.15mm * var(--s)) solid rgba(26,60,63,0.08);
+          border: calc(0.15mm * var(--s)) solid rgba(4,8,18,0.08);
           border-radius: calc(1.5mm * var(--s));
           padding: calc(0.8mm * var(--s)) calc(0.3mm * var(--s));
           display: flex;
@@ -984,7 +984,7 @@ export function PhoneMockup({ variant, scale = 1, locale = 'de' }: PhoneMockupPr
         .pm-mood-label {
           font-size: calc(3.8pt * var(--s));
           font-weight: 700;
-          color: rgba(26,60,63,0.7);
+          color: rgba(4,8,18,0.7);
           letter-spacing: -0.01em;
         }
         .pm-mood-tile.sel .pm-mood-label {
@@ -994,7 +994,7 @@ export function PhoneMockup({ variant, scale = 1, locale = 'de' }: PhoneMockupPr
         /* ── Clean quiet note ─────────────────────────────────── */
         .pm-quiet-note {
           font-size: calc(4pt * var(--s));
-          color: rgba(26,60,63,0.6);
+          color: rgba(4,8,18,0.6);
           font-weight: 500;
           font-style: italic;
           text-align: center;
@@ -1008,7 +1008,7 @@ export function PhoneMockup({ variant, scale = 1, locale = 'de' }: PhoneMockupPr
           justify-content: space-around;
           align-items: stretch;
           background: #fff;
-          border-top: calc(0.1mm * var(--s)) solid rgba(26,60,63,0.12);
+          border-top: calc(0.1mm * var(--s)) solid rgba(4,8,18,0.12);
           padding: calc(0.8mm * var(--s)) calc(0.5mm * var(--s)) calc(1mm * var(--s));
           flex-shrink: 0;
           margin-top: auto;
@@ -1019,10 +1019,10 @@ export function PhoneMockup({ variant, scale = 1, locale = 'de' }: PhoneMockupPr
           align-items: center;
           gap: calc(0.2mm * var(--s));
           flex: 1;
-          color: rgba(26,60,63,0.45);
+          color: rgba(4,8,18,0.45);
         }
         .pm-nav-btn.active {
-          color: #1A3C3F;
+          color: #040812;
         }
         .pm-nav-icon {
           width: calc(3mm * var(--s));
@@ -1038,7 +1038,7 @@ export function PhoneMockup({ variant, scale = 1, locale = 'de' }: PhoneMockupPr
           letter-spacing: 0.02em;
         }
         .pm-nav-btn.active span {
-          color: #1A3C3F;
+          color: #040812;
         }
       `}</style>
     </div>

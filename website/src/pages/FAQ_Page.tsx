@@ -158,21 +158,21 @@ export default function FAQ_Page() {
           >
             <Link
               to="/"
-              className="inline-flex items-center gap-2 text-sm text-teal-dark/60 hover:text-teal-dark transition-colors mb-10"
+              className="inline-flex items-center gap-2 text-sm text-ink/60 hover:text-ink transition-colors mb-10"
             >
               <span aria-hidden>&larr;</span> Zurück
             </Link>
             <p className="text-xs uppercase tracking-[0.2em] text-teal font-medium mb-6">
               Häufige Fragen
             </p>
-            <h1 className="font-display font-bold text-4xl sm:text-5xl lg:text-[3.75rem] leading-[1.04] tracking-tight text-teal-dark">
+            <h1 className="font-display font-bold text-4xl sm:text-5xl lg:text-[3.75rem] leading-[1.04] tracking-tight text-ink">
               Alles, was Eltern fragen.
             </h1>
             <p className="mt-6 text-base sm:text-lg text-ink/75 max-w-2xl leading-relaxed">
               Wenn eure Frage hier fehlt, schreibt uns einfach an{' '}
               <a
                 href="mailto:hallo@ronki.de"
-                className="font-display font-semibold text-teal-dark underline decoration-teal/30 underline-offset-4 hover:decoration-teal hover:text-teal transition-colors"
+                className="font-display font-semibold text-ink underline decoration-teal/30 underline-offset-4 hover:decoration-teal hover:text-teal transition-colors"
               >
                 hallo@ronki.de
               </a>
@@ -204,10 +204,10 @@ export default function FAQ_Page() {
             viewport={{ once: true }}
             transition={{ duration: 0.7, ease: EASE_OUT }}
           >
-            <p className="text-[0.7rem] uppercase tracking-[0.2em] text-teal-dark/60 font-semibold mb-6">
+            <p className="text-[0.7rem] uppercase tracking-[0.2em] text-ink/60 font-semibold mb-6">
               Noch Fragen?
             </p>
-            <h2 className="font-display font-bold text-3xl sm:text-4xl leading-[1.1] tracking-tight text-teal-dark mb-6">
+            <h2 className="font-display font-bold text-3xl sm:text-4xl leading-[1.1] tracking-tight text-ink mb-6">
               Eure Frage fehlt hier? Schreibt sie uns.
             </h2>
             <p className="text-base sm:text-lg text-ink/75 leading-relaxed mb-10 max-w-xl mx-auto">
@@ -224,7 +224,7 @@ export default function FAQ_Page() {
               Lieber per E-Mail? Dann schreibt direkt an{' '}
               <a
                 href="mailto:hallo@ronki.de"
-                className="font-display font-semibold text-teal-dark underline decoration-teal/30 underline-offset-4 hover:decoration-teal hover:text-teal transition-colors"
+                className="font-display font-semibold text-ink underline decoration-teal/30 underline-offset-4 hover:decoration-teal hover:text-teal transition-colors"
               >
                 hallo@ronki.de
               </a>
@@ -233,19 +233,19 @@ export default function FAQ_Page() {
             <div className="mt-12 flex flex-wrap justify-center gap-x-8 gap-y-3 text-sm">
               <Link
                 to="/"
-                className="text-teal-dark/75 hover:text-teal-dark transition-colors underline decoration-teal/30 underline-offset-4 hover:decoration-teal"
+                className="text-ink/75 hover:text-ink transition-colors underline decoration-teal/30 underline-offset-4 hover:decoration-teal"
               >
                 Zurück zur Startseite
               </Link>
               <Link
                 to="/fuer-eltern"
-                className="text-teal-dark/75 hover:text-teal-dark transition-colors underline decoration-teal/30 underline-offset-4 hover:decoration-teal"
+                className="text-ink/75 hover:text-ink transition-colors underline decoration-teal/30 underline-offset-4 hover:decoration-teal"
               >
                 Für Eltern
               </Link>
               <Link
                 to="/wie-es-funktioniert"
-                className="text-teal-dark/75 hover:text-teal-dark transition-colors underline decoration-teal/30 underline-offset-4 hover:decoration-teal"
+                className="text-ink/75 hover:text-ink transition-colors underline decoration-teal/30 underline-offset-4 hover:decoration-teal"
               >
                 Wie Ronki funktioniert
               </Link>
@@ -288,12 +288,12 @@ function FaqSection({
           transition={{ duration: 0.7, ease: EASE_OUT }}
           className="mb-10"
         >
-          <p className="text-[0.7rem] uppercase tracking-[0.2em] text-teal-dark/60 font-semibold mb-4">
+          <p className="text-[0.7rem] uppercase tracking-[0.2em] text-ink/60 font-semibold mb-4">
             {group.eyebrow}
           </p>
           <h2
             id={headingId}
-            className="font-display font-bold text-3xl sm:text-4xl leading-[1.08] tracking-tight text-teal-dark"
+            className="font-display font-bold text-3xl sm:text-4xl leading-[1.08] tracking-tight text-ink"
           >
             {group.title}
           </h2>
@@ -325,12 +325,12 @@ function FaqSection({
                     >
                       {String(globalIdx).padStart(2, '0')}
                     </span>
-                    <span className="font-display font-bold text-teal-dark text-base sm:text-lg leading-snug">
+                    <span className="font-display font-bold text-ink text-base sm:text-lg leading-snug">
                       {item.q}
                     </span>
                   </span>
                   <span
-                    className="text-teal-dark/40 text-xl shrink-0 transition-transform duration-300"
+                    className="text-ink/40 text-xl shrink-0 transition-transform duration-300"
                     style={{ transform: isOpen ? 'rotate(45deg)' : 'rotate(0deg)' }}
                     aria-hidden
                   >

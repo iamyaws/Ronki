@@ -78,7 +78,7 @@ export default function KonsolenCheck() {
         <div className="max-w-3xl mx-auto">
           <Link
             to="/tools"
-            className="inline-flex items-center gap-2 text-sm text-teal-dark/60 hover:text-teal-dark focus:outline-none focus-visible:text-teal-dark focus-visible:underline underline-offset-4 transition-colors mb-8"
+            className="inline-flex items-center gap-2 text-sm text-ink/60 hover:text-ink focus:outline-none focus-visible:text-ink focus-visible:underline underline-offset-4 transition-colors mb-8"
           >
             <span aria-hidden>←</span> Werkzeuge
           </Link>
@@ -88,7 +88,7 @@ export default function KonsolenCheck() {
               <p className="text-xs uppercase tracking-[0.2em] text-teal font-semibold">
                 Werkzeug für Eltern
               </p>
-              <h1 className="font-display font-bold text-3xl sm:text-4xl text-teal-dark leading-tight">
+              <h1 className="font-display font-bold text-3xl sm:text-4xl text-ink leading-tight">
                 Konsole, Tablet oder Phone? Vorher{' '}
                 <em className="italic text-sage">denken</em>.
               </h1>
@@ -216,14 +216,14 @@ export default function KonsolenCheck() {
                     <p className="text-xs uppercase tracking-[0.2em] text-teal font-semibold">
                       Euer Profil für {PLATTFORM_LABELS[a.plattform]}
                     </p>
-                    <h2 className="font-display font-bold text-2xl sm:text-3xl text-teal-dark leading-tight">
+                    <h2 className="font-display font-bold text-2xl sm:text-3xl text-ink leading-tight">
                       {result.riskHeadline}
                     </h2>
                   </div>
 
                   {result.pros.length > 0 && (
                     <div className="space-y-4">
-                      <h3 className="font-display font-bold text-xl text-teal-dark">
+                      <h3 className="font-display font-bold text-xl text-ink">
                         Was bei euch funktioniert
                       </h3>
                       <ul className="space-y-3 list-none pl-0">
@@ -241,7 +241,7 @@ export default function KonsolenCheck() {
 
                   {result.contras.length > 0 && (
                     <div className="space-y-4">
-                      <h3 className="font-display font-bold text-xl text-teal-dark">
+                      <h3 className="font-display font-bold text-xl text-ink">
                         Wo ihr genauer hinschauen solltet
                       </h3>
                       <ul className="space-y-3 list-none pl-0">
@@ -258,7 +258,7 @@ export default function KonsolenCheck() {
                   )}
 
                   <div className="space-y-4">
-                    <h3 className="font-display font-bold text-xl text-teal-dark">
+                    <h3 className="font-display font-bold text-xl text-ink">
                       Konfigurations-Checkliste für{' '}
                       {PLATTFORM_LABELS[a.plattform]}
                     </h3>
@@ -275,7 +275,7 @@ export default function KonsolenCheck() {
                             {i + 1}
                           </span>
                           <div className="space-y-1.5 flex-1">
-                            <p className="font-display font-bold text-teal-dark text-base">
+                            <p className="font-display font-bold text-ink text-base">
                               {s.title}
                             </p>
                             <p className="text-sm text-ink/75 leading-relaxed max-w-prose">
@@ -288,7 +288,7 @@ export default function KonsolenCheck() {
                   </div>
 
                   <div className="rounded-2xl bg-teal-dark/8 border border-teal-dark/15 px-6 py-6 sm:px-8 sm:py-7">
-                    <p className="font-display font-semibold text-base text-teal-dark leading-relaxed max-w-prose">
+                    <p className="font-display font-semibold text-base text-ink leading-relaxed max-w-prose">
                       Diese Liste ist Anker, kein Vertrag. Setzt euch eine
                       Erinnerung im Kalender für{' '}
                       {a.review === 'drei-monate'
@@ -312,7 +312,7 @@ export default function KonsolenCheck() {
                   <button
                     type="button"
                     onClick={() => setStep(step - 1)}
-                    className="inline-flex items-center gap-2 rounded-full border border-teal/30 px-5 py-3 text-sm text-teal-dark font-display font-medium hover:bg-teal-dark hover:text-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-cream transition-colors"
+                    className="inline-flex items-center gap-2 rounded-full border border-teal/30 px-5 py-3 text-sm text-ink font-display font-medium hover:bg-teal-dark hover:text-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-cream transition-colors"
                   >
                     ← Zurück
                   </button>
@@ -333,7 +333,7 @@ export default function KonsolenCheck() {
                 <button
                   type="button"
                   onClick={() => setStep(0)}
-                  className="inline-flex items-center gap-2 rounded-full border border-teal/30 px-5 py-3 text-sm text-teal-dark font-display font-medium hover:bg-teal-dark hover:text-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-cream transition-colors"
+                  className="inline-flex items-center gap-2 rounded-full border border-teal/30 px-5 py-3 text-sm text-ink font-display font-medium hover:bg-teal-dark hover:text-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-cream transition-colors"
                 >
                   ← Anderes Profil durchgehen
                 </button>
@@ -373,7 +373,7 @@ function PlatformStrip() {
       {platforms.map((p) => (
         <span
           key={p}
-          className="inline-flex items-center rounded-full bg-cream/70 ring-1 ring-inset ring-teal/20 px-3 py-1 text-xs font-display font-semibold text-teal-dark"
+          className="inline-flex items-center rounded-full bg-cream/70 ring-1 ring-inset ring-teal/20 px-3 py-1 text-xs font-display font-semibold text-ink"
         >
           {p}
         </span>
@@ -408,8 +408,8 @@ function ChoiceGroup<T extends string>({
               onClick={() => onSelect(value)}
               className={`w-full text-left rounded-xl border-2 px-5 py-4 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-cream ${
                 active
-                  ? 'border-teal bg-teal/8 text-teal-dark shadow-sm'
-                  : 'border-teal/20 bg-cream text-teal-dark hover:border-teal'
+                  ? 'border-teal bg-teal/8 text-ink shadow-sm'
+                  : 'border-teal/20 bg-cream text-ink hover:border-teal'
               }`}
             >
               <span className="flex items-start gap-3">

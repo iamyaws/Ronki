@@ -35,14 +35,14 @@ export default function ToolsHub() {
           <motion.div {...fadeUp(0, reduced)}>
             <Link
               to="/"
-              className="inline-flex items-center gap-2 text-sm text-teal-dark/60 hover:text-teal-dark focus:outline-none focus-visible:text-teal-dark focus-visible:underline underline-offset-4 transition-colors mb-8"
+              className="inline-flex items-center gap-2 text-sm text-ink/60 hover:text-ink focus:outline-none focus-visible:text-ink focus-visible:underline underline-offset-4 transition-colors mb-8"
             >
               <span aria-hidden>←</span> Startseite
             </Link>
             <p className="text-xs uppercase tracking-[0.2em] text-teal font-semibold mb-6">
               Werkzeug für Eltern
             </p>
-            <h1 className="font-display font-bold text-4xl sm:text-5xl lg:text-6xl leading-[1.04] tracking-tight text-teal-dark">
+            <h1 className="font-display font-bold text-4xl sm:text-5xl lg:text-6xl leading-[1.04] tracking-tight text-ink">
               Werkzeuge, die <em className="italic text-sage">dir</em> den
               Rücken freihalten.
             </h1>
@@ -142,7 +142,7 @@ const TONE_STYLES: Record<
     card: 'bg-cream/70 backdrop-blur-sm border border-teal/10',
     ribbon: true,
     eyebrow: 'text-teal',
-    title: 'text-teal-dark',
+    title: 'text-ink',
     description: 'text-ink/70',
     meta: 'text-ink/55',
     cta: 'text-teal',
@@ -152,20 +152,20 @@ const TONE_STYLES: Record<
     card: 'bg-sage/15 ring-1 ring-inset ring-sage/30 border border-transparent',
     ribbon: true,
     eyebrow: 'text-teal',
-    title: 'text-teal-dark',
+    title: 'text-ink',
     description: 'text-ink/75',
     meta: 'text-ink/60',
-    cta: 'text-teal-dark',
+    cta: 'text-ink',
     focusRingOffset: 'focus-visible:ring-offset-cream',
   },
   mustard: {
     card: 'bg-mustard-soft/55 ring-1 ring-inset ring-mustard/35 border border-transparent',
     ribbon: true,
-    eyebrow: 'text-teal-dark',
-    title: 'text-teal-dark',
+    eyebrow: 'text-ink',
+    title: 'text-ink',
     description: 'text-ink/80',
     meta: 'text-ink/65',
-    cta: 'text-teal-dark',
+    cta: 'text-ink',
     focusRingOffset: 'focus-visible:ring-offset-cream',
   },
   teal: {

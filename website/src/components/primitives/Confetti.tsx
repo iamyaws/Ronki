@@ -6,7 +6,7 @@ type Props = {
   count?: number;
 };
 
-const COLORS = ['#FCD34D', '#50A082', '#2D5A5E', '#FDE589', '#7BB89F'];
+const COLORS = ['#FDD134', '#0544B0', '#0544B0', '#FFE68A', '#B9E3FC'];
 
 export function Confetti({ active, count = 30 }: Props) {
   const reduced = useReducedMotion();

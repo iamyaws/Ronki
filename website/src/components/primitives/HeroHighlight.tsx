@@ -8,7 +8,7 @@ type Props = {
   delay?: number;
 };
 
-export function HeroHighlight({ children, color = '#FCD34D', delay = 0.6 }: Props) {
+export function HeroHighlight({ children, color = '#FDD134', delay = 0.6 }: Props) {
   const reduced = useReducedMotion();
   return (
     <span className="relative inline-block">

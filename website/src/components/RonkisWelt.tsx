@@ -1,4 +1,11 @@
+import type { CSSProperties } from 'react';
 import { motion } from 'motion/react';
+import { EASE_OUT } from '../lib/motion';
+import { CrayonBarChart, Doodle, DrawnLink, Ribbon, SpeechBubble } from './bausteine';
+import type { BarRow, BarTone } from './bausteine';
+import { HandNote } from './primitives/HandNote';
+import { PaperEdge } from './primitives/PaperEdge';
+import { StickerLabel } from './primitives/StickerLabel';
 
 /* ------------------------------------------------------------------ */
 /* Data                                                                */
@@ -9,7 +16,6 @@ interface Freund {
   subtitle: string;
   blurb: string;
   image: string;
-  accent: string;
 }
 
 const FREUNDE: Freund[] = [
@@ -18,137 +24,245 @@ const FREUNDE: Freund[] = [
     subtitle: 'Wenn es dunkel wird',
     blurb: 'Sie zündet Laternen an, wenn dein Kind Mut braucht.',
     image: '/art/freunde/lichtbringerin.webp',
-    accent: '#d97706',
   },
   {
     name: 'Sternenweberin',
     subtitle: 'Vor dem Einschlafen',
     blurb: 'Sie webt die Gedanken des Tages zu ruhigen Träumen.',
     image: '/art/freunde/sternenweberin.webp',
-    accent: '#4338ca',
   },
   {
     name: 'Windreiterin',
     subtitle: 'Beim Neues wagen',
     blurb: 'Sie springt voraus, wenn etwas schwer aussieht.',
     image: '/art/freunde/windreiterin.webp',
-    accent: '#50a082',
   },
   {
     name: 'Tiefentaucherin',
     subtitle: 'Wenn Gefühle groß sind',
     blurb: 'Sie hört zu, auch wenn die Worte noch fehlen.',
     image: '/art/freunde/tiefentaucherin.webp',
-    accent: '#2D5A5E',
   },
   {
     name: 'Brückenbauer',
     subtitle: 'Wenn Freunde sich streiten',
     blurb: 'Er baut kleine Brücken, wo Worte fehlen.',
     image: '/art/freunde/brueckenbauer.webp',
-    accent: '#A83E2C',
   },
   {
     name: 'Flackerfuchs',
     subtitle: 'Wenn etwas Freude macht',
     blurb: 'Er tanzt mit, wenn dein Kind lacht.',
     image: '/art/freunde/flackerfuchs.webp',
-    accent: '#c2410c',
   },
   {
     name: 'Pilzhüter',
     subtitle: 'Wenn alles wuselt',
     blurb: 'Er atmet langsam, und dein Kind darf mitatmen.',
     image: '/art/freunde/pilzhueter.webp',
-    accent: '#735c00',
   },
+];
+
+const BARS: BarRow[] = [
+  {
+    label: 'Woche 1',
+    caption: 'Ronki erinnert, lobt, begleitet',
+    parts: [
+      { value: 85, tone: 'sun' },
+      { value: 15, tone: 'cobalt' },
+    ],
+  },
+  {
+    label: 'Woche 3',
+    caption: 'Routine wird vertrauter',
+    parts: [
+      { value: 50, tone: 'sun' },
+      { value: 50, tone: 'cobalt' },
+    ],
+  },
+  {
+    label: 'Woche 6',
+    caption: 'Dein Kind macht es selbst',
+    parts: [
+      { value: 20, tone: 'sun' },
+      { value: 80, tone: 'cobalt' },
+    ],
+  },
+  {
+    label: 'Woche 10+',
+    caption: 'Ronki wird nicht mehr gebraucht',
+    parts: [
+      { value: 5, tone: 'sun' },
+      { value: 95, tone: 'cobalt' },
+    ],
+  },
+];
+
+const LEGEND: { tone: BarTone; label: string }[] = [
+  { tone: 'sun', label: 'Externe Begleitung' },
+  { tone: 'cobalt', label: 'Eigener Antrieb' },
 ];
 
 /* ------------------------------------------------------------------ */
 /* Section                                                             */
 /* ------------------------------------------------------------------ */
 
+/**
+ * One white spread with two parts: the seven friends as round stickers,
+ * and the idea behind them.
+ *
+ * They used to be two sections with a hairline between them, which read
+ * as two half-empty pages. Merged, the friends are the picture and the
+ * fading chart is the caption.
+ */
 export function RonkisWelt() {
   return (
-    <section
-      className="relative px-6 py-24 sm:py-32 border-t border-teal/10"
-      aria-labelledby="welt-heading"
-    >
-      <div className="max-w-6xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7 }}
-          className="mb-16 max-w-3xl"
-        >
-          <p className="text-xs uppercase tracking-[0.2em] text-teal mb-6 font-medium">
+    <div className="relative">
+      <PaperEdge tone="white" variant={1} />
+      <section
+        className="relative bg-white px-5 sm:px-6 py-12 sm:py-14"
+        aria-labelledby="welt-heading"
+      >
+        <div className="relative max-w-6xl mx-auto">
+          {/* ── Part 1: the friends ─────────────────────── */}
+          <Ribbon tone="cobalt" rotate={-1.4}>
             Ronkis Welt
-          </p>
+          </Ribbon>
+
           <h2
             id="welt-heading"
-            className="font-display font-bold text-4xl sm:text-5xl lg:text-6xl leading-[1.08] tracking-tight text-teal-dark"
+            className="bb-display mt-6 text-4xl sm:text-5xl lg:text-[3.5rem] text-ink max-w-3xl"
           >
             Dein Kind ist nicht allein.{' '}
-            <em className="italic text-sage">Ronki hat Freunde.</em>
+            <span className="bb-swipe">
+              Ronki hat Freunde.
+              <svg aria-hidden viewBox="0 0 300 20" preserveAspectRatio="none">
+                <use href="#bb-underline" />
+              </svg>
+            </span>
           </h2>
-          <p className="mt-6 text-base sm:text-lg text-ink/70 max-w-2xl leading-relaxed">
+
+          <p className="mt-4 text-[1.05rem] sm:text-lg text-ink/85 max-w-2xl leading-relaxed">
             Sieben Begleiter, die an den richtigen Momenten des Tages auftauchen. Nicht als Feature-Liste. Als Figuren, die ein Kind gern wiedertrifft.
           </p>
-        </motion.div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-5 sm:gap-6">
-          {FREUNDE.map((f, i) => (
-            <motion.figure
-              key={f.name}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-10%' }}
-              transition={{ duration: 0.6, delay: i * 0.08 }}
-              whileHover={{ y: -4 }}
-              className="group flex flex-col cursor-default"
-            >
-              {/* Painted portrait */}
-              <div
-                className="relative aspect-square overflow-hidden rounded-[1.25rem] ring-1 ring-inset ring-teal/10"
-                style={{
-                  boxShadow: '0 12px 30px -12px rgba(45,90,94,0.25)',
-                }}
+          {/* The third of the page beside the headline used to be empty.
+           *  Ronki says the headline back in his own voice, and the tail
+           *  points down at the seven faces. Only where there is room. */}
+          <div className="pointer-events-none absolute right-0 top-[150px] hidden w-[272px] xl:block">
+            <SpeechBubble tone="sun" tail="bottom" rotate={2.2} className="w-full">
+              Ich bin nicht allein. Du auch nicht.
+            </SpeechBubble>
+            <Doodle
+              name="sparkle-trio"
+              size={44}
+              rotate={12}
+              className="absolute -left-12 top-2 text-cobalt"
+            />
+          </div>
+
+          <ul className="mt-10 grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-x-5 gap-y-9 sm:gap-x-6">
+            {FREUNDE.map((f, i) => (
+              <motion.li
+                key={f.name}
+                initial={{ opacity: 1, y: 14 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-5%' }}
+                transition={{ duration: 0.5, delay: Math.min(i, 4) * 0.06, ease: EASE_OUT }}
+                className="flex flex-col items-center text-center [hyphens:none] last:col-span-2 sm:last:col-span-1"
               >
                 <div
-                  aria-hidden
-                  className="absolute -inset-3 rounded-[1.5rem] blur-2xl opacity-0 group-hover:opacity-40 transition-opacity duration-500 pointer-events-none"
-                  style={{ background: `radial-gradient(circle, ${f.accent} 0%, transparent 65%)` }}
-                />
-                <img
-                  src={f.image}
-                  alt={`${f.name}, eine der fünf Freunde in Ronkis Welt.`}
-                  loading="lazy"
-                  width={400}
-                  height={400}
-                  className="relative z-10 w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
-                />
-              </div>
-
-              {/* Caption */}
-              <figcaption className="mt-4 [hyphens:none]">
-                <p
-                  className="text-[0.7rem] uppercase tracking-[0.15em] font-display font-bold mb-1"
-                  style={{ color: f.accent }}
+                  className="w-full max-w-[128px] aspect-square overflow-hidden rounded-full border-[3px] border-ink bg-sky-wash [transform:rotate(calc(var(--tilt)*0.5))] sm:[transform:rotate(var(--tilt))]"
+                  style={{
+                    boxShadow: '0 0 0 5px #fff, 0 0 0 8px var(--color-ink)',
+                    '--tilt': `${i % 2 === 0 ? -2 : 2}deg`,
+                  } as CSSProperties}
                 >
-                  {f.subtitle}
-                </p>
-                <p className="font-display font-bold text-base sm:text-lg text-teal-dark leading-tight mb-2">
+                  <img
+                    src={f.image}
+                    alt={`${f.name}: ${f.blurb}`}
+                    loading="lazy"
+                    width={400}
+                    height={400}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+                <p className="bb-display mt-5 text-[1.05rem] sm:text-lg text-ink leading-tight">
                   {f.name}
                 </p>
-                <p className="text-xs sm:text-sm text-ink/65 leading-relaxed">
-                  {f.blurb}
+                <p className="mt-1.5 text-sm text-ink/85 leading-snug">{f.subtitle}</p>
+              </motion.li>
+            ))}
+          </ul>
+
+          <div className="mt-8 flex items-center justify-center gap-3 lg:justify-end">
+            <Doodle name="arrow-curved" size={30} rotate={-62} className="text-cobalt" />
+            <HandNote rotate={3} icon="heart" className="text-center lg:text-right">
+              Alle sieben kommen wieder.
+            </HandNote>
+          </div>
+
+          {/* ── Part 2: the idea behind them ────────────── */}
+          <div className="mt-14 grid lg:grid-cols-[1fr_0.95fr] gap-10 lg:gap-14 lg:items-center">
+            <div>
+              <StickerLabel tone="sun" rotate={-3}>
+                Der Ansatz dahinter
+              </StickerLabel>
+
+              <h2 className="bb-display mt-4 text-3xl sm:text-4xl lg:text-5xl text-ink">
+                Intrinsisch statt{' '}
+                <span className="bb-swipe">
+                  extrinsisch.
+                  <svg aria-hidden viewBox="0 0 300 20" preserveAspectRatio="none">
+                    <use href="#bb-underline" />
+                  </svg>
+                </span>
+              </h2>
+
+              <div className="mt-6 flex flex-col gap-4 text-[1.05rem] sm:text-lg text-ink/85 leading-relaxed">
+                <p>
+                  Kinder-Apps arbeiten oft mit externen Belohnungen: Punkte, Abzeichen, Lootboxen. Das funktioniert kurzfristig, tötet aber die natürliche Motivation.
                 </p>
-              </figcaption>
-            </motion.figure>
-          ))}
+                <p>
+                  Ronki dreht das um: Am Anfang begleitet der Drache intensiv. Dann zieht er sich Schritt für Schritt zurück, bis dein Kind seine Routinen{' '}
+                  <strong className="font-semibold text-ink">aus eigenem Antrieb</strong> macht.
+                </p>
+                <p className="text-base text-ink/70">
+                  Basierend auf der Selbstbestimmungstheorie (Deci &amp; Ryan), Fading Scaffolding (Vygotsky) und Montessori-Prinzipien.
+                </p>
+              </div>
+
+              <DrawnLink href="/wissenschaft" className="mt-5">
+                Mehr erfahren
+              </DrawnLink>
+            </div>
+
+            <FadingChart />
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* The drawn chart                                                     */
+/* ------------------------------------------------------------------ */
+
+function FadingChart() {
+  return (
+    <motion.div
+      initial={{ opacity: 1, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-10%' }}
+      transition={{ duration: 0.7, ease: EASE_OUT }}
+      className="rounded-[26px] border-[3px] border-ink bg-paper p-6 sm:p-7 rotate-[0.8deg]"
+    >
+      <StickerLabel tone="sun" rotate={-3}>
+        So wird Ronki leiser
+      </StickerLabel>
+
+      <CrayonBarChart className="mt-6" rows={BARS} legend={LEGEND} />
+    </motion.div>
   );
 }
