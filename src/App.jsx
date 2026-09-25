@@ -104,6 +104,7 @@ import RonkisTag from './components/drachennest/RonkisTag';
 import AlphaBanner from './components/AlphaBanner';
 import SWUpdateBanner from './components/SWUpdateBanner';
 import { useAnalytics } from './hooks/useAnalytics';
+import MotionTicks from './components/bilderbuch/MotionTicks';
 
 // Tiny Suspense fallback for lazy-loaded tools/games. Intentionally
 // minimal — the chunks are small and a full "loading screen" treatment
@@ -111,8 +112,11 @@ import { useAnalytics } from './hooks/useAnalytics';
 // 6yo knows something's arriving rather than assuming the tap broke.
 function ToolLoadingFallback() {
   return (
-    <div className="flex items-center justify-center min-h-dvh bg-surface">
-      <p className="font-label text-sm text-on-surface-variant">Einen Moment…</p>
+    <div className="flex items-center justify-center min-h-dvh bg-white text-ink">
+      <p className="flex items-center gap-2 font-headline font-semibold text-lg">
+        <MotionTicks tone="cobalt" size={22} rotate={-30} />
+        Einen Moment…
+      </p>
     </div>
   );
 }
@@ -847,7 +851,7 @@ function OnboardingGate() {
  *   0 — CombinedParentSetup        sets parentOnboardingDone, parentPin,
  *                                  analyticsEnabled, familyConfig
  *   1 — HandoffBackCard            sets parentHandoffBackSeen
- *   2 — MeetRonki                  collects {heroName, companionVariant};
+ *   2 — MeetRonki                  collects {companionName, companionVariant};
  *                                  sets kidIntroSeen
  *   3 — TeachFireStep              calls completeOnboarding(...) which
  *                                  sets onboardingDone + taughtSignature
@@ -865,7 +869,7 @@ function OnboardingChain({ previewLoop, onComplete }) {
   // kid finishes naming Ronki — the most embarrassing possible time
   // to crash. Pulling it once at the chain level so all phases share it.
   const { t } = useTranslation();
-  const [meetData, setMeetData] = React.useState({ heroName: '', companionVariant: 'forest' });
+  const [meetData, setMeetData] = React.useState({ companionName: '', companionVariant: 'forest' });
 
   // Compute phase from state gates so resume works.
   const phase =
@@ -926,14 +930,16 @@ function OnboardingChain({ previewLoop, onComplete }) {
   if (phase === 2) {
     return (
       <MeetRonki
-        onComplete={({ heroName, companionVariant }) => {
-          // Persist what the kid picked + named — TeachFireStep needs
-          // companionVariant for its theming, completeOnboarding needs
-          // heroName when TeachFireStep finishes.
-          setMeetData({ heroName: heroName || '', companionVariant: companionVariant || 'forest' });
+        onComplete={({ companionName, companionVariant }) => {
+          // Persist what the kid picked and named. The name is Ronki's
+          // nickname (companionName). Until 25 Sep 2026 it travelled as
+          // heroName and completeOnboarding copied it into
+          // familyConfig.childName, so the dragon's name replaced the
+          // child's own name from the parent setup ("Hallo Funki!").
+          setMeetData({ companionName: companionName || '', companionVariant: companionVariant || 'forest' });
           actions.patchState?.({
             kidIntroSeen: true,
-            heroName: heroName || state?.heroName,
+            companionName: companionName || state?.companionName,
             companionVariant: companionVariant || state?.companionVariant,
           });
         }}
@@ -954,9 +960,10 @@ function OnboardingChain({ previewLoop, onComplete }) {
       t={t}
       ProgressBar={NoProgressBar}
       onComplete={() => {
+        // No name here: the child's name comes only from the parent setup
+        // or the profile card, Ronki's nickname from MeetRonki above.
         actions.completeOnboarding?.({
           companionVariant: state?.companionVariant || meetData.companionVariant,
-          heroName: state?.heroName || meetData.heroName,
           heroGender: null,
           taughtSignature: 'fire',
         });
@@ -1024,9 +1031,13 @@ function DevHubPrime({ variant = 'forest' }) {
     if (!state.onboardingDone) {
       actions.completeOnboarding({
         companionVariant: variant,
-        heroName: 'Dev',
         heroGender: 'boy',
       });
+      // The dev child is "Dev"; set as the child's name directly, the way
+      // the parent setup does (completeOnboarding no longer names anyone).
+      if (!state.familyConfig?.childName) {
+        actions.updateFamilyConfig?.({ ...(state.familyConfig || {}), childName: 'Dev' });
+      }
     }
     if (!state.kidIntroSeen || !state.parentHandoffBackSeen) {
       actions.patchState?.({
