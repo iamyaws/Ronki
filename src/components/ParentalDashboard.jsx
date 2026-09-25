@@ -22,6 +22,9 @@ import { useAnalytics } from '../hooks/useAnalytics';
 // Finch pass (26 Sep 2026): "Ronkis Tag" (routine, evening start,
 // Ferien, Extras). RoutinePicker is shared with the parent step.
 import RoutinePicker from './onboarding/RoutinePicker';
+
+/** The old daily habits and recurring activities (no reader since the Finch pass). */
+const SHOW_LEGACY_ROUTINES = false;
 import { normalizeRoutine } from '../data/taskKinds';
 import { DEFAULT_EVENING_START } from '../loop/types';
 import { stonesToNext } from '../loop/growth';
@@ -635,7 +638,7 @@ export function RonkisTagSection({ state, actions, Picker = RoutinePicker }) {
       <div>
         <h3 className="font-headline font-bold text-ink" style={{ fontSize: 18 }}>Ronkis Tag</h3>
         <p className="font-body text-ink-soft" style={{ fontSize: 14, lineHeight: 1.4 }}>
-          Jede Aufgabe macht Ronkis Feuer wärmer. Weniger ist am Anfang mehr.
+          Was euer Kind morgens und abends mit Ronki macht, und wann Ronki von seiner Reise zurückkommt.
         </p>
       </div>
       {Picker && <Picker routine={routine} eveningStart={eveningStart} onChange={handleRoutine} vacation={vacation} />}
@@ -790,6 +793,10 @@ function FamilyTab({ state, actions, lang }) {
         </div>
       </SectionCard>
 
+      {/* Finch pass (26 Sep 2026): the old habits and activities fed only the
+          removed task list, so they changed nothing for the child. Ronkis Tag
+          above is the routine now. Kept behind a switch. */}
+      {SHOW_LEGACY_ROUTINES && (<>
       {/* Daily Habits */}
       <SectionCard icon="routine" title="Tägliche Gewohnheiten"
         subtitle={`${draft.dailyHabits.length} Gewohnheit${draft.dailyHabits.length !== 1 ? 'en' : ''}`}
@@ -900,6 +907,7 @@ function FamilyTab({ state, actions, lang }) {
           }} />
         </div>
       </SectionCard>
+      </>)}
 
       {/* Parent Message */}
       <SectionCard icon="mail" title="Eltern-Nachricht"
