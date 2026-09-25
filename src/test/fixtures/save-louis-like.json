@@ -1,0 +1,335 @@
+{
+  "quests": [
+    {
+      "id": "s_wake",
+      "name": "s_wake",
+      "icon": "x",
+      "anchor": "morning",
+      "xp": 10,
+      "minutes": 2,
+      "order": 1,
+      "done": true,
+      "streak": 4,
+      "completions": 1
+    },
+    {
+      "id": "s_water",
+      "name": "s_water",
+      "icon": "x",
+      "anchor": "morning",
+      "xp": 10,
+      "minutes": 2,
+      "order": 2,
+      "done": true,
+      "streak": 4,
+      "completions": 1
+    },
+    {
+      "id": "s_wash",
+      "name": "s_wash",
+      "icon": "x",
+      "anchor": "morning",
+      "xp": 10,
+      "minutes": 2,
+      "order": 3,
+      "done": false,
+      "streak": 0,
+      "completions": 0
+    },
+    {
+      "id": "s_breakfast",
+      "name": "s_breakfast",
+      "icon": "x",
+      "anchor": "morning",
+      "xp": 10,
+      "minutes": 2,
+      "order": 4,
+      "done": true,
+      "streak": 2,
+      "completions": 1
+    },
+    {
+      "id": "s_teeth_am",
+      "name": "s_teeth_am",
+      "icon": "x",
+      "anchor": "morning",
+      "xp": 10,
+      "minutes": 2,
+      "order": 5,
+      "done": false,
+      "streak": 0,
+      "completions": 0
+    },
+    {
+      "id": "s_dress",
+      "name": "s_dress",
+      "icon": "x",
+      "anchor": "morning",
+      "xp": 10,
+      "minutes": 2,
+      "order": 6,
+      "done": false,
+      "streak": 0,
+      "completions": 0
+    },
+    {
+      "id": "s_packcheck",
+      "name": "s_packcheck",
+      "icon": "x",
+      "anchor": "morning",
+      "xp": 10,
+      "minutes": 2,
+      "order": 7,
+      "done": false,
+      "streak": 0,
+      "completions": 0
+    },
+    {
+      "id": "s_move",
+      "name": "s_move",
+      "icon": "x",
+      "anchor": "evening",
+      "xp": 10,
+      "minutes": 2,
+      "order": 1,
+      "done": false,
+      "streak": 0,
+      "completions": 0
+    },
+    {
+      "id": "s_dinner",
+      "name": "s_dinner",
+      "icon": "x",
+      "anchor": "bedtime",
+      "xp": 10,
+      "minutes": 2,
+      "order": 1,
+      "done": false,
+      "streak": 0,
+      "completions": 0
+    },
+    {
+      "id": "s_teeth_pm",
+      "name": "s_teeth_pm",
+      "icon": "x",
+      "anchor": "bedtime",
+      "xp": 10,
+      "minutes": 2,
+      "order": 2,
+      "done": false,
+      "streak": 0,
+      "completions": 0
+    },
+    {
+      "id": "s_wash_pm",
+      "name": "s_wash_pm",
+      "icon": "x",
+      "anchor": "bedtime",
+      "xp": 10,
+      "minutes": 2,
+      "order": 3,
+      "done": false,
+      "streak": 0,
+      "completions": 0
+    },
+    {
+      "id": "s_pyjama",
+      "name": "s_pyjama",
+      "icon": "x",
+      "anchor": "bedtime",
+      "xp": 10,
+      "minutes": 2,
+      "order": 4,
+      "done": false,
+      "streak": 0,
+      "completions": 0
+    },
+    {
+      "id": "s_cuddle",
+      "name": "s_cuddle",
+      "icon": "x",
+      "anchor": "bedtime",
+      "xp": 10,
+      "minutes": 2,
+      "order": 5,
+      "done": false,
+      "streak": 0,
+      "completions": 0
+    },
+    {
+      "id": "sq3",
+      "name": "sq3",
+      "icon": "x",
+      "anchor": "morning",
+      "xp": 10,
+      "minutes": 2,
+      "order": 94,
+      "done": false,
+      "streak": 0,
+      "completions": 0,
+      "sideQuest": true
+    },
+    {
+      "id": "sq5",
+      "name": "sq5",
+      "icon": "x",
+      "anchor": "evening",
+      "xp": 10,
+      "minutes": 2,
+      "order": 96,
+      "done": false,
+      "streak": 0,
+      "completions": 0,
+      "sideQuest": true
+    }
+  ],
+  "sm": {
+    "s_wake": 4,
+    "s_water": 4,
+    "s_breakfast": 2,
+    "s_teeth_pm": 7
+  },
+  "lastDate": "2026-09-25",
+  "vacMode": false,
+  "dt": 5,
+  "hp": 42,
+  "eggType": "dragon",
+  "heroGender": "boy",
+  "moodAM": 1,
+  "moodPM": null,
+  "catEvo": 3,
+  "companionVariant": "sunset",
+  "companionName": "Funki",
+  "expedition": {
+    "state": "home",
+    "biome": "morgenwald"
+  },
+  "expeditionLog": [
+    {
+      "id": "2026-09-18T09:00:00.000Z-🍁",
+      "emoji": "🍁",
+      "name": "Ahornblatt",
+      "biome": "morgenwald",
+      "location": "Ein kleiner Pfad hinter den Birken",
+      "quote": "Im Morgenwald hat es nach nassem Moos gerochen.",
+      "ts": "2026-09-18T09:00:00.000Z"
+    },
+    {
+      "id": "2026-09-19T09:00:00.000Z-🪶",
+      "emoji": "🪶",
+      "name": "Feder",
+      "biome": "morgenwald",
+      "location": "Stille Lichtung am Baumwipfel",
+      "quote": "Im Morgenwald hat es nach nassem Moos gerochen.",
+      "ts": "2026-09-19T09:00:00.000Z"
+    },
+    {
+      "id": "2026-09-21T09:00:00.000Z-🪨",
+      "emoji": "🪨",
+      "name": "Bachstein",
+      "biome": "morgenwald",
+      "location": "Am kleinen Bach",
+      "quote": "Im Morgenwald hat es nach nassem Moos gerochen.",
+      "ts": "2026-09-21T09:00:00.000Z"
+    },
+    {
+      "id": "2026-09-22T09:00:00.000Z-🌰",
+      "emoji": "🌰",
+      "name": "Eichel",
+      "biome": "morgenwald",
+      "location": "Unter der dicken Eiche",
+      "quote": "Im Morgenwald hat es nach nassem Moos gerochen.",
+      "ts": "2026-09-22T09:00:00.000Z"
+    },
+    {
+      "id": "2026-09-24T09:00:00.000Z-🐌",
+      "emoji": "🐌",
+      "name": "Schneckenhaus",
+      "biome": "morgenwald",
+      "location": "Auf einem Stein in der Sonne",
+      "quote": "Im Morgenwald hat es nach nassem Moos gerochen.",
+      "ts": "2026-09-24T09:00:00.000Z"
+    }
+  ],
+  "onboardingDone": true,
+  "onboardingDate": "2026-09-16",
+  "kidIntroSeen": true,
+  "parentHandoffBackSeen": true,
+  "parentOnboardingDone": true,
+  "parentPin": "4711",
+  "parentPinIsDefault": false,
+  "analyticsEnabled": true,
+  "totalTasksDone": 61,
+  "taughtSignature": "fire",
+  "taughtAt": "2026-09-16",
+  "taughtBreaths": {
+    "flame": "2026-09-16",
+    "sparkle": "2026-09-22"
+  },
+  "journalHistory": [
+    {
+      "date": "2026-09-20",
+      "memory": "Wir waren im Wald.",
+      "gratitude": [
+        "Mama"
+      ],
+      "dayEmoji": 2,
+      "achievements": [],
+      "mood": 1
+    },
+    {
+      "date": "2026-09-23",
+      "memory": "Fussball war toll.",
+      "gratitude": [
+        "Liam",
+        "Papa"
+      ],
+      "dayEmoji": 1,
+      "achievements": [
+        "tor"
+      ],
+      "mood": 0
+    }
+  ],
+  "journalEverUnlocked": true,
+  "micropediaDiscovered": [
+    {
+      "id": "forest_0",
+      "chapter": "forest",
+      "discoveredAt": "2026-09-16T08:00:00.000Z"
+    }
+  ],
+  "mintBadgesEarned": [
+    "zahlenjagd"
+  ],
+  "tabUnlocksSeen": {
+    "ronki": true,
+    "journal": true
+  },
+  "ronkiMood": "normal",
+  "ronkiNextBadDayDate": "2026-10-04",
+  "minigameAccessMode": "routine",
+  "familyConfig": {
+    "childName": "Louis",
+    "childPronouns": "er",
+    "siblings": [
+      {
+        "name": "Liam",
+        "relationship": "Bruder",
+        "pronouns": "er"
+      }
+    ],
+    "dailyHabits": [],
+    "recurringActivities": [],
+    "parentMessage": {
+      "enabled": false,
+      "title": "Botschaft",
+      "body": "Wir haben dich lieb.",
+      "signature": "Mama und Papa"
+    },
+    "familyMotto": "Zusammen sein.",
+    "affirmation": "Ich bin geliebt."
+  },
+  "_v2_economy_reset": true,
+  "_v_companion_name_split": true
+}

@@ -52,7 +52,19 @@ export type EventName =
   // as part of meet completion and is already covered by
   // 'ronki.hatch'; that's why meet.complete is omitted.
   | 'tonight.start'
-  | 'tonight.complete';
+  | 'tonight.complete'
+  // Finch pass (26 Sep 2026): the onboarding funnel and the first task.
+  // Every prop is enum-bound or numeric; never a name the child typed.
+  | 'onboarding.landing.view'
+  | 'onboarding.egg.pick'
+  | 'onboarding.name.confirm'
+  | 'onboarding.parent.done'
+  | 'onboarding.scan.start'
+  | 'onboarding.scan.result'
+  | 'onboarding.teachfire.complete'
+  | 'onboarding.firstday.done'
+  | 'first.task.complete'
+  | 'quest.skip';
 
 export type EventProps = Record<string, string | number | boolean>;
 
@@ -63,14 +75,14 @@ export type EventProps = Record<string, string | number | boolean>;
 const ALLOWED_PROP_KEYS: Record<EventName, readonly string[]> = {
   'app.open': [],
   'routine.complete': [],
-  'quest.complete': ['questId', 'anchor'],
+  'quest.complete': ['questId', 'anchor', 'block', 'kind'],
   'tool.open': ['tool'],
   'tool.complete': ['tool', 'durationSec'],
   'mood.pick': ['mood', 'slot'],
   'game.start': ['gameId'],
   'game.end': ['gameId', 'durationSec', 'completed'],
   'ronki.hatch': [],
-  'ronki.evolve': ['toStage'],
+  'ronki.evolve': ['toStage', 'stage'],
   'journal.write': [],
   'ausmalbild.redeem': ['sceneId'],
   'parent.pin.enter': ['success'],
@@ -80,13 +92,27 @@ const ALLOWED_PROP_KEYS: Record<EventName, readonly string[]> = {
   // today, more later) — enum-bounded, never user content. No memento
   // name on `memento.received` so the event can't leak a memento title
   // that might in some future build include kid-readable copy.
-  'expedition.start': ['biome'],
+  'expedition.start': ['biome', 'kind'],
   'expedition.return': ['biome'],
   'memento.received': ['biome'],
   'companion.sit': [],
   'companion.tap': [],
   'tonight.start': [],
   'tonight.complete': [],
+  // Finch pass funnel. `variant` is a colourway id, `source` and `result`
+  // are short fixed words ('chip' / 'typed', 'camera' / 'code' / 'link',
+  // 'ok' / 'fail'), `block` and `kind` come from src/loop and
+  // src/data/taskKinds. The chosen nickname is never a prop.
+  'onboarding.landing.view': [],
+  'onboarding.egg.pick': ['variant'],
+  'onboarding.name.confirm': ['source'],
+  'onboarding.parent.done': [],
+  'onboarding.scan.start': ['source'],
+  'onboarding.scan.result': ['source', 'result'],
+  'onboarding.teachfire.complete': ['rounds'],
+  'onboarding.firstday.done': ['block'],
+  'first.task.complete': ['block', 'kind'],
+  'quest.skip': ['block', 'kind'],
 };
 
 // ── Storage keys ─────────────────────────────────────────────────────
@@ -95,11 +121,15 @@ const DEVICE_ID_ROTATION_KEY = 'ronki_analytics_device_id_rotate_at';
 const QUEUE_KEY = 'ronki_telemetry_queue';
 const ENABLED_KEY = 'ronki_analytics_enabled';
 const SESSION_APP_OPEN_KEY = 'ronki_telemetry_app_open_fired';
+/** Set once a parent made the consent choice on this device (Finch pass). */
+const CONSENT_DECIDED_KEY = 'ronki_analytics_consent_decided';
 
 // ── Tunables ─────────────────────────────────────────────────────────
 const FLUSH_INTERVAL_MS = 30_000;
 const OFFLINE_QUEUE_CAP = 200;
 const ROTATION_MS = 365 * 24 * 60 * 60 * 1000; // 1 year
+/** Events held in memory while no consent choice exists yet (Finch pass). */
+const CONSENT_BUFFER_CAP = 50;
 
 // ── App version (best-effort; no fallback noise) ─────────────────────
 const APP_VERSION: string | undefined = (() => {
@@ -120,6 +150,16 @@ interface QueuedEvent {
 }
 
 let memoryQueue: QueuedEvent[] = [];
+/**
+ * Consent timing (Finch pass, 26 Sep 2026; census section 7). The funnel
+ * starts before the parent step, so events fired while no consent choice
+ * exists on this device wait here (memory only, never storage, cap 50)
+ * instead of being dropped. A yes sends them through the normal path, a
+ * no drops them. Nothing in here ever leaves the device without a yes.
+ */
+interface BufferedEvent { name: EventName; props?: EventProps; at: Date }
+let consentBuffer: BufferedEvent[] = [];
+let consentDecided = false;
 let enabled = true;
 let initialized = false;
 let flushTimer: ReturnType<typeof setInterval> | null = null;
@@ -160,9 +200,50 @@ export function getDeviceId(): string {
 }
 
 // ── Enable/disable ───────────────────────────────────────────────────
+/**
+ * Mirror of the consent flag (useAnalytics calls this on every change of
+ * state.analyticsEnabled). `true` is always a parent's opt-in (the default
+ * is off), so it also settles the consent choice and sends what waited.
+ * `false` only stops sending: before the parent step it is the default,
+ * not a choice, so waiting events stay held (and are never sent) until
+ * setAnalyticsConsent decides.
+ */
 export function setAnalyticsEnabled(next: boolean): void {
   enabled = !!next;
   try { localStorage.setItem(ENABLED_KEY, enabled ? '1' : '0'); } catch { /* ignore */ }
+  if (enabled) markConsentDecided(true);
+}
+
+/**
+ * The parent's consent choice (parent step, website card, dashboard).
+ * Yes: enable and send the events that waited. No: disable and drop them.
+ */
+export function setAnalyticsConsent(granted: boolean): void {
+  enabled = !!granted;
+  try { localStorage.setItem(ENABLED_KEY, enabled ? '1' : '0'); } catch { /* ignore */ }
+  markConsentDecided(enabled);
+}
+
+/** True once a consent choice exists on this device. */
+export function isConsentDecided(): boolean {
+  return consentDecided;
+}
+
+function markConsentDecided(granted: boolean): void {
+  consentDecided = true;
+  try { localStorage.setItem(CONSENT_DECIDED_KEY, '1'); } catch { /* ignore */ }
+  const held = consentBuffer;
+  consentBuffer = [];
+  if (!granted) return;
+  for (const e of held) enqueue(e.name, e.props, e.at);
+}
+
+function readConsentDecidedFromStorage(): boolean {
+  try {
+    if (localStorage.getItem(CONSENT_DECIDED_KEY) === '1') return true;
+    // A stored yes from before this change is a parent's opt-in too.
+    return localStorage.getItem(ENABLED_KEY) === '1';
+  } catch { return false; }
 }
 
 function readEnabledFromStorage(): boolean {
@@ -236,8 +317,13 @@ function persistToOffline(events: QueuedEvent[]): void {
 
 // ── Core track ───────────────────────────────────────────────────────
 export function track(name: EventName, props?: EventProps): void {
-  if (!enabled) return;
   if (typeof window === 'undefined') return;
+  if (!ALLOWED_PROP_KEYS[name]) return; // unknown event name, drop
+  if (!enabled) {
+    // No consent choice yet on this device: hold the event in memory.
+    if (!consentDecided) holdForConsent(name, props);
+    return;
+  }
 
   // Dedup app.open once per sessionStorage-lifetime so hot-reloads /
   // React StrictMode double-mounts don't double-count sessions.
@@ -248,13 +334,30 @@ export function track(name: EventName, props?: EventProps): void {
     } catch { /* ignore — still send; non-critical */ }
   }
 
-  if (!ALLOWED_PROP_KEYS[name]) return; // unknown event name — drop
+  enqueue(name, props, new Date());
+}
+
+function holdForConsent(name: EventName, props?: EventProps): void {
+  if (name === 'app.open') {
+    try {
+      if (sessionStorage.getItem(SESSION_APP_OPEN_KEY) === '1') return;
+      sessionStorage.setItem(SESSION_APP_OPEN_KEY, '1');
+    } catch { /* ignore */ }
+  }
+  // Sanitise now so nothing unexpected is ever held, even in memory.
+  consentBuffer.push({ name, props: sanitizeProps(name, props), at: new Date() });
+  if (consentBuffer.length > CONSENT_BUFFER_CAP) {
+    consentBuffer = consentBuffer.slice(consentBuffer.length - CONSENT_BUFFER_CAP);
+  }
+}
+
+function enqueue(name: EventName, props: EventProps | undefined, at: Date): void {
   const clean = sanitizeProps(name, props);
   const evt: QueuedEvent = {
     device_id: getDeviceId(),
     name,
     props: clean,
-    ts: timestampFor(name, new Date()),
+    ts: timestampFor(name, at),
     app_version: APP_VERSION,
   };
   memoryQueue.push(evt);
@@ -310,6 +413,7 @@ function ensureInitialized(): void {
   if (initialized) return;
   initialized = true;
   enabled = readEnabledFromStorage();
+  consentDecided = consentDecided || readConsentDecidedFromStorage();
 
   if (typeof window === 'undefined') return;
 
@@ -337,6 +441,8 @@ ensureInitialized();
 // ── Test / debug helpers (unused in prod paths) ──────────────────────
 export function _resetForTests(): void {
   memoryQueue = [];
+  consentBuffer = [];
+  consentDecided = false;
   initialized = false;
   enabled = true;
   if (flushTimer) { clearInterval(flushTimer); flushTimer = null; }
@@ -345,6 +451,7 @@ export function _resetForTests(): void {
     localStorage.removeItem(DEVICE_ID_KEY);
     localStorage.removeItem(DEVICE_ID_ROTATION_KEY);
     localStorage.removeItem(ENABLED_KEY);
+    localStorage.removeItem(CONSENT_DECIDED_KEY);
     sessionStorage.removeItem(SESSION_APP_OPEN_KEY);
   } catch { /* ignore */ }
 }
@@ -355,4 +462,17 @@ export function _resetForTests(): void {
 // tests use this instead of poking the DOM.
 export async function _flushForTests(): Promise<void> {
   await flush({ blocking: true });
+}
+
+/** Test helper: how many events wait for a consent choice. */
+export function _consentBufferSizeForTests(): number {
+  return consentBuffer.length;
+}
+
+/** Test helper: re-read the stored flags as a fresh page load would. */
+export function _reinitForTests(): void {
+  initialized = false;
+  consentDecided = false;
+  if (flushTimer) { clearInterval(flushTimer); flushTimer = null; }
+  ensureInitialized();
 }
