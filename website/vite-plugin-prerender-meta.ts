@@ -99,24 +99,28 @@ const ROUTES: RouteMeta[] = [
   },
   {
     path: '/vorlagen/morgenroutine',
+    ogImage: '/og-vorlage-morgenroutine.jpg',
     title: 'Morgenroutine Vorlage für Kinder zum Ausdrucken · Ronki',
     description:
       'Kostenlose Morgenroutine Vorlage für Kinder zum Ausdrucken. Vier Schritte mit Bildern zum Abhaken, dazu Tipps zum Aufhängen und für Morgen, die schiefgehen.',
   },
   {
     path: '/vorlagen/abendroutine',
+    ogImage: '/og-vorlage-abendroutine.jpg',
     title: 'Abendroutine Vorlage für Kinder zum Ausdrucken · Ronki',
     description:
       'Kostenlose Abendroutine Vorlage für Kinder zum Ausdrucken. Vier Schritte bis ins Bett, zum Abhaken. Dazu: wann ihr anfangt und was hilft, wenn es hakt.',
   },
   {
     path: '/vorlagen/kleine-geschwister',
+    ogImage: '/og-vorlage-kleine-geschwister.jpg',
     title: 'Routine-Vorlage für Kleinkinder zum Ausdrucken · Ronki',
     description:
       'Kostenlose Routine-Vorlage für Kleinkinder von 2 bis 4 Jahren zum Ausdrucken. Vier große Bilder, kein Text, zum Abhaken. Mit Tipps, damit es ohne Druck klappt.',
   },
   {
     path: '/vorlagen/adhs',
+    ogImage: '/og-vorlage-adhs.jpg',
     title: 'Mein Morgen, ein Schritt nach dem anderen: Vorlage bei ADHS · Ronki',
     description:
       'Druckbarer Morgenplan für Kinder mit ADHS oder schwachen Exekutivfunktionen. Sechs Schritte, ein Bild pro Schritt, eine Klammer zeigt, was jetzt dran ist. Kostenlos, ohne Anmeldung.',
