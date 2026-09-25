@@ -19,6 +19,8 @@ const VorlageAdhs = lazy(() => import('./pages/VorlageAdhs'));
 const HomeEN = lazy(() => import('./pages/HomeEN'));
 const Installieren = lazy(() => import('./pages/Installieren'));
 const ProfilErstellen = lazy(() => import('./pages/ProfilErstellen'));
+// Double opt-in landing (Brevo); noindex, not in the sitemap.
+const Bestaetigt = lazy(() => import('./pages/Bestaetigt'));
 const Ratgeber = lazy(() => import('./pages/Ratgeber'));
 const ToolsHub = lazy(() => import('./pages/tools/ToolsHub'));
 const AppCheck = lazy(() => import('./pages/tools/AppCheck'));
@@ -90,6 +92,7 @@ export function AppRoutes() {
         <Route path="/vorlagen/adhs" element={<VorlageAdhs />} />
         <Route path="/installieren" element={<Installieren />} />
         <Route path="/profil-erstellen" element={<ProfilErstellen />} />
+        <Route path="/bestaetigt" element={<Bestaetigt />} />
         <Route path="/styleguide" element={<Styleguide />} />
         <Route path="/print/a6-flyer" element={<PrintA6Flyer />} />
         <Route path="/print/a6-flyer-kids" element={<PrintA6FlyerKids />} />

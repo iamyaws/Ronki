@@ -168,7 +168,7 @@ export default function Datenschutz() {
                 <strong className="text-ink">Widerruf:</strong> Jederzeit und ohne Angabe von Gründen mit einer formlosen Mail an <a href="mailto:hallo@ronki.de" className="underline decoration-mustard underline-offset-4 hover:text-ink">hallo@ronki.de</a>. Wir löschen deinen Eintrag dann umgehend. Die Rechtmäßigkeit der Verarbeitung bis zum Widerruf bleibt davon unberührt.
               </p>
               <p>
-                <strong className="text-ink">Ehrlich gesagt:</strong> Aktuell verschicken wir noch keine Update-Mails. Wenn wir damit anfangen, bekommst du zuerst eine Bestätigungs-Mail (Double-Opt-in).
+                <strong className="text-ink">Update-Mails:</strong> Hast du das zweite Häkchen gesetzt, bekommst du zuerst eine Bestätigungs-Mail (Double-Opt-in). Erst wenn du den Link darin anklickst, schreiben wir dir, höchstens einmal im Monat. Für den Versand geben wir deine E-Mail-Adresse an Brevo weiter (siehe Abschnitt 7). In jeder Mail kannst du dich mit einem Klick abmelden.
               </p>
               <p>
                 Ohne E-Mail geht es auch. Jede Vorlagen-Seite lässt sich direkt im Browser ausdrucken, dafür speichern wir nichts.
@@ -223,6 +223,10 @@ export default function Datenschutz() {
                 <li>
                   <strong className="text-ink">Umami Analytics (Umami Software, Inc.):</strong> Anonyme Reichweitenanalyse unserer Website. Umami setzt keine Cookies, speichert keine IP-Adressen und erstellt keine geräteübergreifenden Profile. Erfasst werden Seitenaufrufe, Referrer (z. B. Suchmaschine, Social-Media-Plattform), Kampagnen-Angaben aus dem Link (z. B. utm_source=instagram), grobe Geo-Region (Land), Gerätetyp und Browser sowie drei Ereignisse ohne personenbezogene Inhalte: Klick auf einen Hauptbutton, erstellte Profil-Karte, Vorlagen-Download. Eine Zuordnung zu einzelnen Personen ist ausdrücklich nicht möglich. Die Daten werden nach sechs Monaten gelöscht. Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an der Verbesserung unseres Angebots). Eine Interessenabwägung ergibt: Umami setzt keine Cookies, speichert keine IP-Adressen, bildet keine geräteübergreifenden Profile und erlaubt keine Identifizierung einzelner Personen. Die Verarbeitung greift damit nur in geringfügigem Maße in deine Rechte ein, während wir ein nachvollziehbares Interesse an aggregierter Reichweitenmessung haben. Sitz: USA. Datenverarbeitung in der EU-Region von Umami Cloud.<br />
                   <span className="text-sm text-ink/65"><a href="https://umami.is/privacy" target="_blank" rel="noopener noreferrer" className="underline decoration-mustard underline-offset-4 hover:text-ink">umami.is/privacy</a></span>
+                </li>
+                <li>
+                  <strong className="text-ink">Brevo (Sendinblue SAS):</strong> Versand der Bestätigungs-Mail und der Update-Mails an Eltern, die auf einer Vorlagen-Seite das zweite Häkchen gesetzt und die Anmeldung bestätigt haben. Verarbeitet werden deine E-Mail-Adresse, der Zeitpunkt von Anmeldung und Bestätigung sowie, ob eine Mail geöffnet oder ein Link darin angeklickt wurde. Diese Werte sehen wir uns nur zusammengefasst an, nicht pro Person. Rechtsgrundlage: deine Einwilligung (Art. 6 Abs. 1 lit. a DSGVO). Sitz: Paris, Frankreich (EU). Es besteht ein Auftragsverarbeitungsvertrag.<br />
+                  <span className="text-sm text-ink/65"><a href="https://www.brevo.com/de/legal/privacypolicy/" target="_blank" rel="noopener noreferrer" className="underline decoration-mustard underline-offset-4 hover:text-ink">brevo.com/de/legal/privacypolicy</a></span>
                 </li>
               </ul>
               <p>
