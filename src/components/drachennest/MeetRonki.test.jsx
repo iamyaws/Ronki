@@ -92,6 +92,8 @@ describe('MeetRonki hatch beat (reduced motion, no clip)', () => {
     // close: Ronki says the nickname back and asks for a parent; the pill
     // reports the nickname as companionName, never as the child's name
     expect(screen.getByText('Ich bin Funki! Und wie heißt du?')).toBeTruthy();
+    // the close pill ignores taps for 450 ms after the close appears
+    act(() => { vi.advanceTimersByTime(500); });
     fireEvent.click(screen.getByText('Mama oder Papa ist da').closest('button'));
     expect(onComplete).toHaveBeenCalledWith({ companionVariant: 'sunset', companionName: 'Funki' });
     expect(onComplete.mock.calls[0][0]).not.toHaveProperty('heroName');
@@ -145,6 +147,7 @@ describe('MeetRonki name chips', () => {
     expect(screen.getByLabelText('Glut: anhören und wählen').getAttribute('aria-pressed')).toBe('false');
     fireEvent.click(confirm);
     expect(screen.getByText('Ich bin Drachi! Und wie heißt du?')).toBeTruthy();
+    act(() => { vi.advanceTimersByTime(500); });
     fireEvent.click(screen.getByText('Mama oder Papa ist da').closest('button'));
     expect(onComplete).toHaveBeenCalledWith({ companionVariant: 'teal', companionName: 'Drachi' });
   });
@@ -256,6 +259,7 @@ describe('MeetRonki close', () => {
     expect(voice.playLocalized.mock.calls.map(c => c[0])).toContain('meet_knowname_01');
     const pill = screen.getByText('Ja, das bin ich').closest('button');
     expect(pill.disabled).toBe(false);
+    act(() => { vi.advanceTimersByTime(500); });
     fireEvent.click(pill);
     fireEvent.click(pill);
     expect(voice.playLocalized.mock.calls.filter(c => c[0] === 'meet_yes_01')).toHaveLength(1);
@@ -266,11 +270,38 @@ describe('MeetRonki close', () => {
     expect(onComplete).toHaveBeenCalledWith({ companionVariant: 'amber', companionName: 'Knisti' });
   });
 
+  it('a double tap on "so soll er heißen" does not land on "Mama oder Papa ist da" (450 ms guard)', () => {
+    const { onComplete } = toClose({ needsParent: true });
+    // the second tap of the double tap hits the close pill at once
+    fireEvent.click(screen.getByText('Mama oder Papa ist da').closest('button'));
+    act(() => { vi.advanceTimersByTime(300); });
+    fireEvent.click(screen.getByText('Mama oder Papa ist da').closest('button'));
+    expect(onComplete).not.toHaveBeenCalled();
+    // the spoken handoff is still scheduled and plays
+    act(() => { vi.advanceTimersByTime(2400); });
+    expect(voice.playLocalized.mock.calls.map(c => c[0])).toContain('meet_getparent_01');
+    fireEvent.click(screen.getByText('Mama oder Papa ist da').closest('button'));
+    expect(onComplete).toHaveBeenCalledTimes(1);
+  });
+
+  it('card family: a tap right after the close appears does not confirm "Ja, das bin ich"', () => {
+    const { onComplete } = toClose({ needsParent: false, childName: 'Mia' });
+    fireEvent.click(screen.getByText('Ja, das bin ich').closest('button'));
+    expect(voice.playLocalized.mock.calls.map(c => c[0])).not.toContain('meet_yes_01');
+    act(() => { vi.advanceTimersByTime(3000); });
+    expect(onComplete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByText('Ja, das bin ich').closest('button'));
+    expect(voice.playLocalized.mock.calls.map(c => c[0])).toContain('meet_yes_01');
+    act(() => { vi.advanceTimersByTime(2000); });
+    expect(onComplete).toHaveBeenCalledTimes(1);
+  });
+
   it('fires the funnel events for the egg pick and the name', () => {
     toClose({ needsParent: true });
     const names = analytics.track.mock.calls.map(c => c[0]);
     expect(names).toContain('onboarding.egg.pick');
     expect(names).toContain('onboarding.name.confirm');
+    act(() => { vi.advanceTimersByTime(500); });
     fireEvent.click(screen.getByText('Mama oder Papa ist da').closest('button'));
     expect(analytics.track.mock.calls.map(c => c[0])).toContain('ronki.hatch');
   });

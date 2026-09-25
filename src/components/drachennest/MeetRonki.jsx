@@ -102,6 +102,14 @@ const LINES = {
 const GETPARENT_DELAY_MS = 2600;
 /** How long "Schön, dass du da bist!" plays before the chain moves on. */
 const YES_TO_DONE_MS = 1900;
+/**
+ * The close pills ignore taps for a moment after the close appears
+ * (KIDUX-4, fix round 1): "so soll er heißen" and the close pill sit at
+ * the bottom of the same column, so a double tap would skip the spoken
+ * handoff. Same guard as HandoffBackCard and FirstDayIntro; no countdown
+ * is shown.
+ */
+const TAP_GUARD_MS = 450;
 
 /**
  * Name chips (PRD 5.2, Marc 25 Sep 2026): the kid gives Ronki a nickname
@@ -127,6 +135,7 @@ export default function MeetRonki({ onComplete, onWantsCard, needsParent, childN
   const askParent = typeof needsParent === 'boolean' ? needsParent : !kind;
   const [saidYes, setSaidYes] = useState(false);
   const finishedRef = useRef(false);
+  const closeShownAt = useRef(0);
   const yesTimer = useRef(null);
   useEffect(() => () => { if (yesTimer.current) clearTimeout(yesTimer.current); }, []);
   const [phase, setPhase] = useState('approach');
@@ -204,13 +213,17 @@ export default function MeetRonki({ onComplete, onWantsCard, needsParent, childN
     const trimmed = name.trim();
     if (!trimmed) return;
     track('onboarding.name.confirm');
+    closeShownAt.current = Date.now();
     setPhase('close');
     setVoiceKey(v => v + 1);
   };
 
+  const tooSoonAfterClose = () => Date.now() - closeShownAt.current < TAP_GUARD_MS;
+
   const finish = () => {
     if (!picked || !name.trim()) return;
     if (finishedRef.current) return;
+    if (tooSoonAfterClose()) return;
     finishedRef.current = true;
     track('ronki.hatch');
     // completeOnboarding is intentionally NOT called here: TeachFireStep
@@ -223,6 +236,7 @@ export default function MeetRonki({ onComplete, onWantsCard, needsParent, childN
   // Card family: "Ja, das bin ich" plays "Schön, dass du da bist!", then on.
   const confirmKnown = () => {
     if (saidYes) return;
+    if (tooSoonAfterClose()) return;
     setSaidYes(true);
     VoiceAudio.playLocalized('meet_yes_01');
     yesTimer.current = setTimeout(finish, YES_TO_DONE_MS);

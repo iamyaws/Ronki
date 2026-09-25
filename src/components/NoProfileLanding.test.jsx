@@ -132,6 +132,26 @@ describe('NoProfileLanding as the scan sheet', () => {
     expect(onBack).toHaveBeenCalledTimes(1);
   });
 
+  it('opened from the egg, the sheet speaks scan_open_01 once; not from the parent step or without a way back', () => {
+    const { unmount, rerender } = render(<NoProfileLanding onBack={vi.fn()} reload={vi.fn()} />);
+    expect(mocks.playLocalized).toHaveBeenCalledWith('scan_open_01', 300);
+    rerender(<NoProfileLanding onBack={vi.fn()} reload={vi.fn()} />);
+    expect(mocks.playLocalized.mock.calls.filter(c => c[0] === 'scan_open_01')).toHaveLength(1);
+    unmount();
+    mocks.playLocalized.mockClear();
+    const parent = render(<NoProfileLanding onBack={vi.fn()} backToEgg={false} reload={vi.fn()} />);
+    parent.unmount();
+    render(<NoProfileLanding reload={vi.fn()} />);
+    expect(mocks.playLocalized.mock.calls.map(c => c[0])).not.toContain('scan_open_01');
+  });
+
+  it('the voiced scan_open_01 line exists in finchLines and as a German recording', async () => {
+    expect(lineText('scan_open_01')).toContain('Karte');
+    const fs = await import('node:fs');
+    const path = await import('node:path');
+    expect(fs.existsSync(path.resolve(process.cwd(), 'public/audio/ronki/de_scan_open_01.mp3'))).toBe(true);
+  });
+
   it('from the parent step the back control reads "Zurück", without the egg', () => {
     const onBack = vi.fn();
     render(<NoProfileLanding onBack={onBack} backToEgg={false} reload={vi.fn()} />);
