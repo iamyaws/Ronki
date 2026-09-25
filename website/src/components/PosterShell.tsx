@@ -193,7 +193,7 @@ export function PosterShell({ config }: { config: PosterConfig }) {
         /* ── Base ───────────────────────────────────────────────── */
         .print-root {
           font-family: 'Be Vietnam Pro', system-ui, sans-serif;
-          color: #1A3C3F;
+          color: #040812;
           min-height: 100vh;
           padding: 32px 16px 64px;
           display: flex;
@@ -207,8 +207,8 @@ export function PosterShell({ config }: { config: PosterConfig }) {
           position: sticky;
           top: 16px;
           z-index: 20;
-          background: #1A3C3F;
-          color: #FDF8F0;
+          background: #040812;
+          color: #FFFFFF;
           padding: 10px 18px;
           border-radius: 999px;
           font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
@@ -222,8 +222,8 @@ export function PosterShell({ config }: { config: PosterConfig }) {
         }
         .print-btn {
           margin-left: auto;
-          background: #FCD34D;
-          color: #1A3C3F;
+          background: #FDD134;
+          color: #040812;
           border: 0;
           padding: 6px 14px;
           border-radius: 999px;
@@ -241,81 +241,81 @@ export function PosterShell({ config }: { config: PosterConfig }) {
           overflow: hidden;
           box-shadow: 0 16px 40px rgba(0,0,0,0.12);
           position: relative;
-          --bg: #FDF8F0;
-          --bg-accent-1: rgba(252,211,77,0.22);
-          --bg-accent-2: rgba(80,160,130,0.14);
-          --stripe: #FCD34D;
-          --text-primary: #1A3C3F;
-          --text-secondary: #2D5A5E;
-          --text-muted: rgba(26,60,63,0.55);
-          --highlight: #2D5A5E;
-          --step-number: #50A082;
-          --border: rgba(26,60,63,0.15);
+          --bg: #FFFFFF;
+          --bg-accent-1: rgba(253,209,52,0.22);
+          --bg-accent-2: rgba(5,68,176,0.14);
+          --stripe: #FDD134;
+          --text-primary: #040812;
+          --text-secondary: #0544B0;
+          --text-muted: rgba(4,8,18,0.55);
+          --highlight: #0544B0;
+          --step-number: #0544B0;
+          --border: rgba(4,8,18,0.15);
         }
-        /* Step-number color was sage #50A082 — contrast on cream was ~3.1:1
-         * (sub-WCAG-AA for 8pt text). Tightened to teal #2D5A5E across all
+        /* Step-number color was sage #0544B0 — contrast on cream was ~3.1:1
+         * (sub-WCAG-AA for 8pt text). Tightened to teal #0544B0 across all
          * light themes (~5.3:1). Keeps brand, fixes legibility. */
-        /* All light themes share the brand Tertiary (Sage #50A082) as
+        /* All light themes share the brand Tertiary (Sage #0544B0) as
          * the --highlight per DESIGN.md: Sage IS the accent color. Earlier
-         * teal-2 #2D5A5E was too close to the base ink #1A3C3F and made
-         * em/strong text look "same color". Mustard #FCD34D stays reserved
+         * teal-2 #0544B0 was too close to the base ink #040812 and made
+         * em/strong text look "same color". Mustard #FDD134 stays reserved
          * for "Quest Gold" (achievement moments), so it doesn't land on
          * light-theme headlines.
          *
          * --step-number stays Teal-2 on light themes: at 8pt the stronger
-         * contrast of #2D5A5E on cream (7.1:1) keeps tiny step counters
+         * contrast of #0544B0 on cream (7.1:1) keeps tiny step counters
          * readable. Sage at 3.2:1 on cream fails WCAG AA for small text. */
         .poster-warm {
-          --bg: #FDF8F0;
-          --bg-accent-1: rgba(252,211,77,0.22);
-          --bg-accent-2: rgba(80,160,130,0.14);
-          --stripe: #FCD34D;
-          --highlight: #50A082;
-          --step-number: #2D5A5E;
+          --bg: #FFFFFF;
+          --bg-accent-1: rgba(253,209,52,0.22);
+          --bg-accent-2: rgba(5,68,176,0.14);
+          --stripe: #FDD134;
+          --highlight: #0544B0;
+          --step-number: #0544B0;
         }
         .poster-evening {
-          --bg: #FDF8F0;
-          --bg-accent-1: rgba(26,60,63,0.14);
-          --bg-accent-2: rgba(252,211,77,0.20);
-          --stripe: #1A3C3F;
-          --highlight: #50A082;
-          --step-number: #2D5A5E;
+          --bg: #FFFFFF;
+          --bg-accent-1: rgba(4,8,18,0.14);
+          --bg-accent-2: rgba(253,209,52,0.20);
+          --stripe: #040812;
+          --highlight: #0544B0;
+          --step-number: #0544B0;
         }
         .poster-morning {
-          --bg: #FDF8F0;
-          --bg-accent-1: rgba(252,211,77,0.32);
+          --bg: #FFFFFF;
+          --bg-accent-1: rgba(253,209,52,0.32);
           --bg-accent-2: rgba(217,119,6,0.10);
-          --stripe: #FCD34D;
-          --highlight: #50A082;
-          --step-number: #2D5A5E;
+          --stripe: #FDD134;
+          --highlight: #0544B0;
+          --step-number: #0544B0;
         }
         .poster-quiet {
-          --bg: #FDF8F0;
-          --bg-accent-1: rgba(80,160,130,0.16);
-          --bg-accent-2: rgba(45,90,94,0.08);
-          --stripe: #50A082;
-          --highlight: #50A082;
-          --step-number: #2D5A5E;
+          --bg: #FFFFFF;
+          --bg-accent-1: rgba(5,68,176,0.16);
+          --bg-accent-2: rgba(4,8,18,0.08);
+          --stripe: #0544B0;
+          --highlight: #0544B0;
+          --step-number: #0544B0;
         }
         .poster-cool {
           --bg: #F4FAF7;
-          --bg-accent-1: rgba(80,160,130,0.22);
-          --bg-accent-2: rgba(45,90,94,0.10);
-          --stripe: #50A082;
-          --highlight: #50A082;
-          --step-number: #2D5A5E;
+          --bg-accent-1: rgba(5,68,176,0.22);
+          --bg-accent-2: rgba(4,8,18,0.10);
+          --stripe: #0544B0;
+          --highlight: #0544B0;
+          --step-number: #0544B0;
         }
         .poster-bold {
-          --bg: #1A3C3F;
-          --bg-accent-1: rgba(252,211,77,0.22);
-          --bg-accent-2: rgba(80,160,130,0.14);
-          --stripe: #FCD34D;
-          --text-primary: #FDF8F0;
-          --text-secondary: #FCD34D;
-          --text-muted: rgba(253,248,240,0.55);
-          --highlight: #FCD34D;
-          --step-number: #FCD34D;
-          --border: rgba(253,248,240,0.15);
+          --bg: #040812;
+          --bg-accent-1: rgba(253,209,52,0.22);
+          --bg-accent-2: rgba(5,68,176,0.14);
+          --stripe: #FDD134;
+          --text-primary: #FFFFFF;
+          --text-secondary: #FDD134;
+          --text-muted: rgba(255,255,255,0.55);
+          --highlight: #FDD134;
+          --step-number: #FDD134;
+          --border: rgba(255,255,255,0.15);
         }
         .poster-page {
           background: var(--bg);
@@ -444,7 +444,7 @@ export function PosterShell({ config }: { config: PosterConfig }) {
           height: 68mm;
           object-fit: cover;
           border-radius: 8mm;
-          box-shadow: 0 8mm 16mm -4mm rgba(26,60,63,0.22);
+          box-shadow: 0 8mm 16mm -4mm rgba(4,8,18,0.22);
         }
 
         /* Phone inset — bottom right of hero area
@@ -463,10 +463,10 @@ export function PosterShell({ config }: { config: PosterConfig }) {
         .phone-frame {
           width: 32mm;
           height: 58mm;
-          background: #1A3C3F;
+          background: #040812;
           border-radius: 4.5mm;
           padding: 1.3mm;
-          box-shadow: 0 5mm 12mm -3mm rgba(26,60,63,0.4);
+          box-shadow: 0 5mm 12mm -3mm rgba(4,8,18,0.4);
           position: relative;
         }
         .phone-notch {
@@ -476,7 +476,7 @@ export function PosterShell({ config }: { config: PosterConfig }) {
           transform: translateX(-50%);
           width: 10mm;
           height: 2mm;
-          background: #1A3C3F;
+          background: #040812;
           border-radius: 1mm;
           z-index: 2;
         }

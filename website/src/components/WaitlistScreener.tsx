@@ -154,7 +154,7 @@ export function WaitlistScreener({ email, onComplete, onSkip }: Props) {
             disabled={!canSubmit}
             whileHover={canSubmit ? { scale: 1.02 } : undefined}
             whileTap={canSubmit ? { scale: 0.97 } : undefined}
-            className="inline-flex items-center gap-2 rounded-full bg-mustard px-5 py-2.5 text-teal-dark font-display font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md transition-shadow"
+            className="inline-flex items-center gap-2 rounded-full bg-cobalt px-5 py-2.5 text-white font-display font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed transition-transform enabled:hover:-translate-y-0.5"
           >
             {status === 'submitting' ? '…' : 'Abschicken'}
             <span>→</span>
@@ -217,7 +217,7 @@ function PillGroup<T extends string>({ options, value, onChange }: PillGroupProp
               onClick={() => onChange(opt.value)}
               className={`rounded-full px-3.5 py-2 text-xs font-display font-semibold transition-all ${
                 selected
-                  ? 'bg-mustard text-teal-dark shadow-sm'
+                  ? 'bg-mustard text-ink shadow-sm'
                   : 'bg-current/15 ring-1 ring-current/20 hover:bg-current/25'
               }`}
             >
@@ -250,7 +250,7 @@ function MultiPillGroup<T extends string>({ options, values, onToggle }: MultiPi
             onClick={() => onToggle(opt.value)}
             className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-display font-semibold transition-all ${
               selected
-                ? 'bg-mustard text-teal-dark shadow-sm'
+                ? 'bg-mustard text-ink shadow-sm'
                 : 'bg-current/15 ring-1 ring-current/20 hover:bg-current/25'
             }`}
           >

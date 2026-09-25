@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { setActiveToken } from '../lib/profileToken';
+import { RonkiArt } from './MoodChibi';
+import { MotionTicks, PaperCard, PillButton, QuietLink } from './bilderbuch';
 
-const base = import.meta.env.BASE_URL;
 const TOKEN_REGEX = /^[a-f0-9]{32}$/;
 
 /**
@@ -21,34 +22,34 @@ function tokenFromQRData(data) {
     const url = new URL(trimmed);
     const p = url.searchParams.get('p');
     if (p && TOKEN_REGEX.test(p.toLowerCase())) return p.toLowerCase();
-  } catch { /* not a URL — fall through */ }
+  } catch { /* not a URL, fall through */ }
   return null;
 }
 
 /**
- * NoProfileLanding — first-screen for visitors with no profile token.
+ * NoProfileLanding: first screen for visitors with no profile token.
  *
  * BeyArena pattern (Marc 3 May 2026): the app stays a kid-only space.
- * Setup happens on the website at ronki.de/profil-erstellen — parent
- * fills a one-screen form on their laptop/phone, the site generates a
- * token + seeds the cloud row + renders a printable QR card. The kid
+ * Setup happens on the website at ronki.de/profil-erstellen. The parent
+ * fills a one-screen form on their laptop or phone, the site generates a
+ * token, seeds the cloud row and renders a printable QR card. The kid
  * scans that card on their tablet here.
  *
- * One primary CTA ("QR-Code scannen") plus a smaller Eltern-callout
+ * One primary CTA ("QR-Code scannen") plus a smaller Eltern callout
  * pointing to the website for new cards. No in-app form, no manual
  * code entry, no email, no password.
  *
- * Scan flow: opens device back-camera (facingMode environment), runs
- * jsQR per-frame on a hidden canvas, validates the decoded URL or
- * token, persists via setActiveToken, hard-reloads so AuthGate picks
- * up the token via getActiveToken() and routes to the cloud-load
- * flow in TaskContext.
+ * Scan flow: opens the device back camera (facingMode environment), runs
+ * jsQR per frame on a hidden canvas, validates the decoded URL or token,
+ * persists via setActiveToken, hard-reloads so AuthGate picks up the
+ * token via getActiveToken() and routes to the cloud-load flow.
  *
  * Fallback for "no camera on this device": the share URL the website
- * also produces (parent taps "Link teilen" on the success screen)
- * encodes ?p=<token> in app.ronki.de — opening that URL bypasses
- * NoProfileLanding entirely (AuthGate's getActiveToken consumes the
- * URL param on first mount).
+ * also produces encodes ?p=<token>; opening that URL bypasses this
+ * screen entirely (AuthGate consumes the URL param on first mount).
+ *
+ * Bilderbuch cut (25 Sep 2026): white ground, the sun egg as the hero,
+ * one cobalt pill, the parent hint on a paper card. Scan logic unchanged.
  */
 export default function NoProfileLanding() {
   const [mode, setMode] = useState('choice'); // 'choice' | 'scan'
@@ -72,8 +73,8 @@ export default function NoProfileLanding() {
     }
   };
 
-  // Cleanup on unmount — releases the camera if the user navigates
-  // away mid-scan (e.g., back-button to OS).
+  // Cleanup on unmount: releases the camera if the user navigates
+  // away mid-scan (e.g. back button to OS).
   useEffect(() => stopScan, []);
 
   useEffect(() => {
@@ -91,8 +92,7 @@ export default function NoProfileLanding() {
         }
         // Prefer the back camera (environment) so the kid can hold the
         // tablet flat and point it at the parent's QR card without
-        // seeing themselves in the way. Falls back to whatever the
-        // browser hands back if 'environment' isn't available.
+        // seeing themselves in the way.
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: { ideal: 'environment' } },
           audio: false,
@@ -104,16 +104,16 @@ export default function NoProfileLanding() {
         streamRef.current = stream;
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
-          // iOS Safari needs both attributes + a play() call before
+          // iOS Safari needs both attributes plus a play() call before
           // the stream renders. playsInline keeps it from going
           // fullscreen on tap.
           videoRef.current.setAttribute('playsinline', 'true');
           videoRef.current.muted = true;
-          try { await videoRef.current.play(); } catch { /* autoplay blocked — surfaces below */ }
+          try { await videoRef.current.play(); } catch { /* autoplay blocked, surfaces below */ }
           setScanStatus('Halte den QR-Code in den Rahmen.');
         }
 
-        // Lazy-import jsQR (~30KB) — only loads when the user actually
+        // Lazy-import jsQR (~30KB): only loads when the user actually
         // taps "QR scannen", keeping the initial bundle slim.
         const jsQRMod = await import('jsqr');
         if (cancelled) return;
@@ -128,7 +128,7 @@ export default function NoProfileLanding() {
             return;
           }
           if (video.readyState < 2) {
-            // HAVE_CURRENT_DATA — wait for the first frame
+            // HAVE_CURRENT_DATA: wait for the first frame
             rafRef.current = requestAnimationFrame(tick);
             return;
           }
@@ -146,8 +146,8 @@ export default function NoProfileLanding() {
           try {
             imageData = ctx.getImageData(0, 0, w, h);
           } catch {
-            // Cross-origin canvas tainting shouldn't happen for camera
-            // streams, but guard anyway — fall through to next frame.
+            // Cross-origin canvas tainting should not happen for camera
+            // streams, but guard anyway: fall through to the next frame.
             rafRef.current = requestAnimationFrame(tick);
             return;
           }
@@ -158,12 +158,12 @@ export default function NoProfileLanding() {
             const token = tokenFromQRData(code.data);
             if (token) {
               detectedRef.current = true;
-              setScanStatus('Code erkannt — du wirst weitergeleitet…');
+              setScanStatus('Code erkannt. Du wirst weitergeleitet…');
               try {
                 setActiveToken(token);
                 stopScan();
                 // Hard reload so AuthGate re-resolves with the new
-                // token + syncLoadByToken pulls cloud state.
+                // token and syncLoadByToken pulls cloud state.
                 window.location.reload();
                 return;
               } catch {
@@ -171,7 +171,7 @@ export default function NoProfileLanding() {
                 detectedRef.current = false;
               }
             }
-            // Found a QR but it wasn't a Ronki token — keep scanning
+            // Found a QR but it was not a Ronki token: keep scanning
             // silently rather than spamming an error.
           }
           rafRef.current = requestAnimationFrame(tick);
@@ -200,52 +200,36 @@ export default function NoProfileLanding() {
   }, [mode]);
 
   return (
-    <div
-      role="main"
-      className="fixed inset-0 overflow-y-auto font-body"
-      style={{
-        background: 'linear-gradient(180deg, #fff8f1 0%, #fef3c7 100%)',
-        color: '#1c1b1e',
-      }}
-    >
+    <div role="main" className="fixed inset-0 overflow-y-auto bg-white text-ink font-body">
       <main
-        className="relative z-10 min-h-full flex flex-col px-6 max-w-md mx-auto"
+        className="relative z-10 min-h-full flex flex-col px-5 max-w-md mx-auto"
         style={{
-          paddingTop: 'calc(2.5rem + env(safe-area-inset-top, 0px))',
+          paddingTop: 'calc(2rem + env(safe-area-inset-top, 0px))',
           paddingBottom: 'calc(2rem + env(safe-area-inset-bottom, 0px))',
         }}
       >
-        {/* Logo */}
-        <div className="flex justify-center mb-6">
-          <img
-            src={base + 'art/ronki-egg-logo.svg'}
-            alt="Ronki"
-            className="w-20 h-auto"
-            style={{ filter: 'drop-shadow(0 6px 14px rgba(0,0,0,0.10))' }}
-          />
+        {/* Hero: the sun egg. Ronki himself stays in the egg until the hatch. */}
+        <div className="flex justify-center mb-5">
+          <div className="relative">
+            <RonkiArt pose="egg-sun" size={mode === 'choice' ? 150 : 96} idle="bb-egg-wobble" label="Ein Ei" />
+            <MotionTicks tone="sun" size={30} rotate={-40} className="absolute" style={{ top: 6, right: -22 }} />
+            <MotionTicks tone="sun" size={30} rotate={220} className="absolute" style={{ top: 6, left: -22 }} />
+          </div>
         </div>
 
         {/* Header */}
-        <div className="text-center mb-8">
-          <p
-            className="font-bold text-xs font-label uppercase tracking-[0.18em] mb-2"
-            style={{ color: '#A83E2C' }}
-          >
-            Willkommen
-          </p>
-          <h1
-            className="font-headline font-bold text-3xl"
-            style={{ fontFamily: 'Fredoka, sans-serif', color: '#124346' }}
-          >
+        <div className="text-center mb-7">
+          <p className="bb-hand text-2xl text-cobalt mb-1">Willkommen</p>
+          <h1 className="bb-display text-4xl">
             {mode === 'choice' ? 'Hast du eine Karte?' : 'QR-Code scannen'}
           </h1>
           {mode === 'choice' && (
-            <p className="font-body text-base text-on-surface-variant mt-3 leading-relaxed">
+            <p className="text-lg text-ink-soft mt-3 leading-relaxed">
               Mama oder Papa haben dir eine Karte gezeigt oder gegeben? Halte sie gleich vor die Kamera.
             </p>
           )}
           {mode === 'scan' && (
-            <p className="font-body text-base text-on-surface-variant mt-3 leading-relaxed">
+            <p className="text-lg text-ink-soft mt-3 leading-relaxed">
               Halte die Kamera auf den ausgedruckten oder gezeigten QR-Code.
             </p>
           )}
@@ -253,71 +237,40 @@ export default function NoProfileLanding() {
 
         {mode === 'choice' && (
           <>
-            {/* QR scan — primary CTA */}
-            <button
-              type="button"
-              onClick={() => setMode('scan')}
-              className="w-full py-5 px-6 rounded-2xl font-headline font-bold text-lg flex items-center gap-4 active:scale-[0.99] transition-all text-left"
-              style={{
-                background: 'linear-gradient(135deg, #124346, #2d5a5e)',
-                color: '#ffffff',
-                boxShadow: '0 12px 30px rgba(18,67,70,0.25)',
-                minHeight: 88,
-              }}
-            >
-              <div
-                className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
-                style={{ background: 'rgba(255,255,255,0.18)' }}
-              >
-                <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>
-                  qr_code_scanner
-                </span>
-              </div>
-              <div className="flex-1">
-                <p className="text-lg leading-tight">QR-Code scannen</p>
-                <p className="font-body font-normal text-xs text-white/75 mt-1">
-                  Halte die Kamera auf die Karte — und los geht's.
-                </p>
-              </div>
-              <span className="material-symbols-outlined">arrow_forward</span>
-            </button>
+            {/* QR scan: the one primary action */}
+            <PillButton full size="lg" arrow onClick={() => setMode('scan')}>
+              <QrDoodle />
+              QR-Code scannen
+            </PillButton>
+            <p className="text-center text-base text-ink-soft mt-3">
+              Halte die Kamera auf die Karte. Dann geht es los.
+            </p>
 
-            {/* Parent path: send them to the website to create a card.
-                Marc 3 May 2026 northstar: setup happens on the website,
-                not in the app. The app stays a kid-only space. */}
-            <div className="mt-8 rounded-2xl px-5 py-4 text-center"
-                 style={{ background: 'rgba(255,255,255,0.7)', border: '1px solid rgba(18,67,70,0.10)' }}>
-              <p className="font-label font-bold text-xs uppercase tracking-[0.10em] mb-1.5" style={{ color: '#A83E2C' }}>
-                Für Eltern
+            {/* Parent path: the website makes the card. The app stays a
+                kid-only space (Marc 3 May 2026). */}
+            <PaperCard tone="paper" className="mt-8 text-center">
+              <p className="bb-hand text-xl text-cobalt mb-1">Für Eltern</p>
+              <p className="text-base text-ink-soft leading-relaxed mb-2">
+                Noch keine Karte? Erstellt sie in einer Minute auf der Webseite. Kein Konto, keine Mail, kein Passwort.
               </p>
-              <p className="font-body text-sm text-on-surface-variant leading-relaxed mb-3">
-                Noch keine Karte? Erstellt sie in einer Minute auf der Webseite — kein Konto, keine Mail, kein Passwort.
-              </p>
-              <a
+              <QuietLink
                 href="https://www.ronki.de/profil-erstellen"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 font-label font-bold text-sm"
-                style={{ color: '#124346' }}
+                arrow
               >
                 ronki.de/profil-erstellen
-                <span className="material-symbols-outlined text-base">open_in_new</span>
-              </a>
-            </div>
+              </QuietLink>
+            </PaperCard>
           </>
         )}
 
         {mode === 'scan' && (
           <div className="flex flex-col">
-            {/* Camera preview frame */}
+            {/* Camera preview frame: drawn outline, sun corner brackets */}
             <div
-              className="relative w-full rounded-3xl overflow-hidden mx-auto"
-              style={{
-                aspectRatio: '1 / 1',
-                maxWidth: 360,
-                background: '#0c4a6e',
-                boxShadow: '0 18px 40px rgba(12,74,110,0.35)',
-              }}
+              className="relative w-full mx-auto overflow-hidden rounded-[28px] border-[3px] border-ink bg-night"
+              style={{ aspectRatio: '1 / 1', maxWidth: 340 }}
             >
               <video
                 ref={videoRef}
@@ -327,66 +280,73 @@ export default function NoProfileLanding() {
                 className="absolute inset-0 w-full h-full object-cover"
                 aria-label="Kamera-Vorschau"
               />
-              {/* Hidden canvas — used for jsQR sampling, not visible. */}
+              {/* Hidden canvas for jsQR sampling, not visible. */}
               <canvas ref={canvasRef} className="hidden" aria-hidden="true" />
 
-              {/* Scan-zone overlay — decorative corner brackets so the
-                  kid knows where to point. jsQR scans the full frame; the
-                  brackets just guide aiming. */}
+              {/* Scan-zone overlay: corner brackets so the kid knows
+                  where to point. jsQR scans the full frame. */}
               <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                <div
-                  className="relative"
-                  style={{ width: '70%', height: '70%' }}
-                >
+                <div className="relative" style={{ width: '70%', height: '70%' }}>
                   {['top-left', 'top-right', 'bottom-left', 'bottom-right'].map((pos) => {
                     const map = {
-                      'top-left': { top: 0, left: 0, borderTop: '4px solid #fff', borderLeft: '4px solid #fff', borderTopLeftRadius: 16 },
-                      'top-right': { top: 0, right: 0, borderTop: '4px solid #fff', borderRight: '4px solid #fff', borderTopRightRadius: 16 },
-                      'bottom-left': { bottom: 0, left: 0, borderBottom: '4px solid #fff', borderLeft: '4px solid #fff', borderBottomLeftRadius: 16 },
-                      'bottom-right': { bottom: 0, right: 0, borderBottom: '4px solid #fff', borderRight: '4px solid #fff', borderBottomRightRadius: 16 },
+                      'top-left': { top: 0, left: 0, borderTop: '5px solid var(--color-sun)', borderLeft: '5px solid var(--color-sun)', borderTopLeftRadius: 16 },
+                      'top-right': { top: 0, right: 0, borderTop: '5px solid var(--color-sun)', borderRight: '5px solid var(--color-sun)', borderTopRightRadius: 16 },
+                      'bottom-left': { bottom: 0, left: 0, borderBottom: '5px solid var(--color-sun)', borderLeft: '5px solid var(--color-sun)', borderBottomLeftRadius: 16 },
+                      'bottom-right': { bottom: 0, right: 0, borderBottom: '5px solid var(--color-sun)', borderRight: '5px solid var(--color-sun)', borderBottomRightRadius: 16 },
                     };
-                    return (
-                      <div
-                        key={pos}
-                        className="absolute"
-                        style={{ width: 36, height: 36, ...map[pos] }}
-                      />
-                    );
+                    return <div key={pos} className="absolute" style={{ width: 36, height: 36, ...map[pos] }} />;
                   })}
                 </div>
               </div>
             </div>
 
             {/* Status / error */}
-            <div className="mt-6 min-h-[48px] text-center">
+            <div className="mt-5 min-h-[52px] text-center" aria-live="polite">
               {scanError ? (
-                <p className="font-body text-sm leading-relaxed" style={{ color: '#dc2626' }}>
-                  {scanError}
-                </p>
+                <p className="text-lg leading-relaxed text-error font-headline font-semibold">{scanError}</p>
               ) : (
-                <p className="font-body text-sm leading-relaxed text-on-surface-variant">
-                  {scanStatus || 'Halte den QR-Code in den Rahmen.'}
-                </p>
+                <p className="text-lg leading-relaxed text-ink-soft">{scanStatus || 'Halte den QR-Code in den Rahmen.'}</p>
               )}
             </div>
 
             {/* Cancel back to choice */}
-            <button
-              type="button"
-              onClick={() => setMode('choice')}
-              className="mt-6 w-full py-4 rounded-full font-label font-bold text-sm active:scale-[0.97] transition-transform"
-              style={{
-                background: 'rgba(18,67,70,0.08)',
-                color: '#124346',
-                border: '1.5px solid rgba(18,67,70,0.18)',
-                minHeight: 48,
-              }}
-            >
+            <PillButton tone="secondary" full className="mt-4" onClick={() => setMode('choice')}>
               Abbrechen
-            </button>
+            </PillButton>
           </div>
         )}
       </main>
     </div>
+  );
+}
+
+/* A drawn QR mark in the pill's ink (DoodleIcon has no QR shape). */
+function QrDoodle() {
+  return (
+    <svg
+      aria-hidden="true"
+      focusable="false"
+      viewBox="0 0 64 64"
+      width="24"
+      height="24"
+      className="inline-block shrink-0 mr-1 align-[-4px]"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="5.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M9 9 C 17 8 22 8 27 9 C 28 15 28 21 27 27 C 21 28 15 28 9 27 C 8 21 8 15 9 9 Z" />
+      <path d="M37 9 C 44 8 50 8 55 9 C 56 15 56 21 55 27 C 49 28 43 28 37 27 C 36 21 36 15 37 9 Z" />
+      <path d="M9 37 C 17 36 22 36 27 37 C 28 43 28 49 27 55 C 21 56 15 56 9 55 C 8 49 8 43 9 37 Z" />
+      <path d="M16 16 L20 20" />
+      <path d="M44 16 L48 20" />
+      <path d="M16 44 L20 48" />
+      <path d="M38 38 L44 38" />
+      <path d="M52 38 L55 38" />
+      <path d="M38 46 L38 55" />
+      <path d="M46 46 L55 46" />
+      <path d="M46 55 L55 55" />
+    </svg>
   );
 }

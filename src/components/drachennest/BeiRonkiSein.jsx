@@ -4,30 +4,21 @@ import { getCatStage } from '../../utils/helpers';
 import { track } from '../../lib/analytics';
 import MoodChibi from '../MoodChibi';
 import VoiceAudio from '../../utils/voiceAudio';
+import { SpeechBubble, DoodleIcon, QuietLink } from '../bilderbuch';
 
 /**
- * BeiRonkiSein — the presence beat (Marc 25 Apr 2026).
+ * BeiRonkiSein: the presence beat (Marc 25 Apr 2026).
  *
- * Marc: "could be a chance for ronki to tell the kid a story or just
- * sit with each other to be present. could allow us for a cutscene
- * of sorts sitting at the fire and having a friendship/bonding
- * moment."
+ * A slow, cosy sit at the fire with Ronki saying one short kid-readable
+ * line. No Funken, no vital, no meter. Tap anywhere to dismiss.
  *
- * The fourth interaction next to Füttern / Streicheln / Spielen, but
- * deliberately separate from them — costs no Funken, doesn't change
- * a vital, doesn't drive any meter. The whole point is the absence
- * of mechanics: a slow cozy sit at the campfire with Ronki saying
- * one short kid-readable line. Tap anywhere to dismiss.
+ * Bilderbuch cut, 25 Sep 2026: this is a whole calm moment, so the
+ * ground is night. A few sun stars, Ronki large and bare on his idle
+ * loop, the fire as a drawn flame, the story in the shared SpeechBubble
+ * above him, the way out a white drawn link. No gradients, no glow.
  *
- * Rotation rules:
- *  · Pick a line that wasn't shown in the last three taps (per
- *    session, kept in a ref). Avoids rapid-repeat boredom without
- *    needing global state.
- *  · Voice-rule compliant — longer slightly-stumbly sentences with
- *    soft hedges, no em-dashes, no tidy three-beat fragments.
- *  · No cooldown for v1 — the kid can return to this moment as
- *    often as they want. If it ends up over-fired we'll add a
- *    once-per-N-minutes throttle later.
+ * Rotation rules stay: a line not shown in the last three sits (per
+ * session), voiced through the same tonight_story_<i> bank.
  */
 
 const STORIES = [
@@ -43,26 +34,25 @@ const STORIES = [
   'Mama-Drache hat mir mal gezeigt wie man Funken pustet ohne dass was kaputtgeht. Sie sagt das geht nur wenn man ruhig atmet.',
 ];
 
+// Sun stars on the night sky, fixed so the scene stays calm.
+const STARS = [
+  { top: '9%', left: '12%', size: 22 },
+  { top: '15%', left: '78%', size: 16 },
+  { top: '26%', left: '88%', size: 12 },
+  { top: '31%', left: '8%', size: 13 },
+  { top: '6%', left: '52%', size: 12 },
+];
+
 export default function BeiRonkiSein({ onClose }) {
   const { state } = useTask();
   const variant = state?.companionVariant || 'forest';
-  // Match RoomHub's canonical mapping (getCatStage uses CAT_STAGES
-  // thresholds [0, 3, 9, 18, 30, 45]). The previous Math.floor(catEvo/9)
-  // produced stage 0 (egg) for any catEvo in 1-8, so a freshly-hatched
-  // kid sat down at the campfire and saw the egg again. The `|| 1`
-  // fallback mirrors RoomHub: by the time the kid is at the campfire
-  // they've already hatched, so we never render the egg here even if
-  // catEvo somehow lands at 0.
+  // Match RoomHub's canonical mapping; never the egg here since the kid
+  // has hatched by the time they sit down at the fire.
   const stageIdx = getCatStage(state?.catEvo ?? 0) || 1;
 
   // Track recently-shown line indexes per session so the rotation
-  // doesn't repeat itself in quick succession. Lives in a ref so
-  // it survives the moment closing + re-opening within the session.
+  // doesn't repeat itself in quick succession.
   const recentRef = useRef(typeof window !== 'undefined' ? (window.__beiRonkiRecent || []) : []);
-  // Pick BOTH the index + text up front so the matching audio file
-  // (de_tonight_story_<idx>) can play in lockstep with the bubble text.
-  // STORIES + tonight_story_* share the same 10-line pool — generated
-  // together in the 27 Apr 2026 voice push.
   const { story, storyIdx } = useMemo(() => {
     const recent = recentRef.current;
     const fresh = STORIES.map((_, i) => i).filter(i => !recent.includes(i));
@@ -81,22 +71,17 @@ export default function BeiRonkiSein({ onClose }) {
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
 
-  // Telemetry — fire once per mount so we count "kid sat with Ronki"
-  // moments. This is a high-signal event for the companion thesis.
+  // Telemetry: once per mount, "kid sat with Ronki".
   useEffect(() => { track('companion.sit'); }, []);
 
-  // Reveal the story line ~700ms after the scene fades in so the kid
-  // has a beat to register the change of place before Ronki speaks.
+  // Reveal the story line ~700 ms after the scene fades in.
   const [showStory, setShowStory] = useState(false);
   useEffect(() => {
     const id = setTimeout(() => setShowStory(true), 700);
     return () => clearTimeout(id);
   }, []);
 
-  // Voice the picked story when it reveals — uses the same 10-file
-  // tonight_story_<i> bank generated for TonightRitual (Apr 2026
-  // voice pass). Audio + bubble line up because both pull from the
-  // same indexed pool.
+  // Voice the picked story when it reveals.
   useEffect(() => {
     if (!showStory) return;
     VoiceAudio.playLocalized(`tonight_story_${storyIdx}`, 100);
@@ -108,11 +93,11 @@ export default function BeiRonkiSein({ onClose }) {
       aria-modal="true"
       aria-label="Bei Ronki sitzen"
       onClick={onClose}
+      className="bg-night text-white"
       style={{
         position: 'fixed',
         inset: 0,
         zIndex: 90,
-        background: '#0f1525',  // deep nightfall outside the firelight
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -121,139 +106,49 @@ export default function BeiRonkiSein({ onClose }) {
         overflow: 'hidden',
       }}
     >
-      {/* Soft amber halo around the campfire — radial vignette. */}
-      <div aria-hidden="true" style={{
-        position: 'absolute', inset: 0,
-        background: `
-          radial-gradient(ellipse 50% 38% at 50% 62%, rgba(252,165,73,0.45) 0%, transparent 65%),
-          radial-gradient(ellipse 80% 60% at 50% 70%, rgba(180,83,9,0.30) 0%, transparent 70%)
-        `,
-        pointerEvents: 'none',
-      }} />
-
-      {/* Drifting embers */}
-      {[...Array(8)].map((_, i) => (
-        <span
-          key={i}
-          aria-hidden="true"
-          style={{
-            position: 'absolute',
-            left: `${15 + (i * 9.3) % 70}%`,
-            bottom: '38%',
-            width: 4, height: 4, borderRadius: '50%',
-            background: 'radial-gradient(circle, #fde68a, #f59e0b)',
-            boxShadow: '0 0 8px rgba(252,211,77,0.7)',
-            animation: `brs-ember ${4 + i * 0.5}s ease-out infinite ${i * 0.3}s`,
-            pointerEvents: 'none',
-          }}
-        />
+      {/* Sun stars */}
+      {STARS.map((s, i) => (
+        <span key={i} aria-hidden="true" className="absolute" style={{ top: s.top, left: s.left, color: 'var(--color-sun)' }}>
+          <DoodleIcon name="star" size={s.size} filled />
+        </span>
       ))}
 
-      {/* Campfire scene — Ronki + the fire, simplified. */}
-      <div style={{
-        position: 'relative',
-        width: '100%',
-        maxWidth: 460,
-        aspectRatio: '4 / 5',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'flex-end',
-        padding: '0 24px 80px',
-      }}>
-        {/* Ronki sitting */}
-        <div
-          aria-hidden="true"
-          style={{
-            position: 'relative',
-            width: 200, height: 200,
-            display: 'grid', placeItems: 'center',
-            animation: 'brs-breathe 5s ease-in-out infinite',
-            zIndex: 4,
-          }}
-        >
-          <MoodChibi size={200} variant={variant} stage={stageIdx} mood="normal" bare />
+      {/* The sit: story above, Ronki, the fire, the way out. */}
+      <div
+        className="relative flex flex-col items-center justify-end w-full"
+        style={{ maxWidth: 460, minHeight: '100dvh', padding: '0 24px calc(28px + env(safe-area-inset-bottom, 0px))' }}
+      >
+        {/* Story bubble */}
+        <div style={{ minHeight: 150, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', width: '100%', marginBottom: 24 }}>
+          {showStory && (
+            <div style={{ maxWidth: 360, animation: 'brs-bubble-in 0.5s cubic-bezier(0.34, 1.2, 0.64, 1) both' }}>
+              <SpeechBubble side="bottom" tone="paper" rotate={-0.6} className="text-center">
+                {story}
+              </SpeechBubble>
+            </div>
+          )}
         </div>
 
-        {/* Campfire */}
-        <div
-          aria-hidden="true"
-          style={{
-            position: 'relative',
-            width: 92, height: 70,
-            marginTop: -12,
-            zIndex: 3,
-          }}
-        >
-          {/* Glow */}
-          <div style={{
-            position: 'absolute', left: -40, bottom: -20,
-            width: 170, height: 80,
-            background: 'radial-gradient(ellipse, rgba(252,165,73,0.6), transparent 70%)',
-            filter: 'blur(2px)',
-          }} />
-          {/* Logs */}
-          <div style={{
-            position: 'absolute', bottom: 0, left: '50%',
-            transform: 'translateX(-50%)',
-            width: 80, height: 14,
-            background: 'linear-gradient(180deg, #9b7447 0%, #5c3e1f 70%)',
-            borderRadius: 6,
-            boxShadow: '0 4px 6px rgba(0,0,0,0.4), inset 0 2px 0 rgba(255,255,255,0.1)',
-          }} />
-          {/* Flame */}
-          <div style={{
-            position: 'absolute', left: '50%', bottom: 12,
-            transform: 'translateX(-50%)',
-            width: 44, height: 56,
-            background: 'radial-gradient(ellipse at 50% 80%, #fef3c7 0%, #fcd34d 18%, #f97316 55%, #dc2626 100%)',
-            borderRadius: '50% 50% 30% 30% / 60% 60% 40% 40%',
-            animation: 'brs-fire 1.1s ease-in-out infinite alternate',
-            filter: 'drop-shadow(0 0 14px rgba(249,115,22,0.7))',
-          }} />
-        </div>
-
-        {/* Ground line */}
-        <div aria-hidden="true" style={{
-          position: 'absolute', bottom: 60, left: '15%', right: '15%',
-          height: 2,
-          background: 'linear-gradient(90deg, transparent, rgba(180,83,9,0.35), transparent)',
-        }} />
-
-        {/* Story bubble — fades in after the scene settles. */}
-        {showStory && (
-          <div style={{
-            position: 'absolute',
-            top: '14%',
-            left: '8%',
-            right: '8%',
-            maxWidth: 380,
-            margin: '0 auto',
-            padding: '14px 18px 16px',
-            borderRadius: 18,
-            background: 'rgba(255,250,240,0.96)',
-            border: '2px solid #5c2a08',
-            boxShadow: '0 10px 28px -8px rgba(0,0,0,0.5)',
-            font: '500 15px/1.45 "Fredoka", "Nunito", sans-serif',
-            color: '#1e1b17',
-            textAlign: 'center',
-            zIndex: 6,
-            animation: 'brs-bubble-in 0.5s cubic-bezier(0.34, 1.2, 0.64, 1) both',
-          }}>
-            {story}
+        {/* Ronki, breathing, with the fire at his side. */}
+        <div aria-hidden="true" className="relative" style={{ zIndex: 2, paddingLeft: 70 }}>
+          <MoodChibi size={230} variant={variant} stage={stageIdx} mood="normal" bare animated />
+          {/* The fire: a drawn flame, ember with a sun heart, on an ink log. */}
+          <div className="absolute flex items-end justify-center" style={{ left: -12, bottom: -6, width: 110, height: 96, zIndex: 3 }}>
+            <span className="absolute" style={{ bottom: 8, color: 'var(--color-ember)' }}>
+              <DoodleIcon name="flame" size={84} filled />
+            </span>
+            <span className="absolute" style={{ bottom: 12, color: 'var(--color-sun)' }}>
+              <DoodleIcon name="flame" size={44} filled />
+            </span>
+            <span className="absolute" style={{ bottom: 0, width: 110, height: 14, borderRadius: 7, background: 'var(--color-ink)' }} />
           </div>
-        )}
+        </div>
 
-        {/* Quiet hint at the bottom — kid-friendly tap-to-close. */}
-        <div style={{
-          position: 'absolute', bottom: 24, left: 0, right: 0,
-          textAlign: 'center',
-          font: '700 11px/1 "Plus Jakarta Sans", sans-serif',
-          letterSpacing: '0.2em', textTransform: 'uppercase',
-          color: 'rgba(254,243,199,0.55)',
-          zIndex: 5,
-        }}>
-          Tipp irgendwo, um zurück zu gehen
+        {/* Quiet way out */}
+        <div style={{ marginTop: 40 }}>
+          <QuietLink tone="white" onClick={onClose}>
+            Tipp irgendwo, um zurück zu gehen
+          </QuietLink>
         </div>
       </div>
 
@@ -261,20 +156,6 @@ export default function BeiRonkiSein({ onClose }) {
         @keyframes brs-fade-in {
           0%   { opacity: 0; }
           100% { opacity: 1; }
-        }
-        @keyframes brs-breathe {
-          0%, 100% { transform: scale(1); }
-          50%      { transform: scale(1.02); }
-        }
-        @keyframes brs-fire {
-          0%   { transform: translateX(-50%) scale(0.95, 1) rotate(-2deg); }
-          100% { transform: translateX(-50%) scale(1.05, 0.95) rotate(2deg); }
-        }
-        @keyframes brs-ember {
-          0%   { opacity: 0; transform: translateY(0) scale(0.6); }
-          15%  { opacity: 0.9; }
-          70%  { opacity: 0.6; }
-          100% { opacity: 0; transform: translateY(-180px) scale(1.1); }
         }
         @keyframes brs-bubble-in {
           0%   { opacity: 0; transform: translateY(8px) scale(0.95); }

@@ -52,10 +52,9 @@ export function VorlageGuide({
             height={previewHeight}
             loading="lazy"
             decoding="async"
-            className="w-full h-auto rounded-lg border border-teal/10 bg-white"
-            style={{ boxShadow: '0 14px 36px -18px rgba(45,90,94,0.35)' }}
+            className="w-full h-auto rounded-[18px] border-[3px] border-ink bg-white"
           />
-          <figcaption className="mt-3 text-center text-xs text-ink/55 leading-relaxed">
+          <figcaption className="bb-hand mt-3 text-center text-lg leading-tight text-cobalt">
             {previewCaption}
           </figcaption>
         </figure>
@@ -63,7 +62,7 @@ export function VorlageGuide({
         <div className="min-w-0 flex-1">
           {sections.map((section) => (
             <section key={section.heading} className="mb-10">
-              <h2 className="font-display font-bold text-2xl text-teal-dark leading-tight mb-4">
+              <h2 className="bb-display text-2xl sm:text-3xl text-ink mb-4">
                 {section.heading}
               </h2>
               <div className="flex flex-col gap-4 text-base text-ink/75 leading-relaxed">
@@ -75,14 +74,17 @@ export function VorlageGuide({
           <section aria-labelledby="vorlage-faq">
             <h2
               id="vorlage-faq"
-              className="font-display font-bold text-2xl text-teal-dark leading-tight mb-5"
+              className="bb-display text-2xl sm:text-3xl text-ink mb-5"
             >
               Häufige Fragen
             </h2>
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-4">
               {faq.map((item) => (
-                <div key={item.question}>
-                  <h3 className="font-display font-semibold text-lg text-teal-dark leading-snug">
+                <div
+                  key={item.question}
+                  className="rounded-[22px] border-[2.5px] border-ink bg-white p-5 sm:p-6"
+                >
+                  <h3 className="font-display font-bold text-lg text-ink leading-snug">
                     {item.question}
                   </h3>
                   <p className="mt-2 text-base text-ink/75 leading-relaxed">{item.answer}</p>
@@ -102,7 +104,7 @@ export function GuideLink({ to, children }: { to: string; children: ReactNode })
   return (
     <Link
       to={to}
-      className="underline decoration-mustard underline-offset-4 hover:text-teal-dark"
+      className="text-cobalt underline decoration-2 underline-offset-4"
     >
       {children}
     </Link>

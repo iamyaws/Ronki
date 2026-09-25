@@ -5,27 +5,20 @@ import { useTranslation } from '../i18n/LanguageContext';
 import { Pearl } from './CurrencyIcons';
 import BelohnungRedeemModal from './BelohnungRedeemModal';
 import TopBar from './TopBar';
-import { biomeBackground } from '../utils/biomeBackgrounds';
+import { PaperCard, PillButton, DoodleIcon, RonkiArt } from './bilderbuch';
 
 /**
- * Belohnungsbank — kid's reward shop, HP-only.
+ * Belohnungsbank, the Laden: the kid's reward shop, Sterne only.
  *
- * Cut #6 (25 Apr 2026 northstar): Funkelzeit + screen-time currency
- * deleted entirely. The shop now has exactly one currency (Sterne /
- * HP) backing real-life rewards the parent pre-loaded — no
- * screen-time bargaining, no parent-confirm overlay for screen
- * minutes, no daily cap modal.
+ * Bilderbuch cut, 25 Sep 2026. Sun is praise: white ground, Ronki
+ * cheering in the header next to the star count on a sun sticker,
+ * every reward a paper card with the gift doodle, one cobalt pill to
+ * redeem where the Sterne suffice, the parent lock through the shared
+ * top bar. The teal hero, its image and the Material glyphs are gone.
  *
- * The component dropped from 574 → ~150 lines and lost three modals,
- * the Hourglass icon, the digital-time section, the mode-'none'
- * notice, the cap-reached overlay, and the Funkelzeit-confirm flow.
+ * Behaviour unchanged: DEFAULT_BELOHNUNGEN filtered to active Sterne
+ * rewards, the redeem modal, actions.redeemReward.
  */
-
-const ICON_MAP = {
-  '🃏': 'playing_cards', '🎧': 'headphones', '🎮': 'sports_esports',
-  '📺': 'tv', '🎬': 'movie', '🍬': 'icecream', '🍕': 'local_pizza',
-  '🎢': 'attractions', '💪': 'fitness_center',
-};
 
 export default function Belohnungsbank({ onNavigate, onOpenParental }) {
   const { t } = useTranslation();
@@ -37,225 +30,82 @@ export default function Belohnungsbank({ onNavigate, onOpenParental }) {
     b => b.active && (b.currency || 'hp') === 'hp',
   );
 
-  const RewardRow = ({ reward, canAfford, balance, ctaLabel }) => {
-    const matIcon = ICON_MAP[reward.emoji] || 'redeem';
-    const remaining = Math.max(0, reward.cost - balance);
-    const pct = Math.min(100, (balance / reward.cost) * 100);
-    return (
-      <div
-        className="grid items-center transition-all"
-        style={{
-          gridTemplateColumns: '52px 1fr auto',
-          gap: 12,
-          padding: '12px 14px 12px 12px',
-          borderRadius: 18,
-          background: '#fff',
-          border: `1px solid ${canAfford ? 'rgba(180,83,9,0.18)' : 'rgba(18,67,70,0.10)'}`,
-          boxShadow: canAfford
-            ? '0 4px 12px -6px rgba(180,83,9,0.2)'
-            : '0 4px 12px -8px rgba(18,67,70,0.12)',
-        }}
-      >
-        <div
-          className="flex items-center justify-center shrink-0"
-          style={{
-            width: 52, height: 52, borderRadius: 14,
-            background: 'linear-gradient(160deg, #fef9e7, #fde68a)',
-            border: '1px solid rgba(180,83,9,0.3)',
-          }}
-        >
-          <span className="material-symbols-outlined" style={{
-            fontSize: 26, color: '#A83E2C',
-            fontVariationSettings: "'FILL' 1, 'wght' 500",
-          }}>
-            {matIcon}
-          </span>
-        </div>
-
-        <div className="min-w-0">
-          <h4 className="font-body" style={{
-            margin: 0, fontWeight: 600, fontSize: 14, lineHeight: 1.2, color: '#124346',
-          }}>
-            {t('bel.' + reward.id)}
-          </h4>
-          <div className="flex items-center gap-2.5 flex-wrap" style={{ marginTop: 4 }}>
-            <span className="inline-flex items-center" style={{
-              gap: 5, fontFamily: 'Plus Jakarta Sans, sans-serif',
-              fontWeight: 800, fontSize: 12, letterSpacing: '0.02em', color: '#A83E2C',
-            }}>
-              <Pearl size={13} />
-              {reward.cost}
-            </span>
-            {!canAfford && (
-              <span style={{
-                fontFamily: 'Plus Jakarta Sans, sans-serif',
-                fontWeight: 700, fontSize: 10, letterSpacing: '0.06em', color: '#6b655b',
-              }}>
-                Noch <b style={{ color: '#124346', fontWeight: 800 }}>{remaining}</b> Sterne
-              </span>
-            )}
-          </div>
-          <div className="overflow-hidden" style={{
-            marginTop: 6, height: 3, borderRadius: 999, background: 'rgba(180,83,9,0.12)',
-          }}>
-            <div className="h-full rounded-full transition-all duration-700" style={{
-              width: `${pct}%`,
-              background: 'linear-gradient(90deg, #fcd34d, #f59e0b)',
-            }} />
-          </div>
-        </div>
-
-        {canAfford ? (
-          <button
-            onClick={() => setRedeemTarget({ ...reward, name: t('bel.' + reward.id) })}
-            className="font-label font-extrabold uppercase rounded-full transition-all active:scale-95 whitespace-nowrap"
-            style={{
-              background: '#124346', color: '#fef3c7',
-              padding: '9px 14px', fontSize: 11, letterSpacing: '0.12em',
-              boxShadow: '0 4px 10px -3px rgba(18,67,70,0.35)',
-            }}
-          >
-            {ctaLabel}
-          </button>
-        ) : (
-          <span className="font-label font-bold whitespace-nowrap" style={{
-            fontSize: 11, letterSpacing: '0.08em',
-            color: 'rgba(18,67,70,0.4)', padding: '9px 14px',
-          }}>
-            {''}
-          </span>
-        )}
-      </div>
-    );
-  };
-
   return (
-    <div className="relative pb-32" style={{ minHeight: '100dvh' }}>
-      <div className="fixed inset-0 pointer-events-none"
-           style={{
-             zIndex: 0,
-             background: biomeBackground('shop'),
-             backgroundColor: '#fff8f2',
-           }}
-           aria-hidden="true" />
-      <div className="relative" style={{ zIndex: 1 }}>
-        <TopBar onNavigate={onNavigate} view="shop" onOpenParental={onOpenParental} />
+    <div className="relative bg-white text-ink pb-32" style={{ minHeight: '100dvh' }}>
+      <TopBar onNavigate={onNavigate} view="shop" onOpenParental={onOpenParental} />
 
-        {/* Hero */}
-        <section style={{ padding: '6px 20px 0' }}>
-          <div className="relative overflow-hidden"
-               style={{
-                 background: `radial-gradient(circle at 15% 15%, rgba(94,234,212,0.28), transparent 55%), linear-gradient(135deg, #0f3236 0%, #164a48 50%, #0a2a2c 100%)`,
-                 border: '1px solid rgba(94,234,212,0.2)',
-                 borderRadius: 26,
-                 boxShadow: '0 16px 36px -14px rgba(12,50,54,0.55), inset 0 1px 0 rgba(94,234,212,0.12)',
-               }}>
-            <div className="flex items-end" style={{ padding: '20px 22px' }}>
-              <div className="flex-1 z-10 pb-1">
-                <p className="font-label font-extrabold uppercase"
-                   style={{ fontSize: 10, letterSpacing: '0.28em', color: '#fcd34d', marginBottom: 6 }}>
-                  {t('shop.header.eyebrow')}
-                </p>
-                <h1 className="font-headline"
-                    style={{ fontFamily: 'Fredoka, sans-serif', fontWeight: 500, fontSize: 26, letterSpacing: '-0.015em', color: '#fff', lineHeight: 1.1, textShadow: '0 2px 8px rgba(0,0,0,0.35)' }}>
-                  {t('shop.header.title')}
-                </h1>
-                <p className="font-body" style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', marginTop: 4, lineHeight: 1.35 }}>
-                  {t('shop.header.subtitle')}
-                </p>
-              </div>
-              <div className="relative" style={{ width: 110, height: 110 }}>
-                <img src={import.meta.env.BASE_URL + 'art/hero-shop.webp'}
-                     alt=""
-                     className="w-full h-auto -mb-3 -mr-1"
-                     style={{ filter: 'drop-shadow(0 6px 12px rgba(0,0,0,0.45))' }} />
-                <span aria-hidden="true" style={{ position: 'absolute', top: 6, right: 8, fontSize: 14, color: '#fcd34d', textShadow: '0 0 6px rgba(252,211,77,0.8)', animation: 'bbTwinkle 2.4s ease-in-out infinite' }}>✦</span>
-                <span aria-hidden="true" style={{ position: 'absolute', top: 22, left: 4, fontSize: 10, color: '#fcd34d', textShadow: '0 0 6px rgba(252,211,77,0.8)', animation: 'bbTwinkle 2.4s ease-in-out infinite', animationDelay: '0.7s' }}>✦</span>
-                <span aria-hidden="true" style={{ position: 'absolute', bottom: 16, right: 2, fontSize: 12, color: '#fcd34d', textShadow: '0 0 6px rgba(252,211,77,0.8)', animation: 'bbTwinkle 2.4s ease-in-out infinite', animationDelay: '1.3s' }}>✦</span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <style>{`
-          @keyframes bbTwinkle {
-            0%, 100% { opacity: 0.3; transform: scale(0.8); }
-            50%      { opacity: 1;   transform: scale(1.1); }
-          }
-        `}</style>
-
-        <div style={{ padding: '16px 20px 100px', display: 'flex', flexDirection: 'column', gap: 22 }}>
-
-          {/* HP balance — single currency now */}
-          <div
-            className="relative overflow-hidden text-left"
-            style={{
-              padding: '14px 14px 12px',
-              borderRadius: 18,
-              background: 'linear-gradient(160deg, #fffdf5 0%, #fef3c7 100%)',
-              border: '1px solid rgba(180,83,9,0.2)',
-              boxShadow: '0 6px 14px -8px rgba(180,83,9,0.2), inset 0 1px 0 rgba(255,255,255,0.7)',
-            }}>
-            <div className="flex items-center" style={{ gap: 8 }}>
-              <Pearl size={22} />
-              <p className="font-label font-extrabold uppercase" style={{ fontSize: 10, letterSpacing: '0.2em', color: '#A83E2C' }}>{t('hub.boss.detail.heroPoints')}</p>
-            </div>
-            <div className="flex items-baseline" style={{ gap: 4, marginTop: 2 }}>
-              <span className="font-headline" style={{ fontWeight: 500, fontSize: 28, color: '#124346', letterSpacing: '-0.02em', lineHeight: 1 }}>{hp}</span>
-              <span className="font-label font-bold" style={{ fontSize: 11, color: '#6b655b', letterSpacing: '0.1em' }}>STERNE</span>
-            </div>
-            <p className="font-body" style={{ fontSize: 10, lineHeight: 1.3, color: '#6b655b', opacity: 0.85, marginTop: 2, fontWeight: 600 }}>
-              Für Belohnungen aus dem Leben
+      {/* Header: Ronki cheers, the Sterne shine on a sun sticker. */}
+      <section style={{ padding: '4px 16px 0' }}>
+        <div className="flex items-end gap-3">
+          <div className="min-w-0 flex-1" style={{ paddingBottom: 6 }}>
+            <p className="bb-hand text-cobalt uppercase" style={{ fontSize: 18, lineHeight: 1, marginBottom: 6 }}>
+              {t('shop.header.eyebrow')}
+            </p>
+            <h1 className="bb-display" style={{ fontSize: 32 }}>
+              {t('shop.header.title')}
+            </h1>
+            <p className="font-body text-ink-soft" style={{ fontSize: 16, lineHeight: 1.4, marginTop: 6 }}>
+              {t('shop.header.subtitle')}
             </p>
           </div>
+          <RonkiArt pose="cheer" animated size={136} className="shrink-0" style={{ marginBottom: -6 }} />
+        </div>
 
-          {/* Family adventures (HP only) */}
-          {familyRewards.length > 0 && (
-            <div className="flex flex-col" style={{ gap: 10 }}>
-              <div className="flex items-center" style={{ gap: 10, padding: '0 2px' }}>
-                <span style={{ width: 4, height: 18, borderRadius: 2, background: '#A83E2C' }} />
-                <h3 className="font-headline" style={{ margin: 0, fontFamily: 'Fredoka, sans-serif', fontWeight: 500, fontSize: 18, letterSpacing: '-0.01em', color: '#124346', flex: 1 }}>
-                  {t('shop.familyAdventures')}
-                </h3>
-              </div>
-              <div className="flex flex-col" style={{ gap: 8 }}>
-                {familyRewards.map(reward => (
-                  <RewardRow
-                    key={reward.id}
-                    reward={reward}
-                    canAfford={hp >= reward.cost}
-                    balance={hp}
-                    ctaLabel={t('shop.redeem')}
-                  />
-                ))}
-              </div>
+        <div
+          className="inline-flex items-center gap-2 rounded-full bg-sun text-ink"
+          style={{ marginTop: 10, padding: '8px 18px 8px 12px', border: '3px solid var(--color-ink)', transform: 'rotate(-1.5deg)' }}
+          aria-label={`${hp} Sterne`}
+        >
+          <Pearl size={30} />
+          <span className="bb-display" style={{ fontSize: 30, lineHeight: 1 }}>{hp}</span>
+          <span className="bb-hand" style={{ fontSize: 20, lineHeight: 1, marginTop: 4 }}>Sterne</span>
+        </div>
+        <p className="bb-hand text-ink-soft" style={{ fontSize: 17, lineHeight: 1, marginTop: 10, marginLeft: 6 }}>
+          Für Belohnungen aus dem Leben
+        </p>
+      </section>
+
+      <div className="flex flex-col" style={{ padding: '22px 16px 24px', gap: 24 }}>
+        {/* Family adventures (Sterne only) */}
+        {familyRewards.length > 0 && (
+          <div className="flex flex-col" style={{ gap: 12 }}>
+            <div className="flex items-center gap-2" style={{ padding: '0 2px' }}>
+              <DoodleIcon name="gift" size={26} />
+              <h2 className="bb-display" style={{ fontSize: 24, margin: 0 }}>
+                {t('shop.familyAdventures')}
+              </h2>
             </div>
-          )}
-
-          {/* How-it-works guide */}
-          <div className="grid items-start"
-               style={{
-                 gridTemplateColumns: '32px 1fr',
-                 gap: 12,
-                 padding: '14px 16px',
-                 borderRadius: 18,
-                 background: 'linear-gradient(160deg, rgba(252,211,77,0.12) 0%, rgba(245,158,11,0.06) 100%)',
-                 border: '1px solid rgba(180,83,9,0.14)',
-               }}>
-            <span className="material-symbols-outlined" style={{ color: '#A83E2C', fontSize: 24, fontVariationSettings: "'FILL' 1, 'wght' 500", marginTop: 2 }}>lightbulb</span>
-            <div>
-              <b className="font-label" style={{ display: 'block', fontWeight: 700, fontSize: 13, lineHeight: 1.2, letterSpacing: '0.04em', color: '#124346', marginBottom: 4 }}>
-                {t('shop.howItWorks')}
-              </b>
-              <p className="font-body" style={{ margin: 0, fontSize: 12, lineHeight: 1.45, color: '#6b655b', fontWeight: 500 }}>
-                {t('shop.howItWorksBody')}
-              </p>
+            <div className="flex flex-col" style={{ gap: 12 }}>
+              {familyRewards.map(reward => (
+                <RewardRow
+                  key={reward.id}
+                  reward={reward}
+                  name={t('bel.' + reward.id)}
+                  canAfford={hp >= reward.cost}
+                  balance={hp}
+                  ctaLabel={t('shop.redeem')}
+                  onRedeem={() => setRedeemTarget({ ...reward, name: t('bel.' + reward.id) })}
+                />
+              ))}
             </div>
           </div>
-        </div>
+        )}
+
+        {/* How it works */}
+        <PaperCard tone="sky-wash" pad="md" className="grid items-start gap-3" style={{ gridTemplateColumns: '36px 1fr' }}>
+          <DoodleIcon name="sparkle" size={32} filled style={{ color: 'var(--color-cobalt)', marginTop: 2 }} />
+          <div>
+            <b className="font-headline font-bold block" style={{ fontSize: 18, lineHeight: 1.2, marginBottom: 4 }}>
+              {t('shop.howItWorks')}
+            </b>
+            <p className="font-body m-0" style={{ fontSize: 16, lineHeight: 1.45 }}>
+              {t('shop.howItWorksBody')}
+            </p>
+          </div>
+        </PaperCard>
       </div>
 
-      {/* HP Reward approval modal */}
+      {/* Reward approval modal */}
       {redeemTarget && (
         <BelohnungRedeemModal
           reward={redeemTarget}
@@ -267,5 +117,52 @@ export default function Belohnungsbank({ onNavigate, onOpenParental }) {
         />
       )}
     </div>
+  );
+}
+
+function RewardRow({ reward, name, canAfford, balance, ctaLabel, onRedeem }) {
+  const remaining = Math.max(0, reward.cost - balance);
+  const pct = Math.min(100, (balance / reward.cost) * 100);
+  return (
+    <PaperCard tone={canAfford ? 'paper' : 'white'} pad="sm" lift={canAfford} className="flex flex-col" style={{ gap: 12, padding: 14 }}>
+      <div className="grid items-center" style={{ gridTemplateColumns: '64px 1fr', gap: 12 }}>
+        <div
+          aria-hidden="true"
+          className="flex items-center justify-center rounded-[20px] bg-white shrink-0"
+          style={{ width: 64, height: 64, border: '2.5px solid var(--color-ink)', color: canAfford ? 'var(--color-cobalt)' : 'var(--color-ink)' }}
+        >
+          <DoodleIcon name="gift" size={36} />
+        </div>
+        <div className="min-w-0">
+          <h3 className="font-headline font-bold m-0" style={{ fontSize: 19, lineHeight: 1.2 }}>
+            {name}
+          </h3>
+          <div className="flex items-center flex-wrap" style={{ gap: 10, marginTop: 4 }}>
+            <span className="inline-flex items-center font-headline font-semibold" style={{ gap: 5, fontSize: 17 }}>
+              <Pearl size={18} />
+              {reward.cost}
+            </span>
+            {!canAfford && (
+              <span className="font-body text-ink-soft" style={{ fontSize: 16 }}>
+                Noch <b className="text-ink">{remaining}</b> Sterne
+              </span>
+            )}
+          </div>
+          {/* A drawn bar: how far the Sterne reach. */}
+          <div
+            className="overflow-hidden rounded-full bg-white"
+            style={{ marginTop: 8, height: 12, border: '2px solid var(--color-ink)' }}
+            aria-hidden="true"
+          >
+            <div className="h-full rounded-full bg-cobalt transition-all duration-700" style={{ width: `${pct}%` }} />
+          </div>
+        </div>
+      </div>
+      {canAfford && (
+        <PillButton full icon="gift" onClick={onRedeem}>
+          {ctaLabel}
+        </PillButton>
+      )}
+    </PaperCard>
   );
 }

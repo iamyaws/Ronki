@@ -47,14 +47,14 @@ export default function MitMachen() {
           >
             <Link
               to="/"
-              className="inline-flex items-center gap-2 text-sm text-teal-dark/60 hover:text-teal-dark transition-colors mb-8"
+              className="inline-flex items-center gap-2 text-sm text-ink/60 hover:text-ink transition-colors mb-8"
             >
               <span aria-hidden>←</span> Zurück
             </Link>
             <p className="text-xs uppercase tracking-[0.2em] text-teal font-medium mb-6">
               Public&#8209;Alpha &middot; kleine Gruppe
             </p>
-            <h1 className="font-display font-bold text-4xl sm:text-5xl lg:text-6xl leading-[1.04] tracking-tight text-teal-dark">
+            <h1 className="font-display font-bold text-4xl sm:text-5xl lg:text-6xl leading-[1.04] tracking-tight text-ink">
               Werdet{' '}
               <em className="italic text-sage whitespace-nowrap">
                 Gründungs&#8209;Familie
@@ -107,7 +107,7 @@ export default function MitMachen() {
             viewport={{ once: true }}
             transition={{ duration: 0.6, ease: EASE_OUT }}
             className="rounded-2xl bg-white p-7 sm:p-8"
-            style={{ boxShadow: '0 8px 28px -12px rgba(45,90,94,0.18)' }}
+            style={{ boxShadow: '0 8px 28px -12px rgba(4,8,18,0.18)' }}
           >
             <div className="h-1 w-12 bg-sage rounded-full mb-5" aria-hidden />
             <p className="text-xs uppercase tracking-[0.15em] text-sage font-display font-bold mb-3">
@@ -155,15 +155,15 @@ export default function MitMachen() {
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.1, ease: EASE_OUT }}
             className="rounded-2xl bg-white p-7 sm:p-8"
-            style={{ boxShadow: '0 8px 28px -12px rgba(45,90,94,0.18)' }}
+            style={{ boxShadow: '0 8px 28px -12px rgba(4,8,18,0.18)' }}
           >
             <div className="h-1 w-12 bg-mustard rounded-full mb-5" aria-hidden />
-            <p className="text-xs uppercase tracking-[0.15em] text-ochre font-display font-bold mb-3">
+            <p className="text-xs uppercase tracking-[0.15em] text-cobalt font-display font-bold mb-3">
               Was wir uns von euch wünschen
             </p>
             <ul className="flex flex-col gap-3.5 text-sm sm:text-base text-ink/80 leading-relaxed">
               <li className="flex items-start gap-3">
-                <span className="text-ochre flex-shrink-0 mt-0.5" aria-hidden>
+                <span className="text-cobalt flex-shrink-0 mt-0.5" aria-hidden>
                   ✦
                 </span>
                 <span>
@@ -171,7 +171,7 @@ export default function MitMachen() {
                 </span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="text-ochre flex-shrink-0 mt-0.5" aria-hidden>
+                <span className="text-cobalt flex-shrink-0 mt-0.5" aria-hidden>
                   ✦
                 </span>
                 <span>
@@ -179,7 +179,7 @@ export default function MitMachen() {
                 </span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="text-ochre flex-shrink-0 mt-0.5" aria-hidden>
+                <span className="text-cobalt flex-shrink-0 mt-0.5" aria-hidden>
                   ✦
                 </span>
                 <span>
@@ -203,7 +203,7 @@ export default function MitMachen() {
             <p className="text-xs uppercase tracking-[0.2em] text-teal font-medium mb-3">
               So steigt ihr ein
             </p>
-            <h2 className="font-display font-bold text-2xl sm:text-3xl lg:text-4xl text-teal-dark">
+            <h2 className="font-display font-bold text-2xl sm:text-3xl lg:text-4xl text-ink">
               Drei Wege, und alle sind ok.
             </h2>
           </motion.div>
@@ -252,10 +252,10 @@ export default function MitMachen() {
             viewport={{ once: true }}
             className="mb-10 text-center"
           >
-            <p className="text-[0.7rem] uppercase tracking-[0.2em] text-teal-dark/60 font-semibold mb-4">
+            <p className="text-[0.7rem] uppercase tracking-[0.2em] text-ink/60 font-semibold mb-4">
               Kleine Fragen
             </p>
-            <h2 className="font-display font-bold text-2xl sm:text-3xl text-teal-dark">
+            <h2 className="font-display font-bold text-2xl sm:text-3xl text-ink">
               Was ihr wahrscheinlich wissen wollt.
             </h2>
           </motion.div>
@@ -286,9 +286,9 @@ export default function MitMachen() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: i * 0.06, ease: EASE_OUT }}
                 className="rounded-2xl bg-white p-5 sm:p-6"
-                style={{ boxShadow: '0 4px 14px -10px rgba(45,90,94,0.18)' }}
+                style={{ boxShadow: '0 4px 14px -10px rgba(4,8,18,0.18)' }}
               >
-                <h3 className="font-display font-bold text-base sm:text-lg text-teal-dark mb-2 leading-tight">
+                <h3 className="font-display font-bold text-base sm:text-lg text-ink mb-2 leading-tight">
                   {item.q}
                 </h3>
                 <p
@@ -315,7 +315,7 @@ export default function MitMachen() {
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.7 }}
-            className="font-display font-semibold text-xl sm:text-2xl lg:text-3xl leading-snug text-teal-dark max-w-2xl mx-auto"
+            className="font-display font-semibold text-xl sm:text-2xl lg:text-3xl leading-snug text-ink max-w-2xl mx-auto"
             style={{
               hyphens: 'manual',
               WebkitHyphens: 'manual',
@@ -370,8 +370,8 @@ function CTACard({
     },
     ochre: {
       bar: 'bg-ochre',
-      eyebrow: 'text-ochre bg-mustard-soft/40',
-      btn: 'bg-ochre text-cream',
+      eyebrow: 'text-ink bg-mustard-soft/70',
+      btn: 'bg-cobalt text-white',
     },
   }[accent];
 
@@ -399,8 +399,8 @@ function CTACard({
         className="group relative flex flex-col rounded-2xl bg-white overflow-hidden h-full"
         style={{
           boxShadow: primary
-            ? '0 12px 32px -12px rgba(80,160,130,0.35)'
-            : '0 8px 24px -12px rgba(45,90,94,0.18)',
+            ? '0 12px 32px -12px rgba(5,68,176,0.35)'
+            : '0 8px 24px -12px rgba(4,8,18,0.18)',
         }}
       >
         <div className={`h-1.5 w-full ${accentClasses.bar}`} />
@@ -410,7 +410,7 @@ function CTACard({
           >
             {eyebrow}
           </span>
-          <h3 className="font-display font-bold text-lg sm:text-xl text-teal-dark leading-tight mb-2">
+          <h3 className="font-display font-bold text-lg sm:text-xl text-ink leading-tight mb-2">
             {title}
           </h3>
           <p className="text-sm text-ink/70 leading-relaxed mb-5 flex-1">

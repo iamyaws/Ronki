@@ -59,7 +59,7 @@ export default function AppCheckResult() {
         <div className="max-w-3xl mx-auto">
           <Link
             to="/tools/app-check"
-            className="inline-flex items-center gap-2 text-sm text-teal-dark/60 hover:text-teal-dark focus:outline-none focus-visible:text-teal-dark focus-visible:underline underline-offset-4 transition-colors mb-8"
+            className="inline-flex items-center gap-2 text-sm text-ink/60 hover:text-ink focus:outline-none focus-visible:text-ink focus-visible:underline underline-offset-4 transition-colors mb-8"
           >
             <span aria-hidden>←</span> Eigenen App-Check starten
           </Link>
@@ -93,7 +93,7 @@ export default function AppCheckResult() {
               <p className="text-xs uppercase tracking-[0.2em] text-teal font-semibold">
                 Hier war mal eine Bewertung
               </p>
-              <h1 className="font-display font-bold text-3xl sm:text-4xl text-teal-dark leading-tight">
+              <h1 className="font-display font-bold text-3xl sm:text-4xl text-ink leading-tight">
                 Den Link <em className="italic text-sage">finden wir nicht</em>.
               </h1>
               <p className="text-base text-ink/75 max-w-prose leading-relaxed">
@@ -122,7 +122,7 @@ export default function AppCheckResult() {
                 <p className="text-xs uppercase tracking-[0.2em] text-teal font-semibold mb-4">
                   Gespeicherte Bewertung
                 </p>
-                <h1 className="font-display font-bold text-3xl sm:text-4xl text-teal-dark leading-tight">
+                <h1 className="font-display font-bold text-3xl sm:text-4xl text-ink leading-tight">
                   Eine <em className="italic text-sage">Eltern-Bewertung</em>.
                 </h1>
               </header>
@@ -134,7 +134,7 @@ export default function AppCheckResult() {
               />
 
               <div className="space-y-5">
-                <h2 className="font-display font-bold text-xl text-teal-dark">
+                <h2 className="font-display font-bold text-xl text-ink">
                   Diesen Permalink teilen
                 </h2>
                 <ShareButtons
