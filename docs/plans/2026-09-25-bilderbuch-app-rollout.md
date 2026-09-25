@@ -40,13 +40,15 @@ Out (follow-ups): mini-game art, Micropedia creatures, the seven Freunde, bosses
 | 1 | Research: Finch 2026, PWA animation tech, Seedance loops, kids' apps | Research agent | Opus 5.5 | Background, now |
 | 2 | Art: character sheet, cut-outs, scenes, icon (GPT Image 2.5); loops (Seedance 2.5); cut-out loops as animated WebP | Orchestrator with the Higgsfield MCP | Opus 5.5 main session | Parallel with 3 |
 | 3 | Foundation: tokens, fonts, primitives, tab bar, `MoodChibi` on new art, `SceneLoop`, sticker burst, surface map | Build agent A | Fable 5.1 | Now, in the clone |
-| 4 | Onboarding and hatch | Build agent B | Fable 5.1 | After 2 and 3 |
-| 5 | Home, the day, celebration | Build agent C | Fable 5.1 | After 2 and 3, parallel with 4 |
-| 6 | Evening, Unser Buch, profile, return beat | Build agent D | Opus 5.5 | After 2 and 3, parallel with 4 and 5 |
-| 7 | Independent review of the diff (bugs, reduced motion, perf, copy) | Review agent | Opus 5.5 | After 4 to 6 |
+| 4 | Onboarding, hatch, expedition return | Build agent B | Fable 5.1 | After 2 and 3 |
+| 5 | Home, the day, rewards | Build agent C | Fable 5.1 | After 2 and 3, parallel with 4 |
+| 6 | Evening, Unser Buch, profile, diary | Build agent D | Opus 5.5 | After 2 and 3, parallel with 4 and 5 |
+| 7 | Review: Astra (GPT-6 via Codex, read-only, medium effort) runs a code review of the app diff and a design, kid-fit and motion-safety review from renders, per the two-model protocol (own read first, max two rounds, open points to Marc) | Astra, two passes | GPT-6 Astra | After 4 to 6 |
 | 8 | Browser pass at 390 px, fixes, tests, build, push, PR, Vercel preview check | Orchestrator | | Last |
 
-Agents: 6 subagents. Estimate about 1.5M subagent tokens, above the 800k default cap, on Marc's go of 25 Sep ("spawn subagents where you see fit"). Hard stop at 10 agents and 1.8M.
+Update 25 Sep, evening: Marc added two steers mid-run. Use Astra as the reviewer and for code review, and work in the shared GitHub repo so the history is tracked. So the Opus review agent is replaced by Astra, every step lands as its own commit on `design/bilderbuch-app`, and the branch is pushed to `iamyaws/Ronki` after each step. Lane split and rules: `docs/plans/2026-09-25-lane-brief.md`.
+
+Agents: 5 Claude subagents plus 2 Astra passes. Estimate about 1.6M Claude subagent tokens, above the 800k default cap, on Marc's go of 25 Sep ("spawn subagents where you see fit"). Hard stop at 10 agents and 1.8M.
 
 Higgsfield budget: 675 credits available. GPT Image 2.5 high 2k costs 2.75 credits, a 5 s Seedance 2.5 clip at 720p costs 35. Plan: about 30 images (about 110 credits with retries) and six clips (about 210). Hard cap 450 credits. Every prompt and cost goes into `docs/design-briefs/2026-09-25-higgsfield-log.md`. One variant per loop (Marc's rule from 12 Jul).
 

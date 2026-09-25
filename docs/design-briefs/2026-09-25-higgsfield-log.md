@@ -71,4 +71,8 @@ Start frames for the transparent character loops are the cut-outs composited loc
 | 64 | b8d9cb6a | 5 s, 9:16 | hatch #12, hatch-end #51 | Egg wobbles twice, zigzag crack, chips pop, top lifts, tiny Ronki peeks out; sparks | 35 |
 | 65 | 879dd4c9 | 5 s, 9:16 | night #11, same | Blanket rises and falls with his breath, star lamp glow pulses, window stars twinkle | 35 |
 
+Processing (local, no credits, script in the session scratchpad `art/clips.py`): loops get the last 0.6 s cross-faded into the first 0.6 s so the seam never jumps (mean frame difference at the seam 0.85 to 2.08 out of 255 afterwards); scenes become H.264 720 wide, CRF 27, faststart, no audio track, with the first frame as poster; the green clips are keyed locally (ffmpeg `colorkey` + `despill`, clean edges on the ink outlines) and saved as animated WebP with alpha at 400 px: idle 12 fps (1.2 MB), cloud 12 fps (1.3 MB), cheer 15 fps and plays once (0.85 MB). Higgsfield's own video background removal was not needed.
+
+**Spend: 292.5 credits of 675 (balance 382.5 after the run), under the 450 cap.**
+
 Note: the first submission of 60 and 62 to 65 was answered with preset suggestions ("IN THE DARK", "DROWN IN MUSIC") instead of jobs; resubmitted with the presets declined. No credits were spent on the suggestions.
