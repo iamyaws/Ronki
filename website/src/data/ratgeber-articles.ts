@@ -76,6 +76,15 @@ export const ARTICLES: Article[] = [
     image: '/art/bioms/Sternenmeer_sea-of-stars.webp',
   },
   {
+    slug: 'zeitumstellung-kinder',
+    title: 'Zeitumstellung im Herbst: So kommt dein Kind gut durch die Umstellung',
+    description:
+      'Zeitumstellung mit Kindern im Herbst: zwei Wege durch den 25. Oktober, ein Plan in kleinen Schritten und was hilft, wenn dein Kind um 5 Uhr wach ist.',
+    category: 'Abendroutine',
+    readMinutes: 7,
+    image: '/art/bioms/Morgenwald_dawn-forest.webp',
+  },
+  {
     slug: 'zaehneputzen-ohne-streit',
     title: 'Zähneputzen ohne Streit: was bei 5- bis 8-Jährigen wirklich hilft',
     description:
