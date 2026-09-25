@@ -29,14 +29,14 @@ const W = 1240;
 const H = 1754;
 
 const COLORS = {
-  cream: '#FDF8F0',
-  teal: '#1A3C3F',
+  cream: '#FFFFFF',
+  teal: '#040812',
   tealDark: '#0E2A2C',
-  sage: '#50A082',
-  mustard: '#FCD34D',
+  sage: '#0544B0',
+  mustard: '#FDD134',
   ink: '#1A2022',
   inkSoft: 'rgba(26, 32, 34, 0.65)',
-  hairline: 'rgba(26, 60, 63, 0.20)',
+  hairline: 'rgba(4, 8, 18, 0.20)',
 };
 
 function todayISODate(): string {
@@ -119,15 +119,15 @@ async function buildCharterPng(answers: CharterAnswers): Promise<Blob> {
 
   // Soft mustard glow top-left
   const tlGlow = ctx.createRadialGradient(120, 120, 30, 120, 120, 480);
-  tlGlow.addColorStop(0, 'rgba(252, 211, 77, 0.30)');
-  tlGlow.addColorStop(1, 'rgba(252, 211, 77, 0)');
+  tlGlow.addColorStop(0, 'rgba(253, 209, 52, 0.30)');
+  tlGlow.addColorStop(1, 'rgba(253, 209, 52, 0)');
   ctx.fillStyle = tlGlow;
   ctx.fillRect(0, 0, W, H);
 
   // Sage glow bottom-right
   const brGlow = ctx.createRadialGradient(W - 120, H - 200, 30, W - 120, H - 200, 520);
-  brGlow.addColorStop(0, 'rgba(80, 160, 130, 0.25)');
-  brGlow.addColorStop(1, 'rgba(80, 160, 130, 0)');
+  brGlow.addColorStop(0, 'rgba(5, 68, 176, 0.25)');
+  brGlow.addColorStop(1, 'rgba(5, 68, 176, 0)');
   ctx.fillStyle = brGlow;
   ctx.fillRect(0, 0, W, H);
 
@@ -294,7 +294,7 @@ async function buildCharterPng(answers: CharterAnswers): Promise<Blob> {
     const pqW = W - 200;
     const pqStartY = y;
     // Background
-    ctx.fillStyle = 'rgba(80, 160, 130, 0.12)';
+    ctx.fillStyle = 'rgba(5, 68, 176, 0.12)';
     // We need to know the height before we draw the background, so
     // measure the wrapped text height first, then draw the box, then
     // draw the text inside.
@@ -304,7 +304,7 @@ async function buildCharterPng(answers: CharterAnswers): Promise<Blob> {
     const pqContentH = 56 /* eyebrow + gap */ + pqLines.length * 36 + 28;
     roundRect(ctx, pqX, pqStartY, pqW, pqContentH, 16);
     ctx.fill();
-    ctx.strokeStyle = 'rgba(80, 160, 130, 0.3)';
+    ctx.strokeStyle = 'rgba(5, 68, 176, 0.3)';
     ctx.lineWidth = 1;
     roundRect(ctx, pqX, pqStartY, pqW, pqContentH, 16);
     ctx.stroke();
@@ -403,7 +403,7 @@ async function buildCharterPng(answers: CharterAnswers): Promise<Blob> {
 
   // Right-aligned page indicator
   ctx.font = '600 14px "Plus Jakarta Sans", system-ui, sans-serif';
-  ctx.fillStyle = 'rgba(253, 248, 240, 0.7)';
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
   const pageTag = `STAND ${todayISODate()} · SEITE 1 / 1`;
   const pageTagW = ctx.measureText(pageTag).width;
   ctx.fillText(pageTag, W - 100 - pageTagW, H - 35);
@@ -541,7 +541,7 @@ export function CharterPreview({ answers }: Props) {
         className="charter-preview relative rounded-2xl bg-cream/95 border border-teal/15 shadow-sm overflow-hidden"
         style={{
           backgroundImage:
-            'radial-gradient(circle at 88% 12%, rgba(252, 211, 77, 0.18) 0%, transparent 55%), radial-gradient(circle at 8% 92%, rgba(80, 160, 130, 0.14) 0%, transparent 60%)',
+            'radial-gradient(circle at 88% 12%, rgba(253, 209, 52, 0.18) 0%, transparent 55%), radial-gradient(circle at 8% 92%, rgba(5, 68, 176, 0.14) 0%, transparent 60%)',
         }}
       >
         {/* Top accent ribbon — house gradient stripe */}
@@ -564,7 +564,7 @@ export function CharterPreview({ answers }: Props) {
                 Familien-Medien-Charter
               </span>
             </p>
-            <h2 className="font-display font-bold text-3xl sm:text-4xl text-teal-dark leading-tight">
+            <h2 className="font-display font-bold text-3xl sm:text-4xl text-ink leading-tight">
               {fname ? (
                 <>
                   Familie{' '}
@@ -578,7 +578,7 @@ export function CharterPreview({ answers }: Props) {
               )}
             </h2>
             {wofuer ? (
-              <p className="font-display italic text-base sm:text-lg text-teal-dark/85 leading-snug max-w-prose">
+              <p className="font-display italic text-base sm:text-lg text-ink/85 leading-snug max-w-prose">
                 {wofuer}
               </p>
             ) : null}
@@ -594,17 +594,17 @@ export function CharterPreview({ answers }: Props) {
               className="charter-date-sticker absolute right-0 top-0 -rotate-3 flex flex-col items-center"
             >
               <div className="rounded-md bg-mustard/90 ring-1 ring-mustard/60 shadow-sm px-3 py-1.5 text-center min-w-[7rem]">
-                <p className="text-[9px] uppercase tracking-[0.18em] text-teal-dark/80 font-semibold leading-tight">
+                <p className="text-[9px] uppercase tracking-[0.18em] text-ink/80 font-semibold leading-tight">
                   Stand
                 </p>
-                <p className="text-sm font-display font-bold text-teal-dark tabular-nums leading-tight">
+                <p className="text-sm font-display font-bold text-ink tabular-nums leading-tight">
                   {today}
                 </p>
                 <span className="block h-px bg-teal-dark/15 my-1" aria-hidden />
-                <p className="text-[9px] uppercase tracking-[0.18em] text-teal-dark/80 font-semibold leading-tight">
+                <p className="text-[9px] uppercase tracking-[0.18em] text-ink/80 font-semibold leading-tight">
                   Wir prüfen am
                 </p>
-                <p className="text-sm font-display font-bold text-teal-dark tabular-nums leading-tight">
+                <p className="text-sm font-display font-bold text-ink tabular-nums leading-tight">
                   {review}
                 </p>
               </div>
@@ -641,7 +641,7 @@ export function CharterPreview({ answers }: Props) {
                 <span className="font-display font-extrabold mr-2">VII</span>
                 {ARTICLE_TITLES.versprechen}
               </p>
-              <blockquote className="font-display italic font-semibold text-lg sm:text-xl text-teal-dark leading-snug max-w-prose">
+              <blockquote className="font-display italic font-semibold text-lg sm:text-xl text-ink leading-snug max-w-prose">
                 <span aria-hidden className="text-sage/55 text-2xl leading-none mr-1">
                   „
                 </span>
@@ -659,7 +659,7 @@ export function CharterPreview({ answers }: Props) {
               Wir lesen das am {review} nochmal. Vielleicht ändern wir was,
               vielleicht auch nicht.
             </p>
-            <p className="font-display italic text-base text-teal-dark/80 leading-snug max-w-prose">
+            <p className="font-display italic text-base text-ink/80 leading-snug max-w-prose">
               Aufgeschrieben am {today}, von und für{' '}
               {fname ? `Familie ${fname}` : 'unsere Familie'}.
             </p>
@@ -678,7 +678,7 @@ export function CharterPreview({ answers }: Props) {
               <div className="grid sm:grid-cols-2 gap-x-10 gap-y-6 pt-3">
                 {signatureNames.map((name) => (
                   <div key={name} className="space-y-1.5">
-                    <p className="text-[10px] uppercase tracking-[0.22em] text-teal-dark/70 font-semibold">
+                    <p className="text-[10px] uppercase tracking-[0.22em] text-ink/70 font-semibold">
                       {name}
                     </p>
                     <span className="block border-b border-teal/35 h-7" aria-hidden />
@@ -688,13 +688,13 @@ export function CharterPreview({ answers }: Props) {
             ) : (
               <div className="grid sm:grid-cols-2 gap-x-10 gap-y-6 pt-3">
                 <div className="space-y-1.5">
-                  <p className="text-[10px] uppercase tracking-[0.22em] text-teal-dark/70 font-semibold">
+                  <p className="text-[10px] uppercase tracking-[0.22em] text-ink/70 font-semibold">
                     Erwachsene
                   </p>
                   <span className="block border-b border-teal/35 h-7" aria-hidden />
                 </div>
                 <div className="space-y-1.5">
-                  <p className="text-[10px] uppercase tracking-[0.22em] text-teal-dark/70 font-semibold">
+                  <p className="text-[10px] uppercase tracking-[0.22em] text-ink/70 font-semibold">
                     Kinder
                   </p>
                   <span className="block border-b border-teal/35 h-7" aria-hidden />
@@ -706,7 +706,7 @@ export function CharterPreview({ answers }: Props) {
           {/* Practical footer line — kept inside the cream area, above
               the dark band, so it reads as advice from the document
               rather than brand chrome. */}
-          <p className="font-display italic text-sm text-teal-dark/75 leading-snug max-w-prose pt-2">
+          <p className="font-display italic text-sm text-ink/75 leading-snug max-w-prose pt-2">
             Wenn euch was schwerfällt: gilt nicht als Versagen. Gilt als
             Punkt zwei der nächsten Verfassung.
           </p>
@@ -756,14 +756,14 @@ export function CharterPreview({ answers }: Props) {
         <button
           type="button"
           onClick={handlePrint}
-          className="inline-flex items-center gap-2 rounded-full border border-teal/30 px-6 py-3 text-sm text-teal-dark font-display font-semibold hover:bg-teal-dark hover:text-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-cream transition-colors"
+          className="inline-flex items-center gap-2 rounded-full border border-teal/30 px-6 py-3 text-sm text-ink font-display font-semibold hover:bg-teal-dark hover:text-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-cream transition-colors"
         >
           Als PDF drucken
         </button>
       </div>
 
       {status === 'error' && (
-        <p role="alert" className="text-sm text-teal-dark">
+        <p role="alert" className="text-sm text-ink">
           Bild-Erzeugung hat nicht geklappt. Versuch es bitte gleich noch
           mal.
         </p>
@@ -795,7 +795,7 @@ export function CharterPreview({ answers }: Props) {
         }
         @media print {
           html, body {
-            background: #FDF8F0 !important;
+            background: #FFFFFF !important;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
           }
@@ -806,7 +806,7 @@ export function CharterPreview({ answers }: Props) {
             left: 0;
             top: 0;
             width: 100%;
-            background: #FDF8F0 !important;
+            background: #FFFFFF !important;
             box-shadow: none !important;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
@@ -820,7 +820,7 @@ export function CharterPreview({ answers }: Props) {
           }
           .charter-bottom-strip {
             background: #0E2A2C !important;
-            color: #FDF8F0 !important;
+            color: #FFFFFF !important;
           }
           .no-print { display: none !important; }
           @page { size: A4 portrait; margin: 1.5cm; }

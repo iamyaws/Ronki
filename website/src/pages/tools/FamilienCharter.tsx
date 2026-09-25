@@ -78,7 +78,7 @@ export default function FamilienCharter() {
         <div className="max-w-3xl mx-auto">
           <Link
             to="/tools"
-            className="inline-flex items-center gap-2 text-sm text-teal-dark/60 hover:text-teal-dark focus:outline-none focus-visible:text-teal-dark focus-visible:underline underline-offset-4 transition-colors mb-8"
+            className="inline-flex items-center gap-2 text-sm text-ink/60 hover:text-ink focus:outline-none focus-visible:text-ink focus-visible:underline underline-offset-4 transition-colors mb-8"
           >
             <span aria-hidden>←</span> Werkzeuge
           </Link>
@@ -96,7 +96,7 @@ export default function FamilienCharter() {
               </p>
               <div className="grid sm:grid-cols-[1fr_auto] gap-6 items-start">
                 <div className="space-y-4">
-                  <h1 className="font-display font-bold text-3xl sm:text-4xl text-teal-dark leading-tight">
+                  <h1 className="font-display font-bold text-3xl sm:text-4xl text-ink leading-tight">
                     Eure{' '}
                     <em className="italic text-sage">Hausverfassung</em>.
                   </h1>
@@ -188,7 +188,7 @@ export default function FamilienCharter() {
                   <button
                     type="button"
                     onClick={() => setStep(step - 1)}
-                    className="inline-flex items-center gap-2 rounded-full border border-teal/30 px-5 py-3 text-sm text-teal-dark font-display font-medium hover:bg-teal-dark hover:text-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-cream transition-colors"
+                    className="inline-flex items-center gap-2 rounded-full border border-teal/30 px-5 py-3 text-sm text-ink font-display font-medium hover:bg-teal-dark hover:text-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-cream transition-colors"
                   >
                     ← Zurück
                   </button>
@@ -210,7 +210,7 @@ export default function FamilienCharter() {
                 <button
                   type="button"
                   onClick={() => setStep(step - 1)}
-                  className="inline-flex items-center gap-2 rounded-full border border-teal/30 px-5 py-3 text-sm text-teal-dark font-display font-medium hover:bg-teal-dark hover:text-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-cream transition-colors"
+                  className="inline-flex items-center gap-2 rounded-full border border-teal/30 px-5 py-3 text-sm text-ink font-display font-medium hover:bg-teal-dark hover:text-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-cream transition-colors"
                 >
                   ← Bearbeiten
                 </button>
@@ -255,7 +255,7 @@ function FamilyStep({
           onChange={(e) => onUpdate('familyName', e.target.value)}
           placeholder="zum Beispiel Müller"
           maxLength={40}
-          className="w-full rounded-xl border border-teal/20 bg-cream px-4 py-3 text-base text-teal-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:border-transparent"
+          className="w-full rounded-xl border border-teal/20 bg-cream px-4 py-3 text-base text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:border-transparent"
         />
       </label>
       <div>
@@ -271,7 +271,7 @@ function FamilyStep({
               className={`min-w-[3.5rem] py-2.5 px-3 rounded-xl border-2 font-display font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-cream transition-all ${
                 answers.childCount === n
                   ? 'border-teal bg-teal text-cream shadow-sm'
-                  : 'border-teal/20 bg-cream text-teal-dark hover:border-teal'
+                  : 'border-teal/20 bg-cream text-ink hover:border-teal'
               }`}
             >
               {n}
@@ -289,7 +289,7 @@ function FamilyStep({
           onChange={(e) => onUpdate('signatures', e.target.value)}
           placeholder="z.B. Anna, Lukas, Mama, Papa"
           maxLength={120}
-          className="w-full rounded-xl border border-teal/20 bg-cream px-4 py-3 text-base text-teal-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:border-transparent"
+          className="w-full rounded-xl border border-teal/20 bg-cream px-4 py-3 text-base text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:border-transparent"
         />
         <span className="text-xs text-ink/55 mt-1.5 block">
           Wir drucken pro Name eine echte Signaturzeile unten auf die Charter.
@@ -430,7 +430,7 @@ function VersprechenStep({
             maxLength={180}
             rows={2}
             placeholder="z.B. Damit wir abends noch Zeit zum Vorlesen haben."
-            className="w-full rounded-xl border border-teal/20 bg-cream px-4 py-3 text-base text-teal-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:border-transparent leading-relaxed"
+            className="w-full rounded-xl border border-teal/20 bg-cream px-4 py-3 text-base text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:border-transparent leading-relaxed"
           />
           <span className="text-xs text-ink/55 mt-1 block tabular-nums">
             {wofuer.length} / 180
@@ -456,7 +456,7 @@ function VersprechenStep({
             maxLength={400}
             rows={4}
             placeholder="Schreib einfach das hin, was ihr euch heute Abend nochmal selbst sagen würdet."
-            className="w-full rounded-xl border border-teal/20 bg-cream px-4 py-3 text-base text-teal-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:border-transparent leading-relaxed"
+            className="w-full rounded-xl border border-teal/20 bg-cream px-4 py-3 text-base text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:border-transparent leading-relaxed"
           />
           <span className="text-xs text-ink/55 mt-1 block tabular-nums">
             {versprechen.length} / 400
@@ -495,8 +495,8 @@ function ChoiceGroup<T extends string>({
               onClick={() => onToggle(value)}
               className={`w-full text-left rounded-xl border-2 px-5 py-4 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-cream ${
                 active
-                  ? 'border-teal bg-teal/8 text-teal-dark shadow-sm'
-                  : 'border-teal/20 bg-cream text-teal-dark hover:border-teal'
+                  ? 'border-teal bg-teal/8 text-ink shadow-sm'
+                  : 'border-teal/20 bg-cream text-ink hover:border-teal'
               }`}
             >
               <span className="flex items-start gap-3">
@@ -557,7 +557,7 @@ function CharterMiniPoster({ reduced }: { reduced: boolean | null }) {
         {/* Gradient stripe */}
         <span className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-mustard via-sage to-teal" />
         {/* Mustard sticker */}
-        <span className="absolute right-2 top-3 -rotate-6 rounded-sm bg-mustard/90 ring-1 ring-mustard/60 px-1.5 py-0.5 text-[7px] font-display font-bold text-teal-dark tabular-nums shadow-sm">
+        <span className="absolute right-2 top-3 -rotate-6 rounded-sm bg-mustard/90 ring-1 ring-mustard/60 px-1.5 py-0.5 text-[7px] font-display font-bold text-ink tabular-nums shadow-sm">
           STAND
         </span>
         {/* Inner double-frame */}
@@ -565,7 +565,7 @@ function CharterMiniPoster({ reduced }: { reduced: boolean | null }) {
           <p className="text-[7px] uppercase tracking-[0.18em] text-teal font-semibold">
             Hausverfassung
           </p>
-          <p className="text-[11px] font-display font-bold text-teal-dark mt-1 leading-tight">
+          <p className="text-[11px] font-display font-bold text-ink mt-1 leading-tight">
             Familie Beispiel
           </p>
           <div className="mt-2 space-y-1.5">
@@ -581,7 +581,7 @@ function CharterMiniPoster({ reduced }: { reduced: boolean | null }) {
           {/* Signature line */}
           <div className="absolute bottom-3 left-3 right-3 space-y-1">
             <span className="block h-px w-[60%] bg-teal/30" />
-            <span className="block text-[6px] uppercase tracking-[0.18em] text-teal-dark/60 font-semibold">
+            <span className="block text-[6px] uppercase tracking-[0.18em] text-ink/60 font-semibold">
               Unterschrieben
             </span>
           </div>

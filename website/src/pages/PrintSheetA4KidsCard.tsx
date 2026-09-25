@@ -189,7 +189,7 @@ const a4SheetCss = `
     z-index: 20;
   }
   .cut-marks line {
-    stroke: #1A3C3F;
+    stroke: #040812;
     stroke-width: 0.7;
     vector-effect: non-scaling-stroke;
     stroke-linecap: round;
@@ -205,8 +205,8 @@ const a4SheetCss = `
     top: -28px;
     left: 50%;
     transform: translateX(-50%);
-    background: #1A3C3F;
-    color: #FDF8F0;
+    background: #040812;
+    color: #FFFFFF;
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-size: 11px;
     font-weight: 700;
@@ -257,8 +257,8 @@ const instructionBarStyle: React.CSSProperties = {
   position: 'sticky',
   top: 16,
   zIndex: 30,
-  background: '#1A3C3F',
-  color: '#FDF8F0',
+  background: '#040812',
+  color: '#FFFFFF',
   padding: '10px 18px',
   borderRadius: 999,
   fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
@@ -273,8 +273,8 @@ const instructionBarStyle: React.CSSProperties = {
 
 const printBtnStyle: React.CSSProperties = {
   marginLeft: 8,
-  background: '#FCD34D',
-  color: '#1A3C3F',
+  background: '#FDD134',
+  color: '#040812',
   border: 0,
   padding: '6px 14px',
   borderRadius: 999,
@@ -288,6 +288,6 @@ const printBtnStyle: React.CSSProperties = {
 const rollBtnStyle: React.CSSProperties = {
   ...printBtnStyle,
   marginLeft: 'auto',
-  background: '#50A082',
-  color: '#FDF8F0',
+  background: '#0544B0',
+  color: '#FFFFFF',
 };

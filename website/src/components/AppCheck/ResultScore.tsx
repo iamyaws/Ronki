@@ -48,17 +48,17 @@ const TONE_CLASSES: Record<ScoreBandDef['tone'], { bg: string; ring: string; acc
   sage: {
     bg: 'bg-sage/12',
     ring: 'ring-sage/25',
-    accent: 'text-teal-dark',
+    accent: 'text-ink',
   },
   mustard: {
     bg: 'bg-mustard-soft/40',
     ring: 'ring-mustard/30',
-    accent: 'text-teal-dark',
+    accent: 'text-ink',
   },
   serious: {
     bg: 'bg-teal-dark/8',
     ring: 'ring-teal-dark/25',
-    accent: 'text-teal-dark',
+    accent: 'text-ink',
   },
 };
 
@@ -130,7 +130,7 @@ export function ResultScore({ appName, answers, score }: Props) {
           className={`rounded-2xl ${tone.bg} ring-1 ring-inset ${tone.ring} px-7 py-8 sm:px-10 sm:py-10`}
         >
           <div className="flex items-baseline gap-4 mb-4">
-            <span className="text-6xl font-display font-bold tabular-nums text-teal-dark">
+            <span className="text-6xl font-display font-bold tabular-nums text-ink">
               {scoreRendered}
             </span>
             <span className="text-lg text-ink/55">/ 10 Pattern beobachtet</span>
@@ -153,7 +153,7 @@ export function ResultScore({ appName, answers, score }: Props) {
           {...sectionMotion(0.05)}
           className="border-l-4 border-mustard pl-6 py-2 italic"
         >
-          <blockquote className="text-lg sm:text-xl text-teal-dark leading-snug max-w-prose">
+          <blockquote className="text-lg sm:text-xl text-ink leading-snug max-w-prose">
             „{vignette.quote}"
           </blockquote>
           <figcaption className="mt-3 text-sm text-ink/60 not-italic">
@@ -167,7 +167,7 @@ export function ResultScore({ appName, answers, score }: Props) {
           {...sectionMotion(0)}
           className="rounded-2xl bg-cream/80 ring-1 ring-inset ring-teal/15 px-7 py-8 sm:px-10 sm:py-10 space-y-3"
         >
-          <h2 className="font-display font-bold text-2xl text-teal-dark">
+          <h2 className="font-display font-bold text-2xl text-ink">
             Noch zu wenig zum Einordnen
           </h2>
           <p className="text-ink/75 leading-relaxed max-w-prose">
@@ -185,14 +185,14 @@ export function ResultScore({ appName, answers, score }: Props) {
         className="space-y-2 text-sm text-ink/65"
       >
         <p>
-          Bewertete App: <strong className="text-teal-dark">{appName}</strong>
+          Bewertete App: <strong className="text-ink">{appName}</strong>
         </p>
         <p className="max-w-prose">
           Aus deinen Antworten:{' '}
-          <strong className="text-teal-dark">{stats.flagged}</strong> Pattern
+          <strong className="text-ink">{stats.flagged}</strong> Pattern
           beobachtet,{' '}
-          <strong className="text-teal-dark">{stats.cleared}</strong> verneint,{' '}
-          <strong className="text-teal-dark">{stats.unclear}</strong> offen
+          <strong className="text-ink">{stats.cleared}</strong> verneint,{' '}
+          <strong className="text-ink">{stats.unclear}</strong> offen
           gelassen.
         </p>
       </motion.div>
@@ -214,7 +214,7 @@ export function ResultScore({ appName, answers, score }: Props) {
           child" framing that puts the pattern in pedagogical terms. */}
       {flaggedQuestions.length > 0 && (
         <motion.div {...sectionMotion(0.1)} className="space-y-5">
-          <h3 className="font-display font-bold text-xl text-teal-dark">
+          <h3 className="font-display font-bold text-xl text-ink">
             Was deine Antworten zu den einzelnen Pattern bedeuten
           </h3>
           <ul className="space-y-4">
@@ -223,7 +223,7 @@ export function ResultScore({ appName, answers, score }: Props) {
                 key={q.id}
                 className="rounded-xl bg-cream/70 border border-teal/10 p-5 space-y-3"
               >
-                <p className="font-display font-semibold text-teal-dark max-w-prose">
+                <p className="font-display font-semibold text-ink max-w-prose">
                   {q.prompt}
                 </p>
                 <p className="text-sm font-display font-semibold italic text-teal max-w-prose">
@@ -260,7 +260,7 @@ export function ResultScore({ appName, answers, score }: Props) {
       {/* Surface unclear questions as a "things you could look into" list. */}
       {unclearQuestions.length > 0 && (
         <motion.div {...sectionMotion(0.2)} className="space-y-4">
-          <h3 className="font-display font-bold text-lg text-teal-dark">
+          <h3 className="font-display font-bold text-lg text-ink">
             Diese Fragen waren für dich unklar
           </h3>
           <ul className="space-y-3">
@@ -269,7 +269,7 @@ export function ResultScore({ appName, answers, score }: Props) {
                 key={q.id}
                 className="rounded-xl bg-cream/50 border border-teal/10 p-4"
               >
-                <p className="text-sm text-teal-dark mb-1 max-w-prose">
+                <p className="text-sm text-ink mb-1 max-w-prose">
                   {q.prompt}
                 </p>
                 <p className="text-xs text-ink/60 leading-relaxed max-w-prose">
@@ -298,7 +298,7 @@ export function ResultScore({ appName, answers, score }: Props) {
           {...sectionMotion(0.3)}
           className="rounded-2xl bg-teal-dark/8 border border-teal-dark/15 px-7 py-7 sm:px-10 sm:py-9"
         >
-          <p className="font-display font-semibold text-lg text-teal-dark leading-relaxed max-w-prose">
+          <p className="font-display font-semibold text-lg text-ink leading-relaxed max-w-prose">
             Was du gerade beobachtet hast, ist nicht die Ausnahme. Es ist
             Standard-Praxis in der Branche, weil diese Pattern messbar
             Sessions verlängern. Du bist nicht paranoid wenn dir das
@@ -311,7 +311,7 @@ export function ResultScore({ appName, answers, score }: Props) {
           score + band + key learning. Parent downloads, posts wherever. */}
       {!tooSparseForBand && (
         <motion.div {...sectionMotion(0.35)} className="space-y-3">
-          <h3 className="font-display font-bold text-lg text-teal-dark">
+          <h3 className="font-display font-bold text-lg text-ink">
             Karte für andere Eltern
           </h3>
           <ShareCard appName={appName} answers={answers} score={score} />

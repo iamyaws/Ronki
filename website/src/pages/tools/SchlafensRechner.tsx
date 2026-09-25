@@ -54,7 +54,7 @@ export default function SchlafensRechner() {
         <div className="max-w-3xl mx-auto">
           <Link
             to="/tools"
-            className="inline-flex items-center gap-2 text-sm text-teal-dark/60 hover:text-teal-dark focus:outline-none focus-visible:text-teal-dark focus-visible:underline underline-offset-4 transition-colors mb-8"
+            className="inline-flex items-center gap-2 text-sm text-ink/60 hover:text-ink focus:outline-none focus-visible:text-ink focus-visible:underline underline-offset-4 transition-colors mb-8"
           >
             <span aria-hidden>←</span> Werkzeuge
           </Link>
@@ -64,7 +64,7 @@ export default function SchlafensRechner() {
               <p className="text-xs uppercase tracking-[0.2em] text-teal font-semibold">
                 Werkzeug für Eltern
               </p>
-              <h1 className="font-display font-bold text-4xl sm:text-5xl lg:text-6xl leading-[1.04] tracking-tight text-teal-dark">
+              <h1 className="font-display font-bold text-4xl sm:text-5xl lg:text-6xl leading-[1.04] tracking-tight text-ink">
                 Wann muss dein Kind ins{' '}
                 <em className="italic text-sage">Bett</em>?
               </h1>
@@ -98,7 +98,7 @@ export default function SchlafensRechner() {
                         className={`min-w-[3rem] py-2.5 px-3 rounded-xl border-2 font-display font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-cream transition-all ${
                           age === a
                             ? 'border-teal bg-teal text-cream shadow-sm'
-                            : 'border-teal/20 bg-cream text-teal-dark hover:border-teal'
+                            : 'border-teal/20 bg-cream text-ink hover:border-teal'
                         }`}
                       >
                         {a}
@@ -118,7 +118,7 @@ export default function SchlafensRechner() {
                     type="time"
                     value={wakeUp}
                     onChange={(e) => setWakeUp(e.target.value)}
-                    className="w-full text-2xl font-display font-bold text-teal-dark bg-cream border-2 border-teal/20 rounded-xl px-4 py-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:border-transparent tabular-nums"
+                    className="w-full text-2xl font-display font-bold text-ink bg-cream border-2 border-teal/20 rounded-xl px-4 py-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:border-transparent tabular-nums"
                   />
                   <p className="text-xs text-ink/55 mt-2">
                     Schule, Kita, oder einfach euer normaler Werktag-Start.
@@ -139,7 +139,7 @@ export default function SchlafensRechner() {
                   <p className="text-xs uppercase tracking-[0.2em] text-teal font-semibold mb-4">
                     Dein Abend-Plan, rückwärts
                   </p>
-                  <h2 className="font-display font-bold text-2xl sm:text-3xl text-teal-dark mb-2">
+                  <h2 className="font-display font-bold text-2xl sm:text-3xl text-ink mb-2">
                     {schedule.recommendation.recommendedHours}{' '}
                     Stunden Schlaf für ein {age}-jähriges Kind.
                   </h2>
@@ -179,7 +179,7 @@ export default function SchlafensRechner() {
                 </ol>
 
                 <div className="rounded-2xl bg-cream/80 ring-1 ring-inset ring-teal/15 px-6 py-6 sm:px-8 sm:py-7 space-y-3">
-                  <h3 className="font-display font-bold text-lg text-teal-dark">
+                  <h3 className="font-display font-bold text-lg text-ink">
                     Was die Zahlen bedeuten
                   </h3>
                   <p className="text-sm text-ink/75 leading-relaxed max-w-prose">
@@ -200,7 +200,7 @@ export default function SchlafensRechner() {
                 </div>
 
                 <div className="rounded-2xl bg-teal-dark/8 border border-teal-dark/15 px-6 py-6 sm:px-8 sm:py-7">
-                  <p className="font-display font-semibold text-base text-teal-dark leading-relaxed max-w-prose">
+                  <p className="font-display font-semibold text-base text-ink leading-relaxed max-w-prose">
                     Das ist ein Vorschlag, kein Dogma. Eure Familie hat
                     Tagesabläufe, an die sich der Plan anpassen muss. Aber
                     wenn ihr morgens regelmäßig schwer aus dem Bett kommt,
@@ -211,7 +211,7 @@ export default function SchlafensRechner() {
                 </div>
 
                 <div className="space-y-3">
-                  <h3 className="font-display font-bold text-lg text-teal-dark">
+                  <h3 className="font-display font-bold text-lg text-ink">
                     Karte für andere Eltern
                   </h3>
                   <SchlafensShareCard
@@ -257,14 +257,14 @@ const ACCENT_CLASSES: Record<
 > = {
   sage: {
     card: 'bg-sage/20 ring-sage/35',
-    chip: 'bg-cream/70 text-teal-dark',
-    timeText: 'text-teal-dark',
+    chip: 'bg-cream/70 text-ink',
+    timeText: 'text-ink',
     detailText: 'text-ink/75',
   },
   mustard: {
     card: 'bg-mustard-soft/55 ring-mustard/40',
-    chip: 'bg-cream/80 text-teal-dark',
-    timeText: 'text-teal-dark',
+    chip: 'bg-cream/80 text-ink',
+    timeText: 'text-ink',
     detailText: 'text-ink/80',
   },
   teal: {

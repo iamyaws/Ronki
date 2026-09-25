@@ -48,7 +48,7 @@ export function TimeCostProjection() {
       className="rounded-2xl bg-cream/70 ring-1 ring-inset ring-teal/15 px-7 py-7 sm:px-10 sm:py-9 space-y-6"
     >
       <div className="space-y-2">
-        <h3 className="font-display font-bold text-xl sm:text-2xl text-teal-dark">
+        <h3 className="font-display font-bold text-xl sm:text-2xl text-ink">
           Was kostet diese App eigentlich an Zeit?
         </h3>
         <p className="text-sm text-ink/70 max-w-prose">
@@ -62,7 +62,7 @@ export function TimeCostProjection() {
         <label className="block">
           <span className="flex items-baseline justify-between mb-2">
             <span className="text-sm text-ink/70">Min pro Tag</span>
-            <span className="font-display font-bold text-2xl text-teal-dark tabular-nums">
+            <span className="font-display font-bold text-2xl text-ink tabular-nums">
               {minutesPerDay}
             </span>
           </span>
@@ -91,7 +91,7 @@ export function TimeCostProjection() {
           <div className="text-xs text-ink/55 uppercase tracking-wider mb-1">
             pro Woche
           </div>
-          <div className="font-display font-bold text-lg text-teal-dark tabular-nums">
+          <div className="font-display font-bold text-lg text-ink tabular-nums">
             {formatHours(minutesPerDay * 7)}
           </div>
         </div>
@@ -99,7 +99,7 @@ export function TimeCostProjection() {
           <div className="text-xs text-ink/55 uppercase tracking-wider mb-1">
             pro Monat
           </div>
-          <div className="font-display font-bold text-lg text-teal-dark tabular-nums">
+          <div className="font-display font-bold text-lg text-ink tabular-nums">
             {formatHours(minutesPerDay * 30)}
           </div>
         </div>
@@ -107,7 +107,7 @@ export function TimeCostProjection() {
           <div className="text-xs text-ink/55 uppercase tracking-wider mb-1">
             pro Jahr
           </div>
-          <div className="font-display font-bold text-lg text-teal-dark tabular-nums">
+          <div className="font-display font-bold text-lg text-ink tabular-nums">
             {formatHours(yearMinutes)}
           </div>
         </div>
@@ -115,14 +115,14 @@ export function TimeCostProjection() {
 
       <div className="rounded-xl bg-teal-dark/5 border border-teal-dark/10 p-5 text-sm text-ink/80 leading-relaxed">
         Im Jahr verbringt dein Kind dann etwa{' '}
-        <strong className="text-teal-dark tabular-nums">
+        <strong className="text-ink tabular-nums">
           {weekHours >= 1 ? `${Math.round(yearDaysContinuous)} ganze 24-Stunden-Tage` : `${Math.round(yearMinutes / 60)} Stunden`}
         </strong>{' '}
         mit dieser App. Das entspricht ungefähr{' '}
-        <strong className="text-teal-dark tabular-nums">{trainings} Fußball-Trainings</strong>,{' '}
-        <strong className="text-teal-dark tabular-nums">{readAlouds} Vorlese-Stunden</strong>{' '}
+        <strong className="text-ink tabular-nums">{trainings} Fußball-Trainings</strong>,{' '}
+        <strong className="text-ink tabular-nums">{readAlouds} Vorlese-Stunden</strong>{' '}
         oder{' '}
-        <strong className="text-teal-dark tabular-nums">{birthdays} Geburtstagsfeiern</strong>.
+        <strong className="text-ink tabular-nums">{birthdays} Geburtstagsfeiern</strong>.
       </div>
 
       <p className="text-xs text-ink/50 italic">

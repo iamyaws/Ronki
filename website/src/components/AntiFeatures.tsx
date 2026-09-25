@@ -1,6 +1,15 @@
 import { motion } from 'motion/react';
-import { Link } from 'react-router-dom';
 import { EASE_OUT } from '../lib/motion';
+import {
+  ChecklistItem,
+  DrawnLink,
+  NotebookPage,
+  Ribbon,
+  StickyNote,
+  TornNote,
+} from './bausteine';
+import { HandNote } from './primitives/HandNote';
+import { PaperEdge } from './primitives/PaperEdge';
 
 const ITEMS = [
   { label: 'Keine Streaks, die reißen können.', detail: 'Kontinuität wächst als Ort in Ronkis Welt. Nicht als Zähler, der heute noch heil ist und morgen zerbricht.' },
@@ -10,104 +19,160 @@ const ITEMS = [
   { label: 'Keine Daten-Weitergabe an Dritte.', detail: 'Keine Cookies, kein personenbezogenes Tracking. Supabase und Plausible, beide in der EU.' },
 ];
 
+/** The other half of honesty: what Ronki cannot do for you. */
+const LIMITS = [
+  { label: 'Kein Ersatz für dich.', detail: 'Ronki erinnert, du begleitest.' },
+  { label: 'Nicht jedes Kind springt drauf an.', detail: 'Manche brauchen das Blatt Papier, nicht die App.' },
+  { label: 'Die ersten zwei Wochen dauern länger.', detail: 'Nicht kürzer.' },
+  { label: 'Frühe Version.', detail: 'Es gibt Ecken, die noch haken.' },
+];
+
+/** The ruled line spacing the notebook page and its text share. Every
+ *  line of type sets to exactly this, so nothing floats between rules. */
+const RULE = 34;
+
+/**
+ * The honest list, on the paper spread.
+ *
+ * The left column used to strike its own lines through as you scrolled.
+ * It looked clever and made five sentences hard to read, so the mark is
+ * a drawn tick beside the line now and the line itself stays intact.
+ */
 export function AntiFeatures() {
   return (
-    <section
-      className="relative px-6 py-28 sm:py-32 border-t border-teal/10"
-      aria-labelledby="anti-features-heading"
-    >
-      <div className="max-w-5xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-20%' }}
-          transition={{ duration: 0.7 }}
-          className="mb-14 max-w-3xl"
-        >
-          <p className="text-xs uppercase tracking-[0.2em] text-teal-dark/85 mb-6 font-semibold">
-            Unser Versprechen
-          </p>
-          <h2
-            id="anti-features-heading"
-            className="font-display font-bold text-5xl sm:text-6xl lg:text-7xl leading-[1.1] tracking-tight text-teal-dark"
-          >
-            Die <em className="italic text-sage">ehrliche</em> Liste.
-          </h2>
-          <p className="mt-6 text-base opacity-75 max-w-2xl leading-relaxed">
-            Das sind keine fehlenden Funktionen. Es sind bewusste Entscheidungen, festgeschrieben, bevor die erste Zeile Code stand.
-          </p>
-          <div className="mt-8 max-w-2xl rounded-2xl bg-cream/70 backdrop-blur-sm border border-mustard/30 p-5 sm:p-6 shadow-sm">
-            <div className="flex items-center gap-2 mb-3">
-              <span aria-hidden className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-mustard/80 text-teal-dark font-display font-bold text-xs">i</span>
-              <p className="text-xs uppercase tracking-[0.15em] text-teal-dark font-bold">
-                Kurz erklärt
-              </p>
-            </div>
-            <p className="font-display font-bold text-xl sm:text-2xl text-teal-dark leading-tight mb-3">
-              Dark Patterns
-            </p>
-            <p className="text-sm sm:text-base text-ink/80 leading-relaxed">
-              So nennt man Tricks in Apps und Spielen, die Kinder länger binden, zum Kaufen bewegen oder zurücklocken. Lootboxen mit Glücksspiel-Logik. Streaks, die ein schlechtes Gewissen machen. Push-Nachrichten am Abend. „Nur noch zwei Minuten"-Schleifen. Wir haben sie uns angesehen und weggelassen.
-            </p>
-          </div>
-        </motion.div>
-
-        <ul className="flex flex-col">
-          {ITEMS.map((item, i) => (
-            <motion.li
-              key={item.label}
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: '-10%' }}
-              transition={{ duration: 0.6, delay: i * 0.08, ease: EASE_OUT }}
-              className="group border-t border-teal/15 last:border-b py-7 sm:py-9"
+    <div className="relative">
+      <PaperEdge tone="paper" variant={2} />
+      <section
+        className="relative bg-paper px-5 sm:px-6 py-12 sm:py-14"
+        aria-labelledby="anti-features-heading"
+      >
+        <div className="relative max-w-5xl mx-auto">
+          <div className="grid gap-10 lg:grid-cols-[1fr_0.9fr] lg:gap-14 lg:items-start">
+            <motion.div
+              initial={{ opacity: 1, y: 14 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-15%' }}
+              transition={{ duration: 0.7 }}
             >
-              <div className="flex flex-col sm:flex-row sm:items-baseline gap-3 sm:gap-8">
-                <span className="text-xs font-display font-semibold text-teal/70 tracking-[0.2em] sm:min-w-[3ch]">
-                  {String(i + 1).padStart(2, '0')}
-                </span>
-                <div className="flex-1">
-                  <p className="relative font-display font-bold text-2xl sm:text-3xl leading-tight inline-block text-teal-dark">
-                    {item.label}
-                    <motion.span
-                      aria-hidden
-                      initial={{ scaleX: 0 }}
-                      whileInView={{ scaleX: 1 }}
-                      viewport={{ once: true, margin: '-10%' }}
-                      transition={{ duration: 0.7, delay: i * 0.08 + 0.4, ease: EASE_OUT }}
-                      className="absolute left-0 top-1/2 h-[3px] w-full origin-left bg-teal-dark/75 rounded-full"
-                    />
-                  </p>
-                  <p className="mt-3 text-sm sm:text-base opacity-75 leading-relaxed max-w-xl text-ink">
-                    {item.detail}
-                  </p>
-                </div>
-              </div>
-            </motion.li>
-          ))}
-        </ul>
+              <Ribbon tone="sun" rotate={-1.4}>
+                Unser Versprechen
+              </Ribbon>
 
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-10%' }}
-          transition={{ duration: 0.7, delay: 0.2 }}
-          className="mt-16 text-center"
-        >
-          <Link
-            to="/wissenschaft"
-            className="group inline-flex items-center gap-3 rounded-full border border-teal/20 bg-cream/60 backdrop-blur-sm px-8 py-4 hover:border-teal/40 hover:bg-cream transition-all shadow-sm"
-          >
-            <span className="font-display font-semibold text-sm sm:text-base text-teal-dark">
-              Wissenschaftlicher Hintergrund
-            </span>
-            <span className="text-teal/70 group-hover:text-teal group-hover:translate-x-1 transition-all" aria-hidden>
-              →
-            </span>
-          </Link>
-        </motion.div>
-      </div>
-    </section>
+              <h2
+                id="anti-features-heading"
+                className="bb-display mt-6 text-4xl sm:text-5xl text-ink"
+              >
+                Die{' '}
+                <span className="bb-swipe">
+                  ehrliche
+                  <svg aria-hidden viewBox="0 0 300 20" preserveAspectRatio="none">
+                    <use href="#bb-underline" />
+                  </svg>
+                </span>{' '}
+                Liste.
+              </h2>
+
+              <p className="mt-4 text-[1.05rem] sm:text-lg text-ink/85 leading-relaxed max-w-xl">
+                Das sind keine fehlenden Funktionen. Es sind bewusste Entscheidungen, festgeschrieben, bevor die erste Zeile Code stand.
+              </p>
+
+              <HandNote rotate={-4} className="mt-7">
+                Steht so im Code.
+              </HandNote>
+            </motion.div>
+
+            {/* Dark patterns, on a sun sticky note. The one per page. */}
+            <StickyNote eyebrow="Kurz erklärt" title="Dark Patterns" curl={false}>
+              So nennt man Tricks in Apps und Spielen, die Kinder länger binden, zum Kaufen bewegen oder zurücklocken. Lootboxen mit Glücksspiel-Logik. Streaks, die ein schlechtes Gewissen machen. Push-Nachrichten am Abend. „Nur noch zwei Minuten"-Schleifen. Wir haben sie uns angesehen und weggelassen.
+            </StickyNote>
+          </div>
+
+          {/* Two different objects, not two matching cards: the sheet out
+           *  of the exercise book with the decisions on it, and the strip
+           *  torn off a bigger page with the limits. The torn strip in
+           *  "Vorher / Nachher" is pinned, this one is taped, and the two
+           *  are never on screen together. */}
+          <div className="mt-10 grid gap-10 md:grid-cols-[1.05fr_0.95fr] md:gap-9 md:items-start">
+            {/* Left: the things we left out on purpose. */}
+            <NotebookPage ruleHeight={RULE} rotate={-0.9}>
+              <p
+                className="bb-display text-[1.35rem] sm:text-[1.5rem] text-ink"
+                style={{ lineHeight: `${RULE}px` }}
+              >
+                Was wir weggelassen haben
+              </p>
+              <ul>
+                {ITEMS.map((item, i) => (
+                  <motion.li
+                    key={item.label}
+                    initial={{ opacity: 1, y: 8 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: '-5%' }}
+                    transition={{ duration: 0.5, delay: i * 0.05, ease: EASE_OUT }}
+                    /* One empty ruled line after the title, then the items
+                     *  run line after line like a handwritten list. */
+                    style={i === 0 ? { marginTop: `${RULE}px` } : undefined}
+                  >
+                    <ChecklistItem mark="check" as="div">
+                      <span className="block">{item.label}</span>
+                      <span
+                        className="block font-body text-[0.92rem] font-normal text-ink/80"
+                        style={{ lineHeight: `${RULE}px` }}
+                      >
+                        {item.detail}
+                      </span>
+                    </ChecklistItem>
+                  </motion.li>
+                ))}
+              </ul>
+            </NotebookPage>
+
+            {/* Right: what Ronki cannot do, on a strip torn off the page,
+             *  with the research link under it as a drawn line, never a
+             *  pill: a link is not an action. */}
+            <div className="flex flex-col gap-9 md:pt-6">
+              <TornNote pin="tape" rotate={1.4}>
+                <p className="bb-display text-[1.3rem] sm:text-[1.45rem] text-ink">
+                  Was Ronki nicht kann
+                </p>
+                <ul className="mt-4 flex flex-col gap-4 pb-2">
+                  {LIMITS.map((item, i) => (
+                    <motion.li
+                      key={item.label}
+                      initial={{ opacity: 1, y: 8 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true, margin: '-5%' }}
+                      transition={{ duration: 0.5, delay: i * 0.05, ease: EASE_OUT }}
+                      className="flex items-start gap-3.5"
+                    >
+                      <svg
+                        aria-hidden
+                        focusable="false"
+                        viewBox="0 0 64 64"
+                        className="mt-1 h-5 w-5 shrink-0 text-ink/75"
+                      >
+                        <use href="#bb-cross" />
+                      </svg>
+                      <div>
+                        <p className="font-display font-bold text-[1.05rem] leading-snug text-ink">
+                          {item.label}
+                        </p>
+                        <p className="mt-1 text-[0.93rem] text-ink/85 leading-relaxed">
+                          {item.detail}
+                        </p>
+                      </div>
+                    </motion.li>
+                  ))}
+                </ul>
+              </TornNote>
+
+              <DrawnLink href="/wissenschaft" className="self-center md:self-start">
+                Wissenschaftlicher Hintergrund
+              </DrawnLink>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
   );
 }
-

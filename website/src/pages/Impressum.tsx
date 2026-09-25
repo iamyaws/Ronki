@@ -15,7 +15,7 @@ export default function Impressum() {
         <article className="max-w-3xl mx-auto">
           <Link
             to="/"
-            className="inline-flex items-center gap-2 text-sm text-teal-dark/70 hover:text-teal-dark transition-colors"
+            className="inline-flex items-center gap-2 text-sm text-ink/70 hover:text-ink transition-colors"
           >
             <span aria-hidden>←</span> Zurück zu Ronki
           </Link>
@@ -23,7 +23,7 @@ export default function Impressum() {
           <p className="mt-10 text-xs uppercase tracking-[0.2em] text-teal font-medium">
             Rechtliches
           </p>
-          <h1 className="mt-4 font-display font-bold text-4xl sm:text-5xl lg:text-6xl leading-[1.05] tracking-tight text-teal-dark">
+          <h1 className="mt-4 font-display font-bold text-4xl sm:text-5xl lg:text-6xl leading-[1.05] tracking-tight text-ink">
             Impressum
           </h1>
           <p className="mt-5 text-base sm:text-lg text-ink/75 max-w-2xl leading-relaxed">
@@ -44,8 +44,8 @@ export default function Impressum() {
 
             <Section heading="Kontakt">
               <p>
-                E-Mail: <a href="mailto:hallo@ronki.de" className="underline decoration-mustard underline-offset-4 hover:text-teal-dark">hallo@ronki.de</a><br />
-                Telefon: <a href="tel:+4917657904421" className="underline decoration-mustard underline-offset-4 hover:text-teal-dark">+49 176 57904421</a>
+                E-Mail: <a href="mailto:hallo@ronki.de" className="underline decoration-mustard underline-offset-4 hover:text-ink">hallo@ronki.de</a><br />
+                Telefon: <a href="tel:+4917657904421" className="underline decoration-mustard underline-offset-4 hover:text-ink">+49 176 57904421</a>
               </p>
             </Section>
 
@@ -76,7 +76,7 @@ export default function Impressum() {
                   href="https://ec.europa.eu/consumers/odr/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="underline decoration-mustard underline-offset-4 hover:text-teal-dark break-words"
+                  className="underline decoration-mustard underline-offset-4 hover:text-ink break-words"
                 >
                   ec.europa.eu/consumers/odr
                 </a>
@@ -128,7 +128,7 @@ export default function Impressum() {
                 Nach aktueller Rechtslage genießen rein KI-generierte Bilder in Deutschland grundsätzlich keinen urheberrechtlichen Schutz (§ 2 Abs. 2 UrhG), da es an einer persönlichen geistigen Schöpfung fehlt. Soweit wir durch eigene kreative Bearbeitung, Auswahl oder Montage ein schutzfähiges Werk geschaffen haben, beanspruchen wir das Urheberrecht ausschließlich an dieser Bearbeitung, nicht am KI-Ausgangsbild.
               </p>
               <p>
-                Die abgebildeten Figuren und Szenen stellen keine realen Personen, Orte oder Ereignisse dar. Sollte dennoch unbeabsichtigt eine Ähnlichkeit mit realen Personen oder geschützten Werken entstanden sein, bitten wir um einen kurzen Hinweis an <a href="mailto:hallo@ronki.de" className="underline decoration-mustard underline-offset-4 hover:text-teal-dark">hallo@ronki.de</a>. Wir prüfen und ersetzen entsprechende Inhalte umgehend.
+                Die abgebildeten Figuren und Szenen stellen keine realen Personen, Orte oder Ereignisse dar. Sollte dennoch unbeabsichtigt eine Ähnlichkeit mit realen Personen oder geschützten Werken entstanden sein, bitten wir um einen kurzen Hinweis an <a href="mailto:hallo@ronki.de" className="underline decoration-mustard underline-offset-4 hover:text-ink">hallo@ronki.de</a>. Wir prüfen und ersetzen entsprechende Inhalte umgehend.
               </p>
               <p>
                 Das Foto von Marc Förster im „Über den Macher"-Bereich ist ein echtes Personenfoto und nicht KI-generiert. Avatar-Grafiken auf älteren oder Test-Varianten der Website sind Platzhalter und zeigen keine realen Personen; etwaige Aussagen daneben stehen in keinem Bezug zu den abgebildeten Avataren.
@@ -147,7 +147,7 @@ export default function Impressum() {
 function Section({ heading, children }: { heading: string; children: React.ReactNode }) {
   return (
     <section className="flex flex-col gap-4">
-      <h2 className="font-display font-bold text-xl sm:text-2xl tracking-tight text-teal-dark">
+      <h2 className="font-display font-bold text-xl sm:text-2xl tracking-tight text-ink">
         {heading}
       </h2>
       {children}

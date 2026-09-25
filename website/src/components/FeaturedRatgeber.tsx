@@ -24,12 +24,19 @@ import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { ARTICLES } from '../data/ratgeber-articles';
 import { EASE_OUT } from '../lib/motion';
+import { DrawnLink, IndexCard, PillButton } from './bausteine';
+import { HandNote } from './primitives/HandNote';
+import { PaperEdge } from './primitives/PaperEdge';
+import { StickerLabel } from './primitives/StickerLabel';
 
 const FEATURED_SLUGS = [
   'morgen-troedeln',
   'sticker-chart-alternative',
   'abendroutine-grundschulkind',
 ] as const;
+
+/** Each card lies a little differently in the drawer. */
+const TILTS = [-1.4, 0.9, -0.6];
 
 export function FeaturedRatgeber() {
   const picks = FEATURED_SLUGS
@@ -39,102 +46,96 @@ export function FeaturedRatgeber() {
   if (picks.length === 0) return null;
 
   return (
-    <section
-      className="relative px-6 py-28 sm:py-32 border-t border-teal/10"
-      aria-labelledby="featured-ratgeber-heading"
-    >
-      <div className="max-w-6xl mx-auto">
-        {/* ── Header ──────────────────────────────── */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-20%' }}
-          transition={{ duration: 0.7 }}
-          className="mb-14 max-w-3xl"
-        >
-          <p className="text-xs uppercase tracking-[0.2em] text-teal-dark/85 mb-6 font-semibold">
-            Aus dem Ratgeber
-          </p>
-          <h2
-            id="featured-ratgeber-heading"
-            className="font-display font-bold text-5xl sm:text-6xl lg:text-7xl leading-[1.1] tracking-tight text-teal-dark"
+    <div className="relative">
+      <PaperEdge tone="white" variant={0} />
+      <section
+        className="relative bg-white px-5 sm:px-6 py-12 sm:py-14"
+        aria-labelledby="featured-ratgeber-heading"
+      >
+        <div className="relative max-w-6xl mx-auto">
+          {/* ── Header ──────────────────────────────── */}
+          <motion.div
+            initial={{ opacity: 1, y: 14 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-15%' }}
+            transition={{ duration: 0.7 }}
+            className="max-w-3xl"
           >
-            Was wir <em className="italic text-sage">rausgefunden</em> haben.
-          </h2>
-          <p className="mt-6 text-base opacity-75 max-w-2xl leading-relaxed">
-            Ehrliche Artikel für Eltern von 5- bis 8-Jährigen. Keine Ratgeber-Klischees,
-            keine Versprechen in drei Schritten. Nur das, was die Forschung sagt und was
-            bei uns zuhause wirklich was verändert hat.
-          </p>
-        </motion.div>
+            <StickerLabel tone="sky-wash" rotate={-3}>
+              Aus dem Ratgeber
+            </StickerLabel>
 
-        {/* ── 3 article cards ─────────────────────── */}
-        <ul className="grid gap-7 sm:gap-8 md:grid-cols-3">
-          {picks.map((article, i) => (
-            <motion.li
-              key={article.slug}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-10%' }}
-              transition={{ duration: 0.6, delay: i * 0.08, ease: EASE_OUT }}
+            <h2
+              id="featured-ratgeber-heading"
+              className="bb-display mt-4 text-4xl sm:text-5xl lg:text-[3.5rem] text-ink"
             >
-              <Link
-                to={`/ratgeber/${article.slug}`}
-                className="group flex flex-col h-full rounded-2xl bg-cream/70 backdrop-blur-sm border border-teal/10 overflow-hidden hover:shadow-lg hover:-translate-y-1 focus-visible:-translate-y-1 focus-visible:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-cream transition-all duration-300"
-              >
-                <div className="relative aspect-[5/3] overflow-hidden">
-                  <img
-                    src={article.image}
-                    alt=""
-                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500"
-                    loading="lazy"
-                  />
-                  <div
-                    className="absolute inset-0 bg-gradient-to-t from-teal-dark/25 via-transparent to-transparent"
-                    aria-hidden
-                  />
-                </div>
-                <div className="flex flex-col flex-1 p-6 sm:p-7">
-                  <div className="flex items-center gap-3 mb-4">
-                    <span className="inline-flex items-center rounded-full bg-teal/10 px-3 py-1 text-[0.65rem] font-display font-bold uppercase tracking-[0.15em] text-teal">
-                      {article.category}
-                    </span>
-                    <span className="text-xs text-ink/50">
-                      {article.readMinutes} Min.
-                    </span>
-                  </div>
-                  <h3 className="font-display font-bold text-xl sm:text-[1.35rem] text-teal-dark leading-snug mb-3 group-hover:text-teal transition-colors">
-                    {article.title}
-                  </h3>
-                  <p className="text-sm text-ink/70 leading-relaxed mb-5 flex-1">
-                    {article.description}
-                  </p>
-                  <span className="inline-flex items-center gap-1 text-sm text-teal font-semibold group-hover:gap-2 transition-all">
-                    Weiterlesen <span aria-hidden>→</span>
-                  </span>
-                </div>
-              </Link>
-            </motion.li>
-          ))}
-        </ul>
+              Was wir{' '}
+              <span className="bb-swipe">
+                rausgefunden
+                <svg aria-hidden viewBox="0 0 300 20" preserveAspectRatio="none">
+                  <use href="#bb-underline" />
+                </svg>
+              </span>{' '}
+              haben.
+            </h2>
 
-        {/* ── All articles CTA ────────────────────── */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="mt-14 flex justify-center"
-        >
-          <Link
-            to="/ratgeber"
-            className="inline-flex items-center gap-2 rounded-full border border-teal/30 px-6 py-3 text-sm text-teal-dark font-display font-semibold hover:bg-teal-dark hover:text-cream hover:border-teal-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-cream transition-colors"
+            <p className="mt-4 text-[1.05rem] sm:text-lg text-ink/85 max-w-2xl leading-relaxed">
+              Ehrliche Artikel für Eltern von 5- bis 8-Jährigen. Keine Ratgeber-Klischees,
+              keine Versprechen in drei Schritten. Nur das, was die Forschung sagt und was
+              bei uns zuhause wirklich was verändert hat.
+            </p>
+          </motion.div>
+
+          <HandNote
+            rotate={4}
+            className="mt-6 lg:mt-0 lg:absolute lg:right-2 lg:top-14 lg:w-[190px] lg:text-right"
           >
-            Alle Artikel ansehen
-            <span aria-hidden>→</span>
-          </Link>
-        </motion.div>
-      </div>
-    </section>
+            Alles selbst ausprobiert.
+          </HandNote>
+
+          {/* ── 3 article cards ─────────────────────── */}
+          {/* Cards out of the index box: the tab names the drawer, the
+           *  picture is a small framed thumbnail and "Weiterlesen" is a
+           *  drawn line, so the teaser never wears a pill. */}
+          <ul className="mt-12 grid gap-9 sm:gap-7 md:grid-cols-3">
+            {picks.map((article, i) => (
+              <motion.li
+                key={article.slug}
+                initial={{ opacity: 1, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-5%' }}
+                transition={{ duration: 0.6, delay: i * 0.08, ease: EASE_OUT }}
+              >
+                <IndexCard
+                  tab={article.category}
+                  title={
+                    <Link
+                      to={`/ratgeber/${article.slug}`}
+                      className="text-ink transition-colors hover:text-cobalt"
+                    >
+                      {article.title}
+                    </Link>
+                  }
+                  meta={`${article.readMinutes} Minuten`}
+                  image={article.image}
+                  imageAlt=""
+                  rotate={TILTS[i % TILTS.length]}
+                >
+                  <p>{article.description}</p>
+                  <DrawnLink href={`/ratgeber/${article.slug}`} className="mt-3">
+                    Weiterlesen
+                  </DrawnLink>
+                </IndexCard>
+              </motion.li>
+            ))}
+          </ul>
+
+          {/* ── All articles CTA ────────────────────── */}
+          <div className="mt-12 flex justify-center">
+            <PillButton href="/ratgeber">Alle Artikel ansehen</PillButton>
+          </div>
+        </div>
+      </section>
+    </div>
   );
 }

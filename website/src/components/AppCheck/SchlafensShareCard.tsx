@@ -22,11 +22,11 @@ const W = 1200;
 const H = 675;
 
 const COLORS = {
-  cream: '#FDF8F0',
-  teal: '#1A3C3F',
+  cream: '#FFFFFF',
+  teal: '#040812',
   tealDark: '#0E2A2C',
-  sage: '#50A082',
-  mustard: '#FCD34D',
+  sage: '#0544B0',
+  mustard: '#FDD134',
   ink: '#1A2022',
   inkSoft: 'rgba(26, 32, 34, 0.65)',
 };
@@ -85,15 +85,15 @@ async function buildSchlafensCardPng({
 
   // Mustard glow top-left
   const tl = ctx.createRadialGradient(180, 140, 40, 180, 140, 380);
-  tl.addColorStop(0, 'rgba(252, 211, 77, 0.32)');
-  tl.addColorStop(1, 'rgba(252, 211, 77, 0)');
+  tl.addColorStop(0, 'rgba(253, 209, 52, 0.32)');
+  tl.addColorStop(1, 'rgba(253, 209, 52, 0)');
   ctx.fillStyle = tl;
   ctx.fillRect(0, 0, W, H);
 
   // Sage glow bottom-right
   const br = ctx.createRadialGradient(W - 200, H - 160, 40, W - 200, H - 160, 420);
-  br.addColorStop(0, 'rgba(80, 160, 130, 0.30)');
-  br.addColorStop(1, 'rgba(80, 160, 130, 0)');
+  br.addColorStop(0, 'rgba(5, 68, 176, 0.30)');
+  br.addColorStop(1, 'rgba(5, 68, 176, 0)');
   ctx.fillStyle = br;
   ctx.fillRect(0, 0, W, H);
 
@@ -141,7 +141,7 @@ async function buildSchlafensCardPng({
     } else if (c.tone === 'mustard') {
       ctx.fillStyle = 'rgba(253, 229, 137, 0.55)';
     } else {
-      ctx.fillStyle = 'rgba(80, 160, 130, 0.18)';
+      ctx.fillStyle = 'rgba(5, 68, 176, 0.18)';
     }
     roundRect(ctx, x, rowY, cardW, cardH, 16);
     ctx.fill();
@@ -149,7 +149,7 @@ async function buildSchlafensCardPng({
     // Label
     ctx.fillStyle =
       c.tone === 'teal'
-        ? 'rgba(253, 248, 240, 0.75)'
+        ? 'rgba(255, 255, 255, 0.75)'
         : COLORS.teal;
     ctx.font = '600 13px "Plus Jakarta Sans", system-ui, sans-serif';
     ctx.fillText(c.label, x + 18, rowY + 22);
@@ -169,7 +169,7 @@ async function buildSchlafensCardPng({
   ctx.fillText('ronki.de/tools/schlafens-rechner', 80, H - 32);
 
   ctx.font = '500 16px "Plus Jakarta Sans", system-ui, sans-serif';
-  ctx.fillStyle = 'rgba(253, 248, 240, 0.7)';
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
   const tag = 'Schlafmedizin-Konsens, eingesetzt';
   const tagW = ctx.measureText(tag).width;
   ctx.fillText(tag, W - 80 - tagW, H - 32);
@@ -211,7 +211,7 @@ export function SchlafensShareCard(props: Props) {
         type="button"
         onClick={handleDownload}
         disabled={status === 'rendering'}
-        className="group inline-flex items-center gap-2 rounded-full border border-teal/30 bg-cream px-5 py-3 text-sm text-teal-dark font-display font-semibold hover:bg-teal-dark hover:text-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-cream disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="group inline-flex items-center gap-2 rounded-full border border-teal/30 bg-cream px-5 py-3 text-sm text-ink font-display font-semibold hover:bg-teal-dark hover:text-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-cream disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
         {status === 'rendering' ? (
           <>
@@ -234,7 +234,7 @@ export function SchlafensShareCard(props: Props) {
         Eltern-Chat.
       </p>
       {status === 'error' && (
-        <p role="alert" className="text-sm text-teal-dark">
+        <p role="alert" className="text-sm text-ink">
           Bild-Erzeugung hat nicht geklappt. Versuch es bitte gleich noch
           mal.
         </p>

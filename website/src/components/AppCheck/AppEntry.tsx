@@ -97,7 +97,7 @@ export function AppEntry({ onContinue }: Props) {
               )}
               <span
                 className={`relative z-10 ${
-                  active ? 'text-cream' : 'text-teal-dark hover:text-teal'
+                  active ? 'text-cream' : 'text-ink hover:text-teal'
                 }`}
               >
                 {label}
@@ -114,7 +114,7 @@ export function AppEntry({ onContinue }: Props) {
           <select
             value={curatedId}
             onChange={(e) => setCuratedId(e.target.value)}
-            className="w-full rounded-xl border border-teal/20 bg-cream px-4 py-3 text-base text-teal-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:border-transparent"
+            className="w-full rounded-xl border border-teal/20 bg-cream px-4 py-3 text-base text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:border-transparent"
           >
             <option value="">Bitte wählen…</option>
             {Object.entries(grouped).map(([cat, apps]) => (
@@ -140,7 +140,7 @@ export function AppEntry({ onContinue }: Props) {
             onChange={(e) => setFreeText(e.target.value)}
             placeholder="z.B. Anton, Duolingo ABC, Pokémon Go"
             maxLength={80}
-            className="w-full rounded-xl border border-teal/20 bg-cream px-4 py-3 text-base text-teal-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:border-transparent"
+            className="w-full rounded-xl border border-teal/20 bg-cream px-4 py-3 text-base text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:border-transparent"
           />
         </label>
       )}

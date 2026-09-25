@@ -435,7 +435,7 @@ const sheetCss = `
     z-index: 20;
   }
   .cut-marks line {
-    stroke: #1A3C3F;
+    stroke: #040812;
     stroke-width: 0.7;
     vector-effect: non-scaling-stroke;
     stroke-linecap: round;
@@ -450,8 +450,8 @@ const sheetCss = `
     top: -28px;
     left: 50%;
     transform: translateX(-50%);
-    background: #1A3C3F;
-    color: #FDF8F0;
+    background: #040812;
+    color: #FFFFFF;
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-size: 11px;
     font-weight: 700;
@@ -547,10 +547,10 @@ const flyerFrontsCss = `
     font-weight: 800;
     letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: #50A082;
+    color: #0544B0;
     margin: 0 0 5mm;
   }
-  .ef-eyebrow--on-dark { color: #FCD34D; }
+  .ef-eyebrow--on-dark { color: #FDD134; }
 
   /* ── Shared URL foot (small text, bottom of bottom zone) ─ */
   .ef-url-on-mustard,
@@ -562,9 +562,9 @@ const flyerFrontsCss = `
     letter-spacing: 0.08em;
     margin: auto 0 0;
   }
-  .ef-url-on-mustard { color: rgba(26,60,63,0.7); }
-  .ef-url-on-sage    { color: rgba(253,248,240,0.85); }
-  .ef-url-on-dark    { color: rgba(253,248,240,0.7); }
+  .ef-url-on-mustard { color: rgba(4,8,18,0.7); }
+  .ef-url-on-sage    { color: rgba(255,255,255,0.85); }
+  .ef-url-on-dark    { color: rgba(255,255,255,0.7); }
 
   /* ────────────────────────────────────────────────────── *
    * Variant 1: NUR EINMAL — poster register              *
@@ -573,15 +573,15 @@ const flyerFrontsCss = `
    * ────────────────────────────────────────────────────── */
 
   .ef-flyer--nur-einmal {
-    background: #FDF8F0;
+    background: #FFFFFF;
     background-image:
-      radial-gradient(ellipse 90% 60% at 100% 0%, rgba(80,160,130,0.15) 0%, transparent 60%);
+      radial-gradient(ellipse 90% 60% at 100% 0%, rgba(5,68,176,0.15) 0%, transparent 60%);
   }
   .ef-flyer--nur-einmal .ef-zone--top { flex: 1 1 56%; }
   .ef-flyer--nur-einmal .ef-zone--bottom { flex: 0 0 44%; }
 
   .ef-zone--mustard {
-    background: #FCD34D;
+    background: #FDD134;
     background-image:
       radial-gradient(ellipse 80% 60% at 100% 100%, rgba(180,83,9,0.1) 0%, transparent 55%);
   }
@@ -592,7 +592,7 @@ const flyerFrontsCss = `
     font-size: 26pt;
     line-height: 1.02;
     letter-spacing: -0.025em;
-    color: #1A3C3F;
+    color: #040812;
     margin: 0;
   }
   .ef-poster-bottom {
@@ -601,7 +601,7 @@ const flyerFrontsCss = `
     font-size: 32pt;
     line-height: 1.0;
     letter-spacing: -0.03em;
-    color: #1A3C3F;
+    color: #040812;
     font-style: italic;
     margin: 0 0 5mm;
   }
@@ -609,7 +609,7 @@ const flyerFrontsCss = `
     font-family: 'Be Vietnam Pro', system-ui, sans-serif;
     font-size: 8.5pt;
     line-height: 1.45;
-    color: rgba(26,60,63,0.88);
+    color: rgba(4,8,18,0.88);
     margin: 0;
     max-width: 80mm;
   }
@@ -622,18 +622,18 @@ const flyerFrontsCss = `
    * ────────────────────────────────────────────────────── */
 
   .ef-flyer--pullover {
-    background: #FDF8F0;
+    background: #FFFFFF;
     background-image:
-      radial-gradient(ellipse 120% 70% at 50% 0%, rgba(252,211,77,0.14) 0%, transparent 60%);
+      radial-gradient(ellipse 120% 70% at 50% 0%, rgba(253,209,52,0.14) 0%, transparent 60%);
   }
   .ef-flyer--pullover .ef-zone--top { flex: 1 1 54%; }
   .ef-flyer--pullover .ef-zone--bottom { flex: 0 0 46%; }
   .ef-zone--pullover-top { padding-top: 13mm; }
 
   .ef-zone--sage {
-    background: #50A082;
+    background: #0544B0;
     background-image:
-      radial-gradient(ellipse 90% 60% at 0% 100%, rgba(26,60,63,0.2) 0%, transparent 55%);
+      radial-gradient(ellipse 90% 60% at 0% 100%, rgba(4,8,18,0.2) 0%, transparent 55%);
     overflow: hidden;
   }
 
@@ -653,7 +653,7 @@ const flyerFrontsCss = `
     font-family: 'Be Vietnam Pro', system-ui, sans-serif;
     font-size: 10pt;
     line-height: 1.55;
-    color: rgba(26,60,63,0.88);
+    color: rgba(4,8,18,0.88);
     margin: 0;
     max-width: 85mm;
   }
@@ -674,7 +674,7 @@ const flyerFrontsCss = `
     font-weight: 600;
     font-size: 8.5pt;
     font-style: italic;
-    color: rgba(253,248,240,0.85);
+    color: rgba(255,255,255,0.85);
     line-height: 1.3;
     margin: 0 0 3mm;
     max-width: 68mm;
@@ -685,7 +685,7 @@ const flyerFrontsCss = `
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-weight: 800;
     font-size: 14pt;
-    color: #FDF8F0;
+    color: #FFFFFF;
     line-height: 1.15;
     letter-spacing: -0.02em;
     margin: 0 0 3mm;
@@ -695,7 +695,7 @@ const flyerFrontsCss = `
   }
   .ef-promise-on-sage em {
     font-style: italic;
-    color: #FCD34D;
+    color: #FDD134;
     font-weight: 800;
   }
 
@@ -707,10 +707,10 @@ const flyerFrontsCss = `
    * ────────────────────────────────────────────────────── */
 
   .ef-flyer--bloeder {
-    background: #1A3C3F;
+    background: #040812;
     background-image:
-      radial-gradient(ellipse 100% 70% at 0% 0%, rgba(45,90,94,0.55) 0%, transparent 60%),
-      radial-gradient(ellipse 90% 60% at 100% 100%, rgba(80,160,130,0.22) 0%, transparent 55%);
+      radial-gradient(ellipse 100% 70% at 0% 0%, rgba(4,8,18,0.55) 0%, transparent 60%),
+      radial-gradient(ellipse 90% 60% at 100% 100%, rgba(5,68,176,0.22) 0%, transparent 55%);
   }
 
   .ef-quote-stack {
@@ -726,7 +726,7 @@ const flyerFrontsCss = `
     font-weight: 900;
     font-size: 72pt;
     line-height: 0.85;
-    color: #FCD34D;
+    color: #FDD134;
     opacity: 0.9;
   }
   .ef-pull-quote {
@@ -735,7 +735,7 @@ const flyerFrontsCss = `
     font-size: 15pt;
     font-style: italic;
     line-height: 1.25;
-    color: #FDF8F0;
+    color: #FFFFFF;
     margin: 0;
     letter-spacing: -0.015em;
   }
@@ -744,7 +744,7 @@ const flyerFrontsCss = `
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-size: 7.5pt;
     font-weight: 800;
-    color: #FCD34D;
+    color: #FDD134;
     letter-spacing: 0.18em;
     text-transform: uppercase;
     margin: 0 0 5mm;
@@ -753,7 +753,7 @@ const flyerFrontsCss = `
     font-family: 'Be Vietnam Pro', system-ui, sans-serif;
     font-size: 8.5pt;
     line-height: 1.5;
-    color: rgba(253,248,240,0.82);
+    color: rgba(255,255,255,0.82);
     margin: 0;
     max-width: 80mm;
   }
@@ -770,23 +770,23 @@ const flyerFrontsCss = `
    * ────────────────────────────────────────────────────── */
 
   .ef-flyer--experiment {
-    background: #FDF8F0;
+    background: #FFFFFF;
     background-image:
-      radial-gradient(ellipse 100% 60% at 100% 0%, rgba(80,160,130,0.12) 0%, transparent 60%);
+      radial-gradient(ellipse 100% 60% at 100% 0%, rgba(5,68,176,0.12) 0%, transparent 60%);
   }
   .ef-flyer--experiment .ef-zone--top { flex: 1 1 68%; }
   .ef-flyer--experiment .ef-zone--bottom { flex: 0 0 32%; }
 
   .ef-zone--ink {
-    background: #1A3C3F;
+    background: #040812;
     background-image:
-      radial-gradient(ellipse 90% 60% at 100% 100%, rgba(80,160,130,0.18) 0%, transparent 55%);
+      radial-gradient(ellipse 90% 60% at 100% 100%, rgba(5,68,176,0.18) 0%, transparent 55%);
     justify-content: center;
   }
 
   .ef-hairline {
     border: 0;
-    border-top: 0.3mm solid #50A082;
+    border-top: 0.3mm solid #0544B0;
     margin: 0 0 5mm;
     width: 14mm;
   }
@@ -796,20 +796,20 @@ const flyerFrontsCss = `
     font-size: 16pt;
     line-height: 1.12;
     letter-spacing: -0.015em;
-    color: #1A3C3F;
+    color: #040812;
     margin: 0 0 5mm;
     max-width: 70mm;
   }
   .ef-essay-headline em {
     font-style: italic;
-    color: #50A082;
+    color: #0544B0;
     font-weight: 700;
   }
   .ef-essay-body {
     font-family: 'Be Vietnam Pro', system-ui, sans-serif;
     font-size: 8.5pt;
     line-height: 1.55;
-    color: rgba(26,60,63,0.82);
+    color: rgba(4,8,18,0.82);
     margin: 0;
     max-width: 72mm;
   }
@@ -820,13 +820,13 @@ const flyerFrontsCss = `
     font-weight: 700;
     letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: #FDF8F0;
+    color: #FFFFFF;
     margin: 0 0 3mm;
     text-align: center;
   }
   .ef-zone--ink .ef-url-on-dark {
     text-align: center;
-    color: rgba(253,248,240,0.55);
+    color: rgba(255,255,255,0.55);
   }
 `;
 
@@ -834,10 +834,10 @@ const flyerFrontsCss = `
 
 const parentBackCss = `
   .parent-back {
-    background: #FDF8F0;
+    background: #FFFFFF;
     background-image:
-      radial-gradient(ellipse 90% 60% at 100% 0%, rgba(80,160,130,0.18) 0%, transparent 60%),
-      radial-gradient(ellipse 90% 50% at 0% 100%, rgba(252,211,77,0.22) 0%, transparent 55%);
+      radial-gradient(ellipse 90% 60% at 100% 0%, rgba(5,68,176,0.18) 0%, transparent 60%),
+      radial-gradient(ellipse 90% 50% at 0% 100%, rgba(253,209,52,0.22) 0%, transparent 55%);
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
     width: 105mm;
@@ -850,7 +850,7 @@ const parentBackCss = `
     position: absolute;
     top: 0; left: 0; right: 0;
     height: 4mm;
-    background: linear-gradient(90deg, #50A082, #FCD34D);
+    background: linear-gradient(90deg, #0544B0, #FDD134);
   }
   .parent-back-inner {
     height: 100%;
@@ -865,7 +865,7 @@ const parentBackCss = `
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-size: 7.5pt;
     font-weight: 800;
-    color: #50A082;
+    color: #0544B0;
     letter-spacing: 0.22em;
     text-transform: uppercase;
     margin: 0 0 2.5mm;
@@ -877,19 +877,19 @@ const parentBackCss = `
     font-size: 17pt;
     line-height: 1.08;
     letter-spacing: -0.02em;
-    color: #1A3C3F;
+    color: #040812;
     margin: 0 0 2mm;
   }
   .pb-headline em {
     font-style: italic;
-    color: #50A082;
+    color: #0544B0;
   }
 
   .pb-sub {
     font-family: 'Be Vietnam Pro', system-ui, sans-serif;
     font-size: 9pt;
     line-height: 1.4;
-    color: rgba(26,60,63,0.78);
+    color: rgba(4,8,18,0.78);
     margin: 0 0 5mm;
   }
 
@@ -912,15 +912,15 @@ const parentBackCss = `
     font-family: 'Be Vietnam Pro', system-ui, sans-serif;
     font-size: 8.5pt;
     line-height: 1.4;
-    color: rgba(26,60,63,0.85);
+    color: rgba(4,8,18,0.85);
   }
   .pb-points strong {
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-weight: 700;
-    color: #1A3C3F;
+    color: #040812;
   }
   .pb-check {
-    color: #50A082;
+    color: #0544B0;
     font-weight: 800;
     font-size: 11pt;
     line-height: 1;
@@ -933,20 +933,20 @@ const parentBackCss = `
     gap: 3mm;
     margin: 4mm 0 3mm;
     padding: 3mm 0;
-    border-top: 0.3mm dashed rgba(26,60,63,0.2);
+    border-top: 0.3mm dashed rgba(4,8,18,0.2);
   }
   .pb-qr {
     width: 20mm;
     height: 20mm;
     border-radius: 1.5mm;
-    border: 0.3mm solid rgba(26,60,63,0.15);
+    border: 0.3mm solid rgba(4,8,18,0.15);
     flex-shrink: 0;
   }
   .pb-qr-text { flex: 1; }
   .pb-qr-main {
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-size: 11pt;
-    color: #1A3C3F;
+    color: #040812;
     margin: 0 0 1mm;
     letter-spacing: -0.01em;
   }
@@ -954,13 +954,13 @@ const parentBackCss = `
     /* ronki.de wordmark stays in brand teal — Marc: "I wouldn't use
        the clay color for the Ronki font." The visual pop comes from
        weight (800) + size inheritance, not hue. */
-    color: #1A3C3F;
+    color: #040812;
     font-weight: 800;
   }
   .pb-qr-sub {
     font-family: 'Be Vietnam Pro', system-ui, sans-serif;
     font-size: 7.5pt;
-    color: rgba(26,60,63,0.65);
+    color: rgba(4,8,18,0.65);
     margin: 0;
     line-height: 1.3;
   }
@@ -969,7 +969,7 @@ const parentBackCss = `
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-size: 7.5pt;
     font-weight: 700;
-    color: rgba(26,60,63,0.65);
+    color: rgba(4,8,18,0.65);
     margin: 0;
     text-align: center;
     letter-spacing: 0.04em;
@@ -977,7 +977,7 @@ const parentBackCss = `
   }
   .pb-signoff-mail {
     font-weight: 500;
-    color: rgba(26,60,63,0.5);
+    color: rgba(4,8,18,0.5);
     letter-spacing: 0.02em;
   }
 `;
@@ -986,8 +986,8 @@ const instructionBarStyle: React.CSSProperties = {
   position: 'sticky',
   top: 16,
   zIndex: 30,
-  background: '#1A3C3F',
-  color: '#FDF8F0',
+  background: '#040812',
+  color: '#FFFFFF',
   padding: '10px 18px',
   borderRadius: 999,
   fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
@@ -1002,8 +1002,8 @@ const instructionBarStyle: React.CSSProperties = {
 
 const printBtnStyle: React.CSSProperties = {
   marginLeft: 'auto',
-  background: '#FCD34D',
-  color: '#1A3C3F',
+  background: '#FDD134',
+  color: '#040812',
   border: 0,
   padding: '6px 14px',
   borderRadius: 999,

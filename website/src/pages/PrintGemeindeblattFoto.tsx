@@ -118,7 +118,7 @@ export default function PrintGemeindeblattFoto() {
           </defs>
           <g
             fill="none"
-            stroke="#1A3C3F"
+            stroke="#040812"
             strokeWidth="3"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -180,7 +180,7 @@ export default function PrintGemeindeblattFoto() {
              printing to A4 doesn't leave a white stripe at the bottom. */
           height: 1018px;
           zoom: 3;
-          background: #FDF8F0;
+          background: #FFFFFF;
           overflow: hidden;
           box-shadow: 0 30px 60px rgba(0,0,0,0.18);
           border-radius: 4px;
@@ -224,13 +224,13 @@ export default function PrintGemeindeblattFoto() {
         .glow-tl {
           top: -280px;
           left: -240px;
-          background: radial-gradient(circle, rgba(252,211,77,0.42) 0%, transparent 60%);
+          background: radial-gradient(circle, rgba(253,209,52,0.42) 0%, transparent 60%);
           filter: blur(10px);
         }
         .glow-br {
           bottom: -320px;
           right: -260px;
-          background: radial-gradient(circle, rgba(80,160,130,0.38) 0%, transparent 60%);
+          background: radial-gradient(circle, rgba(5,68,176,0.38) 0%, transparent 60%);
           filter: blur(10px);
         }
 
@@ -263,8 +263,8 @@ export default function PrintGemeindeblattFoto() {
           position: relative;
           transform: rotate(-4deg);
           filter:
-            drop-shadow(0 40px 60px rgba(45,90,94,0.35))
-            drop-shadow(0 12px 24px rgba(26,60,63,0.18));
+            drop-shadow(0 40px 60px rgba(4,8,18,0.35))
+            drop-shadow(0 12px 24px rgba(4,8,18,0.18));
         }
         .ronki-float {
           position: absolute;
@@ -275,7 +275,7 @@ export default function PrintGemeindeblattFoto() {
           transform: rotate(8deg);
           filter:
             drop-shadow(0 20px 30px rgba(181,83,9,0.25))
-            drop-shadow(0 8px 16px rgba(26,60,63,0.18));
+            drop-shadow(0 8px 16px rgba(4,8,18,0.18));
           z-index: 2;
         }
 
@@ -300,7 +300,7 @@ export default function PrintGemeindeblattFoto() {
           font-size: 18px;
           font-weight: 800;
           letter-spacing: 0.18em;
-          color: rgba(26,60,63,0.45);
+          color: rgba(4,8,18,0.45);
           z-index: 5;
           text-transform: lowercase;
         }
@@ -338,8 +338,8 @@ const instructionBarStyle: React.CSSProperties = {
   position: 'sticky',
   top: 16,
   zIndex: 20,
-  background: '#1A3C3F',
-  color: '#FDF8F0',
+  background: '#040812',
+  color: '#FFFFFF',
   padding: '10px 18px',
   borderRadius: 999,
   fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
@@ -354,8 +354,8 @@ const instructionBarStyle: React.CSSProperties = {
 
 const printBtnStyle: React.CSSProperties = {
   marginLeft: 8,
-  background: '#FCD34D',
-  color: '#1A3C3F',
+  background: '#FDD134',
+  color: '#040812',
   border: 0,
   padding: '6px 14px',
   borderRadius: 999,
@@ -369,8 +369,8 @@ const printBtnStyle: React.CSSProperties = {
 const exportBtnStyle: React.CSSProperties = {
   ...printBtnStyle,
   marginLeft: 'auto',
-  background: '#50A082',
-  color: '#FDF8F0',
+  background: '#0544B0',
+  color: '#FFFFFF',
 };
 
 const exitHintStyle: React.CSSProperties = {
@@ -378,8 +378,8 @@ const exitHintStyle: React.CSSProperties = {
   top: 12,
   right: 12,
   zIndex: 100,
-  background: 'rgba(26,60,63,0.9)',
-  color: '#FDF8F0',
+  background: 'rgba(4,8,18,0.9)',
+  color: '#FFFFFF',
   padding: '6px 14px',
   borderRadius: 999,
   fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",

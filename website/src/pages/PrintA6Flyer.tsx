@@ -55,7 +55,7 @@ export default function PrintA6Flyer() {
           <h1 className="headline">
             Wenn morgens noch
             <br />
-            <span style={{ fontStyle: 'italic', color: '#50A082' }}>
+            <span style={{ fontStyle: 'italic', color: '#0544B0' }}>
               „Zähne putzen!"
             </span>
             <br />
@@ -146,7 +146,7 @@ export default function PrintA6Flyer() {
         /* ───── Global reset for the print root ───── */
         .print-root {
           font-family: 'Be Vietnam Pro', system-ui, sans-serif;
-          color: #1A3C3F;
+          color: #040812;
           min-height: 100vh;
           padding: 32px 16px 64px;
           display: flex;
@@ -161,8 +161,8 @@ export default function PrintA6Flyer() {
           position: sticky;
           top: 16px;
           z-index: 20;
-          background: #1A3C3F;
-          color: #FDF8F0;
+          background: #040812;
+          color: #FFFFFF;
           padding: 10px 18px;
           border-radius: 999px;
           font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
@@ -178,7 +178,7 @@ export default function PrintA6Flyer() {
           width: 105mm;
           height: 148mm;
           overflow: hidden;
-          background: #FDF8F0;
+          background: #FFFFFF;
           position: relative;
           box-shadow: 0 10px 30px rgba(0,0,0,0.12);
           break-inside: avoid;
@@ -189,10 +189,10 @@ export default function PrintA6Flyer() {
 
         /* ───── Front ───── */
         .flyer-front {
-          background: #FDF8F0;
+          background: #FFFFFF;
           background-image:
-            radial-gradient(circle at 85% 15%, rgba(252,211,77,0.18) 0%, transparent 55%),
-            radial-gradient(circle at 10% 95%, rgba(80,160,130,0.12) 0%, transparent 60%);
+            radial-gradient(circle at 85% 15%, rgba(253,209,52,0.18) 0%, transparent 55%),
+            radial-gradient(circle at 10% 95%, rgba(5,68,176,0.12) 0%, transparent 60%);
         }
         .front-inner {
           padding: 10mm 8mm;
@@ -204,7 +204,7 @@ export default function PrintA6Flyer() {
           font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
           font-size: 7.5pt;
           font-weight: 700;
-          color: #2D5A5E;
+          color: #0544B0;
           letter-spacing: 0.22em;
           text-transform: uppercase;
           margin: 0 0 5mm;
@@ -215,7 +215,7 @@ export default function PrintA6Flyer() {
           font-size: 18pt;
           line-height: 1.1;
           letter-spacing: -0.01em;
-          color: #1A3C3F;
+          color: #040812;
           margin: 0 0 4mm;
           text-wrap: balance;
         }
@@ -223,7 +223,7 @@ export default function PrintA6Flyer() {
           font-family: 'Be Vietnam Pro', system-ui, sans-serif;
           font-size: 9pt;
           line-height: 1.45;
-          color: rgba(26,60,63,0.78);
+          color: rgba(4,8,18,0.78);
           margin: 0 0 3mm;
         }
         .dragon {
@@ -232,13 +232,13 @@ export default function PrintA6Flyer() {
           margin: 2mm auto 3mm;
           display: block;
           border-radius: 10mm;
-          box-shadow: 0 6px 16px rgba(26,60,63,0.18);
+          box-shadow: 0 6px 16px rgba(4,8,18,0.18);
         }
         .origin {
           font-family: 'Be Vietnam Pro', system-ui, sans-serif;
           font-size: 7.5pt;
           line-height: 1.4;
-          color: rgba(26,60,63,0.62);
+          color: rgba(4,8,18,0.62);
           font-style: italic;
           text-align: center;
           margin: auto 0 2mm;
@@ -247,7 +247,7 @@ export default function PrintA6Flyer() {
           font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
           font-weight: 700;
           font-size: 10pt;
-          color: #1A3C3F;
+          color: #040812;
           text-align: center;
           letter-spacing: 0.04em;
           margin: 0;
@@ -255,8 +255,8 @@ export default function PrintA6Flyer() {
 
         /* ───── Back ───── */
         .flyer-back {
-          background: #FDF8F0;
-          border-top: 2mm solid #FCD34D;
+          background: #FFFFFF;
+          border-top: 2mm solid #FDD134;
         }
         .back-inner {
           padding: 8mm 8mm;
@@ -268,7 +268,7 @@ export default function PrintA6Flyer() {
           font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
           font-weight: 800;
           font-size: 14pt;
-          color: #1A3C3F;
+          color: #040812;
           letter-spacing: -0.005em;
           margin: 0 0 3mm;
         }
@@ -276,7 +276,7 @@ export default function PrintA6Flyer() {
           font-family: 'Be Vietnam Pro', system-ui, sans-serif;
           font-size: 8.5pt;
           line-height: 1.45;
-          color: rgba(26,60,63,0.78);
+          color: rgba(4,8,18,0.78);
           margin: 0 0 4mm;
         }
         .steps {
@@ -295,7 +295,7 @@ export default function PrintA6Flyer() {
           font-family: 'Be Vietnam Pro', system-ui, sans-serif;
           font-size: 9pt;
           line-height: 1.35;
-          color: #1A3C3F;
+          color: #040812;
         }
         .steps > li::before {
           content: counter(step, decimal-leading-zero);
@@ -305,19 +305,19 @@ export default function PrintA6Flyer() {
           font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
           font-weight: 800;
           font-size: 8pt;
-          color: #50A082;
+          color: #0544B0;
           letter-spacing: 0.03em;
         }
         .step-hint {
           display: block;
           margin-top: 0.8mm;
           font-size: 7.5pt;
-          color: rgba(26,60,63,0.55);
+          color: rgba(4,8,18,0.55);
           line-height: 1.35;
         }
         .no-list {
-          background: rgba(80,160,130,0.08);
-          border-left: 0.8mm solid #50A082;
+          background: rgba(5,68,176,0.08);
+          border-left: 0.8mm solid #0544B0;
           padding: 3mm 3.5mm;
           border-radius: 0 3mm 3mm 0;
           margin: 0 0 4mm;
@@ -326,7 +326,7 @@ export default function PrintA6Flyer() {
           font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
           font-weight: 700;
           font-size: 7.5pt;
-          color: #2D5A5E;
+          color: #0544B0;
           letter-spacing: 0.05em;
           margin: 0 0 2mm;
         }
@@ -337,7 +337,7 @@ export default function PrintA6Flyer() {
           font-family: 'Be Vietnam Pro', system-ui, sans-serif;
           font-size: 8pt;
           line-height: 1.5;
-          color: #1A3C3F;
+          color: #040812;
         }
         .no-list ul li {
           padding-left: 4mm;
@@ -348,7 +348,7 @@ export default function PrintA6Flyer() {
           position: absolute;
           left: 0;
           top: 0;
-          color: #50A082;
+          color: #0544B0;
           font-weight: 700;
         }
         .qr-block {
@@ -361,29 +361,29 @@ export default function PrintA6Flyer() {
           width: 22mm;
           height: 22mm;
           border-radius: 2mm;
-          background: #FDF8F0;
+          background: #FFFFFF;
           flex-shrink: 0;
         }
         .qr-caption {
           font-family: 'Be Vietnam Pro', system-ui, sans-serif;
           font-size: 7.5pt;
           line-height: 1.35;
-          color: rgba(26,60,63,0.72);
+          color: rgba(4,8,18,0.72);
           margin: 0;
         }
         .qr-caption strong {
-          color: #1A3C3F;
+          color: #040812;
           font-weight: 700;
         }
         .footer-line {
           font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
           font-size: 6.5pt;
-          color: rgba(26,60,63,0.55);
+          color: rgba(4,8,18,0.55);
           letter-spacing: 0.03em;
           margin: 0;
           text-align: center;
           padding-top: 2mm;
-          border-top: 0.3mm solid rgba(26,60,63,0.12);
+          border-top: 0.3mm solid rgba(4,8,18,0.12);
         }
 
         /* ───── Print overrides ───── */
@@ -429,8 +429,8 @@ const instructionBarStyle: React.CSSProperties = {
 
 const printBtnStyle: React.CSSProperties = {
   marginLeft: 'auto',
-  background: '#FCD34D',
-  color: '#1A3C3F',
+  background: '#FDD134',
+  color: '#040812',
   border: 0,
   padding: '6px 14px',
   borderRadius: 999,
