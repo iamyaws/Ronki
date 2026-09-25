@@ -1,48 +1,46 @@
 /**
- * Thin wrapper around the Plausible Analytics global.
+ * Thin wrapper around the Umami Analytics global.
  *
- * Plausible loads asynchronously via a script tag in index.html, so
- * `window.plausible` may not exist yet on early calls. This helper
- * guards the call and silently no-ops if the global isn't ready or
- * the user has an extension blocking the script — analytics is
- * non-critical, it should never crash the app.
+ * Umami replaced Plausible on 25 Sep 2026 (the Plausible trial had ended and
+ * no longer stored data). The script loads with `defer` from index.html, so
+ * `window.umami` may not exist yet on very early calls, and blockers can
+ * remove it entirely. This helper guards the call and silently no-ops;
+ * analytics is non-critical and must never crash the app.
  *
  * Usage:
  *   import { trackEvent } from '../lib/analytics';
- *   trackEvent('Discord Click', { source: 'footer' });
- *   trackEvent('App Install Click');
+ *   trackEvent('CTA Klick', { cta: 'header' });
+ *   trackEvent('Karte erstellt');
  *
  * Conventions:
- * - Event names are Title Case (Plausible standard)
- * - Props are lowercase snake_case values
- * - Keep event names stable once introduced — renaming breaks the
- *   existing dashboard timeline in Plausible
+ * - Event names are Title Case and stay stable ("CTA Klick", "Karte erstellt",
+ *   "Vorlage Download"); the decision gates read them by name.
+ * - Data values are lowercase snake_case strings, numbers or booleans.
  */
 
-type PlausibleProps = Record<string, string | number | boolean>;
+type EventData = Record<string, string | number | boolean>;
 
-type PlausibleGlobal = (
-  eventName: string,
-  options?: { props?: PlausibleProps },
-) => void;
+type UmamiGlobal = {
+  track: (eventName: string, eventData?: EventData) => void;
+};
 
 declare global {
   interface Window {
-    plausible?: PlausibleGlobal;
+    umami?: UmamiGlobal;
   }
 }
 
-export function trackEvent(name: string, props?: PlausibleProps): void {
+export function trackEvent(name: string, props?: EventData): void {
   if (typeof window === 'undefined') return;
-  const fn = window.plausible;
-  if (typeof fn !== 'function') return;
+  const umami = window.umami;
+  if (!umami || typeof umami.track !== 'function') return;
   try {
     if (props) {
-      fn(name, { props });
+      umami.track(name, props);
     } else {
-      fn(name);
+      umami.track(name);
     }
   } catch {
-    // Silently ignore — analytics must never crash the app.
+    // Silently ignore, analytics must never crash the app.
   }
 }

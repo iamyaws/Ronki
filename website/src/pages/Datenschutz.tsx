@@ -27,9 +27,9 @@ export default function Datenschutz() {
             Datenschutz&shy;erklärung
           </h1>
           <p className="mt-5 text-base sm:text-lg text-ink/75 max-w-2xl leading-relaxed">
-            Wir erheben so wenige Daten wie möglich. Nur, was wir wirklich brauchen, um Ronki an den Start zu bringen. Keine Werbung, keine Cookies, keine personenbezogenen Profile. Für eine anonyme Reichweitenanalyse nutzen wir Plausible Analytics aus der EU (siehe Abschnitt 7).
+            Wir erheben so wenige Daten wie möglich. Nur, was wir wirklich brauchen, um Ronki an den Start zu bringen. Keine Werbung, keine Cookies, keine personenbezogenen Profile. Für eine anonyme Reichweitenanalyse nutzen wir Umami Analytics mit Datenverarbeitung in der EU (siehe Abschnitt 7).
           </p>
-          <p className="mt-3 text-sm text-ink/60">Stand: 15. September 2026</p>
+          <p className="mt-3 text-sm text-ink/60">Stand: 26. September 2026</p>
 
           <div className="mt-14 flex flex-col gap-12 text-[0.98rem] leading-[1.75] text-ink/85">
 
@@ -180,13 +180,13 @@ export default function Datenschutz() {
                 Diese Website setzt <strong className="text-ink">keine Cookies</strong> zur Analyse, Wiedererkennung oder Werbung. Auch kein Local Storage oder Session Storage wird zu Tracking-Zwecken genutzt. Schutzmechanismen gegen versehentliches mehrfaches Absenden eines Formulars laufen rein im Arbeitsspeicher der jeweiligen Seite und hinterlassen keine Spur im Browser.
               </p>
               <p>
-                Auch die von uns genutzte Reichweitenanalyse (Plausible Analytics) setzt bewusst keine Cookies und keinen Local Storage. Details siehe Abschnitt 7.
+                Auch die von uns genutzte Reichweitenanalyse (Umami Analytics) setzt bewusst keine Cookies und keinen Local Storage. Details siehe Abschnitt 7.
               </p>
             </Section>
 
             <Section heading="6. Eingebundene Dienste, Analytics, Werbung">
               <p>
-                Für die Reichweitenanalyse dieser Website nutzen wir ausschließlich <strong className="text-ink">Plausible Analytics</strong> (Plausible Insights OÜ, Estland). Plausible ist eine privacy-first Alternative zu klassischen Tracking-Diensten: keine Cookies, keine IP-Adressen im Klartext, keine personenbezogenen Profile, keine geräteübergreifende Wiedererkennung. Details siehe Abschnitt 7.
+                Für die Reichweitenanalyse dieser Website nutzen wir ausschließlich <strong className="text-ink">Umami Analytics</strong> (Umami Software, Inc., Datenverarbeitung in der EU-Region von Umami Cloud). Umami ist eine datensparsame Alternative zu klassischen Tracking-Diensten: keine Cookies, keine Speicherung von IP-Adressen, keine personenbezogenen Profile, keine geräteübergreifende Wiedererkennung. Details siehe Abschnitt 7.
               </p>
               <p>
                 Darüber hinaus binden wir <strong className="text-ink">keine weiteren Dienste Dritter</strong> für Werbung, Social-Media-Plugins oder personenbezogenes Tracking ein:
@@ -221,8 +221,8 @@ export default function Datenschutz() {
                   <span className="text-sm text-ink/65"><a href="https://improvmx.com/privacy" target="_blank" rel="noopener noreferrer" className="underline decoration-mustard underline-offset-4 hover:text-ink">improvmx.com/privacy</a> &middot; <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="underline decoration-mustard underline-offset-4 hover:text-ink">policies.google.com/privacy</a></span>
                 </li>
                 <li>
-                  <strong className="text-ink">Plausible Analytics (Plausible Insights OÜ):</strong> Anonyme Reichweitenanalyse unserer Website. Plausible setzt keine Cookies, speichert keine IP-Adressen im Klartext und erstellt keine geräteübergreifenden Profile. Erfasst werden ausschließlich aggregierte Seitenaufrufe, Referrer (z. B. Suchmaschine, Social-Media-Plattform), grobe Geo-Region (Land) und Gerätetyp-Kategorie. Eine Zuordnung zu einzelnen Personen ist ausdrücklich nicht möglich. Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an der Verbesserung unseres Angebots). Eine Interessenabwägung ergibt: Plausible setzt keine Cookies, speichert keine IP im Klartext, bildet keine geräteübergreifenden Profile und erlaubt keine Identifizierung einzelner Personen. Die Verarbeitung greift damit nur in geringfügigem Maße in deine Rechte ein, während wir ein nachvollziehbares Interesse an aggregierter Reichweitenmessung haben. Sitz: Estland (EU). Datenverarbeitung ausschließlich in der EU.<br />
-                  <span className="text-sm text-ink/65"><a href="https://plausible.io/privacy" target="_blank" rel="noopener noreferrer" className="underline decoration-mustard underline-offset-4 hover:text-ink">plausible.io/privacy</a> &middot; <a href="https://plausible.io/data-policy" target="_blank" rel="noopener noreferrer" className="underline decoration-mustard underline-offset-4 hover:text-ink">plausible.io/data-policy</a></span>
+                  <strong className="text-ink">Umami Analytics (Umami Software, Inc.):</strong> Anonyme Reichweitenanalyse unserer Website. Umami setzt keine Cookies, speichert keine IP-Adressen und erstellt keine geräteübergreifenden Profile. Erfasst werden Seitenaufrufe, Referrer (z. B. Suchmaschine, Social-Media-Plattform), Kampagnen-Angaben aus dem Link (z. B. utm_source=instagram), grobe Geo-Region (Land), Gerätetyp und Browser sowie drei Ereignisse ohne personenbezogene Inhalte: Klick auf einen Hauptbutton, erstellte Profil-Karte, Vorlagen-Download. Eine Zuordnung zu einzelnen Personen ist ausdrücklich nicht möglich. Die Daten werden nach sechs Monaten gelöscht. Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an der Verbesserung unseres Angebots). Eine Interessenabwägung ergibt: Umami setzt keine Cookies, speichert keine IP-Adressen, bildet keine geräteübergreifenden Profile und erlaubt keine Identifizierung einzelner Personen. Die Verarbeitung greift damit nur in geringfügigem Maße in deine Rechte ein, während wir ein nachvollziehbares Interesse an aggregierter Reichweitenmessung haben. Sitz: USA. Datenverarbeitung in der EU-Region von Umami Cloud.<br />
+                  <span className="text-sm text-ink/65"><a href="https://umami.is/privacy" target="_blank" rel="noopener noreferrer" className="underline decoration-mustard underline-offset-4 hover:text-ink">umami.is/privacy</a></span>
                 </li>
               </ul>
               <p>
@@ -312,7 +312,7 @@ export default function Datenschutz() {
               Kurz gesagt
             </p>
             <p className="text-base sm:text-lg text-ink/80 leading-relaxed max-w-2xl">
-              Wir speichern deine E-Mail-Adresse, ausschließlich um dir am Start-Tag zu schreiben. Keine Werbung, keine Cookies, kein Verkauf an Dritte. Für eine anonyme Reichweitenanalyse nutzen wir Plausible (EU-Hosting, keine Profile). Wenn du's dir anders überlegst, eine Mail an <a href="mailto:hallo@ronki.de" className="underline decoration-mustard underline-offset-4 hover:text-ink">hallo@ronki.de</a> reicht.
+              Wir speichern deine E-Mail-Adresse, ausschließlich um dir am Start-Tag zu schreiben. Keine Werbung, keine Cookies, kein Verkauf an Dritte. Für eine anonyme Reichweitenanalyse nutzen wir Umami (Datenverarbeitung in der EU, keine Profile). Wenn du's dir anders überlegst, eine Mail an <a href="mailto:hallo@ronki.de" className="underline decoration-mustard underline-offset-4 hover:text-ink">hallo@ronki.de</a> reicht.
             </p>
           </div>
         </article>

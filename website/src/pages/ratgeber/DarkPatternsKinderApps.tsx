@@ -464,7 +464,8 @@ export default function RatgeberDarkPatternsKinderApps() {
         <StepCard n="EU" title="Daten auf EU-Servern, kein Tracking">
           <p>
             Supabase in der EU-Region, Vercel Edge in Frankfurt. Keine Google
-            Analytics, kein Plausible, keine Meta-Pixel. Minimum an Daten, die
+            Analytics, keine Meta-Pixel, auf der Website nur eine anonyme
+            Besuchszählung ohne Cookies. Minimum an Daten, die
             wir für den Betrieb brauchen, nicht mehr.
           </p>
         </StepCard>
