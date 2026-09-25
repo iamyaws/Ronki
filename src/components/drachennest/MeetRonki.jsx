@@ -1,99 +1,113 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useTask } from '../../context/TaskContext';
 import { track } from '../../lib/analytics';
 import VoiceAudio from '../../utils/voiceAudio';
-import MoodChibi from '../MoodChibi';
+import MoodChibi, { RonkiArt } from '../MoodChibi';
+import {
+  ChoiceTile,
+  DoodleIcon,
+  MotionTicks,
+  PaperCard,
+  PillButton,
+  SceneLoop,
+  SpeechBubble,
+  useReducedMotion,
+} from '../bilderbuch';
 
 /**
- * MeetRonki — the 60-second first-encounter beat.
+ * MeetRonki: the 60-second first-encounter beat, on the Bilderbuch art
+ * (25 Sep 2026, lane B).
  *
- * Direction A from the Claude Design hi-fi handoff (26 Apr 2026):
- * "One continuous shot." The camera pushes into the cave from a
- * dim approach, the kid sees six eggs on a stone shelf, picks one,
- * the egg wobbles + cracks + hatches in a flash, Ronki appears
- * with his first voiced line, the kid names him, then we pull
- * back. Drachenmutter narrates the framing beats; Ronki only
- * speaks once he's hatched.
+ * The hatch beat of the rollout plan. One picture-book sequence:
  *
- * Phases (auto-advances unless noted):
- *   approach (4.4s) → shelf (kid picks egg) → wobble (1.6s)
- *     → hatch (1.4s flash) → meet (4.5s, Ronki's first line)
- *     → name (kid types) → close (auto-dismisses)
+ *   approach  his room, empty cushion, the plants and the sun move
+ *             (scenes/zuhause + loops/zuhause.mp4), a caption card.
+ *   shelf     white page, four art eggs on ChoiceTiles, the kid taps one.
+ *   wobble    the chosen egg sits on the cushion of the hatch poster and
+ *             trembles (CSS on the still).
+ *   hatch     loops/hatch.mp4 plays once over its poster and ends on
+ *             loops/hatch-end.webp. Under reduced motion, or when play()
+ *             is refused, the egg still shows egg-cracked and then the
+ *             end frame with a short crossfade (the old 1.4 s beat).
+ *   meet      Ronki peeks out of the shell and says his first line in a
+ *             speech bubble.
+ *   name      white page, Ronki asks for his name, one cobalt pill.
+ *   close     Ronki says good night, tap anywhere to finish.
  *
- * On 'close', calls onComplete with { companionVariant, heroName }
- * — the parent flow uses this to seed the kid's onboarding state.
+ * Phases, timers, voice lines, analytics and the onComplete payload are
+ * the ones of the previous version. The old six colourways collapse to
+ * the four eggs; Ronki is always red-orange now. Each egg still writes
+ * one of the existing companionVariant ids so the profile, the dev
+ * `?variant=` shortcut and every other reader keep working.
  *
- * Voice + lines align with the BeiRonkiSein bar (soft, hedge-y,
- * no em-dashes, kid-readable). ElevenLabs audio shipped 2026-04-27
- * (Eleonore for Drachenmutter — German-native tender guide; Harry for
- * Ronki) — see docs/voice/ronki-voicelines.md narrator_meet_* + de_meet_*.
- *
- * Based on: docs/design-incoming/meet-tonight/project/src/hifi-meet.jsx
+ * Voice files: de_meet_* (Ronki, Harry), see docs/voice/ronki-voicelines.md.
  */
 
-const EGG_VARIANTS = [
-  { id: 'amber',  tint: '#fde68a', deep: '#b45309', name: 'Amber' },
-  { id: 'teal',   tint: '#a7f3d0', deep: '#0f766e', name: 'Mint' },
-  { id: 'rose',   tint: '#fbcfe8', deep: '#be185d', name: 'Rose' },
-  { id: 'violet', tint: '#c4b5fd', deep: '#6d28d9', name: 'Veilchen' },
-  { id: 'forest', tint: '#bbf7d0', deep: '#15803d', name: 'Wald' },
-  { id: 'sunset', tint: '#fdba74', deep: '#c2410c', name: 'Sonnen' },
+const ART = `${import.meta.env.BASE_URL}art/bilderbuch/`;
+const ROOM_POSTER = `${ART}scenes/zuhause.webp`;
+const ROOM_LOOP = `${ART}loops/zuhause.mp4`;
+const HATCH_POSTER = `${ART}loops/hatch-poster.webp`;
+const HATCH_CLIP = `${ART}loops/hatch.mp4`;
+const HATCH_END = `${ART}loops/hatch-end.webp`;
+
+/**
+ * The four eggs. `variant` is the companionVariant id written to state,
+ * one of the six ids the rest of the app already accepts.
+ */
+export const EGGS = [
+  { id: 'cream', variant: 'forest', label: 'Weiß' },
+  { id: 'ember', variant: 'sunset', label: 'Rot' },
+  { id: 'sun', variant: 'amber', label: 'Gelb' },
+  { id: 'cobalt', variant: 'teal', label: 'Blau' },
 ];
 
+/** Where the egg sits in loops/hatch-poster.webp (fractions of the frame). */
+const POSTER = { w: 720, h: 1280 };
+const EGG_ANCHOR = { cx: 0.485, cy: 0.522, box: 0.35 };
+
+/** How long the hatch phase may take before we move on regardless. */
+const HATCH_MAX_MS = 8000;
+
 const LINES = {
-  // Apr 27 2026: Drachenmutter removed (Marc: "Ronki's voice only").
-  // Pre-hatch beats (approach/shelf/wobble) are now silent-with-text —
-  // no speaker attribution, no audio, the German line just fades in
-  // visually like a storybook caption. Ronki can't speak from inside
-  // the egg, but the cinematic still needs framing copy. Post-hatch
-  // (meet/name/close) is Ronki's voice, his text. 'who: null' is the
-  // signal to VoiceLine to render text without the speaker eyebrow.
-  approach: { who: null,    text: 'Da hinten leuchtet etwas.' },
-  shelf:    { who: null,    text: 'Welches Ei fühlt sich richtig an?' },
-  wobble:   { who: null,    text: 'Eines zittert leicht.' },
-  hatch:    null,
-  meet:     { who: 'Ronki', text: 'Hallo. Ich hab auf dich gewartet. Glaub ich.' },
-  name:     { who: 'Ronki', text: 'Hm, wie soll ich heißen?' },
-  close:    { who: 'Ronki', text: 'Bis morgen. Versprochen.' },
+  // Pre-hatch beats are silent captions: Ronki cannot speak from inside
+  // the egg. 'who: null' renders a caption card instead of a bubble.
+  approach: { who: null, text: 'Da hinten leuchtet etwas.' },
+  shelf: { who: null, text: 'Welches Ei fühlt sich richtig an?' },
+  wobble: { who: null, text: 'Eines zittert leicht.' },
+  hatch: null,
+  meet: { who: 'Ronki', text: 'Hallo. Ich hab auf dich gewartet. Glaub ich.' },
+  name: { who: 'Ronki', text: 'Hm, wie soll ich heißen?' },
+  close: { who: 'Ronki', text: 'Bis morgen. Versprochen.' },
 };
 
 export default function MeetRonki({ onComplete }) {
-  const { actions } = useTask();
+  useTask();
   const [phase, setPhase] = useState('approach');
   const [picked, setPicked] = useState(null);
   const [name, setName] = useState('');
   const [voiceKey, setVoiceKey] = useState(0);
 
-  // Auto-advance through the phases the kid doesn't drive. Each branch
-  // also fires its matching ElevenLabs line + returns a cleanup that
-  // stops the audio if phase shifts mid-playback. Symmetric structure
-  // (every branch returns a cleanup) keeps the contract obvious for
-  // future-you. Audio files: narrator_meet_* (Drachenmutter, Charlotte)
-  // and de_meet_*_01 (Ronki, Harry) — see docs/voice/ronki-voicelines.md.
+  // Auto-advance through the phases the kid does not drive. Each branch
+  // fires its matching line and returns a cleanup that stops the audio
+  // if the phase shifts mid-playback.
   useEffect(() => {
     if (phase === 'approach') {
-      // Pre-hatch: silent, on-screen text only. Ronki can't speak yet.
-      // Phase length tightened from 4400 → 3600ms now that no voice needs
-      // to land — pure visual beat with text fade-in.
       const t = setTimeout(() => { setPhase('shelf'); setVoiceKey(v => v + 1); }, 3600);
       return () => clearTimeout(t);
     }
     if (phase === 'shelf') {
-      // Silent — kid is browsing eggs. Tapping advances.
       return undefined;
     }
     if (phase === 'wobble') {
-      // Silent. Visual: chosen egg trembles, others dim, music carries.
-      // Phase length 1400ms (faster now that no voice has to fit).
       const t = setTimeout(() => setPhase('hatch'), 1400);
       return () => clearTimeout(t);
     }
     if (phase === 'hatch') {
-      const t = setTimeout(() => { setPhase('meet'); setVoiceKey(v => v + 1); }, 1400);
+      // The clip's onEnded moves us on; this is the net under it.
+      const t = setTimeout(() => { setPhase('meet'); setVoiceKey(v => v + 1); }, HATCH_MAX_MS);
       return () => clearTimeout(t);
     }
     if (phase === 'meet') {
-      // Ronki's first voiced line. Already shipped.
       VoiceAudio.playLocalized('meet_hello_01', 200);
       const t = setTimeout(() => { setPhase('name'); setVoiceKey(v => v + 1); }, 4500);
       return () => { clearTimeout(t); VoiceAudio.stop(); };
@@ -103,22 +117,25 @@ export default function MeetRonki({ onComplete }) {
       return () => VoiceAudio.stop();
     }
     if (phase === 'close') {
-      // Was Drachenmutter narrator_meet_close ("Er bleibt hier...");
-      // now Ronki saying his own goodbye. Voice file de_meet_close_01
-      // is queued in docs/voice/ronki-voicelines.md for the next gen pass —
-      // until that lands, playLocalized fails silently and the on-
-      // screen "Bis morgen. Versprochen." text carries the moment.
+      // de_meet_close_01 is still queued; until it lands playLocalized
+      // fails silently and the on-screen line carries the moment.
       VoiceAudio.playLocalized('meet_close_01', 600);
       return () => VoiceAudio.stop();
     }
+    return undefined;
   }, [phase]);
 
-  const pickEgg = (variant) => {
+  const pickEgg = (eggId) => {
     if (phase !== 'shelf') return;
-    setPicked(variant);
+    setPicked(eggId);
     setPhase('wobble');
     setVoiceKey(v => v + 1);
   };
+
+  const hatched = useCallback(() => {
+    setPhase(p => (p === 'hatch' ? 'meet' : p));
+    setVoiceKey(v => v + 1);
+  }, []);
 
   const confirmName = () => {
     const trimmed = name.trim();
@@ -130,163 +147,144 @@ export default function MeetRonki({ onComplete }) {
   const finish = () => {
     if (!picked || !name.trim()) return;
     track('ronki.hatch');
-    // NOTE: completeOnboarding is intentionally NOT called here. The
-    // chained onboarding flow (CombinedParentSetup → HandoffBackCard
-    // → MeetRonki → TeachFireStep → Hub) runs TeachFireStep AFTER this
-    // surface, and TeachFireStep's onComplete is what flips
-    // state.onboardingDone (via completeOnboarding with taughtSignature
-    // = 'fire'). If we flipped onboardingDone here, the gate that
-    // hides onboarding would unmount the chain mid-flight before
-    // TeachFireStep even rendered.
-    //
-    // Standalone usage of MeetRonki (e.g. ?meet=1 preview) doesn't
-    // need onboardingDone flipped — it's already onboarded.
-    onComplete?.({ companionVariant: picked, heroName: name.trim() });
+    // completeOnboarding is intentionally NOT called here: TeachFireStep
+    // runs after this surface and flips onboardingDone. See App.jsx
+    // OnboardingChain.
+    const egg = EGGS.find(e => e.id === picked);
+    onComplete?.({ companionVariant: egg?.variant || 'forest', heroName: name.trim() });
   };
 
-  const pickedVar = picked ? EGG_VARIANTS.find(e => e.id === picked) : null;
   const cur = LINES[phase];
+  const onScene = phase === 'approach' || phase === 'wobble' || phase === 'hatch' || phase === 'meet';
+  const onWhite = !onScene;
 
   return (
     <div
       role="dialog"
       aria-modal="true"
       aria-label="Ronki kennenlernen"
-      style={{ position: 'fixed', inset: 0, zIndex: 950, overflow: 'hidden', background: '#050302' }}
+      className="bg-white text-ink"
+      style={{ position: 'fixed', inset: 0, zIndex: 950, overflow: 'hidden' }}
     >
-      <CaveScene phase={phase} pickedTint={pickedVar?.tint} pickedDeep={pickedVar?.deep} />
+      {/* Approach: his room, alive. */}
+      {phase === 'approach' && (
+        <div className="absolute inset-0 mr-fade">
+          <SceneLoop poster={ROOM_POSTER} video={ROOM_LOOP} objectPosition="50% 40%" priority />
+        </div>
+      )}
 
-      {(phase === 'shelf' || phase === 'wobble' || phase === 'hatch') && (
-        <div style={{
-          position: 'absolute', top: '50%', left: '50%',
-          transform: 'translate(-50%, -10%)',
-          display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: 18, padding: '0 36px', width: '88%', justifyItems: 'center',
-        }}>
-          {EGG_VARIANTS.map(e => {
-            const isPicked = picked === e.id;
-            const dim = picked && !isPicked;
-            return (
-              <Egg
+      {/* Wobble, hatch, meet: the egg on the cushion, then the clip. */}
+      {(phase === 'wobble' || phase === 'hatch' || phase === 'meet') && picked && (
+        <HatchStage egg={picked} phase={phase} onEnded={hatched} />
+      )}
+
+      {/* Shelf: the four eggs. */}
+      {phase === 'shelf' && (
+        <div
+          className="absolute inset-0 flex flex-col items-center justify-center px-5 mr-fade"
+          style={{ paddingTop: 'env(safe-area-inset-top, 0px)', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+        >
+          <h1 key={voiceKey} className="bb-display text-center text-3xl mb-8 mr-line-in" style={{ maxWidth: 300 }}>
+            {LINES.shelf.text}
+          </h1>
+          <div className="grid grid-cols-2 gap-4" role="group" aria-label="Ei wählen">
+            {EGGS.map((e, i) => (
+              <ChoiceTile
                 key={e.id}
-                tint={e.tint}
-                deep={e.deep}
-                size={62}
-                picked={isPicked}
-                dim={dim}
-                wobble={isPicked && phase === 'wobble'}
-                hatching={isPicked && phase === 'hatch'}
-                onTap={!picked && phase === 'shelf' ? () => pickEgg(e.id) : undefined}
+                size="lg"
+                label={e.label}
+                aria-label={`Ei wählen: ${e.label}`}
+                onClick={() => pickEgg(e.id)}
+                className="mr-pop"
+                style={{ animationDelay: `${i * 90}ms` }}
+              >
+                <RonkiArt
+                  pose={`egg-${e.id}`}
+                  size={64}
+                  idle="bb-egg-wobble"
+                  style={{ animationDelay: `${i * 0.45}s` }}
+                />
+              </ChoiceTile>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Name and close: Ronki on white. */}
+      {(phase === 'name' || phase === 'close') && (
+        <div
+          className="absolute inset-0 flex flex-col items-center px-6 mr-fade"
+          style={{
+            paddingTop: 'calc(24px + env(safe-area-inset-top, 0px))',
+            paddingBottom: 'calc(24px + env(safe-area-inset-bottom, 0px))',
+          }}
+        >
+          <div className="flex-1 flex flex-col items-center justify-center gap-5 w-full max-w-sm">
+            {cur && (
+              <SpeechBubble key={voiceKey} side="bottom" size="lg" className="mr-line-in" style={{ maxWidth: 300 }}>
+                {cur.text}
+              </SpeechBubble>
+            )}
+            <MoodChibi stage={1} mood="normal" size={phase === 'close' ? 260 : 220} bare label="Ronki" />
+          </div>
+
+          {phase === 'name' && (
+            <div className="w-full max-w-sm flex flex-col items-center gap-4 mr-line-in" style={{ animationDelay: '300ms' }}>
+              <label htmlFor="mr-name" className="sr-only">Name für Ronki</label>
+              <input
+                id="mr-name"
+                type="text"
+                value={name}
+                onChange={e => setName(e.target.value.slice(0, 18))}
+                placeholder="hier tippen"
+                autoFocus
+                autoComplete="off"
+                className="w-full min-w-0 rounded-[14px] border-[2.5px] border-ink bg-white px-4 py-3 text-center font-headline font-semibold text-ink placeholder:text-ink-soft/60 focus:outline-none focus:border-cobalt"
+                style={{ fontSize: 22, lineHeight: 1.2 }}
               />
-            );
-          })}
+              <PillButton full size="lg" onClick={confirmName} disabled={!name.trim()}>
+                so soll er heißen
+              </PillButton>
+            </div>
+          )}
         </div>
       )}
 
-      {(phase === 'meet' || phase === 'name' || phase === 'close') && pickedVar && (
-        <div style={{
-          position: 'absolute', top: '50%', left: '50%',
-          transform: phase === 'close'
-            ? 'translate(-50%, -38%) scale(0.5)'
-            : 'translate(-50%, -45%)',
-          transition: 'transform 1400ms cubic-bezier(.34,1.4,.64,1)',
-        }}>
-          {/* Apr 2026 immersion fix: was a custom CSS-drawn RonkiHatchling
-              that didn't match TeachBreathBeat's MoodChibi → kid saw two
-              different Ronkis between hatching here and learning fire-
-              breath in TeachFireStep. Now both surfaces share MoodChibi
-              with stage=1 (baby) + variant from the egg pick. The wrapper
-              div carries the awakening scale ramp + breathing animation
-              that the old hatchling baked in. */}
-          <RonkiHatchlingWrapper
-            awakening={phase === 'meet' || phase === 'name' ? 1 : 0.6}
-            breathe={phase !== 'hatch'}
-            tint={pickedVar?.tint || '#fde68a'}
-          >
-            <MoodChibi
-              variant={picked || 'amber'}
-              stage={1}
-              mood="normal"
-              size={150}
-              bare
-            />
-          </RonkiHatchlingWrapper>
+      {/* Captions for the silent beats, on the scene or the white page. */}
+      {cur && cur.who === null && phase !== 'shelf' && (
+        <Caption key={voiceKey} text={cur.text} />
+      )}
+
+      {/* Ronki's first line, above the shell. */}
+      {phase === 'meet' && cur && (
+        <div
+          key={voiceKey}
+          className="absolute left-0 right-0 flex justify-center px-6 mr-line-in"
+          style={{ top: 'calc(14% + env(safe-area-inset-top, 0px))', pointerEvents: 'none' }}
+        >
+          <SpeechBubble side="bottom" size="lg" style={{ maxWidth: 300 }}>
+            {cur.text}
+          </SpeechBubble>
         </div>
       )}
 
-      {cur && phase !== 'hatch' && <VoiceLine key={voiceKey} who={cur.who} text={cur.text} />}
-
-      {/* Waveform only on phases where Ronki actually speaks — was previously
-          showing during the silent pre-hatch beats too, which read as a bug
-          (waveform present, no audio). */}
-      {cur && (phase === 'meet' || phase === 'close') && (
-        <Waveform active />
-      )}
-
-      {phase === 'name' && (
-        <div style={{
-          position: 'absolute', bottom: 38, left: 28, right: 28,
-          display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center',
-          animation: 'mr-lineIn 700ms ease 400ms backwards',
-        }}>
-          <input
-            type="text"
-            value={name}
-            onChange={e => setName(e.target.value.slice(0, 18))}
-            placeholder="hier tippen"
-            autoFocus
-            style={{
-              width: '100%',
-              padding: '14px 18px',
-              borderRadius: 14,
-              background: 'rgba(255,255,255,.08)',
-              border: '1.5px solid rgba(252,211,77,.4)',
-              outline: 'none',
-              font: '600 18px "Fredoka", sans-serif',
-              color: '#fef3c7',
-              textAlign: 'center',
-              backdropFilter: 'blur(8px)',
-              WebkitBackdropFilter: 'blur(8px)',
-            }}
-          />
-          <button
-            type="button"
-            onClick={confirmName}
-            disabled={!name.trim()}
-            style={{
-              padding: '12px 28px',
-              borderRadius: 999,
-              border: 'none',
-              background: name.trim() ? '#fcd34d' : 'rgba(252,211,77,.2)',
-              color: name.trim() ? '#5a3a08' : 'rgba(254,243,199,.4)',
-              font: '700 13px "Plus Jakarta Sans", sans-serif',
-              letterSpacing: '.14em',
-              textTransform: 'uppercase',
-              cursor: name.trim() ? 'pointer' : 'default',
-              transition: 'all 300ms ease',
-            }}
-          >
-            so soll er heißen
-          </button>
-        </div>
-      )}
+      {/* "spricht" only while a voiced line plays. */}
+      {(phase === 'meet' || phase === 'close') && <Speaking />}
 
       {phase === 'close' && (
         <button
           type="button"
           onClick={finish}
-          style={{
-            position: 'absolute', inset: 0,
-            background: 'transparent', border: 'none', cursor: 'pointer',
-            font: '600 10px "Plus Jakarta Sans", sans-serif',
-            letterSpacing: '.22em', textTransform: 'uppercase',
-            color: 'rgba(255,242,217,.35)',
-            display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
-            paddingBottom: 26,
-            animation: 'mr-lineIn 800ms ease 3000ms backwards',
-          }}
+          aria-label="tippen zum schließen"
+          className="absolute inset-0 flex items-end justify-center bg-transparent border-0 cursor-pointer"
+          style={{ paddingBottom: 'calc(28px + env(safe-area-inset-bottom, 0px))' }}
         >
-          tippen zum schließen
+          <span
+            className="font-headline font-semibold text-lg text-cobalt mr-line-in"
+            style={{ animationDelay: '3000ms', animationFillMode: 'backwards' }}
+          >
+            tippen zum schließen
+          </span>
         </button>
       )}
 
@@ -295,310 +293,216 @@ export default function MeetRonki({ onComplete }) {
           0% { opacity: 0; transform: translateY(8px); }
           100% { opacity: 1; transform: translateY(0); }
         }
+        @keyframes mr-fadeIn {
+          0% { opacity: 0; }
+          100% { opacity: 1; }
+        }
+        @keyframes mr-pop {
+          0% { opacity: 0; transform: scale(0.85); }
+          70% { opacity: 1; transform: scale(1.04); }
+          100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes mr-tremble {
+          0%, 100% { transform: translate(-50%, -50%) rotate(-5deg); }
+          25% { transform: translate(-50%, -50%) rotate(4deg); }
+          50% { transform: translate(-50%, -50%) rotate(-4deg); }
+          75% { transform: translate(-50%, -50%) rotate(5deg); }
+        }
+        @keyframes mr-crack {
+          0% { transform: translate(-50%, -50%) rotate(0deg); }
+          30% { transform: translate(-50%, -52%) rotate(-3deg); }
+          60% { transform: translate(-50%, -50%) rotate(3deg); }
+          100% { transform: translate(-50%, -50%) rotate(0deg); }
+        }
+        .mr-line-in { animation: mr-lineIn 700ms ease-out backwards; }
+        .mr-fade { animation: mr-fadeIn 500ms ease-out both; }
+        .mr-pop { animation: mr-pop 500ms cubic-bezier(.34,1.4,.64,1) backwards; }
       `}</style>
     </div>
   );
 }
 
-// ─── Cave (painterly, layered, animated) ────────────────────────
+/* Storybook caption: a paper card at the bottom, a little off straight. */
+function Caption({ text }) {
+  return (
+    <div
+      className="absolute left-0 right-0 flex justify-center px-6 mr-line-in"
+      style={{ bottom: 'calc(36px + env(safe-area-inset-bottom, 0px))', pointerEvents: 'none' }}
+    >
+      <PaperCard tone="paper" pad="md" style={{ transform: 'rotate(-1deg)', maxWidth: 320 }}>
+        <p className="bb-display text-center text-2xl m-0">{text}</p>
+      </PaperCard>
+    </div>
+  );
+}
 
-function CaveScene({ phase, pickedTint }) {
-  const cameraScale =
-    phase === 'approach' ? 1.0 :
-    phase === 'shelf'    ? 1.4 :
-    phase === 'wobble'   ? 1.7 :
-    phase === 'hatch'    ? 1.9 :
-    phase === 'meet'     ? 1.85 :
-    phase === 'name'     ? 1.7 :
-    phase === 'close'    ? 1.15 : 1.0;
+/* Small "spricht" sticker while Ronki's voice plays. */
+function Speaking() {
+  return (
+    <div
+      aria-hidden="true"
+      className="absolute left-1/2 -translate-x-1/2 inline-flex items-center gap-2 rounded-full border-[2.5px] border-ink bg-paper px-3 py-1.5 mr-fade"
+      style={{ top: 'calc(14px + env(safe-area-inset-top, 0px))' }}
+    >
+      <DoodleIcon name="sound" size={20} />
+      <span className="font-headline font-semibold text-base text-ink leading-none">spricht</span>
+      <MotionTicks tone="sun" size={18} rotate={-20} />
+    </div>
+  );
+}
 
-  const cameraY =
-    phase === 'approach' ? '0%' :
-    phase === 'shelf'    ? '4%' :
-    phase === 'wobble'   ? '6%' :
-    phase === 'hatch'    ? '6%' :
-    phase === 'meet'     ? '4%' :
-    phase === 'name'     ? '2%' :
-    phase === 'close'    ? '0%' : '0%';
+/**
+ * HatchStage: the hatch poster with the chosen egg on its cushion. Wobble
+ * trembles the egg, hatch plays the one-shot clip, meet keeps the end
+ * frame. Mounted from the wobble phase so the clip preloads while the
+ * egg trembles.
+ *
+ * Rules: poster always there; the video is muted, playsInline, no loop,
+ * fades in only once it plays; never mounted under reduced motion; a
+ * refused play() or a video error falls back to the stills (chosen egg,
+ * egg-cracked, end frame) on the old 1.4 s timing.
+ */
+function HatchStage({ egg, phase, onEnded }) {
+  const reduced = useReducedMotion();
+  const stageRef = useRef(null);
+  const videoRef = useRef(null);
+  const [mode, setMode] = useState(reduced ? 'still' : 'clip');
+  const [playing, setPlaying] = useState(false);
+  const [ended, setEnded] = useState(false);
+  const [stillStep, setStillStep] = useState(0);
+  const doneRef = useRef(false);
+  const box = useCoverBox(stageRef, POSTER.w, POSTER.h);
 
-  const lantern =
-    phase === 'approach' ? 0.55 :
-    phase === 'shelf'    ? 0.85 :
-    phase === 'wobble'   ? 1.0 :
-    phase === 'hatch'    ? 1.6 :
-    phase === 'meet'     ? 1.15 :
-    phase === 'name'     ? 1.0 : 0.9;
+  const finish = useCallback(() => {
+    if (doneRef.current) return;
+    doneRef.current = true;
+    setEnded(true);
+    onEnded?.();
+  }, [onEnded]);
+
+  useEffect(() => {
+    if (reduced) setMode('still');
+  }, [reduced]);
+
+  // Hatch, clip mode: play once. A refused play() drops to the stills.
+  useEffect(() => {
+    if (phase !== 'hatch' || mode !== 'clip') return undefined;
+    const v = videoRef.current;
+    if (!v) return undefined;
+    v.muted = true;
+    v.defaultMuted = true;
+    let cancelled = false;
+    const p = v.play?.();
+    if (p && typeof p.catch === 'function') {
+      p.catch(() => { if (!cancelled) setMode('still'); });
+    }
+    return () => { cancelled = true; };
+  }, [phase, mode]);
+
+  // Hatch, still mode: crack, then the end frame, then move on.
+  useEffect(() => {
+    if (phase !== 'hatch' || mode !== 'still') return undefined;
+    const a = setTimeout(() => setStillStep(1), 150);
+    const b = setTimeout(() => setStillStep(2), 900);
+    const c = setTimeout(finish, 1400);
+    return () => { clearTimeout(a); clearTimeout(b); clearTimeout(c); };
+  }, [phase, mode, finish]);
+
+  useEffect(() => () => { videoRef.current?.pause?.(); }, []);
+
+  const showEnd = ended || stillStep === 2 || phase === 'meet';
+  const showChosen = !showEnd && !playing && stillStep === 0;
+  const showCracked = !showEnd && mode === 'still' && stillStep === 1;
+  const eggPx = box ? box.drawnH * EGG_ANCHOR.box : 0;
+  const eggStyle = box
+    ? {
+        position: 'absolute',
+        left: box.offX + box.drawnW * EGG_ANCHOR.cx,
+        top: box.offY + box.drawnH * EGG_ANCHOR.cy,
+        width: eggPx,
+        height: eggPx,
+        transform: 'translate(-50%, -50%)',
+        transformOrigin: '50% 90%',
+      }
+    : { display: 'none' };
+  const layer = { position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: '50% 50%' };
 
   return (
-    <div aria-hidden="true" style={{
-      position: 'absolute', inset: 0,
-      background: 'radial-gradient(ellipse at 50% 65%, #1a0f08 0%, #050302 100%)',
-      overflow: 'hidden',
-    }}>
-      <div style={{
-        position: 'absolute', inset: 0,
-        transform: `scale(${cameraScale}) translateY(${cameraY})`,
-        transformOrigin: '50% 60%',
-        transition: 'transform 1800ms cubic-bezier(.65,.05,.36,1)',
-      }}>
-        <svg viewBox="0 0 400 700" preserveAspectRatio="xMidYMid slice"
-             style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
-          <defs>
-            <radialGradient id="mr-bgWarm" cx="50%" cy="65%" r="55%">
-              <stop offset="0%" stopColor="#3a2310"/>
-              <stop offset="50%" stopColor="#1c1108"/>
-              <stop offset="100%" stopColor="#050302"/>
-            </radialGradient>
-            <radialGradient id="mr-lant" cx="50%" cy="58%" r="35%">
-              <stop offset="0%"  stopColor={`rgba(252,211,77,${0.45 * lantern})`}/>
-              <stop offset="40%" stopColor={`rgba(245,158,11,${0.18 * lantern})`}/>
-              <stop offset="100%" stopColor="rgba(0,0,0,0)"/>
-            </radialGradient>
-            <linearGradient id="mr-floorG" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#3a2410"/>
-              <stop offset="100%" stopColor="#0a0604"/>
-            </linearGradient>
-            <radialGradient id="mr-shelfG" cx="50%" cy="50%" r="60%">
-              <stop offset="0%" stopColor="#5a3a20"/>
-              <stop offset="100%" stopColor="#1c1108"/>
-            </radialGradient>
-          </defs>
+    <div ref={stageRef} className="absolute inset-0 overflow-hidden bg-paper mr-fade" aria-hidden="true">
+      <img src={HATCH_POSTER} alt="" draggable={false} decoding="async" style={layer} />
 
-          <rect width="400" height="700" fill="url(#mr-bgWarm)"/>
-
-          {/* Side walls */}
-          <path d="M0 0 L0 700 L70 700 Q40 500, 60 350 Q80 200, 30 90 Q20 40, 0 0 Z"
-                fill="#1c1108" opacity="0.85"/>
-          <path d="M400 0 L400 700 L330 700 Q360 500, 340 350 Q320 200, 370 90 Q380 40, 400 0 Z"
-                fill="#1c1108" opacity="0.85"/>
-
-          {/* Brush strokes */}
-          <g opacity="0.4">
-            <path d="M30 100 Q50 200, 35 300 Q20 400, 40 500" stroke="#2a1810" strokeWidth="2" fill="none"/>
-            <path d="M50 50 Q70 180, 55 320" stroke="#3a2210" strokeWidth="1.5" fill="none"/>
-            <path d="M360 80 Q345 220, 365 360" stroke="#2a1810" strokeWidth="2" fill="none"/>
-            <path d="M375 150 Q360 280, 380 410" stroke="#3a2210" strokeWidth="1.5" fill="none"/>
-          </g>
-
-          {/* Floor */}
-          <path d="M0 600 Q200 580, 400 600 L400 700 L0 700 Z" fill="url(#mr-floorG)"/>
-
-          {/* Stone shelf */}
-          <g style={{
-            opacity: phase === 'approach' ? 0 : 1,
-            transition: 'opacity 1400ms ease',
-          }}>
-            <ellipse cx="200" cy="430" rx="135" ry="14" fill="#0a0604" opacity="0.7"/>
-            <path d="M65 420 Q200 405, 335 420 L335 445 Q200 455, 65 445 Z" fill="url(#mr-shelfG)"/>
-            <path d="M65 420 Q200 405, 335 420" stroke="#7a4f28" strokeWidth="1.5" fill="none" opacity="0.6"/>
-            <path d="M120 430 L128 442" stroke="#0a0604" strokeWidth="1"/>
-            <path d="M250 432 L255 440" stroke="#0a0604" strokeWidth="1"/>
-          </g>
-
-          <rect width="400" height="700" fill="url(#mr-lant)"/>
-
-          {/* Lantern source */}
-          <g style={{
-            opacity: phase === 'approach' ? 0.6 : 1,
-            transition: 'opacity 1400ms ease',
-          }}>
-            <circle cx="62" cy="180" r="3"  fill="#fef3c7"/>
-            <circle cx="62" cy="180" r="14" fill="#fcd34d" opacity="0.18"/>
-            <circle cx="62" cy="180" r="40" fill="#f59e0b" opacity="0.06"/>
-          </g>
-        </svg>
-
-        {/* Floating dust motes */}
-        {[...Array(18)].map((_, i) => {
-          const seed = i * 47;
-          return (
-            <div key={i} style={{
-              position: 'absolute',
-              top:  `${20 + (seed % 60)}%`,
-              left: `${10 + ((seed * 3) % 80)}%`,
-              width: 1 + (i % 3), height: 1 + (i % 3),
-              borderRadius: '50%',
-              background: 'rgba(252,211,77,.35)',
-              boxShadow: '0 0 4px rgba(252,211,77,.5)',
-              animation: `mr-mote ${8 + (i % 5)}s ease-in-out infinite ${(i * 0.4) % 3}s`,
-            }} />
-          );
-        })}
-      </div>
-
-      {/* Hatch flash */}
-      {phase === 'hatch' && (
-        <div key="flash" style={{
-          position: 'absolute', inset: 0,
-          background: `radial-gradient(circle at 50% 55%, ${pickedTint || '#fef3c7'}cc 0%, transparent 50%)`,
-          animation: 'mr-flash 1400ms ease-out forwards',
-          pointerEvents: 'none',
-        }} />
+      {mode === 'clip' && (
+        <video
+          ref={videoRef}
+          src={HATCH_CLIP}
+          muted
+          playsInline
+          preload="auto"
+          disablePictureInPicture
+          tabIndex={-1}
+          onPlaying={() => setPlaying(true)}
+          onEnded={finish}
+          onError={() => setMode('still')}
+          style={{ ...layer, opacity: playing ? 1 : 0, transition: 'opacity 350ms ease-out', pointerEvents: 'none' }}
+        />
       )}
 
-      <style>{`
-        @keyframes mr-mote {
-          0%, 100% { transform: translateY(0) translateX(0); opacity: 0.4; }
-          50%      { transform: translateY(-12px) translateX(6px); opacity: 0.9; }
-        }
-        @keyframes mr-flash {
-          0%   { opacity: 0; }
-          18%  { opacity: 1; }
-          100% { opacity: 0; }
-        }
-      `}</style>
-    </div>
-  );
-}
+      <img
+        src={HATCH_END}
+        alt=""
+        draggable={false}
+        decoding="async"
+        style={{ ...layer, opacity: showEnd ? 1 : 0, transition: 'opacity 320ms ease-out' }}
+      />
 
-// ─── Egg ────────────────────────────────────────────────────────
-
-function Egg({ tint, deep, size = 60, picked, dim, onTap, wobble, hatching }) {
-  return (
-    <button
-      type="button"
-      onClick={onTap}
-      aria-label="Ei wählen"
-      style={{
-        background: 'transparent', border: 'none', padding: 0,
-        cursor: onTap ? 'pointer' : 'default',
-        position: 'relative',
-        width: size, height: size * 1.28,
-        opacity: dim ? 0.18 : 1,
-        transform: picked ? `scale(${hatching ? 0 : 1.3})` : 'scale(1)',
-        transition: hatching
-          ? 'transform 900ms cubic-bezier(.7,0,.84,0), opacity 600ms ease'
-          : 'transform 600ms ease, opacity 700ms ease',
-        animation: wobble ? 'mr-eggWobble 1.4s ease-in-out infinite' : 'none',
-        filter: picked
-          ? 'drop-shadow(0 0 18px rgba(252,211,77,.7))'
-          : 'drop-shadow(0 6px 10px rgba(0,0,0,.5))',
-      }}
-    >
-      <svg viewBox="0 0 60 80" width={size} height={size * 1.28} style={{ display: 'block' }}>
-        <defs>
-          <radialGradient id={`mr-eg-${tint.replace('#','')}`} cx="35%" cy="32%" r="65%">
-            <stop offset="0%"   stopColor="#ffffff" stopOpacity="0.9"/>
-            <stop offset="18%"  stopColor={tint}/>
-            <stop offset="65%"  stopColor={tint}/>
-            <stop offset="100%" stopColor={deep} stopOpacity="0.6"/>
-          </radialGradient>
-        </defs>
-        <ellipse cx="30" cy="42" rx="22" ry="34" fill={`url(#mr-eg-${tint.replace('#','')})`}/>
-        <circle cx="22" cy="35" r="1.2" fill={deep} opacity="0.35"/>
-        <circle cx="38" cy="48" r="1"   fill={deep} opacity="0.3"/>
-        <circle cx="26" cy="58" r="1.4" fill={deep} opacity="0.4"/>
-        <circle cx="35" cy="28" r="0.8" fill={deep} opacity="0.3"/>
-        <ellipse cx="22" cy="28" rx="3" ry="6" fill="white" opacity="0.45"/>
-      </svg>
-      <style>{`
-        @keyframes mr-eggWobble {
-          0%, 100% { transform: rotate(-4deg); }
-          50%      { transform: rotate(4deg); }
-        }
-      `}</style>
-    </button>
-  );
-}
-
-// ─── RonkiHatchlingWrapper — awakening scale + breathing animation ────
-//
-// Apr 2026 art-unification (Marc: "Ronki that hatches and Ronki getting
-// taught firebreath aren't the same chibi but have to be"). The body
-// is now MoodChibi (same primitive TeachBreathBeat uses), so the kid
-// sees a continuous Ronki across the meet→teach handoff. This wrapper
-// keeps the choreography that the old custom hatchling baked in:
-//  · awakening: 0..1 — scale ramps from 0.4× to 1.0× over 900ms when
-//    Ronki "wakes up" post-hatch (phase shifts from hatch → meet)
-//  · breathe: gentle 3.4s breathing pulse once the chibi has settled
-//  · drop-shadow with a variant-tinted glow so the egg's color carries
-//    through visually on the hatchling
-//
-// Old custom-SVG hatchling deleted. EGG_VARIANTS still exports tint+deep
-// for the egg artwork itself (the wobbling eggs on the shelf); the
-// chibi colors come from MoodChibi's own palette via variant id.
-function RonkiHatchlingWrapper({ children, awakening = 1, breathe = true, tint = '#fde68a' }) {
-  return (
-    <div style={{
-      position: 'relative',
-      transform: `scale(${0.4 + 0.6 * awakening})`,
-      transition: 'transform 900ms cubic-bezier(.34,1.4,.64,1)',
-      animation: breathe ? 'mr-ronkiBreathe 3.4s ease-in-out infinite' : 'none',
-      filter: `drop-shadow(0 8px 14px rgba(0,0,0,.5)) drop-shadow(0 0 20px ${tint}88)`,
-    }}>
-      {children}
-      <style>{`
-        @keyframes mr-ronkiBreathe {
-          0%, 100% { transform: scale(1); }
-          50%      { transform: scale(1.04); }
-        }
-      `}</style>
-    </div>
-  );
-}
-
-// ─── Voice line + waveform ──────────────────────────────────────
-
-function VoiceLine({ who, text }) {
-  // who: 'Ronki' | null. Drachenmutter removed Apr 27 2026 — pre-hatch
-  // beats now use who=null (storybook caption, no speaker eyebrow).
-  const showSpeaker = who === 'Ronki';
-  return (
-    <div style={{
-      position: 'absolute', bottom: 90, left: 28, right: 28,
-      animation: 'mr-lineIn 800ms ease-out',
-      pointerEvents: 'none', textAlign: 'center',
-    }}>
-      {showSpeaker && (
-        <div style={{
-          font: '700 9px/1 "Plus Jakarta Sans", sans-serif',
-          letterSpacing: '.32em', textTransform: 'uppercase',
-          color: 'rgba(252,211,77,.7)',
-          marginBottom: 8,
-        }}>
-          Ronki
+      {/* The chosen egg on the cushion: trembles on wobble, covers the
+          poster egg until the clip is really playing. */}
+      {(showChosen || showCracked) && (
+        <div
+          style={{
+            ...eggStyle,
+            transition: 'opacity 300ms ease-out',
+            animation: showCracked
+              ? 'mr-crack 500ms ease-out both'
+              : phase === 'wobble'
+                ? 'mr-tremble 700ms ease-in-out infinite'
+                : 'none',
+          }}
+        >
+          <RonkiArt pose={showCracked ? 'egg-cracked' : `egg-${egg}`} size={eggPx || 1} style={{ width: '100%', height: '100%' }} />
         </div>
       )}
-      <p style={{
-        margin: 0,
-        font: `400 ${showSpeaker ? 17 : 16}px/1.45 "Nunito", sans-serif`,
-        fontStyle: 'italic',
-        color: 'rgba(255,242,217,.92)',
-      }}>
-        {text}
-      </p>
     </div>
   );
 }
 
-function Waveform({ active }) {
-  return (
-    <div aria-hidden="true" style={{
-      position: 'absolute', top: 60, left: '50%', transform: 'translateX(-50%)',
-      display: 'flex', gap: 3, alignItems: 'center', padding: '6px 12px',
-      borderRadius: 999, background: 'rgba(0,0,0,.35)',
-      backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
-      opacity: active ? 1 : 0, transition: 'opacity 400ms ease',
-    }}>
-      {[3,7,11,8,5,9,12,6,4].map((h, i) => (
-        <div key={i} style={{
-          width: 2, height: h, borderRadius: 1,
-          background: 'rgba(252,211,77,.7)',
-          animation: active ? `mr-wave 1s ease-in-out ${i * 0.08}s infinite` : 'none',
-        }} />
-      ))}
-      <span style={{
-        marginLeft: 6,
-        font: '600 9px/1 "Plus Jakarta Sans", sans-serif',
-        letterSpacing: '.18em', textTransform: 'uppercase',
-        color: 'rgba(255,242,217,.6)',
-      }}>spricht</span>
-      <style>{`
-        @keyframes mr-wave {
-          0%, 100% { transform: scaleY(0.5); }
-          50%      { transform: scaleY(1.4); }
-        }
-      `}</style>
-    </div>
-  );
+/**
+ * useCoverBox: where an image with object-fit cover actually lands
+ * inside `ref`, so a cut-out can sit on a spot of the picture at any
+ * viewport size.
+ */
+function useCoverBox(ref, imgW, imgH) {
+  const [box, setBox] = useState(null);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return undefined;
+    const measure = () => {
+      const W = el.clientWidth;
+      const H = el.clientHeight;
+      if (!W || !H) return;
+      const scale = Math.max(W / imgW, H / imgH);
+      const drawnW = imgW * scale;
+      const drawnH = imgH * scale;
+      setBox({ drawnW, drawnH, offX: (W - drawnW) / 2, offY: (H - drawnH) / 2 });
+    };
+    measure();
+    if (typeof ResizeObserver === 'undefined') {
+      window.addEventListener('resize', measure);
+      return () => window.removeEventListener('resize', measure);
+    }
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [ref, imgW, imgH]);
+  return box;
 }

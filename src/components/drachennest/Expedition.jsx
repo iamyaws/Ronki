@@ -2,9 +2,20 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useTask } from '../../context/TaskContext';
 import RonkiAwayLoop from './RonkiAwayLoop';
 import VoiceAudio from '../../utils/voiceAudio';
+import { RonkiArt } from '../MoodChibi';
+import {
+  DoodleIcon,
+  MotionTicks,
+  PaperCard,
+  PillButton,
+  SceneLoop,
+  SpeechBubble,
+  StickerBurst,
+  TopBar,
+} from '../bilderbuch';
 
 // ─── Voice (Apr 2026 voice pass) ──────────────────────────────────
-// State-keyed Ronki narration. Each state-entry fires one matching
+// State-keyed Ronki narration. Each state entry fires one matching
 // line; refs prevent re-fire on re-render. Pack/depart/browse pull
 // from indexed pools so the kid hears a different take across days.
 const KARTE_POOL_SIZE = 3;       // de_karte_0..2
@@ -27,33 +38,33 @@ function randPoolId(prefix, size, suffix1Indexed = false) {
     : `${prefix}_${i}`;                              // _0 / _1 / _2
 }
 
+const ART = `${import.meta.env.BASE_URL}art/bilderbuch/`;
+const MORGENWALD = `${ART}scenes/morgenwald.webp`;
+
 /**
- * Expedition — the Reise surface (Drachennest, 25 Apr 2026).
+ * Expedition: the Reise surface (Drachennest, 25 Apr 2026), on the
+ * Bilderbuch art (25 Sep 2026, lane B).
  *
- * Direct port of the FEATURE 3 spec from the Ronki Feature Previews
- * design file. State machine:
+ * State machine (unchanged):
  *
- *   home    — Ronki at the campfire, ritual % visible, CTA hint.
- *   leaving — Triggered when morning ritual hits 100%. Walk-out
- *             animation (~2.5s) carries Ronki off-frame, then we
- *             flip to 'away' via rangerDeparted() which sets
- *             departedAt + returnAt + pendingMemento.
- *   away    — Ronki gone. Folded map placeholder + paw-trail visible
- *             on the log. A polling effect checks every 30s; once
- *             now > returnAt we flip to 'waiting' via rangerArrived().
- *   waiting — Ronki returned. Glowing diary at the campfire pulses;
- *             tap opens the diary modal. Closing the modal calls
- *             receiveMemento(), which pushes pendingMemento into the
- *             expeditionLog and resets state to 'home'.
+ *   home    Ronki at the camp, ritual % visible, CTA hint.
+ *   leaving Triggered when the morning ritual hits 100%. Walk-out
+ *           animation (~2.5 s) carries Ronki off-frame, then we flip to
+ *           'away' via rangerDeparted() which sets departedAt, returnAt
+ *           and pendingMemento.
+ *   away    Ronki gone. A polling effect checks every 30 s; once
+ *           now > returnAt we flip to 'waiting' via rangerArrived().
+ *   waiting Ronki returned. The diary sticker at the camp; tap opens
+ *           the diary sheet. Closing it calls receiveMemento(), which
+ *           pushes pendingMemento into the expeditionLog and resets the
+ *           state to 'home'.
  *
- * v1 scope (per spec):
- *  - One biome: Morgenwald.
- *  - One memento per return.
- *  - No 'night-away' yet — that's a follow-up.
+ * The return beat: the Morgenwald behind, Ronki as a cut-out waving on
+ * arrival with a sticker burst, the memento on a sun paper card, the
+ * diary as paper.
  *
- * Dev affordance: ?expedition=home|leaving|away|waiting forces a
- * state for QA so all four screens are reachable without waiting on
- * real timestamps. DEV-only.
+ * Dev affordance: ?expedition=home|leaving|away|waiting forces a state
+ * for QA. DEV-only.
  */
 
 export default function Expedition({ onClose }) {
@@ -63,12 +74,10 @@ export default function Expedition({ onClose }) {
 
   const [showDiary, setShowDiary] = useState(false);
   // Local "diary just received the bar fill" trigger so the progress
-  // bar inside the diary modal animates in after mount, matching the
-  // spec.
+  // bar inside the diary sheet animates in after mount.
   const [diaryFillKey, setDiaryFillKey] = useState(0);
 
-  // Dev URL param: force a state for QA. One-shot on mount so the
-  // forced value isn't reapplied on every re-render.
+  // Dev URL param: force a state for QA. One-shot on mount.
   const devForcedRef = useRef(false);
   useEffect(() => {
     if (devForcedRef.current) return;
@@ -89,14 +98,12 @@ export default function Expedition({ onClose }) {
     }
   }, [actions]);
 
-  // ─── Voice — state-keyed Ronki narration ──
+  // ─── Voice: state-keyed Ronki narration ──
   // home:    Karte voice on first mount (kid is browsing the map)
   // leaving: pack voice (Ronki narrates packing) +
-  //          depart voice 1.5s later (synced with the walk-out anim)
+  //          depart voice 1.5 s later (synced with the walk-out anim)
   // away:    arrive voice (per biome) on first render of away state
   // waiting: return voice ("Ich bin wieder da. Schau, was ich gefunden hab.")
-  // Refs gate each so re-renders or rapid state-flip-flops don't
-  // double-fire. Reset only on full unmount.
   const voiceFiredRef = useRef({ home: false, leaving: false, away: false, waiting: false });
   useEffect(() => {
     const s = expedition.state;
@@ -106,7 +113,7 @@ export default function Expedition({ onClose }) {
     } else if (s === 'leaving' && !voiceFiredRef.current.leaving) {
       voiceFiredRef.current.leaving = true;
       VoiceAudio.playLocalized(randPoolId('expedition_pack', PACK_POOL_SIZE, true), 200);
-      // Depart line lands as Ronki actually walks off (~1.6s in).
+      // Depart line lands as Ronki actually walks off (~1.6 s in).
       const t = setTimeout(() => {
         VoiceAudio.playLocalized(randPoolId('expedition_depart', DEPART_POOL_SIZE, true), 0);
       }, 1600);
@@ -116,9 +123,7 @@ export default function Expedition({ onClose }) {
       const biomeId = expedition.biome || 'morgenwald';
       const baseId = BIOME_TO_VOICE[biomeId] || 'expedition_arrive_morgenwald';
       VoiceAudio.playLocalized(baseId, 400);
-      // Browse line plays a few seconds after arrival, then again on
-      // any return-visit (handled by below effect via voiceFiredRef
-      // reset on close — kept simple here).
+      // Browse line plays a few seconds after arrival.
       const t = setTimeout(() => {
         VoiceAudio.playLocalized(randPoolId('expedition_browse', BROWSE_POOL_SIZE, true), 0);
       }, 5000);
@@ -127,19 +132,19 @@ export default function Expedition({ onClose }) {
       voiceFiredRef.current.waiting = true;
       VoiceAudio.playLocalized('expedition_return_01', 400);
     }
+    return undefined;
   }, [expedition.state, expedition.biome]);
 
-  // 'leaving' → 'away' transition: the walk-out animation runs ~2.4s,
-  // then we hand off to the reducer (which stamps departedAt +
-  // returnAt + pendingMemento). Guarded so re-renders during the
-  // animation don't double-trigger.
+  // 'leaving' → 'away' transition: the walk-out animation runs ~2.4 s,
+  // then we hand off to the reducer. Guarded so re-renders during the
+  // animation do not double-trigger.
   const departingRef = useRef(false);
   useEffect(() => {
     if (expedition.state !== 'leaving') {
       departingRef.current = false;
-      return;
+      return undefined;
     }
-    if (departingRef.current) return;
+    if (departingRef.current) return undefined;
     departingRef.current = true;
     const t = setTimeout(() => {
       actions.rangerDeparted?.();
@@ -147,10 +152,9 @@ export default function Expedition({ onClose }) {
     return () => clearTimeout(t);
   }, [expedition.state, actions]);
 
-  // 'away' → 'waiting' poll: once a minute, check if now > returnAt.
-  // Cheap; the surface is rarely on-screen for long.
+  // 'away' → 'waiting' poll: every 30 s, check if now > returnAt.
   useEffect(() => {
-    if (expedition.state !== 'away') return;
+    if (expedition.state !== 'away') return undefined;
     const tick = () => {
       const target = expedition.returnAt ? new Date(expedition.returnAt).getTime() : 0;
       if (target && Date.now() >= target) {
@@ -168,12 +172,12 @@ export default function Expedition({ onClose }) {
   const morningPct = morningTotal > 0 ? Math.round((morningDone / morningTotal) * 100) : 0;
   const ritualDone = morningTotal > 0 && morningDone === morningTotal;
 
-  // Status strip copy per state. Mirrors the spec's CAMP_STATES table.
+  // Status card copy per state. Mirrors the spec's CAMP_STATES table.
   const statusByState = {
-    home:    { biome: '🌲', title: '',                              sub: '' },
-    leaving: { biome: '🌲', title: 'Ronki packt den Rucksack.',     sub: 'Bis zum Nachmittag' },
-    away:    { biome: '🌲', title: 'Ronki ist im Morgenwald.',      sub: returnLabel(expedition.returnAt) },
-    waiting: { biome: '✉️', title: 'Ronki ist zurück.',             sub: 'Er hat etwas mitgebracht' },
+    home:    { icon: 'leaf', title: '',                          sub: '' },
+    leaving: { icon: 'bag',  title: 'Ronki packt den Rucksack.', sub: 'Bis zum Nachmittag' },
+    away:    { icon: 'leaf', title: 'Ronki ist im Morgenwald.',  sub: returnLabel(expedition.returnAt) },
+    waiting: { icon: 'book', title: 'Ronki ist zurück.',         sub: 'Er hat etwas mitgebracht' },
   };
   const status = statusByState[expedition.state] || statusByState.home;
 
@@ -191,186 +195,81 @@ export default function Expedition({ onClose }) {
     waiting: 'Tipp auf die Seite',
   };
 
+  const openDiary = () => { setShowDiary(true); setDiaryFillKey(k => k + 1); };
+  const ctaLabel =
+    expedition.state === 'waiting' ? 'Tagebuch öffnen' :
+    expedition.state === 'home' && !ritualDone ? 'Zur Schriftrolle' :
+    'Ronki ist unterwegs';
+  const ctaIdle = expedition.state === 'away' || expedition.state === 'leaving';
+
   return (
     <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 80,
-        background: 'linear-gradient(180deg, #fff8f2 0%, #f5e3c1 100%)',
-        overflowY: 'auto',
-        fontFamily: '"Nunito", sans-serif',
-        WebkitOverflowScrolling: 'touch',
-      }}
+      className="fixed inset-0 overflow-y-auto bg-white text-ink font-body"
+      style={{ zIndex: 80, WebkitOverflowScrolling: 'touch' }}
     >
-      {/* Back chrome */}
-      <div style={{
-        position: 'sticky', top: 0, zIndex: 50,
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        padding: '14px 16px',
-        background: 'linear-gradient(180deg, rgba(255,248,242,0.95), rgba(255,248,242,0.7) 70%, rgba(255,248,242,0))',
-        backdropFilter: 'blur(8px)',
-        WebkitBackdropFilter: 'blur(8px)',
-      }}>
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Zurück ins Zimmer"
-          style={{
-            display: 'flex', alignItems: 'center', gap: 6,
-            padding: '8px 14px', borderRadius: 999,
-            background: '#ffffff',
-            border: '1.5px solid rgba(180,83,9,0.18)',
-            color: '#124346',
-            font: '700 12px/1 "Plus Jakarta Sans", sans-serif',
-            letterSpacing: '0.06em',
-            boxShadow: '0 4px 10px -4px rgba(18,67,70,0.18)',
-            cursor: 'pointer',
-          }}
-        >
-          <span className="material-symbols-outlined" style={{ fontSize: 18 }}>arrow_back</span>
-          Zurück
-        </button>
-        <div style={{
-          font: '800 10px/1 "Plus Jakarta Sans", sans-serif',
-          letterSpacing: '0.22em', textTransform: 'uppercase',
-          color: '#b45309',
-        }}>
-          Ronkis Reise
-        </div>
-        <div style={{ width: 76 }} aria-hidden="true" />
-      </div>
+      {/* This surface covers the alpha banner, so the bar pins at 0, not
+          at the banner offset the shared TopBar assumes. */}
+      <TopBar sticky title="Ronkis Reise" onBack={onClose} backLabel="Zurück ins Zimmer" className="bg-white" style={{ top: 0 }} />
 
-      {/* ── Campfire scene ──
-           When Ronki's away, the scene swaps to the infinite-loop
-           walking shot so the kid sees him on the move through the
-           biome instead of an empty campfire (Marc 25 Apr 2026). */}
-      <CampfireScene
+      {/* The camp scene. Away swaps to the drifting loop. */}
+      <ExpeditionScene
         expState={expedition.state}
         biome={expedition.biome}
         variant={state?.companionVariant}
         discovered={state?.micropediaDiscovered || []}
-        onTapDiary={() => { setShowDiary(true); setDiaryFillKey(k => k + 1); }}
+        onTapDiary={openDiary}
         status={status}
       />
 
-      {/* ── Below-fold ── */}
-      <section style={{ padding: '18px 18px 32px' }}>
-        <div style={{
-          textAlign: 'center',
-          paddingBottom: 14,
-          borderBottom: '1px solid rgba(18,67,70,0.06)',
-          marginBottom: 18,
-        }}>
-          <div style={{
-            font: '600 10px/1 "Plus Jakarta Sans", sans-serif',
-            letterSpacing: '0.22em', textTransform: 'uppercase',
-            color: 'rgba(18,67,70,0.55)',
-            marginBottom: 4,
-          }}>
-            Lagerfeuer
-          </div>
-          <h2 style={{
-            margin: 0,
-            font: '500 24px/1.1 "Fredoka", sans-serif',
-            color: '#124346',
-            letterSpacing: '-0.01em',
-          }}>
-            {titleByState[expedition.state]}
-          </h2>
+      {/* Below the picture */}
+      <section className="px-5 pt-5 pb-10 max-w-lg mx-auto">
+        <div className="text-center mb-5">
+          <p className="bb-hand text-xl text-cobalt mb-1">Lagerfeuer</p>
+          <h2 className="bb-display text-3xl">{titleByState[expedition.state]}</h2>
         </div>
 
         {/* Ritual row */}
-        <div style={{
-          padding: '14px 16px',
-          borderRadius: 16,
-          background: '#fff',
-          border: '1px solid rgba(18,67,70,0.08)',
-          display: 'flex', alignItems: 'center', gap: 12,
-          marginBottom: 14,
-        }}>
-          <div style={{
-            width: 40, height: 40, borderRadius: 12,
-            display: 'grid', placeItems: 'center',
-            background: ritualDone
-              ? 'linear-gradient(160deg, #a7f3d0, #10b981)'
-              : 'linear-gradient(160deg, #fef3c7, #fcd34d)',
-            color: ritualDone ? '#fff' : '#5c4508',
-            fontSize: 22,
-            flexShrink: 0,
-          }}>
-            {ritualDone ? '✓' : '☀️'}
-          </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <b style={{ display: 'block', font: '700 13px/1.2 "Nunito", sans-serif', color: '#124346' }}>
-              Morgen-Ritual
-            </b>
-            <span style={{ font: '600 11px/1 "Plus Jakarta Sans", sans-serif', color: 'rgba(18,67,70,0.6)', letterSpacing: '0.03em', display: 'block', marginTop: 2 }}>
+        <PaperCard tone="paper" pad="sm" className="flex items-center gap-3 mb-4">
+          <span
+            aria-hidden="true"
+            className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-[2.5px] border-ink ${ritualDone ? 'bg-sun text-ink' : 'bg-white text-ink'}`}
+          >
+            <DoodleIcon name={ritualDone ? 'check' : 'sun'} size={28} stroke={6.5} />
+          </span>
+          <span className="flex-1 min-w-0">
+            <b className="block font-headline font-semibold text-lg leading-tight">Morgen-Ritual</b>
+            <span className="block text-base text-ink-soft mt-0.5">
               {morningTotal === 0
                 ? 'Heute keine Aufgaben'
                 : `${morningDone} von ${morningTotal} Aufgaben${ritualDone ? ' · erledigt' : ''}`}
             </span>
-          </div>
-          <div style={{
-            padding: '4px 10px', borderRadius: 999,
-            background: ritualDone ? '#10b981' : 'rgba(18,67,70,0.08)',
-            color: ritualDone ? '#fff' : '#124346',
-            font: '800 11px/1 "Plus Jakarta Sans", sans-serif',
-          }}>
+          </span>
+          <span className={`shrink-0 rounded-full border-[2.5px] border-ink px-3 py-1 font-headline font-bold text-base ${ritualDone ? 'bg-sun' : 'bg-white'}`}>
             {morningPct}%
-          </div>
-        </div>
+          </span>
+        </PaperCard>
 
-        {/* CTA — disabled when there are no morning quests left to do */}
-        <div
-          role={expedition.state === 'home' && !ritualDone ? 'button' : undefined}
+        {/* CTA: idle while Ronki is out, the diary once he is back */}
+        <PillButton
+          full
+          size="lg"
+          arrow={!ctaIdle}
+          icon={expedition.state === 'waiting' ? 'book' : undefined}
+          disabled={ctaIdle}
           onClick={() => {
-            if (expedition.state === 'waiting') {
-              setShowDiary(true);
-              setDiaryFillKey(k => k + 1);
-            } else if (expedition.state === 'home') {
-              // Tap goes home to do the ritual. Surface owns no
-              // "force complete" — that lives in the kid's TaskList.
-              onClose?.();
-            }
-          }}
-          style={{
-            padding: '14px 18px', borderRadius: 16,
-            background: expedition.state === 'waiting' ? '#f59e0b' : '#124346',
-            color: '#fef3c7',
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            font: '700 14px/1.1 "Nunito", sans-serif',
-            cursor: 'pointer',
-            boxShadow: expedition.state === 'waiting'
-              ? '0 6px 16px -6px rgba(245,158,11,0.5)'
-              : '0 6px 16px -6px rgba(18,67,70,0.4)',
-            marginBottom: 18,
+            if (expedition.state === 'waiting') openDiary();
+            else if (expedition.state === 'home') onClose?.();
           }}
         >
-          <div>
-            <div>{
-              expedition.state === 'waiting' ? 'Tagebuch öffnen' :
-              expedition.state === 'home' && !ritualDone ? 'Zur Schriftrolle' :
-              'Ronki ist unterwegs'
-            }</div>
-            <span style={{
-              font: '800 10px/1 "Plus Jakarta Sans", sans-serif',
-              letterSpacing: '0.12em', textTransform: 'uppercase',
-              opacity: 0.7,
-            }}>
-              {ctaSubByState[expedition.state]}
-            </span>
-          </div>
-          <span className="material-symbols-outlined" style={{ fontSize: 22 }}>
-            {expedition.state === 'waiting' ? 'auto_stories' : 'arrow_forward'}
-          </span>
-        </div>
+          {ctaLabel}
+        </PillButton>
+        <p className="text-center text-base text-ink-soft mt-2 mb-6">{ctaSubByState[expedition.state]}</p>
 
-        {/* Naturtagebuch — Mementos shelf + recent pages */}
+        {/* Naturtagebuch: the mementos shelf and recent pages */}
         <Naturtagebuch log={log} expedition={expedition} />
       </section>
 
-      {/* Diary modal */}
+      {/* Diary sheet */}
       {showDiary && expedition.pendingMemento && (
         <DiaryModal
           key={diaryFillKey}
@@ -383,10 +282,8 @@ export default function Expedition({ onClose }) {
         />
       )}
 
-      {/* Dev affordance: state-cycle bar for QA. Hidden by default
-          even in dev builds (it was leaking the "in-development"
-          feel into Marc's previews — 25 Apr 2026). Opt in with
-          `?devCycler=1` or `?expedition=…`. Hidden in prod always. */}
+      {/* Dev affordance: state cycler for QA. Opt in with ?devCycler=1
+          or ?expedition=… Hidden in prod always. */}
       {import.meta.env?.DEV && typeof window !== 'undefined' && (() => {
         const params = new URLSearchParams(window.location.search);
         if (!params.get('devCycler') && !params.get('expedition')) return null;
@@ -395,536 +292,195 @@ export default function Expedition({ onClose }) {
 
       <style>{`
         @keyframes exp-walk {
-          0%   { transform: translateX(0) translateY(0); opacity: 1; }
-          12%  { transform: translateX(0) translateY(-2px); }
-          22%  { transform: translateX(4px) translateY(0); }
-          30%  { transform: translateX(8px) translateY(-4px); }
-          40%  { transform: translateX(20px) translateY(-1px); }
-          70%  { transform: translateX(150px) translateY(-3px); opacity: 0.8; }
-          100% { transform: translateX(280px) translateY(-2px); opacity: 0; }
-        }
-        @keyframes exp-fire-flick {
-          0%   { transform: translateX(-50%) scale(.95, 1) rotate(-2deg); }
-          100% { transform: translateX(-50%) scale(1.05, .95) rotate(2deg); }
-        }
-        @keyframes exp-wing-flap {
-          0%, 100% { transform: rotate(-15deg); }
-          50%      { transform: rotate(-5deg); }
-        }
-        @keyframes exp-diary-pulse {
-          0%, 100% {
-            box-shadow:
-              0 0 24px 8px rgba(252,211,77,0.6),
-              0 0 48px 12px rgba(252,165,73,0.3),
-              inset 0 -2px 0 rgba(180,90,30,0.2);
-          }
-          50% {
-            box-shadow:
-              0 0 34px 12px rgba(252,211,77,0.8),
-              0 0 60px 18px rgba(252,165,73,0.45),
-              inset 0 -2px 0 rgba(180,90,30,0.2);
-          }
+          0%   { transform: translateX(-50%) translateY(0); opacity: 1; }
+          20%  { transform: translateX(-46%) translateY(-6px); }
+          45%  { transform: translateX(-20%) translateY(0); opacity: 1; }
+          70%  { transform: translateX(40%) translateY(-6px); opacity: 0.9; }
+          100% { transform: translateX(120%) translateY(0); opacity: 0; }
         }
         @keyframes exp-sheet-up {
           from { transform: translateY(100%); }
           to   { transform: translateY(0); }
         }
-        @keyframes exp-bar-fill {
-          from { width: 0%; }
-          to   { width: var(--target, 14%); }
-        }
         @keyframes exp-fade-in {
           from { opacity: 0; }
           to   { opacity: 1; }
         }
+        .exp-walk-out { animation: exp-walk 2.4s cubic-bezier(0.5, 0, 0.5, 1) forwards; }
       `}</style>
     </div>
   );
 }
 
-// ─── Campfire scene ──────────────────────────────────────────────
+// ─── The camp scene ─────────────────────────────────────────────
 
-function CampfireScene({ expState, biome, variant, discovered, onTapDiary, status }) {
-  const showRonki = expState === 'home' || expState === 'leaving' || expState === 'waiting';
-  const showDiary = expState === 'waiting';
+function ExpeditionScene({ expState, biome, variant, discovered, onTapDiary, status }) {
   const showStatus = expState !== 'home';
   const walking = expState === 'leaving';
+  const [burst, setBurst] = useState(false);
 
-  // Away state — swap to the infinite-loop walking shot. Kid sees
-  // Ronki on the move through the biome with parallax + biome
-  // items, plus the status strip pinned on top so they still know
-  // where he is.
-  if (expState === 'away') {
-    return (
-      <div style={{ position: 'relative' }}>
+  // The arrival celebration: one sticker burst when Ronki is back.
+  useEffect(() => {
+    setBurst(expState === 'waiting');
+  }, [expState]);
+
+  const speech =
+    expState === 'home' ? 'Ich bin heute voller Vorfreude.' :
+    expState === 'leaving' ? 'Ich schnapp mir meinen Rucksack. Bis zum Nachmittag.' :
+    expState === 'waiting' ? 'Ich hab dir was mitgebracht. Willst du es sehen?' :
+    null;
+
+  return (
+    <div className="relative w-full overflow-hidden bg-sky-wash" style={{ height: 'min(52vh, 440px)', minHeight: 320 }}>
+      {expState === 'away' ? (
         <RonkiAwayLoop biome={biome} variant={variant} discovered={discovered} />
-        {showStatus && (
-          <div style={{
-            position: 'absolute', left: 14, right: 14, top: 14,
-            padding: '10px 14px', borderRadius: 14,
-            background: 'rgba(255,248,242,0.85)',
-            backdropFilter: 'blur(8px)',
-            WebkitBackdropFilter: 'blur(8px)',
-            border: '1px solid rgba(18,67,70,0.1)',
-            display: 'flex', alignItems: 'center', gap: 10,
-            color: '#124346',
-            boxShadow: '0 6px 14px -4px rgba(18,67,70,0.15)',
-            zIndex: 10,
-          }}>
-            <div style={{
-              width: 26, height: 26, borderRadius: '50%',
-              background: 'radial-gradient(circle at 40% 35%, #a3c677, #5a8f4a)',
-              display: 'grid', placeItems: 'center',
-              fontSize: 12,
-              boxShadow: 'inset 0 -2px 0 rgba(0,0,0,0.15)',
-              flexShrink: 0,
-            }}>
-              {status.biome}
-            </div>
-            <div style={{ minWidth: 0 }}>
-              <b style={{ display: 'block', font: '700 13px/1.1 "Nunito", sans-serif', marginBottom: 1 }}>{status.title}</b>
-              <span style={{ font: '600 11px/1 "Plus Jakarta Sans", sans-serif', color: 'rgba(18,67,70,0.6)', letterSpacing: '0.04em' }}>
-                {status.sub}
-              </span>
-            </div>
+      ) : (
+        <>
+          <Morgenwald />
+
+          {/* Ronki, a cut-out at the camp. Leaving jumps once and walks off. */}
+          <div
+            aria-hidden="true"
+            className={`absolute ${walking ? 'exp-walk-out' : ''}`}
+            style={{ left: '50%', bottom: 8, transform: 'translateX(-50%)', width: 'min(56%, 230px)', aspectRatio: '1 / 1' }}
+          >
+            <RonkiArt
+              pose={walking ? 'cheer' : 'wave'}
+              animated={walking}
+              size={230}
+              idle={walking ? '' : 'bb-idle-breathe'}
+              style={{ width: '100%', height: '100%' }}
+            />
           </div>
-        )}
-      </div>
-    );
-  }
 
-  return (
-    <div
-      style={{
-        position: 'relative',
-        height: 360,
-        overflow: 'hidden',
-        background: `
-          radial-gradient(ellipse at 50% 12%, #fde68a 0%, transparent 32%),
-          linear-gradient(180deg, #e7d8b9 0%, #d4b894 38%, #8a8455 66%, #3f4a2e 100%)
-        `,
-        isolation: 'isolate',
-      }}
-    >
-      {/* Distant trees */}
-      <Tree style={{ left: '8%', transform: 'scale(0.8)', opacity: 0.75 }} />
-      <Tree style={{ left: '72%', transform: 'scale(0.9)' }} />
-      <Tree style={{ right: '6%', transform: 'scale(0.7)', opacity: 0.6 }} />
+          {/* His line */}
+          {speech && (
+            <div
+              className="absolute left-4 right-4 flex justify-center"
+              style={{ top: showStatus ? 92 : 18, pointerEvents: 'none', animation: 'exp-fade-in 0.4s ease' }}
+            >
+              <SpeechBubble side="bottom" tone="white" style={{ maxWidth: 300 }}>
+                {speech}
+              </SpeechBubble>
+            </div>
+          )}
 
-      {/* Ground */}
-      <div style={{
-        position: 'absolute', left: 0, right: 0, bottom: 0, height: '28%',
-        background: 'linear-gradient(180deg, #6b5a3a 0%, #3a2f1a 100%)',
-        boxShadow: 'inset 0 6px 12px rgba(0,0,0,0.25)',
-      }} />
+          {/* The diary, back with him */}
+          {expState === 'waiting' && (
+            <button
+              type="button"
+              onClick={onTapDiary}
+              aria-label="Tagebuch öffnen"
+              className="absolute flex flex-col items-center gap-1 rounded-[20px] border-[2.5px] border-ink bg-sun px-3 py-2 bb-idle-bob"
+              style={{ left: 14, bottom: 18, transform: 'rotate(-6deg)' }}
+            >
+              <DoodleIcon name="book" size={30} />
+              <span className="font-headline font-bold text-base leading-none">Tagebuch</span>
+              <MotionTicks tone="cobalt" size={22} rotate={-40} className="absolute" style={{ top: -12, right: -14 }} />
+            </button>
+          )}
 
-      {/* Log */}
-      <div style={{
-        position: 'absolute', left: '18%', bottom: '14%',
-        width: 110, height: 18,
-        background: 'linear-gradient(180deg, #9b7447 0%, #5c3e1f 70%)',
-        borderRadius: 10,
-        boxShadow: '0 4px 6px rgba(0,0,0,0.3), inset 0 2px 0 rgba(255,255,255,0.1)',
-      }}>
-        <div style={{
-          position: 'absolute', right: -5, top: 2,
-          width: 14, height: 14,
-          background: '#ead5a0',
-          border: '2px solid #8c6a3a',
-          borderRadius: '50%',
-        }} />
-      </div>
-
-      {/* Fire */}
-      <div style={{ position: 'absolute', left: '46%', bottom: '12%', width: 44, height: 50 }}>
-        <div style={{
-          position: 'absolute', left: -40, bottom: -20,
-          width: 130, height: 60,
-          background: 'radial-gradient(ellipse, rgba(252,165,73,0.4), transparent 70%)',
-          pointerEvents: 'none',
-        }} />
-        <div style={{
-          position: 'absolute', left: '50%', bottom: 8, transform: 'translateX(-50%)',
-          width: 28, height: 36,
-          background: 'radial-gradient(ellipse at 50% 80%, #fef3c7 0%, #fcd34d 20%, #f97316 55%, #dc2626 100%)',
-          borderRadius: '50% 50% 30% 30% / 60% 60% 40% 40%',
-          animation: 'exp-fire-flick 1.1s ease-in-out infinite alternate',
-          filter: 'drop-shadow(0 0 10px rgba(249,115,22,0.6))',
-        }} />
-        <div style={{
-          position: 'absolute', bottom: 0, left: '50%', transform: 'translateX(-50%)',
-          width: 50, height: 10,
-          background: '#3a2212',
-          borderRadius: 4,
-          boxShadow: '0 -2px 4px rgba(252,165,73,0.4)',
-        }} />
-      </div>
-
-      {/* Ronki side-view */}
-      {showRonki && (
-        <CampRonki walking={walking} />
+          <StickerBurst active={burst} size={300} count={22} onDone={() => setBurst(false)} />
+        </>
       )}
 
-      {/* Away-state placeholder + paw-trail removed 25 Apr 2026 —
-          the away render now lives in its own RonkiAwayLoop branch
-          at the top of CampfireScene (parallax walking shot). */}
-
-      {/* Glowing diary */}
-      {showDiary && (
-        <button
-          type="button"
-          onClick={onTapDiary}
-          aria-label="Tagebuch öffnen"
-          style={{
-            position: 'absolute', left: '40%', bottom: '22%',
-            width: 44, height: 34,
-            background: 'linear-gradient(160deg, #fef9d7, #fcd34d)',
-            borderRadius: 4,
-            transform: 'rotate(-6deg)',
-            cursor: 'pointer',
-            border: 'none',
-            padding: 0,
-            animation: 'exp-diary-pulse 2.4s ease-in-out infinite',
-            zIndex: 6,
-          }}
-        >
-          <div style={{
-            position: 'absolute', top: 4, left: 6, right: 6, height: 2,
-            background: 'rgba(180,90,30,0.25)',
-            borderRadius: 2,
-            boxShadow: '0 5px 0 rgba(180,90,30,0.2), 0 10px 0 rgba(180,90,30,0.15)',
-            pointerEvents: 'none',
-          }} />
-        </button>
-      )}
-
-      {/* Status strip */}
+      {/* Status card, pinned inside the picture */}
       {showStatus && (
-        <div style={{
-          position: 'absolute', left: 14, right: 14, top: 14,
-          padding: '10px 14px', borderRadius: 14,
-          background: 'rgba(255,248,242,0.82)',
-          backdropFilter: 'blur(8px)',
-          WebkitBackdropFilter: 'blur(8px)',
-          border: '1px solid rgba(18,67,70,0.1)',
-          display: 'flex', alignItems: 'center', gap: 10,
-          color: '#124346',
-          boxShadow: '0 6px 14px -4px rgba(18,67,70,0.15)',
-          zIndex: 10,
-        }}>
-          <div style={{
-            width: 26, height: 26, borderRadius: '50%',
-            background: expState === 'waiting'
-              ? 'radial-gradient(circle at 40% 35%, #fde68a, #f59e0b)'
-              : 'radial-gradient(circle at 40% 35%, #a3c677, #5a8f4a)',
-            display: 'grid', placeItems: 'center',
-            fontSize: 12,
-            boxShadow: 'inset 0 -2px 0 rgba(0,0,0,0.15)',
-            flexShrink: 0,
-          }}>
-            {status.biome}
-          </div>
-          <div style={{ minWidth: 0 }}>
-            <b style={{ display: 'block', font: '700 13px/1.1 "Nunito", sans-serif', marginBottom: 1 }}>{status.title}</b>
-            <span style={{ font: '600 11px/1 "Plus Jakarta Sans", sans-serif', color: 'rgba(18,67,70,0.6)', letterSpacing: '0.04em' }}>
-              {status.sub}
-            </span>
-          </div>
-        </div>
-      )}
-
-      {/* Speech bubbles per state */}
-      {expState === 'home' && (
-        <CampSpeech text="Ich bin heute voller Vorfreude." />
-      )}
-      {expState === 'leaving' && (
-        <CampSpeech text="Ich schnapp mir meinen Rucksack. Bis zum Nachmittag." />
-      )}
-      {expState === 'waiting' && (
-        <CampSpeech text="Ich hab dir was mitgebracht. Willst du es sehen?" rightAligned />
+        <PaperCard
+          tone="paper"
+          pad="sm"
+          className="absolute left-3 right-3 top-3 flex items-center gap-3"
+          style={{ animation: 'exp-fade-in 0.4s ease' }}
+        >
+          <span
+            aria-hidden="true"
+            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-[2.5px] border-ink ${expState === 'waiting' ? 'bg-sun' : 'bg-white'}`}
+          >
+            <DoodleIcon name={status.icon} size={24} />
+          </span>
+          <span className="min-w-0">
+            <b className="block font-headline font-semibold text-lg leading-tight truncate">{status.title}</b>
+            <span className="block text-base text-ink-soft truncate">{status.sub}</span>
+          </span>
+        </PaperCard>
       )}
     </div>
   );
 }
 
-function Tree({ style }) {
+/**
+ * The Morgenwald scene, cropped to its treetops: the picture has Ronki
+ * painted into its lower half, so the frame shows the top of the art
+ * (enlarged 1.5x) and the cut-out Ronki stands in front of it.
+ */
+function Morgenwald() {
   return (
-    <div style={{
-      position: 'absolute', bottom: '28%', width: 40, height: 70,
-      ...style,
-    }}>
-      <div style={{
-        position: 'absolute', bottom: 0,
-        left: '46%', width: '8%', height: '40%',
-        background: '#5a3a22',
-        transform: 'translateX(-50%)',
-      }} />
-      <div style={{
-        position: 'absolute', left: '50%', bottom: '30%',
-        transform: 'translateX(-50%)',
-        width: 36, height: 50,
-        background: 'radial-gradient(ellipse at 40% 30%, #7d9a4a, #4a6628 70%)',
-        borderRadius: '50% 60% 55% 45% / 40% 50% 55% 45%',
-      }} />
+    <div aria-hidden="true" className="absolute" style={{ left: '-25%', top: 0, width: '150%', aspectRatio: '9 / 16' }}>
+      <SceneLoop poster={MORGENWALD} objectPosition="50% 0%" />
     </div>
   );
 }
 
-function CampRonki({ walking }) {
-  return (
-    <div style={{
-      position: 'absolute',
-      left: '22%', bottom: '17%',
-      width: 78, height: 72,
-      zIndex: 5,
-      animation: walking ? 'exp-walk 2.4s cubic-bezier(0.5, 0, 0.5, 1) forwards' : undefined,
-      transition: 'opacity 0.4s, transform 0.4s',
-    }}>
-      {/* Tail */}
-      <div style={{
-        position: 'absolute', top: '60%', left: '-4%',
-        width: 22, height: 14,
-        background: 'linear-gradient(135deg, #f97e5a 0%, #b23a1c 100%)',
-        borderRadius: '60% 30% 50% 40%',
-        transform: 'rotate(-20deg)',
-      }}>
-        <div style={{
-          position: 'absolute', left: -3, top: 2,
-          width: 10, height: 10,
-          background: 'linear-gradient(180deg, #fde68a, #f59e0b)',
-          borderRadius: '50%',
-          boxShadow: '0 0 6px rgba(252,211,77,0.5)',
-        }} />
-      </div>
-      {/* Wing */}
-      <div style={{
-        position: 'absolute', top: '24%', left: '-2%',
-        width: 22, height: 30,
-        background: 'linear-gradient(160deg, #f97e5a, #b23a1c)',
-        borderRadius: '50% 10% 50% 50% / 55% 20% 55% 55%',
-        transform: 'rotate(-15deg)',
-        animation: 'exp-wing-flap 2s ease-in-out infinite',
-        transformOrigin: '100% 30%',
-      }} />
-      {/* Body */}
-      <div style={{
-        position: 'absolute', left: '10%', top: '20%',
-        width: 56, height: 54,
-        background: 'linear-gradient(175deg, #fed7aa 0%, #f97316 62%, #c2410c 100%)',
-        borderRadius: '58% 50% 40% 50% / 62% 56% 44% 48%',
-        boxShadow: 'inset -4px -6px 0 rgba(0,0,0,0.18), 0 4px 8px rgba(0,0,0,0.22)',
-      }} />
-      {/* Belly */}
-      <div style={{
-        position: 'absolute', left: '16%', top: '45%',
-        width: 26, height: 22,
-        background: '#fde0a8',
-        borderRadius: '50% 40% 50% 50%',
-      }} />
-      {/* Face cluster — Marc 25 Apr 2026 audit: features were
-          scattered (horns at 26-38%, eye at 46%, mouth at 52%)
-          while the walking animation slides Ronki RIGHT. The
-          dragon was visually facing left while moving right.
-          Now the face is a tight cluster on the front-right of
-          the body, all features clustering between 52-68% of
-          the wrapper, so the head reads as a snout pointing in
-          the walk direction.
-
-          Horns — back horn slightly left of front, both
-          sitting at the top of the head. */}
-      <div style={{
-        position: 'absolute', top: '14%', left: '52%',
-        width: 8, height: 14,
-        background: 'linear-gradient(180deg, #fde68a, #f59e0b)',
-        borderRadius: '50% 50% 10% 10%',
-        transform: 'rotate(-8deg)',
-      }} />
-      <div style={{
-        position: 'absolute', top: '14%', left: '64%',
-        width: 8, height: 12,
-        background: 'linear-gradient(180deg, #fde68a, #f59e0b)',
-        borderRadius: '50% 50% 10% 10%',
-        transform: 'rotate(6deg)',
-      }} />
-      {/* Eye — sits on the front-half of the head, looking
-          forward (rightward). Highlight at top-right keeps the
-          look-direction consistent. */}
-      <div style={{
-        position: 'absolute', top: '32%', left: '60%',
-        width: 6, height: 8,
-        background: '#1a0e08',
-        borderRadius: '50%',
-      }}>
-        <div style={{
-          position: 'absolute', top: 1, right: 0,
-          width: 2, height: 2, background: '#fff', borderRadius: '50%',
-        }} />
-      </div>
-      {/* Mouth — front of the snout, just below + to the right
-          of the eye. */}
-      <div style={{
-        position: 'absolute', top: '48%', left: '68%',
-        width: 8, height: 3,
-        borderBottom: '1.5px solid #3a1f12',
-        borderRadius: '0 0 4px 4px',
-      }} />
-      {/* Bag (only when leaving) */}
-      {walking && (
-        <div style={{
-          position: 'absolute', top: '15%', left: '22%',
-          width: 18, height: 18,
-          background: 'linear-gradient(180deg, #8a6a3e, #5c3e1f)',
-          borderRadius: '8px 8px 6px 6px',
-          boxShadow: 'inset 0 -2px 0 rgba(0,0,0,0.3), 0 2px 2px rgba(0,0,0,0.2)',
-          transform: 'rotate(-6deg)',
-        }}>
-          <div style={{
-            position: 'absolute', top: -3, left: '50%', transform: 'translateX(-50%)',
-            width: 4, height: 4, background: '#5c3e1f', borderRadius: 2,
-          }} />
-        </div>
-      )}
-      {/* Legs */}
-      <div style={{ position: 'absolute', bottom: '-4%', left: '28%', width: 8, height: 14, background: '#c2410c', borderRadius: '40% 40% 30% 30%' }} />
-      <div style={{ position: 'absolute', bottom: '-4%', left: '52%', width: 8, height: 14, background: '#c2410c', borderRadius: '40% 40% 30% 30%' }} />
-    </div>
-  );
-}
-
-function CampSpeech({ text, rightAligned }) {
-  return (
-    <div style={{
-      position: 'absolute',
-      [rightAligned ? 'right' : 'left']: rightAligned ? '14%' : '18%',
-      [rightAligned ? 'top' : 'bottom']: rightAligned ? '34%' : '58%',
-      padding: '10px 14px',
-      borderRadius: rightAligned ? '14px 14px 4px 14px' : '14px 14px 14px 4px',
-      background: 'rgba(255,248,242,0.95)',
-      backdropFilter: 'blur(8px)',
-      border: '1px solid rgba(18,67,70,0.1)',
-      boxShadow: '0 8px 18px -6px rgba(18,67,70,0.25)',
-      font: '500 12px/1.35 "Nunito", sans-serif',
-      color: '#124346',
-      maxWidth: 200,
-      zIndex: 7,
-      animation: 'exp-fade-in 0.4s ease',
-    }}>
-      {text}
-    </div>
-  );
-}
-
-// ─── Naturtagebuch shelf ────────────────────────────────────────
+// ─── Naturtagebuch: shelf and pages ───────────────────────────────
 
 function Naturtagebuch({ log, expedition }) {
   // Show 8 slots; fill with what we have, dash the rest. Recent 3
-  // pages go below as the "Seiten" detail strip.
+  // pages go below as the "Seiten" strip.
   const SHELF_SLOTS = 8;
   const slots = Array.from({ length: SHELF_SLOTS }, (_, i) => log[log.length - 1 - i] || null);
   const recent = log.slice(-3).reverse();
   const isEmpty = log.length === 0;
 
   return (
-    <>
-      <div style={{ marginTop: 4 }}>
-        <div style={{
-          font: '800 10px/1 "Plus Jakarta Sans", sans-serif',
-          letterSpacing: '0.20em', textTransform: 'uppercase',
-          color: 'rgba(18,67,70,0.55)', marginBottom: 4,
-        }}>
-          Naturtagebuch
-        </div>
-        <h3 style={{
-          margin: 0,
-          font: '500 18px/1.15 "Fredoka", sans-serif',
-          color: '#124346',
-        }}>
-          Was Ronki gesammelt hat
-        </h3>
-        <p style={{
-          margin: '4px 0 0',
-          font: '500 12px/1.4 "Nunito", sans-serif',
-          color: 'rgba(18,67,70,0.6)',
-        }}>
+    <PaperCard tone="paper" pad="md">
+      <div>
+        <p className="bb-hand text-xl text-cobalt mb-1">Naturtagebuch</p>
+        <h3 className="bb-display text-2xl">Was Ronki gesammelt hat</h3>
+        <p className="text-base text-ink-soft mt-2 leading-relaxed">
           Jede Seite ein kleiner Streifzug. Keine Punkte, keine Serie, nur was er mitbringt.
         </p>
       </div>
 
-      {/* Mini map — Uber-style live trail (Marc 25 Apr 2026: "show
-          where ronki is going in the woods and how there might be an
-          expedition line of where he is going and track that trail
-          like the Uber Magic Map"). The trail is computed from the
-          active expedition's departedAt/returnAt; idle/home shows a
-          dimmed preview path so the surface still reads as a map. */}
+      {/* The map: where Ronki is going, drawn as a line. */}
       <ExpeditionTrail
         expedition={expedition}
         label={`Morgenwald · ${Math.min(99, Math.round((log.length / 24) * 100))}%`}
       />
 
-      {/* Empty state — warm onboarding card instead of an
-          all-dashed-boxes shelf when Ronki hasn't collected anything
-          yet (Marc 25 Apr 2026 polish: bottom felt dev-in-progress). */}
       {isEmpty ? (
-        <div style={{
-          marginTop: 16,
-          padding: '20px 18px',
-          borderRadius: 18,
-          background: `
-            radial-gradient(ellipse at 80% 0%, rgba(252,211,77,0.25), transparent 50%),
-            linear-gradient(180deg, #fff8f2 0%, #fef3c7 100%)
-          `,
-          border: '1px solid rgba(180,120,40,0.18)',
-          boxShadow: '0 6px 14px -10px rgba(180,90,30,0.30), inset 0 1px 0 rgba(255,255,255,0.7)',
-          display: 'grid',
-          gridTemplateColumns: '54px 1fr',
-          gap: 14,
-          alignItems: 'center',
-        }}>
-          <div style={{
-            width: 54, height: 54, borderRadius: 14,
-            background: 'linear-gradient(160deg, #fef3c7, #fcd34d)',
-            display: 'grid', placeItems: 'center',
-            fontSize: 28,
-            boxShadow: 'inset 0 -2px 0 rgba(180,90,30,0.18)',
-          }}>
-            📔
-          </div>
-          <div>
-            <b style={{ display: 'block', font: '600 14px/1.25 "Fredoka", sans-serif', color: '#124346' }}>
-              Noch leer.
-            </b>
-            <span style={{ display: 'block', marginTop: 4, font: '500 12px/1.45 "Nunito", sans-serif', color: 'rgba(18,67,70,0.7)' }}>
+        <PaperCard tone="white" pad="sm" className="mt-4 flex items-center gap-3 p-4">
+          <span aria-hidden="true" className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border-[2.5px] border-ink bg-sun">
+            <DoodleIcon name="book" size={30} />
+          </span>
+          <span className="min-w-0">
+            <b className="block font-headline font-semibold text-lg leading-tight">Noch leer.</b>
+            <span className="block text-base text-ink-soft mt-1 leading-snug">
               Wenn Ronki vom Morgenwald zurückkommt, landen seine Funde hier auf der Seite.
             </span>
-          </div>
-        </div>
+          </span>
+        </PaperCard>
       ) : (
         <>
           {/* Mementos shelf */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '14px 0 4px' }}>
-            <h4 style={{ margin: 0, font: '600 15px/1 "Fredoka", sans-serif', color: '#124346' }}>Mementos</h4>
-            <small style={{ font: '700 10px/1 "Plus Jakarta Sans", sans-serif', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(18,67,70,0.55)' }}>
-              {log.length} von 24
-            </small>
+          <div className="flex justify-between items-baseline pt-4 pb-2">
+            <h4 className="font-headline font-semibold text-lg m-0">Mementos</h4>
+            <span className="bb-hand text-lg text-sun-deep">{log.length} von 24</span>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+          <div className="grid grid-cols-4 gap-2">
             {slots.map((m, i) => m ? (
-              <div key={m.id} style={{
-                aspectRatio: 1, borderRadius: 12,
-                background: `radial-gradient(ellipse at 40% 30%, rgba(252,211,77,0.3), transparent 40%), linear-gradient(135deg, #fff8f2, #fef3c7)`,
-                border: '1px solid rgba(180,120,40,0.15)',
-                display: 'grid', placeItems: 'center',
-                fontSize: 26,
-                filter: 'drop-shadow(0 2px 3px rgba(180,90,30,0.15))',
-              }}>
-                {m.emoji}
+              <div
+                key={m.id}
+                className="flex items-center justify-center rounded-[16px] border-[2.5px] border-ink bg-white"
+                style={{ aspectRatio: '1 / 1', fontSize: 28 }}
+              >
+                <span aria-hidden="true">{m.emoji}</span>
               </div>
             ) : (
-              <div key={`empty-${i}`} style={{
-                aspectRatio: 1, borderRadius: 12,
-                background: 'rgba(18,67,70,0.04)',
-                border: '1px dashed rgba(18,67,70,0.15)',
-              }} />
+              <div
+                key={`empty-${i}`}
+                className="rounded-[16px] border-[2.5px] border-dashed border-outline-variant bg-white"
+                style={{ aspectRatio: '1 / 1' }}
+              />
             ))}
           </div>
         </>
@@ -933,84 +489,62 @@ function Naturtagebuch({ log, expedition }) {
       {/* Recent pages */}
       {recent.length > 0 && (
         <>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '16px 0 8px' }}>
-            <h4 style={{ margin: 0, font: '600 15px/1 "Fredoka", sans-serif', color: '#124346' }}>Seiten</h4>
+          <div className="flex justify-between items-baseline pt-5 pb-2">
+            <h4 className="font-headline font-semibold text-lg m-0">Seiten</h4>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div className="flex flex-col gap-2">
             {recent.map(m => (
-              <div key={m.id} style={{
-                display: 'grid', gridTemplateColumns: '48px 1fr auto', gap: 12,
-                alignItems: 'center',
-                padding: '10px 12px', borderRadius: 14,
-                background: '#fff',
-                border: '1px solid rgba(18,67,70,0.06)',
-              }}>
-                <div style={{
-                  width: 48, height: 48, borderRadius: 10,
-                  background: 'linear-gradient(160deg, #d3e5c0, #7a9a5d)',
-                  display: 'grid', placeItems: 'center',
-                  fontSize: 22,
-                }}>
+              <PaperCard key={m.id} tone="white" pad="sm" className="grid items-center gap-3" style={{ gridTemplateColumns: '48px 1fr auto' }}>
+                <span
+                  aria-hidden="true"
+                  className="flex h-12 w-12 items-center justify-center rounded-full border-[2.5px] border-ink bg-sky-wash"
+                  style={{ fontSize: 22 }}
+                >
                   {m.emoji}
-                </div>
-                <div style={{ minWidth: 0 }}>
-                  <b style={{ display: 'block', font: '600 14px/1.2 "Fredoka", sans-serif', color: '#124346' }}>{m.name}</b>
-                  <span style={{ font: '500 11px/1.35 "Nunito", sans-serif', color: 'rgba(18,67,70,0.6)' }}>
-                    Morgenwald · {m.location}
-                  </span>
-                </div>
-                <time style={{ font: '600 11px/1 "Plus Jakarta Sans", sans-serif', color: 'rgba(18,67,70,0.5)', letterSpacing: '0.04em' }}>
-                  {relativeTime(m.ts)}
-                </time>
-              </div>
+                </span>
+                <span className="min-w-0">
+                  <b className="block font-headline font-semibold text-lg leading-tight truncate">{m.name}</b>
+                  <span className="block text-base text-ink-soft truncate">Morgenwald · {m.location}</span>
+                </span>
+                <time className="bb-hand text-lg text-sun-deep">{relativeTime(m.ts)}</time>
+              </PaperCard>
             ))}
           </div>
         </>
       )}
-    </>
+    </PaperCard>
   );
 }
 
-// ─── ExpeditionTrail — Uber-style live route map ─────────────────
+// ─── ExpeditionTrail: the live route, drawn ───────────────────────
 //
 // Marc 25 Apr 2026: "show where ronki is going in the woods and how
 // there might be an expedition line of where he is going and track
 // that trail like the Uber Magic Map."
 //
-// Design:
-//   · Parchment map background with scattered tree blobs as
-//     landmarks (kept from the prior ScrapMap for continuity).
-//   · A bezier path drawn from the cave (left, fixed) to the target
-//     find (right, varies per trip via deterministic seed off
-//     departedAt). Each trip looks like a different route.
-//   · Solid green stroke for the portion Ronki has covered;
-//     dashed amber stroke for the portion still ahead.
-//   · A pulsing Ronki dot at the current progress along the curve.
-//   · Three waypoint dots along the path so the route reads as a
-//     real path through landmarks rather than an abstract line.
-//   · Idle / home state shows a dimmed faint path so the map still
-//     reads as a map without giving away the next route.
-//   · Tick once a minute while Ronki is away so the dot crawls
-//     across the map noticeably between visits.
+//   · A paper map with a few leaf blobs as landmarks.
+//   · A route from the camp (left, fixed) to the find (right, varies
+//     per trip via a deterministic seed off departedAt).
+//   · Cobalt dashed line for the way ahead, solid leaf for the part
+//     Ronki has covered, a Ronki dot at the current progress.
+//   · Idle / home shows the route faint so the map still reads as a
+//     map without giving away the next route.
+//   · Ticks once a minute while Ronki is away.
 //
-// Pure visual; no game logic. Geometry uses a fixed 320×160 SVG
-// viewBox so the bezier coords are scale-independent.
+// Pure visual, no game logic. Geometry in a fixed 320 x 160 viewBox.
 
 function ExpeditionTrail({ expedition, label }) {
   const expState = expedition?.state || 'home';
   const isMoving = expState === 'away' || expState === 'waiting' || expState === 'leaving';
 
-  // Tick once a minute so the dot moves visibly across the trip
-  // even if the kid leaves the surface open. 60s is enough granularity
-  // for a 4-hour trip and is cheap.
   const [, forceTick] = useState(0);
   useEffect(() => {
-    if (expState !== 'away') return;
+    if (expState !== 'away') return undefined;
     const id = setInterval(() => forceTick(n => n + 1), 60_000);
     return () => clearInterval(id);
   }, [expState]);
 
-  // Progress 0..1 — driven by the trip's actual timestamps.
+  // Progress 0..1, driven by the trip's actual timestamps.
   const progress = (() => {
     if (expState === 'waiting') return 1;
     if (expState === 'leaving') return 0.04;
@@ -1023,206 +557,123 @@ function ExpeditionTrail({ expedition, label }) {
     return Math.max(0, Math.min(1, (now - start) / (end - start)));
   })();
 
-  // Deterministic path per trip — same departedAt produces the same
-  // route so the dot doesn't teleport between renders.
+  // Deterministic path per trip.
   const seed = expedition?.departedAt
     ? new Date(expedition.departedAt).getTime()
     : 12345; // stable idle preview seed
   const path = useMemo(() => makeTrailPath(seed), [seed]);
 
-  // Compute Ronki's current position via bezier eval.
   const dot = bezierAt(path, progress);
-  // Three waypoint dots at fixed parametric positions — landmarks
-  // along the way (start = 0, end = 1, three intermediate beats).
   const waypoints = useMemo(() => (
     [0.22, 0.5, 0.78].map((t, i) => ({ t, ...bezierAt(path, t), key: i }))
   ), [path]);
 
-  // Path length for the stroke-dashoffset trick. Read on mount via
-  // ref so the SVG path's actual measured length drives the
-  // traveled-vs-ahead split (more accurate than a chord estimate).
   const pathRef = useRef(null);
-  const [pathLen, setPathLen] = useState(360);  // sane default until measured
+  const [pathLen, setPathLen] = useState(360);
   useEffect(() => {
     if (pathRef.current && pathRef.current.getTotalLength) {
       setPathLen(pathRef.current.getTotalLength());
     }
   }, [path]);
 
-  // Faint preview when the kid hasn't departed yet — the map still
-  // shows a route, but it's clearly a "coming next" state.
   const preview = !isMoving;
 
   return (
-    <div style={{
-      margin: '10px 0 0',
-      height: 160,
-      borderRadius: 16,
-      position: 'relative',
-      overflow: 'hidden',
-      background: `
-        radial-gradient(ellipse at 30% 60%, rgba(163,198,119,0.35), transparent 40%),
-        radial-gradient(ellipse at 70% 40%, rgba(252,211,77,0.18), transparent 30%),
-        linear-gradient(180deg, #f5eedc 0%, #e9dec3 100%)
-      `,
-      boxShadow: 'inset 0 0 0 1px rgba(180,120,40,0.15)',
-    }}>
-      {/* Landmark blobs (forest patches) — purely decorative,
-          unchanged from the prior map so the parchment still
-          reads "Morgenwald." */}
-      <div aria-hidden="true" style={{
-        position: 'absolute', inset: 0,
-        backgroundImage: `
-          radial-gradient(circle at 22% 32%, #7a9a5d 0%, transparent 8%),
-          radial-gradient(circle at 42% 70%, #7a9a5d 0%, transparent 10%),
-          radial-gradient(circle at 64% 38%, #a3c677 0%, transparent 9%),
-          radial-gradient(circle at 76% 78%, #5a8f4a 0%, transparent 7%),
-          radial-gradient(circle at 30% 90%, #7a9a5d 0%, transparent 6%),
-          radial-gradient(circle at 88% 22%, #a3c677 0%, transparent 7%)
-        `,
-        opacity: 0.45,
-      }} />
-
-      {/* Trail SVG — the heart of the magic-map effect. */}
+    <div className="relative mt-3 overflow-hidden rounded-[20px] border-[2.5px] border-ink bg-white" style={{ height: 168 }}>
       <svg
         viewBox="0 0 320 160"
         preserveAspectRatio="none"
-        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
+        className="absolute inset-0 w-full h-full"
+        aria-hidden="true"
       >
-        {/* "Ahead" path — dashed amber, full length, drawn first
-            so the solid traveled portion paints over it. */}
+        {/* Leaf blobs as landmarks */}
+        <g fill="var(--color-leaf)" opacity={0.28}>
+          <ellipse cx="70" cy="50" rx="22" ry="14" />
+          <ellipse cx="134" cy="112" rx="26" ry="15" />
+          <ellipse cx="205" cy="60" rx="20" ry="13" />
+          <ellipse cx="243" cy="125" rx="18" ry="12" />
+          <ellipse cx="282" cy="36" rx="16" ry="11" />
+        </g>
+        {/* The way ahead: cobalt dashed */}
         <path
           d={path.d}
           fill="none"
-          stroke={preview ? 'rgba(120,53,15,0.30)' : 'rgba(180,83,9,0.55)'}
-          strokeWidth={preview ? 1.2 : 2}
+          stroke="var(--color-cobalt)"
+          strokeWidth={preview ? 2 : 3}
           strokeLinecap="round"
-          strokeDasharray="4 5"
-          opacity={preview ? 0.6 : 0.95}
+          strokeDasharray="6 7"
+          opacity={preview ? 0.35 : 1}
         />
-        {/* Traveled portion — solid green, dashoffset reveals only
-            the first `progress` chunk. While idle (preview) this
-            is hidden entirely so the route reads as "not started." */}
+        {/* The part Ronki has covered: solid leaf */}
         {!preview && (
           <path
             ref={pathRef}
             d={path.d}
             fill="none"
-            stroke="#15803d"
-            strokeWidth={2.6}
+            stroke="var(--color-leaf-deep)"
+            strokeWidth={3.4}
             strokeLinecap="round"
             strokeDasharray={pathLen}
             strokeDashoffset={pathLen * (1 - progress)}
             style={{ transition: 'stroke-dashoffset 1.2s ease-out' }}
           />
         )}
-        {/* Waypoint markers — three small landmarks along the path.
-            Lit when Ronki has passed them, dim ahead. */}
         {waypoints.map(wp => {
           const passed = !preview && progress >= wp.t;
           return (
             <circle
               key={wp.key}
-              cx={wp.x} cy={wp.y} r={2.2}
-              fill={passed ? '#15803d' : 'rgba(120,53,15,0.45)'}
-              stroke="#fff8f2"
-              strokeWidth={1}
+              cx={wp.x} cy={wp.y} r={3}
+              fill={passed ? 'var(--color-leaf-deep)' : '#ffffff'}
+              stroke="var(--color-ink)"
+              strokeWidth={1.6}
             />
           );
         })}
-        {/* Cave (start) marker — small home arch on the left. */}
-        <g transform={`translate(${path.p0.x - 6} ${path.p0.y - 8})`}>
-          <rect x="0" y="6" width="12" height="8" rx="1.5"
-                fill={preview ? 'rgba(120,53,15,0.7)' : '#5c2a08'} />
-          <path d="M 0 6 L 6 0 L 12 6 Z"
-                fill={preview ? 'rgba(120,53,15,0.7)' : '#5c2a08'} />
-          <rect x="4.5" y="9" width="3" height="5" rx="0.5"
-                fill="rgba(254,243,199,0.85)" />
+        {/* The camp (start) */}
+        <g transform={`translate(${path.p0.x - 8} ${path.p0.y - 9})`} stroke="var(--color-ink)" strokeWidth={1.8} strokeLinejoin="round" strokeLinecap="round">
+          <path d="M1 8 L8 1 L15 8" fill="none" />
+          <path d="M3 7 L3 15 L13 15 L13 7" fill="var(--color-paper)" />
         </g>
-        {/* Target (end) marker — small star/find. Pulses when
-            Ronki has arrived. */}
+        {/* The find (end): a sun star */}
         <g transform={`translate(${path.p3.x} ${path.p3.y})`}>
-          <circle r={6}
-                  fill={expState === 'waiting' ? 'rgba(252,211,77,0.55)' : 'rgba(252,211,77,0.20)'}
-                  style={{ animation: expState === 'waiting' ? 'et-pulse 1.4s ease-in-out infinite' : undefined }} />
-          <circle r={2.6} fill={expState === 'waiting' ? '#f59e0b' : 'rgba(180,83,9,0.7)'} />
+          <path
+            d="M0 -8 C 1 -3 3 -1 8 0 C 3 1 1 3 0 8 C -1 3 -3 1 -8 0 C -3 -1 -1 -3 0 -8 Z"
+            fill={expState === 'waiting' ? 'var(--color-sun)' : '#ffffff'}
+            stroke="var(--color-ink)"
+            strokeWidth={1.6}
+            strokeLinejoin="round"
+          />
         </g>
-
-        {/* Ronki dot — only while a real trip is running. Pulsing
-            ring + chibi-coloured core. */}
+        {/* Ronki dot, only on a real trip */}
         {!preview && (
           <g transform={`translate(${dot.x} ${dot.y})`} style={{ transition: 'transform 1.2s ease-out' }}>
-            <circle r={9} fill="rgba(252,211,77,0.20)"
-                    style={{ animation: 'et-pulse 1.6s ease-in-out infinite' }} />
-            <circle r={5} fill="#fff8f2" stroke="#15803d" strokeWidth={1.6} />
-            <circle r={2} fill="#15803d" />
+            <circle r={7} fill="var(--color-ember)" stroke="var(--color-ink)" strokeWidth={1.8} />
+            <circle r={2.2} fill="#ffffff" />
           </g>
         )}
       </svg>
 
-      {/* Compass rose */}
-      <div aria-hidden="true" style={{
-        position: 'absolute', top: 10, left: 12,
-        width: 28, height: 28, borderRadius: '50%',
-        background: 'rgba(255,248,242,0.85)',
-        display: 'grid', placeItems: 'center',
-        font: '800 10px/1 "Plus Jakarta Sans", sans-serif', color: '#124346',
-        letterSpacing: '0.04em',
-      }}>
-        N
-      </div>
+      {/* Biome + collection label */}
+      <span className="absolute bottom-2 right-3 bb-hand text-lg text-sun-deep">{label}</span>
 
-      {/* Biome + collection % label */}
-      <div style={{
-        position: 'absolute', bottom: 10, right: 12,
-        padding: '4px 10px', borderRadius: 999,
-        background: 'rgba(255,248,242,0.9)',
-        font: '800 10px/1 "Plus Jakarta Sans", sans-serif',
-        letterSpacing: '0.14em', textTransform: 'uppercase',
-        color: '#124346',
-      }}>
-        {label}
-      </div>
-
-      {/* Status pill — only while Ronki is moving. Floats top-right
-          so the kid sees what the dot means without translating
-          coordinates in their head. */}
+      {/* Status pill while Ronki is moving */}
       {isMoving && (
-        <div style={{
-          position: 'absolute', top: 10, right: 12,
-          padding: '4px 10px', borderRadius: 999,
-          background: 'rgba(20,83,45,0.92)',
-          color: '#ecfdf5',
-          font: '700 10px/1 "Plus Jakarta Sans", sans-serif',
-          letterSpacing: '0.10em', textTransform: 'uppercase',
-          display: 'flex', alignItems: 'center', gap: 6,
-        }}>
-          <span style={{
-            width: 6, height: 6, borderRadius: '50%',
-            background: expState === 'waiting' ? '#fbbf24' : '#86efac',
-            animation: 'et-pulse 1.4s ease-in-out infinite',
-          }} />
+        <span className="absolute top-2 right-2 inline-flex items-center gap-2 rounded-full border-[2.5px] border-ink bg-cobalt px-3 py-1 font-headline font-semibold text-base text-white">
+          <DoodleIcon name={expState === 'waiting' ? 'check' : 'paw'} size={16} stroke={7} />
           {expState === 'waiting'
             ? 'Zurück'
             : expState === 'leaving'
             ? 'Aufbruch'
             : `Unterwegs · ${Math.round(progress * 100)}%`}
-        </div>
+        </span>
       )}
-
-      <style>{`
-        @keyframes et-pulse {
-          0%, 100% { opacity: 1;   transform: scale(1); }
-          50%      { opacity: 0.55; transform: scale(1.35); }
-        }
-      `}</style>
     </div>
   );
 }
 
 // ─── Trail-path math (deterministic bezier per trip) ──────────────
 
-// Cubic bezier evaluator — returns {x, y} at parameter t in [0,1].
 function bezierAt({ p0, p1, p2, p3 }, t) {
   const u = 1 - t;
   return {
@@ -1231,15 +682,12 @@ function bezierAt({ p0, p1, p2, p3 }, t) {
   };
 }
 
-// Build a curvy path from the cave (fixed left anchor) to the
-// target find (right, varies). Two control points jitter so each
-// trip's route looks unique. Coords are inside the 320×160 viewBox.
 function makeTrailPath(seed) {
   const rand = mulberry32(seed || 1);
-  const p0 = { x: 32,  y: 124 };  // cave/home anchor
+  const p0 = { x: 32,  y: 124 };  // camp anchor
   const p3 = {
     x: 286,
-    y: 28 + Math.floor(rand() * 80),  // target varies upper to lower-mid
+    y: 28 + Math.floor(rand() * 80),
   };
   const p1 = {
     x: 90  + Math.floor(rand() * 60),
@@ -1253,9 +701,7 @@ function makeTrailPath(seed) {
   return { p0, p1, p2, p3, d };
 }
 
-// Tiny seeded PRNG — same seed always returns the same sequence.
-// Lifted from public-domain mulberry32 so we don't pull a dep in for
-// twelve random numbers.
+// Tiny seeded PRNG (public-domain mulberry32).
 function mulberry32(a) {
   return function() {
     let t = a += 0x6D2B79F5;
@@ -1265,220 +711,104 @@ function mulberry32(a) {
   };
 }
 
-// ─── Diary modal ────────────────────────────────────────────────
+// ─── Diary sheet ────────────────────────────────────────────────
 
 function DiaryModal({ memento, totalCollected, onClose }) {
   const pct = Math.min(99, Math.round((totalCollected / 24) * 100));
   // Animate the bar fill in after mount
   const [fillTarget, setFillTarget] = useState('0%');
+  const [burst, setBurst] = useState(false);
   useEffect(() => {
     const t = setTimeout(() => setFillTarget(`${pct}%`), 200);
-    return () => clearTimeout(t);
+    const b = setTimeout(() => setBurst(true), 350);
+    return () => { clearTimeout(t); clearTimeout(b); };
   }, [pct]);
 
   return (
     <div
       role="dialog"
       aria-modal="true"
-      style={{
-        position: 'fixed', inset: 0, zIndex: 90,
-        background: 'rgba(18,42,54,0.6)',
-        display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
-        animation: 'exp-fade-in 0.3s ease',
-      }}
+      aria-label="Tagebuch"
+      className="fixed inset-0 flex items-end justify-center"
+      style={{ zIndex: 90, background: 'rgba(4, 34, 94, 0.55)', animation: 'exp-fade-in 0.3s ease' }}
       onClick={onClose}
     >
       <div
         onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-lg overflow-y-auto rounded-t-[28px] border-[3px] border-b-0 border-ink bg-paper text-ink px-5 pt-5"
         style={{
-          width: '100%',
-          borderRadius: '24px 24px 0 0',
-          background: `
-            radial-gradient(ellipse at 30% 15%, rgba(252,211,77,0.15), transparent 40%),
-            linear-gradient(180deg, #fdf6e3 0%, #f2e4c3 100%)
-          `,
-          padding: '24px 20px 22px',
           maxHeight: '92%',
-          overflowY: 'auto',
-          boxShadow: '0 -20px 50px -20px rgba(0,0,0,0.4)',
-          position: 'relative',
+          paddingBottom: 'calc(20px + env(safe-area-inset-bottom, 0px))',
           animation: 'exp-sheet-up 0.4s cubic-bezier(0.34, 1.2, 0.64, 1)',
         }}
       >
         {/* Drag handle */}
-        <div style={{
-          position: 'absolute', top: 8, left: '50%', transform: 'translateX(-50%)',
-          width: 40, height: 4, borderRadius: 999,
-          background: 'rgba(180,120,40,0.35)',
-        }} />
+        <div aria-hidden="true" className="absolute left-1/2 -translate-x-1/2 top-2 h-1.5 w-10 rounded-full bg-ink" />
 
-        <div style={{
-          font: '600 10px/1 "Plus Jakarta Sans", sans-serif',
-          letterSpacing: '0.18em', textTransform: 'uppercase',
-          color: '#b45309', textAlign: 'center', marginBottom: 6,
-        }}>
-          Heute · {timeOfDay()}
-        </div>
-        <h3 style={{
-          margin: '0 0 14px',
-          font: '500 22px/1.15 "Fredoka", sans-serif',
-          color: '#124346', textAlign: 'center', letterSpacing: '-0.01em',
-        }}>
-          Ein {memento.name}
-        </h3>
+        <p className="bb-hand text-xl text-cobalt text-center mt-2 mb-1">Heute · {timeOfDay()}</p>
+        <h3 className="bb-display text-3xl text-center mb-4">Ein {memento.name}</h3>
 
-        {/* Banner */}
-        <div style={{
-          height: 110,
-          borderRadius: 12,
-          marginBottom: 14,
-          position: 'relative',
-          overflow: 'hidden',
-          background: `
-            radial-gradient(ellipse at 20% 25%, rgba(253,230,138,0.5), transparent 40%),
-            linear-gradient(180deg, #c3dcad 0%, #7a9a5d 55%, #4a6628 100%)
-          `,
-          boxShadow: 'inset 0 0 0 1px rgba(74,102,40,0.25), 0 4px 10px rgba(74,102,40,0.2)',
-        }}>
-          <div style={{
-            position: 'absolute', inset: 0,
-            background: `
-              radial-gradient(circle at 30% 80%, rgba(74,102,40,0.4) 0%, transparent 15%),
-              radial-gradient(circle at 70% 75%, rgba(74,102,40,0.3) 0%, transparent 14%),
-              radial-gradient(circle at 88% 90%, rgba(74,102,40,0.3) 0%, transparent 12%)
-            `,
-          }} />
-          <div style={{
-            position: 'absolute', left: 12, bottom: 10,
-            padding: '4px 10px', borderRadius: 999,
-            background: 'rgba(255,248,242,0.85)',
-            backdropFilter: 'blur(6px)',
-            font: '800 10px/1 "Plus Jakarta Sans", sans-serif',
-            letterSpacing: '0.14em', textTransform: 'uppercase',
-            color: '#124346',
-          }}>
-            Morgenwald
+        {/* Ronki with his find, the burst on top */}
+        <div className="relative flex justify-center mb-3">
+          <div className="relative flex h-40 w-40 items-center justify-center rounded-full border-[2.5px] border-ink bg-sky-wash">
+            <RonkiArt pose="leaf" size={150} idle="bb-idle-lift" style={{ marginTop: 8 }} />
+            <MotionTicks tone="sun" size={30} rotate={-40} className="absolute" style={{ top: 6, right: -8 }} />
           </div>
+          <StickerBurst active={burst} size={260} count={20} onDone={() => setBurst(false)} />
         </div>
 
-        <p style={{
-          margin: '0 0 16px',
-          padding: '0 4px',
-          font: '500 15px/1.55 "Fredoka", sans-serif',
-          color: '#3a2818',
-          fontStyle: 'italic',
-        }}>
-          „{memento.quote}"
+        <p className="font-headline font-semibold text-lg text-center leading-snug mb-4 px-1">
+          „{memento.quote}“
         </p>
 
-        {/* Memento card */}
-        <div style={{
-          background: 'rgba(255,248,242,0.7)',
-          border: '1px solid rgba(180,90,30,0.15)',
-          borderRadius: 14,
-          padding: '14px 16px',
-          display: 'grid', gridTemplateColumns: '68px 1fr', gap: 14,
-          alignItems: 'center',
-          marginBottom: 14,
-        }}>
-          <div style={{
-            width: 68, height: 68, borderRadius: 14,
-            background: `
-              radial-gradient(ellipse at 40% 30%, #f59e0b 0%, transparent 40%),
-              linear-gradient(135deg, #fef9d7, #fde68a)
-            `,
-            display: 'grid', placeItems: 'center',
-            fontSize: 38,
-            filter: 'drop-shadow(0 2px 4px rgba(180,90,30,0.2))',
-          }}>
+        {/* Memento card, on sun */}
+        <PaperCard tone="sun" pad="sm" className="grid items-center gap-3 p-4 mb-4" style={{ gridTemplateColumns: '68px 1fr' }}>
+          <span
+            aria-hidden="true"
+            className="flex h-[68px] w-[68px] items-center justify-center rounded-full border-[2.5px] border-ink bg-white"
+            style={{ fontSize: 36 }}
+          >
             {memento.emoji}
-          </div>
-          <div style={{ minWidth: 0 }}>
-            <div style={{
-              font: '700 10px/1 "Plus Jakarta Sans", sans-serif',
-              letterSpacing: '0.14em', textTransform: 'uppercase',
-              color: '#b45309', marginBottom: 3,
-            }}>
-              Spur · Für dich
-            </div>
-            <div style={{
-              font: '600 15px/1.2 "Fredoka", sans-serif',
-              color: '#124346', marginBottom: 3,
-            }}>
-              {memento.name}
-            </div>
-            <div style={{ font: '500 11px/1.35 "Nunito", sans-serif', color: 'rgba(18,67,70,0.6)' }}>
-              {memento.location}
-            </div>
-          </div>
-        </div>
+          </span>
+          <span className="min-w-0">
+            <span className="block bb-hand text-lg text-sun-deep">Spur · Für dich</span>
+            <span className="block font-headline font-bold text-xl leading-tight">{memento.name}</span>
+            <span className="block text-base text-ink-soft mt-0.5">{memento.location}</span>
+          </span>
+        </PaperCard>
 
         {/* Progress */}
-        <div style={{
-          padding: '12px 14px',
-          borderRadius: 12,
-          background: 'rgba(18,67,70,0.05)',
-          marginBottom: 18,
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-            <b style={{ font: '700 12px/1 "Nunito", sans-serif', color: '#124346' }}>Morgenwald entdeckt</b>
-            <span style={{ font: '700 11px/1 "Plus Jakarta Sans", sans-serif', color: 'rgba(18,67,70,0.6)', letterSpacing: '0.04em' }}>{pct}%</span>
+        <PaperCard tone="white" pad="sm" className="mb-5 p-4">
+          <div className="flex justify-between items-center mb-2">
+            <b className="font-headline font-semibold text-lg">Morgenwald entdeckt</b>
+            <span className="bb-hand text-lg text-sun-deep">{pct}%</span>
           </div>
-          <div style={{
-            height: 8, borderRadius: 999,
-            background: 'rgba(18,67,70,0.1)',
-            overflow: 'hidden',
-            position: 'relative',
-          }}>
-            <div style={{
-              height: '100%',
-              background: 'linear-gradient(90deg, #7a9a5d 0%, #a3c677 60%, #fcd34d 100%)',
-              borderRadius: 999,
-              width: fillTarget,
-              transition: 'width 1.2s cubic-bezier(0.5, 0, 0.2, 1)',
-              boxShadow: '0 0 10px rgba(163,198,119,0.5)',
-            }} />
+          <div className="h-3 overflow-hidden rounded-full border-[2px] border-ink bg-paper-deep">
+            <div
+              className="h-full rounded-full bg-cobalt"
+              style={{ width: fillTarget, transition: 'width 1.2s cubic-bezier(0.5, 0, 0.2, 1)' }}
+            />
           </div>
-        </div>
+        </PaperCard>
 
-        <button
-          type="button"
-          onClick={onClose}
-          style={{
-            width: '100%',
-            padding: '13px 20px', borderRadius: 999,
-            background: '#124346', color: '#fef3c7',
-            font: '800 11px/1 "Plus Jakarta Sans", sans-serif',
-            letterSpacing: '0.14em', textTransform: 'uppercase',
-            border: 'none',
-            cursor: 'pointer',
-          }}
-        >
+        <PillButton full size="lg" onClick={onClose}>
           Aufs Regal stellen
-        </button>
+        </PillButton>
       </div>
     </div>
   );
 }
 
-// ─── Dev-only state cycler (visible in DEV builds) ─────────────
+// ─── Dev-only state cycler ─────────────────────────────────────
 
 function DevStateCycler({ current, actions }) {
   const STATES = ['home', 'leaving', 'away', 'waiting'];
   return (
-    <div style={{
-      position: 'fixed', bottom: 90, left: '50%', transform: 'translateX(-50%)',
-      zIndex: 70,
-      padding: '6px 10px', borderRadius: 999,
-      background: 'rgba(18,67,70,0.85)',
-      color: '#fef3c7',
-      font: '700 10px/1 "Plus Jakarta Sans", sans-serif',
-      letterSpacing: '0.12em', textTransform: 'uppercase',
-      display: 'flex', gap: 4, alignItems: 'center',
-      boxShadow: '0 6px 14px -4px rgba(0,0,0,0.4)',
-      pointerEvents: 'auto',
-    }}>
-      <span style={{ opacity: 0.6 }}>DEV</span>
+    <div
+      className="fixed left-1/2 -translate-x-1/2 flex items-center gap-1 rounded-full border-[2.5px] border-ink bg-ink px-2 py-1 font-headline font-semibold text-sm text-white"
+      style={{ bottom: 90, zIndex: 70 }}
+    >
+      <span className="opacity-60 px-1">DEV</span>
       {STATES.map(s => (
         <button
           key={s}
@@ -1491,14 +821,7 @@ function DevStateCycler({ current, actions }) {
             }
             else actions.setExpedition?.({ state: s, biome: 'morgenwald' });
           }}
-          style={{
-            padding: '4px 8px', borderRadius: 999,
-            background: current === s ? '#fde68a' : 'transparent',
-            color: current === s ? '#124346' : '#fef3c7',
-            border: '1px solid rgba(254,243,199,0.25)',
-            font: 'inherit',
-            cursor: 'pointer',
-          }}
+          className={`rounded-full px-2 py-1 ${current === s ? 'bg-sun text-ink' : 'text-white'}`}
         >
           {s}
         </button>
@@ -1510,11 +833,8 @@ function DevStateCycler({ current, actions }) {
 // ─── Helpers ────────────────────────────────────────────────────
 
 function returnLabel(returnAt) {
-  // Kid-readable return-time copy (Marc 25 Apr 2026 audit fix —
-  // 'Zurück gegen 14:00' was unreadable for a 6yo who hasn't
-  // mastered clocks yet). Map the return time to a daytime anchor
-  // the kid already knows (vor dem Mittag / zum Mittagessen / am
-  // Nachmittag / am Abend / morgen früh) so the wait is concrete.
+  // Kid-readable return-time copy: map the return time to a daytime
+  // anchor the kid already knows so the wait is concrete.
   if (!returnAt) return '';
   const t = new Date(returnAt);
   const hh = t.getHours();
