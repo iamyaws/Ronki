@@ -32,6 +32,10 @@ export default function RatgeberAbendroutineGrundschulkind() {
           slug: 'zaehneputzen-ohne-streit',
           title: 'Zähneputzen ohne Streit: was bei 5- bis 8-Jährigen wirklich hilft',
         },
+        {
+          slug: 'zeitumstellung-kinder',
+          title: 'Zeitumstellung im Herbst: So kommt dein Kind gut durch die Umstellung',
+        },
       ]}
     >
       <p className="lead">
