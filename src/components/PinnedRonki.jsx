@@ -1,57 +1,51 @@
 import React, { useEffect, useRef, useState } from 'react';
-import MoodChibi from './MoodChibi';
+import MoodChibi, { ambientMood as toAmbient } from './MoodChibi';
 import { useQuestEater } from './QuestEater';
 import { useTask } from '../context/TaskContext';
+import { SpeechBubble, MotionTicks } from './bilderbuch';
 
 /**
- * PinnedRonki — circular gold-haloed pill housing a <MiniRonki>.
+ * PinnedRonki: the round companion chip in the top bar that follows
+ * the kid across tabs. Bilderbuch cut, 25 Sep 2026: a sky-wash circle
+ * with an ink outline, the routine progress as a cobalt drawn arc, the
+ * burp as three sun motion ticks, the bubble the shared SpeechBubble
+ * with its tail pointing up at the chip.
  *
- * The companion that follows Louis across tabs (core-loop audit's #1
- * recommendation + Claude Design's "pinned Ronki" pattern Louis liked).
- * Sits in the TopBar so Louis sees Ronki everywhere he goes, not just on
- * the Ronki tab.
- *
- * Interactions:
- *   - Tap  → `onTap` (typically navigates to the Ronki tab)
- *   - Long-press or external trigger → shows a speech bubble below
- *   - Burp overlay plays when the `burpTrigger` prop increments (useful
- *     for quest-completion celebrations — "Ronki eats the quest icon")
+ * Behaviour is unchanged: it registers its DOM node with the
+ * QuestEater as the fallback target of the flying quest icon, subscribes
+ * to the eater's burp and bubble triggers, fills the ring from the
+ * current routine block, and mirrors the ambient mood.
  *
  * Props:
- *   - size         (number)   — outer pill diameter, default 46
- *   - mood         ('happy' | 'sad' | 'sleepy' | 'proud') — MiniRonki mood
- *   - bubble       (string)   — optional speech bubble text, auto-fades
- *   - burpTrigger  (number)   — bump to fire a flame-puff overlay
- *   - onTap        (fn)       — tap handler
- *   - ariaLabel    (string)   — a11y label, default 'Ronki'
+ *   - size         (number)   outer chip diameter, default 46
+ *   - mood         accepted for back-compat; the ambient mood from state wins
+ *   - bubble       (string)   optional speech bubble text
+ *   - burpTrigger  (number)   bump to fire the motion ticks
+ *   - onTap        (fn)       tap handler
+ *   - ariaLabel    (string)   a11y label, default 'Ronki'
  */
+
+const TICK_TONE = {
+  flame: 'ember',
+  ember: 'sun',
+  sparkle: 'sun',
+  heart: 'ember',
+  rainbow: 'cobalt',
+};
 
 export default function PinnedRonki({
   size = 46,
-  mood = 'happy',
+  mood = 'happy', // eslint-disable-line no-unused-vars
   bubble: bubbleOverride,
   burpTrigger = 0,
   onTap,
   ariaLabel = 'Ronki',
 }) {
-  // Register with the QuestEater context so the "flying quest icon"
-  // animation knows where to aim. Also subscribe to its burp + bubble
-  // triggers so ticking a quest anywhere in the app makes Ronki react
-  // HERE without prop-drilling.
   const eater = useQuestEater();
-  const { state, computed } = useTask();
-  // Ambient status — the pill becomes an at-a-glance companion chip:
-  //   ring fills with CURRENT ROUTINE BLOCK's pct (morning / evening /
-  //   bedtime depending on hour), face swaps to current ronkiMood,
-  //   variant threads through so the colorway matches Louis's save.
-  //
-  // Routine-based ring (Marc Apr 2026): "shouldn't one routine put the
-  // circle to full so that the kid can leave the app after the routine
-  // is done and Ronki is happy." Previously used done/total across all
-  // quests → required completing morning + evening + bedtime to fill.
-  // Now: time-of-day picks the active block, ring fills when THAT
-  // block's main quests are all done. Kid finishes morning → ring full
-  // → knows it's safe to put the phone away.
+  const { state } = useTask();
+  // Routine-based ring (Marc Apr 2026): time of day picks the active
+  // block; the ring fills when THAT block's main quests are all done so
+  // the kid knows it is safe to put the phone away.
   const _h = new Date().getHours();
   const activeAnchor =
     _h >= 6 && _h < 12 ? 'morning' :
@@ -64,22 +58,19 @@ export default function PinnedRonki({
   const blockTotal = blockQuests.length;
   const pct = blockTotal > 0 ? blockDone / blockTotal : 0;
   const allDone = blockTotal > 0 && blockDone === blockTotal;
-  const ambientMood = state?.ronkiMood || 'normal';
+  const ambientMood = toAmbient(state?.ronkiMood);
   const variant = state?.companionVariant || 'amber';
   const pillRef = useRef(null);
   useEffect(() => {
     if (!eater || !pillRef.current) return;
-    // Fallback slot — the CampfireScene's SideRonki takes priority
-    // when mounted (on Lager). Everywhere else, this TopBar Ronki is
-    // the target for the flying quest icon.
+    // Fallback slot: a scene Ronki takes priority when mounted; everywhere
+    // else this chip is the target for the flying quest icon.
     eater.registerRonkiEl(pillRef.current, 'fallback');
     return () => eater.registerRonkiEl(null, 'fallback');
   }, [eater]);
 
-  // Burp flame overlay — mounts briefly when burpTrigger (prop) OR
-  // eater.burpKey (context) changes. Either source can trigger Ronki.
-  // Flavor picks which shape/color the burp renders (flame, ember,
-  // sparkle, heart, rainbow) so the pin mirrors the Lager fire-breath.
+  // Burp ticks: mount briefly when burpTrigger (prop) OR eater.burpKey
+  // (context) changes. The flavor picks the tick colour.
   const [burpKey, setBurpKey] = useState(0);
   const [burpFlavor, setBurpFlavor] = useState('flame');
   const lastPropTrigger = useRef(burpTrigger);
@@ -102,203 +93,133 @@ export default function PinnedRonki({
   // Prefer explicit bubble prop; fall back to context bubble.
   const bubble = bubbleOverride ?? eater?.bubble;
 
-  // Ronki's inner chibi is ~65% of the outer pill diameter (30/46 in the
-  // Claude Design spec). Scale together so every size of the pill keeps
-  // the same visual proportions.
-  const innerSize = Math.round(size * 0.65);
+  // Ronki's face fills about 78 percent of the chip.
+  const innerSize = Math.round(size * 0.78);
 
   const Tag = onTap ? 'button' : 'div';
+
+  // The ring is drawn on a slightly bigger box so the stroke sits just
+  // outside the chip's outline.
+  const padding = 5;
+  const boxSize = size + padding * 2;
+  const stroke = Math.max(3, Math.round(size * 0.08));
+  const radius = (size + padding) / 2;
+  const circumference = 2 * Math.PI * radius;
 
   return (
     <Tag
       ref={pillRef}
       onClick={onTap}
       aria-label={onTap ? ariaLabel : undefined}
-      className="pr-pin"
+      className="pr-pin active:scale-95 transition-transform"
       style={{
         position: 'relative',
         width: size,
         height: size,
         borderRadius: '50%',
-        background: 'radial-gradient(circle at 50% 40%, #fef3c7, #fcd34d 50%, #f59e0b 100%)',
-        border: '2px solid #fff',
-        boxShadow: '0 4px 10px -3px rgba(245,158,11,0.5)',
+        background: 'var(--color-sky-wash)',
+        border: '2px solid var(--color-ink)',
+        boxSizing: 'border-box',
         display: 'grid',
         placeItems: 'center',
         cursor: onTap ? 'pointer' : 'default',
-        transition: 'transform 0.15s',
         flexShrink: 0,
         padding: 0,
+        overflow: 'visible',
       }}
-      onMouseDown={onTap ? (e) => e.currentTarget.style.transform = 'scale(0.95)' : undefined}
-      onMouseUp={onTap ? (e) => e.currentTarget.style.transform = '' : undefined}
-      onMouseLeave={onTap ? (e) => e.currentTarget.style.transform = '' : undefined}
     >
-      {/* Progress ring — active routine block's pct. Amber in-progress,
-           emerald + subtle glow at all-done. Drawn on a slightly bigger
-           box so the stroke sits just outside the white pill border.
-           strokeLinecap: butt on the track (clean closed circle) + round
-           on the foreground arc only so the advancing tip feels soft
-           without creating visible stub "humps" on both ends. */}
-      {(() => {
-        const padding = 5;                      // distance from pill edge
-        const boxSize = size + padding * 2;
-        const stroke = Math.max(3, Math.round(size * 0.08)); // scales with size
-        const radius = (size + padding) / 2;
-        const circumference = 2 * Math.PI * radius;
-        return (
-          <svg
-            aria-hidden="true"
-            width={boxSize}
-            height={boxSize}
-            viewBox={`0 0 ${boxSize} ${boxSize}`}
-            style={{
-              position: 'absolute',
-              inset: -padding,
-              pointerEvents: 'none',
-              transform: 'rotate(-90deg)',
-              overflow: 'visible',
-            }}
-          >
-            {/* Track — full circle, flat caps, low contrast */}
-            <circle
-              cx={boxSize / 2}
-              cy={boxSize / 2}
-              r={radius}
-              fill="none"
-              stroke="rgba(18,67,70,0.14)"
-              strokeWidth={stroke}
-            />
-            {/* Foreground arc — strokeLinecap:round so the tip is soft.
-                 Only drawn when pct > 0 to avoid the stray end-cap dot
-                 at 0%. At allDone the arc covers the full circle, so the
-                 soft cap is hidden (seam sits behind itself). */}
-            {pct > 0 && (
-              <circle
-                cx={boxSize / 2}
-                cy={boxSize / 2}
-                r={radius}
-                fill="none"
-                stroke={allDone ? '#34d399' : '#fcd34d'}
-                strokeWidth={stroke}
-                strokeLinecap="round"
-                strokeDasharray={circumference}
-                strokeDashoffset={circumference * (1 - pct)}
-                style={{
-                  transition: 'stroke-dashoffset 0.6s ease, stroke 0.3s ease',
-                  filter: allDone
-                    ? 'drop-shadow(0 0 6px rgba(52,211,153,0.75))'
-                    : 'drop-shadow(0 0 4px rgba(252,211,77,0.55))',
-                }}
-              />
-            )}
-          </svg>
-        );
-      })()}
+      {/* Progress ring: paper track, cobalt drawn arc. */}
+      <svg
+        aria-hidden="true"
+        width={boxSize}
+        height={boxSize}
+        viewBox={`0 0 ${boxSize} ${boxSize}`}
+        style={{
+          position: 'absolute',
+          inset: -padding - 2,
+          pointerEvents: 'none',
+          transform: 'rotate(-90deg)',
+          overflow: 'visible',
+        }}
+      >
+        <circle
+          cx={boxSize / 2}
+          cy={boxSize / 2}
+          r={radius}
+          fill="none"
+          stroke="var(--color-paper-deep)"
+          strokeWidth={stroke}
+        />
+        {pct > 0 && (
+          <circle
+            cx={boxSize / 2}
+            cy={boxSize / 2}
+            r={radius}
+            fill="none"
+            stroke={allDone ? 'var(--color-cobalt)' : 'var(--color-cobalt)'}
+            strokeWidth={stroke}
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            strokeDashoffset={circumference * (1 - pct)}
+            style={{ transition: 'stroke-dashoffset 0.6s ease' }}
+          />
+        )}
+      </svg>
 
-      {/* Chibi inside the pill — threads real ronkiMood + variant so the
-           face/particles match Ronki's state everywhere else (Lager,
-           Profile, Compendium). */}
+      {/* Ronki's face, the ambient mood. */}
       <div style={{ width: innerSize, height: innerSize, position: 'relative', zIndex: 1 }}>
-        <MoodChibi size={innerSize} mood={ambientMood} variant={variant} stage={2} bare />
+        <MoodChibi size={innerSize} mood={ambientMood} variant={variant} stage={2} bare face />
       </div>
 
-      {/* Flavored burp — shape/color picked by flavor so the pin mirrors
-          the Lager fire-breath variant for the same event. Keyed so each
-          trigger mounts a fresh animation run. */}
-      {burpKey > 0 && (() => {
-        const f = burpFlavor || 'flame';
-        const common = {
-          position: 'absolute',
-          left: '50%',
-          top: '30%',
-          transform: 'translateX(-50%)',
-          width: size * 0.4,
-          height: size * 0.48,
-          pointerEvents: 'none',
-          zIndex: 40,
-          animation: 'prBurp 0.9s ease-out forwards',
-        };
-        const bg =
-          f === 'rainbow' ? 'conic-gradient(from 0deg at 50% 70%, #f97316, #fde047, #4ade80, #22d3ee, #818cf8, #ec4899, #f97316)' :
-          f === 'heart'   ? 'radial-gradient(ellipse at 50% 70%, #fbcfe8 0%, #ec4899 50%, #be185d 100%)' :
-          f === 'sparkle' ? 'radial-gradient(ellipse at 50% 70%, #fff 0%, #fde68a 45%, #fcd34d 100%)' :
-          f === 'ember'   ? 'radial-gradient(ellipse at 50% 70%, #fef3c7 0%, #fcd34d 35%, #f97316 75%, transparent 100%)' :
-                            'radial-gradient(ellipse at 50% 70%, #fef3c7 0%, #f59e0b 45%, #dc2626 100%)';
-        const glow =
-          f === 'rainbow' ? '0 0 10px rgba(236,72,153,0.6)' :
-          f === 'heart'   ? '0 0 10px rgba(236,72,153,0.7)' :
-          f === 'sparkle' ? '0 0 10px rgba(252,211,77,0.9)' :
-          f === 'ember'   ? '0 0 8px rgba(249,115,22,0.6)' :
-                            '0 0 8px rgba(245,158,11,0.7)';
-        return (
-          <span
-            key={burpKey}
-            aria-hidden="true"
-            style={{
-              ...common,
-              background: bg,
-              borderRadius: '50% 50% 30% 30% / 65% 65% 35% 35%',
-              filter: `drop-shadow(${glow})`,
-            }}
-          />
-        );
-      })()}
+      {/* Burp: three motion ticks fanning up from the chip. Keyed so
+          each trigger mounts a fresh animation run. */}
+      {burpKey > 0 && (
+        <span
+          key={burpKey}
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            left: '50%',
+            top: -6,
+            transform: 'translateX(-50%)',
+            pointerEvents: 'none',
+            zIndex: 40,
+            animation: 'prBurp 0.9s ease-out forwards',
+          }}
+        >
+          <MotionTicks tone={TICK_TONE[burpFlavor] || 'sun'} size={Math.round(size * 0.55)} rotate={-90} />
+        </span>
+      )}
 
-      {/* Speech bubble — positioned below the pin, small tail pointing up.
-          Kept inside the pin so it follows the component; consumers don't
-          need to worry about layout. Limits width to prevent wrap on long
-          strings; truncate if you want ultra-compact. */}
+      {/* Speech bubble below the chip, tail pointing up at it. */}
       {bubble && (
         <div
           role="status"
           style={{
             position: 'absolute',
             zIndex: 30,
-            top: 'calc(100% + 8px)',
-            right: 0,
-            maxWidth: 240,
-            padding: '8px 12px',
-            borderRadius: 14,
-            background: '#fff',
-            border: '1px solid rgba(18,67,70,0.1)',
-            boxShadow: '0 8px 20px -6px rgba(18,67,70,0.2)',
-            fontFamily: 'Nunito, sans-serif',
-            fontSize: 12,
-            fontWeight: 500,
-            lineHeight: 1.3,
-            color: '#124346',
+            top: 'calc(100% + 22px)',
+            left: '50%',
+            transform: 'translateX(-50%)',
             whiteSpace: 'nowrap',
             animation: 'prBubIn 0.25s cubic-bezier(.34,1.56,.64,1)',
           }}
         >
-          {bubble}
-          <span
-            aria-hidden="true"
-            style={{
-              position: 'absolute',
-              top: -5,
-              right: 18,
-              width: 10,
-              height: 10,
-              background: '#fff',
-              borderLeft: '1px solid rgba(18,67,70,0.1)',
-              borderTop: '1px solid rgba(18,67,70,0.1)',
-              transform: 'rotate(45deg)',
-            }}
-          />
+          <SpeechBubble side="top" tone="paper" rotate={0} className="text-left">
+            {bubble}
+          </SpeechBubble>
         </div>
       )}
 
       <style>{`
         @keyframes prBurp {
-          0%   { opacity: 0; transform: translate(-50%, 0) scale(0.3); }
-          20%  { opacity: 1; transform: translate(-50%, -4px) scale(1); }
-          100% { opacity: 0; transform: translate(-50%, -22px) scale(0.4); }
+          0%   { opacity: 0; transform: translate(-50%, 4px) scale(0.5); }
+          25%  { opacity: 1; transform: translate(-50%, -6px) scale(1); }
+          100% { opacity: 0; transform: translate(-50%, -22px) scale(0.8); }
         }
         @keyframes prBubIn {
-          from { opacity: 0; transform: translateY(-4px) scale(0.9); }
-          to   { opacity: 1; transform: translateY(0) scale(1); }
+          from { opacity: 0; transform: translateX(-50%) translateY(-4px) scale(0.9); }
+          to   { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
         }
       `}</style>
     </Tag>

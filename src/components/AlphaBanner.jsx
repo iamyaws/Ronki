@@ -12,6 +12,10 @@ import { useTranslation } from '../i18n/LanguageContext';
  * header) can offset by exactly the banner's height — including the iOS
  * safe-area-inset-top which the banner absorbs. Without this, `fixed top-0`
  * headers render ON TOP of the sticky banner at scroll=0 and clip avatars.
+ *
+ * Look (Bilderbuch, 25 Sep 2026): night blue strip, white print, a sun
+ * dot and a sun feedback link. Sun on night is a dark ground, so it may
+ * carry text here.
  */
 export default function AlphaBanner() {
   const { t, lang, setLang } = useTranslation();
@@ -37,35 +41,27 @@ export default function AlphaBanner() {
     <div
       ref={ref}
       role="note"
-      className="sticky top-0 inset-x-0 z-[60] bg-[#0F2C2E] text-white/85 border-b border-white/10"
-      style={{
-        paddingTop: 'env(safe-area-inset-top, 0px)',
-        fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
-      }}
+      className="sticky top-0 inset-x-0 z-[60] bg-night text-white font-headline"
+      style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
     >
-      <div className="max-w-lg mx-auto flex items-center gap-2 px-4 py-1.5 text-[11px] leading-tight">
-        <span
-          aria-hidden
-          className="inline-block w-1.5 h-1.5 rounded-full bg-[#FCD34D] shrink-0 animate-pulse"
-        />
-        <span className="font-semibold tracking-wide">{t('alpha.label')}</span>
+      <div className="max-w-lg mx-auto flex items-center gap-2 px-4 py-1.5 text-[12px] leading-tight">
+        <span aria-hidden className="inline-block w-2 h-2 rounded-full bg-sun shrink-0" />
+        <span className="font-semibold">{t('alpha.label')}</span>
         <span className="opacity-40" aria-hidden>·</span>
-        <span className="opacity-70 truncate">{t('alpha.body')}</span>
+        <span className="opacity-80 truncate font-body text-[11px]">{t('alpha.body')}</span>
         <button
           type="button"
           onClick={() => setLang(lang === 'de' ? 'en' : 'de')}
           aria-label={t('lang.switchTo')}
-          className="ml-auto shrink-0 font-semibold tracking-wide opacity-80 hover:opacity-100 transition-opacity"
-          /* 10px → 12px + padding bumps height to 28px — still compact
-             for an alpha banner but readable. UI/UX Pro Max flag 24 Apr. */
-          style={{ fontSize: 12, letterSpacing: '0.12em', padding: '4px 8px', minHeight: 28 }}
+          className="ml-auto shrink-0 font-semibold opacity-90 hover:opacity-100 transition-opacity"
+          style={{ fontSize: 12, letterSpacing: '0.06em', padding: '4px 8px', minHeight: 28 }}
         >
           {lang === 'de' ? 'DE ▸ EN' : 'EN ▸ DE'}
         </button>
         <span className="opacity-40" aria-hidden>·</span>
         <a
           href="mailto:hallo@ronki.de?subject=Ronki%20Alpha%20Feedback"
-          className="shrink-0 font-semibold text-[#FCD34D] hover:text-white transition-colors underline decoration-[#FCD34D]/40 underline-offset-2"
+          className="shrink-0 font-semibold text-sun hover:text-white transition-colors underline decoration-sun/50 underline-offset-2"
         >
           {t('alpha.feedback')}
         </a>

@@ -3,25 +3,26 @@ import { motion, useReducedMotion } from 'motion/react';
 import MoodChibi from '../MoodChibi';
 import FireBreathPuff from '../FireBreathPuff';
 import VoiceAudio from '../../utils/voiceAudio';
+import { DoodleIcon, MotionTicks, PillButton } from '../bilderbuch';
 
 /**
- * TeachBreathBeat — the reusable "teach Ronki a fire-breath flavor" beat.
+ * TeachBreathBeat: the reusable "teach Ronki a fire-breath flavor" beat.
  *
  * Pulled out of TeachFireStep v2 so post-onboarding rituals (Herzfeuer
  * / Funkenstern / Glut / Regenbogenfeuer) share the same 2-round
  * failure-first mechanic without each one re-implementing the state
  * machine. Takes props for:
- *   · variant      — chibi colorway (forest/amber/teal/rose/violet/sunset)
- *   · t            — translation function (parent injects its own useTranslation)
- *   · targetFlavor — the flavor that plays on round 2 success. 'flame'
+ *   · variant     : chibi colorway (forest/amber/teal/rose/violet/sunset)
+ *   · t           : translation function (parent injects its own useTranslation)
+ *   · targetFlavor: the flavor that plays on round 2 success. 'flame'
  *                    for onboarding; 'heart' / 'sparkle' / 'ember' /
  *                    'rainbow' for unlock rituals. Round 1 always plays
  *                    'smoke' regardless.
- *   · copyKeys     — { title, intro, tryFail, tryAgain, holdHint,
+ *   · copyKeys    : { title, intro, tryFail, tryAgain, holdHint,
  *                      smokeFail, celebrate, soloLine, holdLabel,
- *                      next } — i18n keys for each phase's copy. The
+ *                      next }: i18n keys for each phase's copy. The
  *                      wrapper owns which language namespace to use.
- *   · onComplete   — called when phase='done' (after the solo repeat).
+ *   · onComplete  : called when phase='done' (after the solo repeat).
  *                    Wrapper decides what to do next (continue onboarding
  *                    → step 7, or dismiss modal + actions.teachBreath).
  *
@@ -38,7 +39,7 @@ import VoiceAudio from '../../utils/voiceAudio';
  *     wrapping.
  */
 
-// Minimum press duration to count as a deliberate "hold" — filters
+// Minimum press duration to count as a deliberate "hold": filters
 // accidental double-taps. Any release above this advances the round;
 // there is no "too early" branch anymore.
 const MIN_HOLD_MS = 220;
@@ -47,7 +48,7 @@ const SUCCESS_TO_SOLO_DELAY = 1300;
 const SOLO_TO_DONE_DELAY = 1200;
 const INTRO_DURATION_MS = 2200;
 
-// Chibi container — nominal 540px (50% larger than v2's 360px per Marc
+// Chibi container: nominal 540px (50% larger than v2's 360px per Marc
 // 24 Apr 2026 "ronki could be 50% bigger"). Actual size measured at
 // runtime so on narrow viewports the chibi scales down proportionally
 // instead of overflowing. MoodChibi's internal layout is percent-based,
@@ -56,13 +57,13 @@ const NOMINAL_CHIBI_SIZE = 540;
 
 // Per-flavor mouth anchor. Each flavor's internal emission origin sits
 // at a different offset inside its own wrapper box:
-//   · flame/heart/rainbow — cone/shape originates near wrapper top-left
+//   · flame/heart/rainbow: cone/shape originates near wrapper top-left
 //     (cone extends rightward, heart mass near upper edge).
-//   · smoke — cloud puffs drift right-and-up from wrapper left edge.
-//   · sparkle — stars are bottom-anchored inside their wrapper and
+//   · smoke: cloud puffs drift right-and-up from wrapper left edge.
+//   · sparkle: stars are bottom-anchored inside their wrapper and
 //     drift upward. Wrapper must be placed so its BOTTOM lands at the
 //     mouth line (anchor top pushed well above mouth).
-//   · ember — dots radiate from wrapper's LEFT-MIDDLE. Anchor shifted
+//   · ember: dots radiate from wrapper's LEFT-MIDDLE. Anchor shifted
 //     up slightly so mid-wrapper hits the mouth line.
 // Tuned empirically 24 Apr 2026 after Marc flagged sparkle + ember
 // weren't aligned to the mouth like heart + rainbow were.
@@ -76,7 +77,7 @@ const FLAVOR_MOUTH_ANCHORS = {
 };
 
 // Per-flavor fire size + duration. Each successive ritual in the unlock
-// order renders a bigger, longer breath — the progression system made
+// order renders a bigger, longer breath: the progression system made
 // tangible. flame (onboarding) is the baseline; rainbow is the biggest
 // because it's the last unlock (after 3 boss-arc completions). sparkle
 // + ember bumped 24 Apr 2026 per Marc ("could both also be bigger") to
@@ -89,7 +90,7 @@ const FIRE_SIZE_BY_FLAVOR = {
   rainbow: { scale: 3.5,  duration: 2.1  },
 };
 
-// Inhale scale — chibi puffs up during the hold. Was 1.08 (subtle) in
+// Inhale scale: chibi puffs up during the hold. Was 1.08 (subtle) in
 // v2; bumped to 1.55 per Marc ("full intake should be also 50% than
 // right now" = ~+50% from the 1.08 state). Reduced-motion still gets
 // a flat 1.0.
@@ -101,7 +102,7 @@ export default function TeachBreathBeat({
   targetFlavor = 'flame',
   copyKeys,
   onComplete,
-  // Header rendered above the chibi. Optional — wrappers that have
+  // Header rendered above the chibi. Optional: wrappers that have
   // their own heading (e.g. a modal with a title bar) can pass null
   // to skip the inner H1.
   showTitle = true,
@@ -156,12 +157,12 @@ export default function TeachBreathBeat({
     return () => clearTimeout(id);
   }, [phase]);
 
-  // ── Voice — phase-keyed playback (Apr 2026 character pass).
+  // ── Voice: phase-keyed playback (Apr 2026 character pass).
   // Drachenmutter (Eleonore) narrates framing beats; Ronki (Harry)
-  // voices first-person reactions. No cleanup-stop — each new
+  // voices first-person reactions. No cleanup-stop: each new
   // phase's play() naturally overrides the previous via
   // VoiceAudio.stop() inside play(), so audio chains cleanly without
-  // gaps. Onboarding-flame only — ritual unlock variants will get
+  // gaps. Onboarding-flame only: ritual unlock variants will get
   // their own audio bank when those modals ship.
   const isOnboardingFlame = targetFlavor === 'flame';
   const introPlayedRef = useRef(false);
@@ -205,7 +206,7 @@ export default function TeachBreathBeat({
     }
 
     if (attemptNum === 1) {
-      // Round 1 — always smoke. Deterministic per spec.
+      // Round 1: always smoke. Deterministic per spec.
       setFireFlavor('smoke');
       setFireKey(k => k + 1);
       setPhase('smoke');
@@ -216,7 +217,7 @@ export default function TeachBreathBeat({
       }, SMOKE_TO_PROMPT_DELAY);
       timersRef.current.push(t1);
     } else {
-      // Round 2 — always targetFlavor. Celebration → Ronki solo → done.
+      // Round 2: always targetFlavor. Celebration → Ronki solo → done.
       setFireFlavor(targetFlavor);
       setFireKey(k => k + 1);
       setPhase('released');
@@ -268,16 +269,13 @@ export default function TeachBreathBeat({
     <>
       {showTitle && (
         <header className="space-y-2 max-w-md">
-          <h1
-            className="font-display text-3xl font-bold text-white tracking-tight leading-tight"
-            style={{ fontFamily: 'Fredoka, sans-serif', textShadow: '0 2px 12px rgba(0,0,0,0.2)', textWrap: 'balance' }}
-          >
+          <h1 className="bb-display text-4xl text-white">
             {t(copyKeys.title)}
           </h1>
         </header>
       )}
 
-      {/* Chibi stage — nominal 540×540 container (50% bigger than v2 per
+      {/* Chibi stage: nominal 540×540 container (50% bigger than v2 per
           Marc 24 Apr 2026). `width: min(NOMINAL, 92vw)` caps on narrow
           phones so the chibi never overflows horizontally. aspect-ratio
           keeps the box square. ResizeObserver measures actual width and
@@ -304,26 +302,50 @@ export default function TeachBreathBeat({
             bare
           />
 
+          {/* Breath ticks: the drawn marks around a chest that fills. */}
+          {isInhaling && !prefersReducedMotion && (
+            <>
+              <MotionTicks
+                tone="sun"
+                size={Math.round(chibiSize * 0.13)}
+                rotate={-30}
+                className="absolute tbb-tick"
+                style={{ top: '30%', right: '6%' }}
+              />
+              <MotionTicks
+                tone="sun"
+                size={Math.round(chibiSize * 0.13)}
+                rotate={210}
+                className="absolute tbb-tick"
+                style={{ top: '30%', left: '6%', animationDelay: '0.2s' }}
+              />
+            </>
+          )}
+
+          {/* Mouth sparkle when the fire lands, one burst of sun ticks. */}
           {showMouthGlow && (
             <span
               key={`glow-${fireKey}`}
               aria-hidden="true"
+              className="tbb-glow"
               style={{
                 position: 'absolute',
-                top: '72%',
-                left: '50%',
+                top: '70%',
+                left: '54%',
                 width: glowW,
                 height: glowH,
-                borderRadius: '50%',
-                background:
-                  'radial-gradient(ellipse at 50% 50%, rgba(253,224,71,0.72) 0%, rgba(249,115,22,0.42) 45%, rgba(249,115,22,0) 80%)',
                 transform: 'translate(-50%, -50%)',
-                filter: 'blur(5px)',
-                animation: `teachMouthGlow ${FIRE_DURATION_S}s ease-out forwards`,
+                animation: `tbbGlow ${FIRE_DURATION_S}s ease-out forwards`,
                 pointerEvents: 'none',
                 zIndex: 7,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
               }}
-            />
+            >
+              <MotionTicks tone="sun" size={Math.round(glowH * 0.6)} rotate={200} />
+              <MotionTicks tone="sun" size={Math.round(glowH * 0.6)} rotate={-20} />
+            </span>
           )}
 
           <FireBreathPuff
@@ -343,7 +365,7 @@ export default function TeachBreathBeat({
         initial={{ opacity: 0.35, y: 4 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.22, ease: 'easeOut' }}
-        className="text-white/90 text-lg leading-relaxed max-w-sm"
+        className="text-white font-headline font-semibold text-xl leading-snug max-w-sm"
         style={{ textWrap: 'balance', minHeight: '3em' }}
         aria-live="polite"
         aria-atomic="true"
@@ -351,63 +373,56 @@ export default function TeachBreathBeat({
         {t(copyKey)}
       </motion.p>
 
-      {/* Action zone — hold button OR continue button */}
+      {/* Action zone: hold button OR continue button */}
       <div className="w-full max-w-xs mt-2 min-h-[120px] flex flex-col items-center justify-center gap-3">
         {showHoldButton && (
           <>
+            {/* The hold button: a sun disc with the ink edge it sinks into. */}
             <button
               type="button"
               onPointerDown={startHold}
               onPointerUp={endHold}
               onPointerLeave={endHold}
               onPointerCancel={endHold}
-              className="w-24 h-24 rounded-full font-headline text-3xl font-bold flex items-center justify-center"
+              className="w-28 h-28 rounded-full border-[3px] border-ink bg-sun text-ember flex items-center justify-center select-none"
               style={{
-                background: phase === 'inhaling'
-                  ? 'radial-gradient(circle at 40% 30%, #fed7aa, #f97316 70%, #c2410c)'
-                  : 'radial-gradient(circle at 40% 30%, #fde68a, #fcd34d 70%, #f59e0b)',
-                boxShadow: phase === 'inhaling'
-                  ? '0 0 60px rgba(249,115,22,0.7), inset 0 -4px 8px rgba(0,0,0,0.2)'
-                  : '0 0 32px rgba(252,211,77,0.55), inset 0 -4px 8px rgba(0,0,0,0.18)',
-                border: 'none',
-                transform: phase === 'inhaling' ? 'scale(0.94)' : 'scale(1)',
-                transition: 'transform 0.2s ease, box-shadow 0.3s ease, background 0.3s ease',
+                boxShadow: phase === 'inhaling' ? '0 1px 0 var(--color-ink)' : '0 6px 0 var(--color-ink)',
+                transform: phase === 'inhaling' ? 'translateY(5px)' : 'translateY(0)',
+                transition: 'transform 0.15s ease-out, box-shadow 0.15s ease-out',
                 cursor: 'pointer',
                 touchAction: 'none',
                 userSelect: 'none',
+                WebkitUserSelect: 'none',
               }}
               aria-label={t(copyKeys.holdLabel)}
             >
-              <span aria-hidden="true">🔥</span>
+              <DoodleIcon name="flame" size={56} filled={phase === 'inhaling'} />
             </button>
-            <p className="text-white/85 text-sm font-label uppercase tracking-widest inline-flex items-center gap-2">
-              <span className="material-symbols-outlined" style={{ fontSize: 18, fontVariationSettings: "'FILL' 1" }}>touch_app</span>
+            <p className="text-white font-headline font-semibold text-lg inline-flex items-center gap-2">
+              <MotionTicks tone="white" size={20} rotate={-20} />
               {t(copyKeys.holdLabel)}
             </p>
           </>
         )}
 
         {showContinue && (
-          <motion.button
+          <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            onClick={onComplete}
-            className="w-full py-5 px-8 rounded-full font-headline text-xl font-bold text-white flex items-center justify-center gap-3 active:scale-95 transition-all"
-            style={{
-              background: 'linear-gradient(135deg, #124346, #2d5a5e)',
-              boxShadow: '0 12px 30px rgba(18,67,70,0.25)',
-            }}
+            className="w-full"
           >
-            {t(copyKeys.next)}
-            <span className="material-symbols-outlined">arrow_forward</span>
-          </motion.button>
+            {/* Sun pill on the sky ground: never a cobalt pill on blue. */}
+            <PillButton tone="sun" size="lg" full arrow onClick={onComplete}>
+              {t(copyKeys.next)}
+            </PillButton>
+          </motion.div>
         )}
       </div>
 
-      {/* Local keyframes — cfFireBreath (for flame/targetFlavor puff)
-          and teachMouthGlow (for the mouth-pulse) must be available
-          even if no campfire-scene stylesheet is mounted. */}
+      {/* Local keyframes: cfFireBreath (for the flame puff) must be
+          available even if no campfire-scene stylesheet is mounted;
+          tbbGlow is the mouth sparkle, tbbTick the breath ticks. */}
       <style>{`
         @keyframes cfFireBreath {
           0%   { opacity: 0; transform: scaleX(0.2) scaleY(0.6); }
@@ -415,11 +430,16 @@ export default function TeachBreathBeat({
           80%  { opacity: 0.8; transform: scaleX(1.3) scaleY(0.9); }
           100% { opacity: 0; transform: scaleX(1.6) scaleY(0.5); }
         }
-        @keyframes teachMouthGlow {
-          0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+        @keyframes tbbGlow {
+          0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.6); }
           25%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-          100% { opacity: 0; transform: translate(-50%, -50%) scale(1.2); }
+          100% { opacity: 0; transform: translate(-50%, -50%) scale(1.15); }
         }
+        @keyframes tbbTick {
+          0%, 100% { opacity: 0.55; transform: scale(0.9); }
+          50%      { opacity: 1; transform: scale(1.08); }
+        }
+        .tbb-tick { animation: tbbTick 1.2s ease-in-out infinite; }
       `}</style>
     </>
   );

@@ -1,26 +1,23 @@
 import React, { useState } from 'react';
 import { useTranslation } from '../i18n/LanguageContext';
-
-const base = import.meta.env.BASE_URL;
+import { RonkiArt } from './MoodChibi';
+import { DoodleIcon, PaperCard, PillButton } from './bilderbuch';
 
 /**
- * CombinedParentSetup — single-screen replacement for ParentOnboarding.
+ * CombinedParentSetup: single-screen replacement for ParentOnboarding.
  *
  * Tier-2 onboarding trim (26 Apr 2026): the prior 5-step parent flow
- * (Welcome → PIN-twice → Child name + siblings → Analytics → Done)
- * collapsed to one form. Same data captured, no re-confirm on the PIN
- * (a typo lockout is recoverable; making the parent type the same
- * digits twice is friction theater).
+ * collapsed to one form. Same data captured, no re-confirm on the PIN.
  *
  * Sections, top to bottom:
- *   1. Wer setzt das ein?  — child name (required, single field)
- *   2. PIN für Eltern-Bereich  — optional, single 4-digit field, can
- *      skip with "später" → 1234 stays default with a banner-nag in
- *      the dashboard
- *   3. Hilfst du uns?  — analytics opt-in toggle, default off
+ *   1. Wer setzt das ein?  child name (required, single field)
+ *   2. PIN für Eltern-Bereich  optional, single 4-digit field; leaving
+ *      it empty keeps 1234 as the default with a banner nag in the
+ *      dashboard
+ *   3. Hilfst du uns?  analytics opt-in, default off
  *
  * On submit, calls onComplete with the same payload shape as the old
- * ParentOnboarding so consumers downstream don't need to change:
+ * ParentOnboarding so consumers downstream do not need to change:
  *   {
  *     parentOnboardingDone: true,
  *     parentPin,
@@ -29,12 +26,16 @@ const base = import.meta.env.BASE_URL;
  *     familyConfig: { ...existing, childName, siblings: [] },
  *   }
  *
- * Siblings array intentionally always empty here — sibling data was
- * killed in the trim (1+ siblings is a v1.5 nice-to-have, not a
- * launch-blocker question for a single-kid product).
+ * Siblings array intentionally always empty here (killed in the trim).
+ *
+ * Bilderbuch cut (25 Sep 2026): parent register, calm density. White
+ * ground, ink labels, inputs with a 2.5 px ink outline, consent as a
+ * sky-wash paper card, one cobalt pill. The 390 px overflow of the old
+ * layout came from the PIN input's intrinsic width inside a flex row;
+ * it now has min-width 0.
  */
 export default function CombinedParentSetup({ existingFamilyConfig, onComplete }) {
-  const { t } = useTranslation();
+  useTranslation();
   const [childName, setChildName] = useState((existingFamilyConfig?.childName || '').trim());
   const [pinDigits, setPinDigits] = useState('');
   const [analyticsOptIn, setAnalyticsOptIn] = useState(false);
@@ -69,61 +70,39 @@ export default function CombinedParentSetup({ existingFamilyConfig, onComplete }
   };
 
   const canSubmit = childName.trim().length > 0;
+  const input = 'w-full min-w-0 rounded-[14px] border-[2.5px] border-ink bg-white px-4 py-3 font-body text-lg text-ink placeholder:text-ink-soft/60 focus:outline-none focus:border-cobalt';
 
   return (
     <div
       role="dialog"
       aria-modal="true"
       aria-label="Eltern-Einstellungen"
-      className="fixed inset-0 overflow-y-auto font-body"
-      style={{
-        background: 'linear-gradient(180deg, #fff8f1 0%, #fef3c7 100%)',
-        color: '#1c1b1e',
-      }}
+      className="fixed inset-0 overflow-y-auto bg-white text-ink font-body"
     >
       <main
-        className="relative z-10 min-h-full flex flex-col px-6 max-w-md mx-auto"
+        className="relative z-10 min-h-full flex flex-col px-5 max-w-md mx-auto"
         style={{
-          paddingTop: 'calc(2.5rem + env(safe-area-inset-top, 0px))',
+          // Clear the fixed alpha banner (it already absorbs the iOS safe
+          // area); the small egg sat half under it before.
+          paddingTop: 'calc(var(--alpha-banner-h, 28px) + 1.5rem)',
           paddingBottom: 'calc(2rem + env(safe-area-inset-bottom, 0px))',
         }}
       >
-        {/* Logo (small, single beat — parent stays blind to Ronki) */}
-        <div className="flex justify-center mb-6">
-          <img
-            src={base + 'art/ronki-egg-logo.svg'}
-            alt="Ronki"
-            className="w-16 h-auto"
-            style={{ filter: 'drop-shadow(0 6px 14px rgba(0,0,0,0.10))' }}
-          />
+        {/* Small egg, one beat. The parent stays blind to Ronki. */}
+        <div className="flex justify-center mb-4">
+          <RonkiArt pose="egg-sun" size={84} idle="bb-egg-wobble" label="Ein Ei" />
         </div>
 
         {/* Header */}
-        <div className="text-center mb-8">
-          <p
-            className="font-bold text-xs font-label uppercase tracking-[0.18em] mb-2"
-            style={{ color: '#A83E2C' }}
-          >
-            Kurz einrichten
-          </p>
-          <h1
-            className="font-headline font-bold text-3xl"
-            style={{ fontFamily: 'Fredoka, sans-serif', color: '#124346' }}
-          >
-            Drei kleine Sachen.
-          </h1>
-          <p className="font-body text-base text-on-surface-variant mt-3 leading-relaxed">
-            Dann darf mit Ronki gespielt werden.
-          </p>
+        <div className="text-center mb-7">
+          <p className="bb-hand text-2xl text-cobalt mb-1">Kurz einrichten</p>
+          <h1 className="bb-display text-4xl">Drei kleine Sachen.</h1>
+          <p className="text-lg text-ink-soft mt-3 leading-relaxed">Dann darf mit Ronki gespielt werden.</p>
         </div>
 
         {/* Section 1: Child name */}
-        <section className="mb-7">
-          <label
-            htmlFor="cps-childName"
-            className="block font-label font-bold text-sm uppercase tracking-[0.10em] mb-2"
-            style={{ color: '#124346' }}
-          >
+        <section className="mb-6">
+          <label htmlFor="cps-childName" className="block font-headline font-semibold text-lg mb-2">
             Wie heißt euer Kind?
           </label>
           <input
@@ -133,27 +112,17 @@ export default function CombinedParentSetup({ existingFamilyConfig, onComplete }
             onChange={(e) => setChildName(e.target.value)}
             placeholder="Vorname"
             autoComplete="off"
-            className="w-full rounded-2xl px-5 py-4 font-body text-lg"
-            style={{
-              background: '#ffffff',
-              border: '1.5px solid rgba(18,67,70,0.18)',
-              color: '#1c1b1e',
-              outline: 'none',
-            }}
+            className={input}
             required
           />
         </section>
 
         {/* Section 2: PIN */}
-        <section className="mb-7">
-          <label
-            htmlFor="cps-pin"
-            className="block font-label font-bold text-sm uppercase tracking-[0.10em] mb-2"
-            style={{ color: '#124346' }}
-          >
+        <section className="mb-6">
+          <label htmlFor="cps-pin" className="block font-headline font-semibold text-lg mb-2">
             PIN für den Eltern-Bereich (optional)
           </label>
-          <div className="flex gap-3 items-center">
+          <div className="flex gap-3 items-center min-w-0">
             <input
               id="cps-pin"
               type={showPin ? 'text' : 'password'}
@@ -164,108 +133,61 @@ export default function CombinedParentSetup({ existingFamilyConfig, onComplete }
               onChange={(e) => handlePinInput(e.target.value)}
               placeholder="••••"
               autoComplete="new-password"
-              className="flex-1 rounded-2xl px-5 py-4 font-body text-lg tracking-widest"
-              style={{
-                background: '#ffffff',
-                border: '1.5px solid rgba(18,67,70,0.18)',
-                color: '#1c1b1e',
-                outline: 'none',
-              }}
+              className={`${input} flex-1 tracking-[0.3em]`}
+              style={{ width: 0 }}
             />
-            <button
-              type="button"
-              onClick={() => setShowPin(s => !s)}
+            <PillButton
+              tone="secondary"
+              onClick={() => setShowPin((s) => !s)}
               aria-label={showPin ? 'PIN verbergen' : 'PIN zeigen'}
-              className="rounded-full px-4 py-3 font-label font-bold text-sm active:scale-95 transition-transform"
-              style={{
-                background: 'rgba(18,67,70,0.08)',
-                border: '1.5px solid rgba(18,67,70,0.18)',
-                color: '#124346',
-                minHeight: 44,
-              }}
+              className="shrink-0"
+              style={{ minHeight: 52, paddingLeft: 20, paddingRight: 20 }}
             >
               {showPin ? 'Aus' : 'An'}
-            </button>
+            </PillButton>
           </div>
           {pinError && (
-            <p className="font-body text-sm text-error mt-2" style={{ color: '#dc2626' }}>
-              {pinError}
-            </p>
+            <p className="text-base text-error font-headline font-semibold mt-2">{pinError}</p>
           )}
-          <p className="font-body text-xs text-on-surface-variant mt-2 leading-relaxed">
-            Leer lassen heißt: Standard-PIN <strong>1234</strong>. Im Eltern-Bereich
-            jederzeit änderbar.
+          <p className="text-base text-ink-soft mt-2 leading-relaxed">
+            Leer lassen heißt: Standard-PIN <strong className="text-ink">1234</strong>. Im Eltern-Bereich jederzeit änderbar.
           </p>
         </section>
 
-        {/* Section 3: Analytics */}
-        <section className="mb-9">
-          <button
+        {/* Section 3: Analytics consent */}
+        <section className="mb-8">
+          <PaperCard
+            as="button"
+            tone="sky-wash"
+            pad="none"
             type="button"
-            onClick={() => setAnalyticsOptIn(v => !v)}
-            className="w-full flex items-start gap-4 rounded-2xl p-4 active:scale-[0.99] transition-transform text-left"
-            style={{
-              background: analyticsOptIn ? 'rgba(52,211,153,0.10)' : 'rgba(18,67,70,0.04)',
-              border: analyticsOptIn ? '1.5px solid rgba(52,211,153,0.45)' : '1.5px solid rgba(18,67,70,0.12)',
-            }}
+            onClick={() => setAnalyticsOptIn((v) => !v)}
             aria-pressed={analyticsOptIn}
+            className="w-full flex items-start gap-3 p-4"
           >
-            <div
-              className="rounded-md flex-shrink-0 mt-0.5"
-              style={{
-                width: 22,
-                height: 22,
-                background: analyticsOptIn ? '#34d399' : 'transparent',
-                border: analyticsOptIn ? 'none' : '1.5px solid rgba(18,67,70,0.32)',
-                display: 'grid',
-                placeItems: 'center',
-              }}
+            <span
+              aria-hidden="true"
+              className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-[8px] border-[2.5px] border-ink ${analyticsOptIn ? 'bg-cobalt text-white' : 'bg-white text-transparent'}`}
             >
-              {analyticsOptIn && (
-                <span
-                  aria-hidden="true"
-                  className="material-symbols-outlined text-white"
-                  style={{ fontSize: 16, fontVariationSettings: "'wght' 700" }}
-                >
-                  check
-                </span>
-              )}
-            </div>
-            <div className="flex-1">
-              <p
-                className="font-label font-bold text-sm uppercase tracking-[0.08em] mb-1"
-                style={{ color: '#124346' }}
-              >
+              <DoodleIcon name="check" size={18} stroke={7} />
+            </span>
+            <span className="flex-1 min-w-0">
+              <span className="block font-headline font-semibold text-lg leading-snug mb-1">
                 Anonyme Nutzungsdaten teilen?
-              </p>
-              <p className="font-body text-sm text-on-surface-variant leading-relaxed">
-                Hilft uns Ronki zu verbessern. Keine Werbung, kein Tracking,
-                nichts Drittes. Frankfurter Server. Jederzeit aus.
-              </p>
-            </div>
-          </button>
+              </span>
+              <span className="block text-base text-ink-soft leading-relaxed">
+                Hilft uns Ronki zu verbessern. Keine Werbung, kein Tracking, nichts Drittes. Frankfurter Server. Jederzeit aus.
+              </span>
+            </span>
+          </PaperCard>
         </section>
 
         {/* CTA */}
-        <button
-          type="button"
-          onClick={submit}
-          disabled={!canSubmit}
-          className="w-full py-5 px-8 rounded-full font-headline text-xl font-bold text-white flex items-center justify-center gap-3 active:scale-95 transition-all"
-          style={{
-            background: canSubmit
-              ? 'linear-gradient(135deg, #124346, #2d5a5e)'
-              : 'rgba(18,67,70,0.32)',
-            boxShadow: canSubmit ? '0 12px 30px rgba(18,67,70,0.25)' : 'none',
-            opacity: canSubmit ? 1 : 0.6,
-            cursor: canSubmit ? 'pointer' : 'not-allowed',
-          }}
-        >
+        <PillButton full size="lg" arrow onClick={submit} disabled={!canSubmit}>
           Weiter zum Kind
-          <span className="material-symbols-outlined">arrow_forward</span>
-        </button>
+        </PillButton>
 
-        <p className="font-body text-xs text-center text-on-surface-variant/70 mt-6 leading-relaxed">
+        <p className="text-base text-center text-ink-soft mt-5 leading-relaxed">
           Keine Daten verlassen Deutschland. Mehr im Eltern-Bereich.
         </p>
       </main>
