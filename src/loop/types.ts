@@ -79,3 +79,40 @@ export interface TripClock {
   today: string;
   block: Block;
 }
+
+/**
+ * New save fields (all optional, all additive; Lane B adds them to the
+ * TaskState type and the rehydration allowlist in TaskContext.tsx, with
+ * these defaults for old saves). Lanes A, C and D read them from
+ * `state` via useTask().
+ */
+export interface LoopStateFields {
+  /** Opened treasures so far. Old saves: backfilled from expeditionLog.length. */
+  adventureCount?: number;
+  /** Day key (see clock.dayKey) of the last departure; one trip per day. */
+  lastTripDate?: string | null;
+  /** Index into TRIPS of the next trip (wraps after 14). Old saves: 0. */
+  tripCursor?: number;
+  /** Trip ids whose treasure is on the shelf, in order found. */
+  treasuresFound?: string[];
+  /** Highest stage index whose GrowthBeat was shown. Old saves: stage of their catEvo. */
+  stageSeen?: number;
+  /** Whole days between the previous played day and today (set by the day transition). */
+  lastGapDays?: number;
+  /** Day key when today's return line was played. */
+  greetedDate?: string | null;
+  /** Parent "Extras zeigen" toggle. Default false. */
+  extrasEnabled?: boolean;
+  /** Existing field, now written by completeTonight(). ISO time. */
+  eveningRitualCompletedAt?: string | null;
+  /** Existing expedition object gains: kind ('day' | 'night') and tripId ('t01'...). */
+  expedition?: {
+    state: 'home' | 'leaving' | 'away' | 'waiting';
+    biome?: string;
+    departedAt?: string;
+    returnAt?: string;
+    kind?: TripKind;
+    tripId?: string;
+    pendingMemento?: { id: string; ts: string; emoji: string; name: string; biome?: string; location?: string; quote?: string; tripId?: string };
+  };
+}
