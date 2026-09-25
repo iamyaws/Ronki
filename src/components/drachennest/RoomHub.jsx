@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
+import React, { useState, useEffect, useRef, useLayoutEffect, useCallback } from 'react';
 import { useTask } from '../../context/TaskContext';
 import { getCatStage } from '../../utils/helpers';
 import { track } from '../../lib/analytics';
@@ -6,18 +6,32 @@ import MoodChibi, { ambientMood } from '../MoodChibi';
 import VoiceAudio from '../../utils/voiceAudio';
 import {
   PillButton,
-  SpeechBubble,
+  QuietLink,
   ChoiceTile,
-  PaperCard,
   DoodleIcon,
   SceneLoop,
+  StickerBurst,
+  RonkiArt,
   useReducedMotion,
 } from '../bilderbuch';
-import FeelingDoodle from '../JournalFeelings';
 import RonkiSpeechBubble from './RonkiSpeechBubble';
-import { SunCheck } from './RoomHubBits';
-import Expedition from './Expedition';
+import { DepartureCard, TreasureCard, MoonCard } from './RoomHubBits';
 import BeiRonkiSein from './BeiRonkiSein';
+import FireBowl from './FireBowl';
+import NowCard from './NowCard';
+import TaskRow from './TaskRow';
+import DepartureSheet from './DepartureSheet';
+import AwayCard from './AwayCard';
+import TreasureReveal from './TreasureReveal';
+import GrowthBeat from './GrowthBeat';
+import FeelingsSheet, { SIT_OFFER } from './FeelingsSheet';
+import TreasureShelf from './TreasureShelf';
+import { nestBeat, greetingFor, afternoonTasks, orderWithLater, byeLine } from './returnBeat';
+import { now as clockNow } from '../../loop/clock';
+import { stageOf } from '../../loop/growth';
+import { lineText } from '../../data/ronkiLines';
+import { taskAskLineId } from '../../data/taskKinds';
+import { extrasOn, FEATURES } from '../../config/features';
 import CaveStyleSheet from './CaveStyleSheet';
 
 // Ronki-tap voice gate (Apr 2026 voice pass). Marc: "doesn't have to
@@ -26,25 +40,41 @@ import CaveStyleSheet from './CaveStyleSheet';
 const ROOM_TAP_VOICE_COUNT = 10; // de_room_tap_0 through de_room_tap_9
 const ROOM_TAP_COOLDOWN_MS = 7000;
 
+/** How often the Nest looks at the clock again (the trip clock also runs globally). */
+const TICK_MS = 30000;
+/** How long a passing line (greeting, "Oh, das wärmt!") stays before the context line returns. */
+const PASSING_MS = 3600;
+/** The send-off sheet opens after Ronki's cheer and his "Mein Feuer ist ganz warm!". */
+const DEPARTURE_DELAY_MS = 3800;
+/** Ronki floats out of the room after "Tschüss". */
+const FLOAT_OUT_MS = 1500;
+
 /**
- * RoomHub, "Ronkis Zimmer": the home. Bilderbuch cut, 25 Sep 2026.
+ * RoomHub, the Nest: the one home screen (Finch pass, 26 Sep 2026).
+ *
+ * Top to bottom: the header ("Hallo {Kind}!", the face button for
+ * feelings, the small parent lock), the painted room with Ronki, his
+ * bubble and his fire, the one loud item of the moment, the task row,
+ * the treasure shelf, one quiet link. The state comes from the clock,
+ * the fire and the trip (nestBeat in returnBeat.js):
+ *
+ *   fire       Jetzt card (task picture, "Geschafft", "Später"), task row
+ *   departure  Ronki cheers, then the send-off sheet ("Tschüss, {Nick}!")
+ *   stay       Ronki stays home in the day block; afternoon task if any
+ *   away       the room without Ronki; his postcard
+ *   waiting    Ronki back with a wrapped treasure ("Aufmachen")
+ *   evening    the moon card into TonightRitual (loud when the fire is full)
+ *   night      Ronki asleep in the night room; no card
  *
  * The room is the painted Seedance scene (loops/zuhause.mp4 with its
- * poster; plants and sun move, the cushion stays still) inside the
- * drawn frame. Ronki is NOT baked into the video: he sits on top as a
- * cut-out through MoodChibi (bare, animated, mood and stage from
- * state) so he keeps reacting to moods and taps. A copy of the poster
- * clipped to the cushion's front rim is laid over his ankles, so he
- * sits IN the nest instead of on it. The speech bubble is anchored
- * above his head from the same measured geometry.
+ * poster). Ronki is NOT baked into the video: he sits on top as a
+ * cut-out (MoodChibi, bare) so he keeps reacting to moods and taps. A
+ * copy of the poster clipped to the cushion's front rim is laid over his
+ * ankles, so he sits IN the nest. The bubble is anchored above his head
+ * from the same measured geometry.
  *
- * Below the scene everything sits on white: Ronki's mood question as
- * choice tiles, one cobalt pill (sit with Ronki), the evening as a
- * night paper card, the day's asks as a paper card, the object tiles,
- * the mementos, and "Einrichten" as a secondary pill.
- *
- * Behaviour is unchanged: tap reactions and voice gate, mood pick,
- * expedition unlock, navigation targets, memento slots.
+ * Kid words come from src/data/finchLines.de.json (lineText) and are
+ * voiced with VoiceAudio.playLocalized(id); names are only in the text.
  */
 
 // Poster geometry. The loop and its poster are 720 x 1280; every
@@ -54,10 +84,11 @@ const ROOM_TAP_COOLDOWN_MS = 7000;
 const POSTER_W = 720;
 const POSTER_H = 1280;
 const SCENE_POS_Y = 0.34;
-/** The room style sheet waits until the painted room can show a pick. */
-const SHOW_ROOM_STYLE = false;
-const POSTER = `${import.meta.env.BASE_URL}art/bilderbuch/loops/zuhause-poster.webp`;
-const LOOP = `${import.meta.env.BASE_URL}art/bilderbuch/loops/zuhause.mp4`;
+const ART = `${import.meta.env.BASE_URL}art/bilderbuch/`;
+const POSTER = `${ART}loops/zuhause-poster.webp`;
+const LOOP = `${ART}loops/zuhause.mp4`;
+const NIGHT_POSTER = `${ART}loops/nacht-poster.webp`;
+const NIGHT_LOOP = `${ART}loops/nacht.mp4`;
 
 // Ronki's square on the poster: centre x, bottom edge, width (fractions).
 const RONKI_CX = 0.47;
@@ -65,7 +96,6 @@ const RONKI_BOTTOM = 0.75;
 const RONKI_W = 0.62;
 const RONKI_LEFT = RONKI_CX - RONKI_W / 2;
 const RONKI_TOP = RONKI_BOTTOM - RONKI_W * (POSTER_W / POSTER_H);
-const RONKI_HEAD = RONKI_TOP + 0.03 * RONKI_W * (POSTER_W / POSTER_H);
 
 // The cushion's front rim, traced on the poster (x, y in poster px):
 // the line where the blue front tufts meet the yellow seat. Everything
@@ -98,48 +128,209 @@ function sceneGeometry(w, h) {
   };
 }
 
-const ANCHOR_LABEL = {
-  morning: 'Morgens',
-  evening: 'Nachmittag',
-  bedtime: 'Abends',
-};
+/** The line Ronki says for the state the Nest is in (null: no bubble). */
+function contextLineFor(beat, cardQuest) {
+  switch (beat.mode) {
+    case 'fire': return cardQuest ? taskAskLineId(cardQuest.id) : null;
+    case 'departure': return 'fire_full_morning_01';
+    case 'stay': return beat.firstDay ? 'fd_start_day_01' : 'home_stay_01';
+    case 'waiting': return beat.tripKind === 'night' ? 'trip_back_night_01' : 'trip_back_01';
+    case 'evening': return beat.fire.total > 0 ? 'fire_full_evening_01' : 'eve_moon_01';
+    default: return null;
+  }
+}
 
-export default function RoomHub({ onNavigate }) {
+export default function RoomHub({ onNavigate, onOpenParental, onOpenTonight }) {
   const { state, actions } = useTask();
-  // The "Karte" tile and the window both open the Expedition surface.
-  const [showExpedition, setShowExpedition] = useState(false);
-  const [showPresence, setShowPresence] = useState(false);
-  const [showStyleSheet, setShowStyleSheet] = useState(false);
-  const [floatingHearts, setFloatingHearts] = useState([]);
   const reduced = useReducedMotion();
 
-  // "Wie geht's dir?" entry on the room (Marc, 25 Sep 2026, on Astra's
-  // design review R3): the room stays the first thing a kid sees, and one
-  // small sticker at its bottom edge leads to the full feelings picker
-  // below. Tapping scrolls there, rings the tiles for a moment and puts
-  // focus on the first one. No state change until a feeling is picked.
-  const moodRef = useRef(null);
-  const [moodNudge, setMoodNudge] = useState(false);
-  const nudgeTimers = useRef([]);
-  useEffect(() => () => nudgeTimers.current.forEach(clearTimeout), []);
-  const openFeelings = () => {
-    const el = moodRef.current;
-    if (!el) return;
-    // Focus first (without scrolling), then scroll: a delayed focus would
-    // pull a keyboard user back to "Gut" after they already moved on
-    // (Astra delta review R1).
-    el.querySelector('button')?.focus?.({ preventScroll: true });
-    el.scrollIntoView?.({ behavior: reduced ? 'auto' : 'smooth', block: 'center' });
-    nudgeTimers.current.forEach(clearTimeout);
-    setMoodNudge(true);
-    nudgeTimers.current = [setTimeout(() => setMoodNudge(false), 1600)];
-  };
+  // The clock: look again every 30 s and when the app comes back.
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const bump = () => setTick(t => t + 1);
+    const id = setInterval(bump, TICK_MS);
+    const onVis = () => { if (typeof document === 'undefined' || !document.hidden) bump(); };
+    document.addEventListener('visibilitychange', onVis);
+    return () => {
+      clearInterval(id);
+      document.removeEventListener('visibilitychange', onVis);
+    };
+  }, []);
+  const current = clockNow();
+  const beat = nestBeat(state, current);
+  const { mode, fire, block, today } = beat;
 
+  const nick = state?.companionName || '';
+  const kidName = state?.familyConfig?.childName || '';
+  const vars = { nick, kind: kidName };
+  const heroName = kidName || 'du';
   const variant = state?.companionVariant || 'forest';
   const stageIdx = getCatStage(state?.catEvo ?? 0);
-  const mood = ambientMood(state?.ronkiMood);
-  // The child's own name; never the dragon's (heroName is gone, 25 Sep 2026).
-  const heroName = state?.familyConfig?.childName || 'du';
+  // Ronki never looks worried or sad on the Nest because of a gap.
+  const rawMood = ambientMood(state?.ronkiMood);
+  const mood = (state?.lastGapDays ?? 0) >= 2 && (rawMood === 'sad' || rawMood === 'tired') ? 'normal' : rawMood;
+
+  // Overlays.
+  const [showPresence, setShowPresence] = useState(false);
+  const [showStyleSheet, setShowStyleSheet] = useState(false);
+  const [feelings, setFeelings] = useState(null); // { askId, slot }
+  const [showReveal, setShowReveal] = useState(false);
+  const [departureOpen, setDepartureOpen] = useState(false);
+  const [departureDismissed, setDepartureDismissed] = useState(false);
+  const [growthDone, setGrowthDone] = useState(0);
+  const [askAfterTreasure, setAskAfterTreasure] = useState(false);
+  // After Traurig or Besorgt, "Bei Ronki sitzen" is the loud card for this open (spec R5).
+  const [sitLoud, setSitLoud] = useState(false);
+
+  // Growth: a stage the child has not seen yet (stageSeen written by markStageSeen).
+  const stageNow = stageOf(state?.catEvo);
+  const growthPending = typeof state?.stageSeen === 'number' && stageNow >= 2
+    && stageNow > state.stageSeen && stageNow > growthDone;
+  const showGrowth = growthPending && !showReveal;
+
+  // The Jetzt card: the next task, "Später" moves one to the back, a
+  // tap in the row picks one. Session only, nothing is stored.
+  const [laterIds, setLaterIds] = useState([]);
+  const [pickedId, setPickedId] = useState(null);
+  const cardList = mode === 'fire'
+    ? orderWithLater(fire.slots, laterIds)
+    : (mode === 'stay' || mode === 'away')
+      ? orderWithLater(afternoonTasks(state?.quests), laterIds)
+      : [];
+  const cardQuest = cardList.find(q => q.id === pickedId) || cardList[0] || null;
+
+  // Celebration and the flame that just lit.
+  const [cheer, setCheer] = useState(false);
+  const [justLit, setJustLit] = useState(-1);
+  const [floatOut, setFloatOut] = useState(false);
+  const floatTimer = useRef(null);
+
+  // Ronki's bubble: a passing line (greeting, "Oh, das wärmt!") over the
+  // line of the moment. Each line is spoken once when it appears.
+  const [passing, setPassing] = useState(null);
+  const passingTimer = useRef(null);
+  const passingUntil = useRef(0);
+  const sayPassing = useCallback((id, ms = PASSING_MS) => {
+    if (!id) return;
+    clearTimeout(passingTimer.current);
+    passingUntil.current = Date.now() + ms;
+    setPassing(id);
+    VoiceAudio.playLocalized(id, 0);
+    passingTimer.current = setTimeout(() => setPassing(null), ms);
+  }, []);
+  useEffect(() => () => {
+    clearTimeout(passingTimer.current);
+    clearTimeout(floatTimer.current);
+  }, []);
+
+  const overlayOpen = showPresence || showStyleSheet || !!feelings || showReveal || showGrowth || (mode === 'departure' && departureOpen);
+
+  // The return beat: the first Nest open of the day (spec 3.5).
+  const greetId = greetingFor(state, current);
+  const greetDue = !!greetId && mode !== 'away' && mode !== 'night';
+  // Holds the day key of the last greeting, so a Nest left open overnight
+  // greets again the next morning.
+  const greetedRef = useRef(null);
+  useEffect(() => {
+    if (!greetDue || greetedRef.current === today) return;
+    greetedRef.current = today;
+    sayPassing(greetId);
+    actions?.markGreeted?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [greetDue, today]);
+
+  const contextId = contextLineFor(beat, cardQuest);
+  const spokenRef = useRef(null);
+  useEffect(() => {
+    if (!contextId || overlayOpen) return;
+    if (spokenRef.current === contextId) return;
+    spokenRef.current = contextId;
+    VoiceAudio.playLocalized(contextId, Math.max(400, passingUntil.current - Date.now()));
+  }, [contextId, overlayOpen]);
+
+  const bubbleId = mode === 'away' ? null : (passing || contextId);
+  const bubbleText = bubbleId ? lineText(bubbleId, vars) : '';
+
+  // Ronki is back: a burst when the Nest first sees him waiting.
+  const prevMode = useRef(mode);
+  useEffect(() => {
+    if (mode === 'waiting' && prevMode.current !== 'waiting') setCheer(true);
+    if (mode !== 'departure') setDepartureOpen(false);
+    prevMode.current = mode;
+  }, [mode]);
+
+  // The send-off sheet opens after his cheer.
+  useEffect(() => {
+    if (mode !== 'departure' || departureDismissed) return undefined;
+    const t = setTimeout(() => setDepartureOpen(true), DEPARTURE_DELAY_MS);
+    return () => clearTimeout(t);
+  }, [mode, departureDismissed]);
+
+  // The once-a-day feelings ask, right after the treasure story in the evening (spec R5).
+  useEffect(() => {
+    if (!askAfterTreasure || showReveal || showGrowth) return;
+    setAskAfterTreasure(false);
+    if ((block === 'evening' || block === 'night') && state?.moodPM == null) {
+      setFeelings({ askId: 'eve_mood_ask_01', slot: 'moodPM' });
+    }
+  }, [askAfterTreasure, showReveal, showGrowth, block, state?.moodPM]);
+
+  const onTaskDone = (q) => {
+    setCheer(true);
+    setPickedId(null);
+    setLaterIds(ids => ids.filter(id => id !== q.id));
+    if (mode === 'fire') {
+      setJustLit(fire.lit);
+      sayPassing('fire_lit_01', 2400);
+    }
+  };
+
+  const onTaskLater = (q) => {
+    setPickedId(null);
+    setLaterIds(ids => [...ids.filter(id => id !== q.id), q.id]);
+    sayPassing('task_later_01', 2400);
+  };
+
+  const byeId = byeLine(current, state?.vacMode);
+  const departedRef = useRef(false);
+  const bye = (voiced) => {
+    if (departedRef.current) return;
+    departedRef.current = true;
+    if (!voiced) VoiceAudio.playLocalized(byeId, 0);
+    setDepartureOpen(false);
+    setFloatOut(true);
+    clearTimeout(floatTimer.current);
+    floatTimer.current = setTimeout(() => setFloatOut(false), FLOAT_OUT_MS);
+    actions?.departTrip?.('day');
+  };
+  useEffect(() => {
+    if (mode === 'departure') departedRef.current = false;
+  }, [mode]);
+
+  // A new day while the Nest stays open (the tablet sat on it overnight):
+  // everything that belongs to one day starts fresh (spec 2, Base 3).
+  const dayRef = useRef(today);
+  useEffect(() => {
+    if (dayRef.current === today) return;
+    dayRef.current = today;
+    setDepartureDismissed(false);
+    setDepartureOpen(false);
+    setSitLoud(false);
+    setLaterIds([]);
+    setPickedId(null);
+    setAskAfterTreasure(false);
+    departedRef.current = false;
+    spokenRef.current = null;
+  }, [today]);
+
+  // Into TonightRitual. Falls back to the old route when the host does
+  // not pass onOpenTonight yet.
+  const openTonight = () => {
+    if (onOpenTonight) onOpenTonight();
+    else onNavigate?.('tonight');
+  };
+
+  const openFeelings = () => setFeelings({ askId: 'mood_ask_01', slot: undefined });
 
   // Scene measurement: the frame's box decides how the poster is
   // drawn (cover), and Ronki, the rim and the bubble follow that.
@@ -161,18 +352,9 @@ export default function RoomHub({ onNavigate }) {
   }, []);
   const geo = sceneGeometry(box.w, box.h);
 
-
-  const quests = state?.quests || [];
-  const undoneByAnchor = ['morning', 'evening', 'bedtime'].map(anchor => {
-    const items = quests.filter(q => q.anchor === anchor && !q.done);
-    return { anchor, label: ANCHOR_LABEL[anchor], count: items.length };
-  });
-  const morningDone = quests.filter(q => q.anchor === 'morning').every(q => q.done) && quests.some(q => q.anchor === 'morning');
-  const bedtimeDone = quests.filter(q => q.anchor === 'bedtime').every(q => q.done) && quests.some(q => q.anchor === 'bedtime');
-  const expeditionUnlocked = morningDone && bedtimeDone;
-
   // Tap-Ronki reaction rotation (Marc 25 Apr 2026): six body moves,
   // every third tap escalates into one; every tap spawns a glyph.
+  const [floatingHearts, setFloatingHearts] = useState([]);
   const reactionTimerRef = useRef(null);
   const [reaction, setReaction] = useState(null);
   const tapCountRef = useRef(0);
@@ -190,8 +372,8 @@ export default function RoomHub({ onNavigate }) {
     tapCountRef.current += 1;
 
     // Glyph burst on every tap.
-    const variants = ['heart', 'sparkle', 'giggle'];
-    const glyph = variants[Math.floor(Math.random() * variants.length)];
+    const glyphs = ['heart', 'sparkle', 'giggle'];
+    const glyph = glyphs[Math.floor(Math.random() * glyphs.length)];
     setFloatingHearts(prev => [...prev, { id, x, y, kind: glyph }]);
     setTimeout(() => setFloatingHearts(prev => prev.filter(h => h.id !== id)), 950);
 
@@ -199,12 +381,12 @@ export default function RoomHub({ onNavigate }) {
     track('companion.tap');
 
     // Voice, gated by cooldown and chance.
-    const now = Date.now();
-    if (now - voiceLastRef.current >= ROOM_TAP_COOLDOWN_MS && Math.random() < 0.34) {
+    const t = Date.now();
+    if (t - voiceLastRef.current >= ROOM_TAP_COOLDOWN_MS && Math.random() < 0.34) {
       const idx = voiceIdxRef.current;
       voiceIdxRef.current = (idx + 1) % ROOM_TAP_VOICE_COUNT;
       VoiceAudio.playLocalized(`room_tap_${idx}`, 80);
-      voiceLastRef.current = now;
+      voiceLastRef.current = t;
     }
 
     // Body-reaction escalation every 3rd tap.
@@ -213,7 +395,6 @@ export default function RoomHub({ onNavigate }) {
       reactionIdxRef.current = (reactionIdxRef.current + 1 + Math.floor(Math.random() * 2)) % moves.length;
       const move = moves[reactionIdxRef.current];
       setReaction(move);
-      // TODO(voiceline): per-reaction Ronki samples, see reference_voice_casting.md.
       const dur = move === 'flameBurp' ? 1100 : move === 'spin' ? 950 : 900;
       if (reactionTimerRef.current) clearTimeout(reactionTimerRef.current);
       reactionTimerRef.current = setTimeout(() => setReaction(null), dur);
@@ -224,13 +405,13 @@ export default function RoomHub({ onNavigate }) {
     if (reactionTimerRef.current) clearTimeout(reactionTimerRef.current);
   }, []);
 
-  const reactionAnim =
-    reaction === 'bounce'    ? 'rh-rk-bounce 0.85s ease-out'
-    : reaction === 'spin'    ? 'rh-rk-spin 0.95s ease-in-out'
-    : reaction === 'wink'    ? 'rh-rk-wink 0.8s ease-out'
+  const reactionAnim = reduced ? undefined
+    : reaction === 'bounce'    ? 'rh-rk-bounce 0.85s ease-out'
+    : reaction === 'spin'      ? 'rh-rk-spin 0.95s ease-in-out'
+    : reaction === 'wink'      ? 'rh-rk-wink 0.8s ease-out'
     : reaction === 'flameBurp' ? 'rh-rk-burp 1.05s ease-out'
-    : reaction === 'shake'   ? 'rh-rk-shake 0.85s ease-in-out'
-    : reaction === 'wiggle'  ? 'rh-rk-wiggle 0.85s ease-in-out'
+    : reaction === 'shake'     ? 'rh-rk-shake 0.85s ease-in-out'
+    : reaction === 'wiggle'    ? 'rh-rk-wiggle 0.85s ease-in-out'
     : undefined;
 
   // Bubble anchor: just above Ronki's head, measured from the frame's
@@ -242,49 +423,50 @@ export default function RoomHub({ onNavigate }) {
   const headTopPx = geo.offY + geo.drawnH * (RONKI_BOTTOM - artHeight);
   const bubbleBottom = Math.max(24, Math.round(geo.h - headTopPx + 30));
 
+  const night = mode === 'night';
+  const ronkiHome = mode !== 'away' && !night;
+  const showCutout = ronkiHome || floatOut;
+  const pauseScene = overlayOpen;
+  const showFire = (mode === 'fire' || mode === 'departure' || mode === 'evening') && fire.total > 0;
+
+  // Which pose the cut-out wears: back with a wave, cheering at the send-off.
+  const pose = mode === 'waiting' ? 'wave' : mode === 'departure' ? 'cheer' : null;
+
+  const loudSit = sitLoud && (mode === 'fire' || mode === 'stay' || mode === 'evening');
+  const moonText = lineText('eve_moon_01', vars);
+
   return (
     <div
       className="relative bg-white text-ink"
+      data-mode={mode}
       style={{ minHeight: '100dvh', paddingBottom: 110, overflow: 'hidden' }}
     >
-      {/* Greeting */}
-      <header
-        className="relative z-10 flex items-end justify-between gap-3"
-        style={{ padding: '12px 16px 8px' }}
-      >
-        <div className="min-w-0">
-          <div className="bb-hand text-cobalt uppercase" style={{ fontSize: 18, letterSpacing: '0.04em', lineHeight: 1 }}>
-            Ronkis Zimmer
-          </div>
-          <h1 className="bb-display text-ink" style={{ fontSize: 30, marginTop: 4 }}>
-            Hallo {heroName}!
-          </h1>
-        </div>
-        {/* "Wie geht's dir?" sits beside the greeting, outside the picture:
-            always in the first view, never on Ronki or his bubble, on any
-            screen height (review workflow, 25 Sep 2026: inside the frame it
-            covered him on short phones). Its heart is not one of the answers. */}
-        {state?.moodAM === null && (
+      {/* Greeting, feelings face, parent lock */}
+      <header className="relative z-10 flex items-center justify-between gap-3" style={{ padding: '12px 16px 8px' }}>
+        <h1 className="bb-display text-ink min-w-0" style={{ fontSize: 30, margin: 0, overflowWrap: 'anywhere' }}>
+          Hallo {heroName}!
+        </h1>
+        <div className="flex items-center shrink-0" style={{ gap: 10 }}>
           <button
             type="button"
             onClick={openFeelings}
-            aria-label="Wie geht's dir? Gefühl aussuchen"
-            className="bb-press shrink-0 flex items-center gap-2 font-headline font-semibold text-ink"
-            style={{
-              padding: '8px 14px 8px 10px',
-              marginBottom: 4,
-              borderRadius: 999,
-              border: '2.5px solid var(--color-ink)',
-              background: 'var(--color-paper)',
-              fontSize: 17,
-              lineHeight: 1.1,
-              whiteSpace: 'nowrap',
-            }}
+            aria-label="Wie geht's dir?"
+            data-testid="face-button"
+            className="bb-press flex items-center justify-center rounded-full bg-paper"
+            style={{ width: 52, height: 52, border: '2.5px solid var(--color-ink)' }}
           >
-            <DoodleIcon name="heart" size={22} filled style={{ color: 'var(--color-ember)' }} />
-            Wie geht's dir?
+            <DoodleIcon name="heart" size={28} filled style={{ color: 'var(--color-ember)' }} />
           </button>
-        )}
+          <button
+            type="button"
+            onClick={() => onOpenParental?.()}
+            aria-label="Eltern-Bereich"
+            className="flex items-center justify-center rounded-full bg-white text-ink-soft"
+            style={{ width: 40, height: 40, border: '2px solid var(--color-ink-soft)' }}
+          >
+            <DoodleIcon name="lock" size={18} />
+          </button>
+        </div>
       </header>
 
       {/* The room */}
@@ -292,283 +474,216 @@ export default function RoomHub({ onNavigate }) {
         <div
           ref={sceneRef}
           className="bb-frame relative w-full"
+          data-testid="nest-scene"
           style={{ aspectRatio: '3 / 4', maxHeight: '62dvh', overflow: 'hidden' }}
         >
-          {/* Stage: the poster's drawn box. Everything inside shares
-              the poster's coordinate system. */}
-          <div
-            aria-hidden="true"
-            style={{
-              position: 'absolute',
-              left: geo.offX,
-              top: geo.offY,
-              width: geo.drawnW,
-              height: geo.drawnH,
-            }}
-          >
-            <SceneLoop poster={POSTER} video={LOOP} priority objectPosition="50% 50%" paused={showExpedition || showPresence || showStyleSheet} />
-
-            {/* Ronki, a cut-out on the cushion. */}
+          {night ? (
+            // Asleep: the night room has Ronki painted into his bed.
             <button
               type="button"
-              onClick={tapRonki}
-              aria-label="Ronki streicheln"
-              style={{
-                position: 'absolute',
-                left: `${RONKI_LEFT * 100}%`,
-                top: `${RONKI_TOP * 100}%`,
-                width: `${RONKI_W * 100}%`,
-                aspectRatio: '1 / 1',
-                background: 'transparent',
-                border: 'none',
-                padding: 0,
-                cursor: 'pointer',
-                zIndex: 2,
-              }}
+              onClick={() => sayPassing('away_sleep_01')}
+              aria-label="Ronki schläft"
+              data-testid="nest-asleep"
+              style={{ position: 'absolute', inset: 0, background: 'transparent', border: 0, padding: 0, cursor: 'pointer' }}
             >
-              <div
-                style={{
-                  position: 'relative',
-                  width: '100%',
-                  height: '100%',
-                  animation: reactionAnim,
-                  transformOrigin: '50% 100%',
-                }}
-              >
-                {/* The loops are cropped like the stills (25 Sep 2026), so the
-                    idle loop and the still draw Ronki at the same size. */}
-                <div style={{ width: '100%', height: '100%' }}>
-                  <MoodChibi
-                    size={100}
-                    variant={variant}
-                    stage={stageIdx}
-                    mood={mood}
-                    bare
-                    animated={!showExpedition && !showPresence && !showStyleSheet}
-                    style={{ width: '100%', height: '100%' }}
-                  />
-                </div>
-                {floatingHearts.map(h => (
-                  <span
-                    key={h.id}
-                    aria-hidden="true"
-                    className={h.kind === 'giggle' ? 'bb-hand' : ''}
+              <SceneLoop poster={NIGHT_POSTER} video={NIGHT_LOOP} objectPosition="50% 60%" paused={pauseScene} />
+            </button>
+          ) : (
+            <div
+              aria-hidden="true"
+              style={{ position: 'absolute', left: geo.offX, top: geo.offY, width: geo.drawnW, height: geo.drawnH }}
+            >
+              <SceneLoop poster={POSTER} video={LOOP} priority objectPosition="50% 50%" paused={pauseScene} />
+
+              {showCutout && (
+                <>
+                  {/* Ronki, a cut-out on the cushion. */}
+                  <button
+                    type="button"
+                    onClick={ronkiHome ? tapRonki : undefined}
+                    aria-label="Ronki streicheln"
+                    data-testid="ronki-cutout"
+                    tabIndex={ronkiHome ? 0 : -1}
+                    className={floatOut && !ronkiHome ? (reduced ? 'rh-fade-out' : 'rh-float-out') : ''}
                     style={{
                       position: 'absolute',
-                      left: h.x,
-                      top: h.y,
-                      pointerEvents: 'none',
-                      fontSize: 22,
-                      color: 'var(--color-sun-deep)',
-                      lineHeight: 1,
-                      animation: 'rh-heart 0.95s ease-out forwards',
-                      zIndex: 12,
+                      left: `${RONKI_LEFT * 100}%`,
+                      top: `${RONKI_TOP * 100}%`,
+                      width: `${RONKI_W * 100}%`,
+                      aspectRatio: '1 / 1',
+                      background: 'transparent',
+                      border: 'none',
+                      padding: 0,
+                      cursor: 'pointer',
+                      zIndex: 2,
                     }}
                   >
-                    {h.kind === 'sparkle' ? (
-                      <DoodleIcon name="sparkle" size={30} filled style={{ color: 'var(--color-sun)' }} />
-                    ) : h.kind === 'giggle' ? (
-                      'hihi'
-                    ) : (
-                      <DoodleIcon name="heart" size={30} filled style={{ color: 'var(--color-ember)' }} />
-                    )}
-                  </span>
-                ))}
-              </div>
-            </button>
+                    <div style={{ position: 'relative', width: '100%', height: '100%', animation: reactionAnim, transformOrigin: '50% 100%' }}>
+                      <div style={{ width: '100%', height: '100%' }}>
+                        {pose ? (
+                          <RonkiArt pose={pose} animated={pose === 'cheer'} size={100} style={{ width: '100%', height: '100%' }} />
+                        ) : (
+                          <MoodChibi
+                            size={100}
+                            variant={variant}
+                            stage={stageIdx}
+                            mood={mood}
+                            bare
+                            animated={!pauseScene}
+                            style={{ width: '100%', height: '100%' }}
+                          />
+                        )}
+                      </div>
+                      {floatingHearts.map(h => (
+                        <span
+                          key={h.id}
+                          aria-hidden="true"
+                          className={h.kind === 'giggle' ? 'bb-hand' : ''}
+                          style={{
+                            position: 'absolute',
+                            left: h.x,
+                            top: h.y,
+                            pointerEvents: 'none',
+                            fontSize: 22,
+                            color: 'var(--color-sun-deep)',
+                            lineHeight: 1,
+                            animation: 'rh-heart 0.95s ease-out forwards',
+                            zIndex: 12,
+                          }}
+                        >
+                          {h.kind === 'sparkle' ? (
+                            <DoodleIcon name="sparkle" size={30} filled style={{ color: 'var(--color-sun)' }} />
+                          ) : h.kind === 'giggle' ? (
+                            'hihi'
+                          ) : (
+                            <DoodleIcon name="heart" size={30} filled style={{ color: 'var(--color-ember)' }} />
+                          )}
+                        </span>
+                      ))}
+                    </div>
+                  </button>
 
-            {/* The cushion's front rim, drawn again over Ronki's ankles. */}
-            <img
-              src={POSTER}
-              alt=""
-              draggable={false}
-              decoding="async"
-              style={{
-                position: 'absolute',
-                inset: 0,
-                width: '100%',
-                height: '100%',
-                objectFit: 'fill',
-                pointerEvents: 'none',
-                zIndex: 3,
-                clipPath: `path('${rimPath(geo.scale)}')`,
-              }}
+                  {/* The cushion's front rim, drawn again over Ronki's ankles. */}
+                  <img
+                    src={POSTER}
+                    alt=""
+                    draggable={false}
+                    decoding="async"
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'fill',
+                      pointerEvents: 'none',
+                      zIndex: 3,
+                      clipPath: `path('${rimPath(geo.scale)}')`,
+                    }}
+                  />
+                </>
+              )}
+            </div>
+          )}
+
+          {/* Ronki's line, anchored above his head; tap to hear it again. */}
+          {bubbleText && (
+            <RonkiSpeechBubble
+              text={bubbleText}
+              voiceId={bubbleId}
+              style={night ? { top: 12 } : { top: 'auto', bottom: bubbleBottom }}
             />
+          )}
+
+          {/* His fire, lower right. */}
+          {showFire && (
+            <div style={{ position: 'absolute', right: 10, bottom: 10, left: 10, display: 'flex', justifyContent: 'flex-end', zIndex: 9, pointerEvents: 'none' }}>
+              <FireBowl lit={fire.lit} total={fire.total} justLit={justLit} />
+            </div>
+          )}
+
+          <StickerBurst active={cheer} size={300} onDone={() => setCheer(false)} />
+        </div>
+      </section>
+
+      {/* The one loud item of the moment, and what goes with it. */}
+      <section className="flex flex-col" style={{ padding: '18px 16px 0', gap: 14 }}>
+        {loudSit && (
+          <PillButton full size="lg" icon="flame" data-loud="true" onClick={() => setShowPresence(true)}>
+            Bei Ronki sitzen
+          </PillButton>
+        )}
+
+        {mode === 'fire' && cardQuest && (
+          <NowCard quest={cardQuest} onDone={onTaskDone} onLater={onTaskLater} loud={!loudSit} />
+        )}
+
+        {mode === 'departure' && (
+          <DepartureCard label={`Tschüss, ${nick || 'Ronki'}!`} onBye={() => bye(false)} />
+        )}
+
+        {mode === 'stay' && (cardQuest ? (
+          <NowCard quest={cardQuest} onDone={onTaskDone} onLater={onTaskLater} loud={!loudSit} />
+        ) : !loudSit && (
+          <PillButton full size="lg" icon="flame" data-loud="true" onClick={() => setShowPresence(true)}>
+            Bei Ronki sitzen
+          </PillButton>
+        ))}
+
+        {mode === 'away' && (
+          <>
+            <AwayCard now={current} eveningStart={state?.familyConfig?.eveningStart} />
+            {cardQuest && <NowCard quest={cardQuest} onDone={onTaskDone} onLater={onTaskLater} loud={false} />}
+          </>
+        )}
+
+        {mode === 'waiting' && <TreasureCard onOpen={() => setShowReveal(true)} />}
+
+        {(mode === 'fire' || mode === 'departure') && fire.slots.length > 0 && (
+          <TaskRow slots={fire.slots} currentId={mode === 'fire' ? cardQuest?.id : null} onPick={id => setPickedId(id)} />
+        )}
+
+        {/* The way to bed is there from the evening start, at any fire
+            level and while a treasure waits (spec 3.4, never earned). */}
+        {(mode === 'evening' || ((mode === 'fire' || mode === 'waiting') && block === 'evening')) && (
+          <MoonCard text={moonText} loud={mode === 'evening' && !loudSit} onOpen={openTonight} />
+        )}
+
+        {/* The quiet way to just be with him. */}
+        {(mode === 'fire' || mode === 'evening' || (mode === 'stay' && cardQuest)) && !loudSit && (
+          <div className="flex justify-center">
+            <QuietLink onClick={() => setShowPresence(true)}>Bei Ronki sitzen</QuietLink>
           </div>
-
-          {/* Ronki's line, anchored above his head. Tap to dismiss is
-              wired inside the component. */}
-          <RonkiSpeechBubble style={{ top: 'auto', bottom: bubbleBottom }} />
-        </div>
-
+        )}
       </section>
 
-      {/* Ronki asks how the day feels; picking a mood hides it for the day. */}
-      {state?.moodAM === null && (
-        <RonkiMoodPrompt
-          sectionRef={moodRef}
-          highlight={moodNudge}
-          heroName={heroName}
-          variant={variant}
-          stageIdx={stageIdx}
-          onPick={(idx) => actions?.setMood?.('moodAM', idx)}
-        />
-      )}
-
-      {/* Presence beat: the one primary action of the room. Free, no
-          Sterne, no vital change; opens BeiRonkiSein. */}
-      <section style={{ padding: '22px 16px 0' }}>
-        <PillButton
-          full
-          size="lg"
-          icon="flame"
-          onClick={() => setShowPresence(true)}
-          aria-label="Bei Ronki sein"
-        >
-          Bei Ronki sitzen
-        </PillButton>
-        <div className="bb-hand text-ink-soft text-center" style={{ fontSize: 17, marginTop: 8, lineHeight: 1 }}>
-          ohne Sterne
-        </div>
-
-        {/* Heute Abend: the bedtime ritual as a night card. */}
-        <PaperCard
-          as="button"
-          tone="night"
-          pad="md"
-          onClick={() => onNavigate?.('tonight')}
-          aria-label="Heute Abend mit Ronki"
-          className="w-full flex items-center gap-4"
-          style={{ marginTop: 14 }}
-        >
-          <span className="flex items-center justify-center shrink-0" style={{ width: 52, height: 52, color: 'var(--color-sun)' }}>
-            <DoodleIcon name="moon" size={44} filled />
-          </span>
-          <span className="flex flex-col min-w-0">
-            <span className="bb-display text-white" style={{ fontSize: 24 }}>Heute Abend</span>
-            <span className="bb-hand" style={{ fontSize: 18, color: 'var(--color-sun)', marginTop: 4, lineHeight: 1 }}>mit Ronki</span>
-          </span>
-          <span className="ml-auto text-white shrink-0"><DoodleIcon name="arrow" size={22} stroke={7} /></span>
-        </PaperCard>
-      </section>
-
-      {/* Adventure-ready card once the morning routine is complete. */}
-      {morningDone && (state?.expedition?.state === 'home') && (
-        <section style={{ padding: '14px 16px 0' }}>
-          <PaperCard
-            as="button"
-            tone="sun"
-            pad="md"
-            lift
-            onClick={() => {
-              actions?.startExpedition?.();
-              setShowExpedition(true);
-            }}
-            className="w-full flex items-center gap-4"
-          >
-            <span className="flex items-center justify-center shrink-0 text-ink" style={{ width: 52, height: 52 }}>
-              <DoodleIcon name="leaf" size={44} />
-            </span>
-            <span className="flex flex-col min-w-0">
-              <span className="bb-hand text-ink uppercase" style={{ fontSize: 17, lineHeight: 1 }}>Ronki ist bereit</span>
-              <span className="font-headline font-semibold text-ink" style={{ fontSize: 18, lineHeight: 1.25, marginTop: 4 }}>
-                "Lass uns auf Abenteuer gehen, ich bringe dir was Schönes mit."
-              </span>
-            </span>
-          </PaperCard>
+      {/* Toys, only with the parent's Extras switch on. */}
+      {extrasOn(state) && (
+        <section style={{ padding: '16px 16px 0' }}>
+          <ChoiceTile
+            label="Spielzeug"
+            doodle="star"
+            filled
+            doodleColor="var(--color-sun)"
+            className="w-full"
+            onClick={() => onNavigate?.('spiele')}
+          />
         </section>
       )}
 
-      {/* Ronki's asks today: the day strip, grouped by anchor. */}
-      <section style={{ padding: '22px 16px 0' }}>
-        <div className="bb-hand text-ink-soft uppercase" style={{ fontSize: 17, marginBottom: 8, paddingLeft: 4, lineHeight: 1 }}>
-          Ronki bittet dich heute um Hilfe
-        </div>
-        <PaperCard tone="paper" pad="md" className="flex flex-col gap-3">
-          <button
-            type="button"
-            onClick={() => onNavigate?.('aufgaben')}
-            className="flex w-full items-center justify-between gap-3 bg-transparent border-0 p-0 text-left text-ink active:scale-[0.99] transition-transform"
-            aria-label="Alle Aufgaben anzeigen"
-          >
-            <span className="bb-display" style={{ fontSize: 22 }}>Heute auf der Schriftrolle</span>
-            <DoodleIcon name="arrow" size={22} stroke={7} />
-          </button>
-          <div className="grid gap-2" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
-            {undoneByAnchor.map(a => (
-              <button
-                key={a.anchor}
-                type="button"
-                onClick={() => onNavigate?.('aufgaben', { anchor: a.anchor })}
-                aria-label={`${a.label}: ${a.count > 0 ? `${a.count} offen` : 'fertig'}`}
-                className="flex flex-col items-center gap-1 rounded-[20px] border-[2.5px] border-ink bg-white text-ink active:scale-[0.96] transition-transform"
-                style={{ padding: '10px 6px 9px' }}
-              >
-                <span className="font-headline font-semibold" style={{ fontSize: 16, lineHeight: 1 }}>{a.label}</span>
-                {a.count > 0 ? (
-                  <span className="bb-display" style={{ fontSize: 26, lineHeight: 1 }}>{a.count}</span>
-                ) : (
-                  <SunCheck size={30} />
-                )}
-                <span className="bb-hand text-ink-soft" style={{ fontSize: 16, lineHeight: 1 }}>
-                  {a.count > 0 ? 'offen' : 'fertig'}
-                </span>
-              </button>
-            ))}
-          </div>
-        </PaperCard>
-      </section>
-
-      {/* Object tiles: Spielzeug and Karte (the rest lives in the tab bar). */}
-      <section className="grid gap-3" style={{ padding: '16px 16px 0', gridTemplateColumns: 'repeat(2, 1fr)' }}>
-        <ChoiceTile
-          label="Spielzeug"
-          doodle="star"
-          filled
-          doodleColor="var(--color-sun)"
-          className="w-full"
-          onClick={() => onNavigate?.('spiele')}
-        />
-        <ChoiceTile
-          label="Karte"
-          doodle="leaf"
-          filled={expeditionUnlocked}
-          doodleColor={expeditionUnlocked ? 'var(--color-leaf)' : 'var(--color-ink)'}
-          className="w-full"
-          onClick={() => setShowExpedition(true)}
-          aria-label={expeditionUnlocked ? 'Karte, Ronki ist startklar' : 'Karte'}
-        />
-      </section>
-
-      {expeditionUnlocked && (
-        <div style={{ padding: '12px 16px 0' }}>
-          <PaperCard tone="sky-wash" pad="sm" className="text-center">
-            <span className="font-headline font-semibold" style={{ fontSize: 17 }}>
-              Ronki ist startklar für ein Abenteuer. Tipp auf <b>Karte</b>.
-            </span>
-          </PaperCard>
-        </div>
+      {/* Einrichten: hidden behind FEATURES.roomStyle until the painted
+          room can show a pick (the saved choice and the sheet stay). */}
+      {FEATURES.roomStyle && (
+        <section className="flex justify-center" style={{ padding: '16px 16px 0' }}>
+          <PillButton tone="secondary" icon="scribble" onClick={() => setShowStyleSheet(true)} aria-label="Ronkis Zimmer einrichten">
+            Einrichten
+          </PillButton>
+        </section>
       )}
 
-      {/* Mementos from the expeditions, on paper tiles. */}
-      <section style={{ padding: '16px 16px 0' }}>
-        <Fundstuecke expeditionLog={state?.expeditionLog || []} />
+      {/* The last treasures he brought home. */}
+      <section style={{ padding: '18px 16px 0' }}>
+        <TreasureShelf log={state?.expeditionLog} />
       </section>
-
-      {/* Einrichten: the room style sheet. Hidden since 25 Sep 2026: the
-          painted room no longer repaints from state.caveStyle, so a pick
-          would change nothing a kid can see. The saved choice and the
-          sheet stay; flip SHOW_ROOM_STYLE when the room can show it. */}
-      {SHOW_ROOM_STYLE && <section className="flex justify-center" style={{ padding: '16px 16px 0' }}>
-        <PillButton
-          tone="secondary"
-          icon="scribble"
-          onClick={() => setShowStyleSheet(true)}
-          aria-label="Ronkis Zimmer einrichten"
-        >
-          Einrichten
-        </PillButton>
-      </section>}
 
       <style>{`
         @keyframes rh-heart {
@@ -615,121 +730,55 @@ export default function RoomHub({ onNavigate }) {
           75%  { transform: translateY(2%) scale(1.05, 0.95) rotate(3deg); }
           100% { transform: scale(1) rotate(0deg); }
         }
+        @keyframes rh-float-out {
+          0%   { transform: translateY(0); opacity: 1; }
+          100% { transform: translateY(-120%); opacity: 0; }
+        }
+        @keyframes rh-fade-out {
+          0%   { opacity: 1; }
+          100% { opacity: 0; }
+        }
+        .rh-float-out { animation: rh-float-out ${FLOAT_OUT_MS}ms ease-in forwards; pointer-events: none; }
+        .rh-fade-out { animation: rh-fade-out ${FLOAT_OUT_MS}ms ease forwards; pointer-events: none; }
       `}</style>
 
-      {/* Karte + window: Expedition (Reise / Naturtagebuch surface). */}
-      {showExpedition && <Expedition onClose={() => setShowExpedition(false)} />}
+      {mode === 'departure' && departureOpen && (
+        <DepartureSheet
+          nick={nick}
+          now={current}
+          eveningStart={state?.familyConfig?.eveningStart}
+          byeLineId={byeId}
+          catEvo={state?.catEvo}
+          adventureCount={state?.adventureCount}
+          variant={variant}
+          onBye={() => bye(true)}
+          onClose={() => { setDepartureOpen(false); setDepartureDismissed(true); }}
+        />
+      )}
+
+      {showReveal && (
+        <TreasureReveal onDone={() => { setShowReveal(false); setAskAfterTreasure(true); }} />
+      )}
+
+      {showGrowth && (
+        <GrowthBeat stage={stageNow} onDone={() => setGrowthDone(stageNow)} />
+      )}
+
+      {feelings && (
+        <FeelingsSheet
+          askId={feelings.askId}
+          slot={feelings.slot}
+          now={current}
+          onPick={(idx) => { if (SIT_OFFER.has(idx)) setSitLoud(true); }}
+          onClose={() => setFeelings(null)}
+          onSit={() => { setFeelings(null); setShowPresence(true); }}
+        />
+      )}
+
+      {showStyleSheet && <CaveStyleSheet onClose={() => setShowStyleSheet(false)} />}
 
       {/* Presence moment: full-screen sit with Ronki. */}
       {showPresence && <BeiRonkiSein onClose={() => setShowPresence(false)} />}
-
-      {/* Room style sheet (wallpaper and floor picks are kept in state;
-          the painted room does not repaint from them any more). */}
-      {showStyleSheet && <CaveStyleSheet onClose={() => setShowStyleSheet(false)} />}
     </div>
-  );
-}
-
-// ─── Helpers ──────────────────────────────────────────────────
-
-// Ronki asks how the day feels. Six feelings as choice tiles, drawn
-// with the same FeelingDoodle as the Tagebuch and the Buch, so one
-// feeling has one picture everywhere (Astra design review R7).
-const MOODS = [
-  { idx: 3, label: 'Gut' },
-  { idx: 4, label: 'Magisch' },
-  { idx: 2, label: 'Okay' },
-  { idx: 0, label: 'Traurig' },
-  { idx: 1, label: 'Besorgt' },
-  { idx: 5, label: 'Müde' },
-];
-
-function RonkiMoodPrompt({ sectionRef, highlight = false, heroName, variant, stageIdx, onPick }) {
-  return (
-    <section ref={sectionRef} style={{ padding: '20px 16px 0', scrollMarginTop: 80 }}>
-      <div className="flex items-end gap-3">
-        <MoodChibi size={64} variant={variant} stage={stageIdx || 1} mood="normal" face />
-        <div className="min-w-0 flex-1">
-          <div className="bb-hand text-cobalt uppercase" style={{ fontSize: 17, lineHeight: 1, marginBottom: 6, marginLeft: 6 }}>
-            Ronki fragt
-          </div>
-          <SpeechBubble side="left" tone="paper" rotate={0}>
-            Wie geht's dir heute, {heroName}?
-          </SpeechBubble>
-        </div>
-      </div>
-      <div
-        className="grid gap-3"
-        style={{
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          marginTop: 16,
-          // A drawn cobalt ring for a moment after the room's entry is
-          // tapped, so the eye lands on the tiles (no motion needed).
-          borderRadius: 26,
-          outline: highlight ? '3px solid var(--color-cobalt)' : '3px solid transparent',
-          outlineOffset: 6,
-          transition: 'outline-color 300ms ease-out',
-        }}
-        role="group"
-        aria-label="Ronkis Frage beantworten"
-      >
-        {MOODS.map(m => (
-          <ChoiceTile
-            key={m.idx}
-            label={m.label}
-            className="w-full"
-            style={{ minWidth: 0 }}
-            onClick={() => onPick(m.idx)}
-          >
-            <FeelingDoodle idx={m.idx} size={44} />
-          </ChoiceTile>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-// Mementos from the Reise. The three most recent sit up front (a dimmed
-// starter trio on day one so the row never looks broken); the decor
-// slots that used to hang in the cave (4th, 7th and 10th memento) join
-// the same row as the log grows.
-const STARTER = ['🍂', '🪶', '🪨'];
-
-function Fundstuecke({ expeditionLog }) {
-  const log = expeditionLog || [];
-  const recent = log.slice(-3).reverse();
-  const front = [0, 1, 2].map(i => (recent[i] ? { emoji: recent[i].emoji, real: true } : { emoji: STARTER[i], real: false }));
-  const extra = [log.length >= 4 ? log[3] : null, log.length >= 7 ? log[6] : null, log.length >= 10 ? log[9] : null]
-    .filter(Boolean)
-    .map(m => ({ emoji: m.emoji, real: true }));
-  const items = [...front, ...extra];
-
-  return (
-    <PaperCard tone="paper" pad="md">
-      <div className="flex items-center justify-between gap-3">
-        <span className="bb-display" style={{ fontSize: 20 }}>Ronkis Fundstücke</span>
-        <DoodleIcon name="bag" size={24} />
-      </div>
-      <div className="flex flex-wrap gap-2" style={{ marginTop: 12 }}>
-        {items.map((it, i) => (
-          <span
-            key={i}
-            aria-hidden="true"
-            className="inline-flex items-center justify-center rounded-full bg-white"
-            style={{
-              width: 52,
-              height: 52,
-              border: '2.5px solid var(--color-ink)',
-              fontSize: 24,
-              lineHeight: 1,
-              opacity: it.real ? 1 : 0.45,
-              filter: it.real ? 'none' : 'saturate(0.5)',
-            }}
-          >
-            {it.emoji}
-          </span>
-        ))}
-      </div>
-    </PaperCard>
   );
 }

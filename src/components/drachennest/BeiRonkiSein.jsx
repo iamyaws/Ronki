@@ -5,6 +5,7 @@ import { track } from '../../lib/analytics';
 import MoodChibi from '../MoodChibi';
 import VoiceAudio from '../../utils/voiceAudio';
 import { SpeechBubble, DoodleIcon, QuietLink } from '../bilderbuch';
+import { TONIGHT_STORIES } from './TonightRitual';
 
 /**
  * BeiRonkiSein: the presence beat (Marc 25 Apr 2026).
@@ -18,21 +19,14 @@ import { SpeechBubble, DoodleIcon, QuietLink } from '../bilderbuch';
  * above him, the way out a white drawn link. No gradients, no glow.
  *
  * Rotation rules stay: a line not shown in the last three sits (per
- * session), voiced through the same tonight_story_<i> bank.
+ * session), voiced through the same tonight_story_<i> bank, and since the
+ * Finch pass the text shown is the text that bank says.
  */
 
-const STORIES = [
-  'Heute hab ich an die Wolken gedacht. Manche davon sahen aus wie kleine Drachen die Verstecken spielen.',
-  'Im Morgenwald rascheln die Blätter ganz leise wenn niemand hinsieht. Ich glaub die erzählen sich kleine Witze.',
-  'Ich mag wie\'s hier riecht wenn das Feuer knistert. Irgendwie nach Marshmallows und nach Holz und nach gemütlich.',
-  'Manchmal frag ich mich was die Sterne eigentlich machen wenn keiner sie anschaut. Vielleicht tanzen sie ein bisschen.',
-  'Weißt du was lustig ist, mein Schwanz schläft manchmal vor mir ein. Dann muss ich ihn ganz vorsichtig wecken.',
-  'Wenn ich so mit dir am Feuer sitze, fühlt sich der ganze Tag an wie in eine warme Decke eingewickelt.',
-  'Heute morgen hat ein kleiner Käfer mein Frühstück angeguckt. Ich hab ihn gefragt ob er was abhaben will, er war aber viel zu schüchtern.',
-  'Ich hab vergessen was ich eigentlich erzählen wollte. Aber das ist okay, ich bin einfach gern mit dir hier.',
-  'Manchmal lieg ich abends da und mag das Geräusch wenn der Wind in den Birken oben umherwandert. Klingt fast wie wer leise summt.',
-  'Mama-Drache hat mir mal gezeigt wie man Funken pustet ohne dass was kaputtgeht. Sie sagt das geht nur wenn man ruhig atmet.',
-];
+// The texts on screen are the ones the voice files say: the
+// tonight_story_<i> recordings belong to TonightRitual's ten bedtime
+// stories (census 2.5: the sit showed ten other texts over that audio).
+const STORIES = TONIGHT_STORIES;
 
 // Sun stars on the night sky, fixed so the scene stays calm.
 const STARS = [

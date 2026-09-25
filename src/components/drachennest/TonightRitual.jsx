@@ -1,7 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useTask } from '../../context/TaskContext';
 import { track } from '../../lib/analytics';
 import VoiceAudio from '../../utils/voiceAudio';
 import { SceneLoop, QuietLink, DoodleIcon, RonkiArt, useReducedMotion } from '../bilderbuch';
+import { now as clockNow, dayKey } from '../../loop/clock';
+import { fireOfBlock } from '../../loop/fire';
+import { tripAt } from '../../data/trips';
+import { lineText } from '../../data/ronkiLines';
 
 // Path to the lullaby audio. Royalty-free 4-bar loop, ~30s.
 // File is not committed yet; Marc to drop in once curated. The
@@ -33,14 +38,27 @@ const NIGHT_SKY = '#011551';
  *   enter   (2.4s, title fades in on the night ground)
  *   lookup  (4.4s, the bedroom fades in)
  *   story   (kid taps when ready, the story line fades in)
+ *   hook    (Finch pass: what comes next, about 6.5s or a tap)
  *   curtain (12s, the room dims to night, stars come out, lullaby plays)
- *   black   (final state: sleeping Ronki, "Schlaf gut.", replay link)
+ *   black   (final state: sleeping Ronki, "Schlaf gut.", the way out)
+ *
+ * Finch pass (26 Sep 2026, spec 3.4 and R3):
+ *   - A close doodle works from the first frame (the census found no
+ *     way out for 6.8 s). "Nochmal" is gone.
+ *   - Before the curtain, one line about what comes next (tonightHook):
+ *     after a trip today the next trip's hook ("Als Nächstes flieg ich
+ *     zum Bach.", never a time word); with a full evening fire and no
+ *     trip today the dream trip ("Heute Nacht flieg ich im Traum los.");
+ *     otherwise "Schlaf gut. Ich bin hier im Nest."
+ *   - Reaching the end calls completeTonight() and, for the dream trip,
+ *     departTrip('night'). Closing early changes nothing.
  *
  * Voice lines, analytics events, the story pool and the lullaby are
  * the same as before the Bilderbuch pass.
  */
 
-const STORY_LINES = [
+/** The ten bedtime stories. Index i matches public/audio/ronki/de_tonight_story_<i>.mp3. */
+export const TONIGHT_STORIES = [
   // BeiRonkiSein-bar bedtime stories. Soft, hedge-y, no em-dashes.
   // Rotation lives here for now; ParentalDashboard tooling for
   // adding family-specific lines is a v1.5 follow-up.
@@ -64,25 +82,48 @@ function pickStory() {
   // audio file (de_tonight_story_<idx>) can play in lockstep.
   try {
     const recent = JSON.parse(window.sessionStorage.getItem('tonight_recent') || '[]');
-    const fresh = STORY_LINES.map((_, i) => i).filter(i => !recent.includes(i));
-    const pool = fresh.length > 0 ? fresh : STORY_LINES.map((_, i) => i);
+    const fresh = TONIGHT_STORIES.map((_, i) => i).filter(i => !recent.includes(i));
+    const pool = fresh.length > 0 ? fresh : TONIGHT_STORIES.map((_, i) => i);
     const idx = pool[Math.floor(Math.random() * pool.length)];
     const next = [...recent, idx].slice(-3);
     window.sessionStorage.setItem('tonight_recent', JSON.stringify(next));
-    return { text: STORY_LINES[idx], idx };
+    return { text: TONIGHT_STORIES[idx], idx };
   } catch {
-    return { text: STORY_LINES[0], idx: 0 };
+    return { text: TONIGHT_STORIES[0], idx: 0 };
   }
 }
+
+/**
+ * The line before the curtain: what comes next. `dream` true means the
+ * end of the ritual sends Ronki on his dream trip.
+ */
+export function tonightHook(state, when) {
+  const today = dayKey(when);
+  if (state?.lastTripDate === today) {
+    const trip = tripAt((state?.tripCursor ?? 0) + (state?.expedition?.pendingMemento ? 1 : 0));
+    return { id: trip.hookVoice, text: trip.hook, dream: false };
+  }
+  if (fireOfBlock(state || {}, 'evening', when).full) {
+    return { id: 'night_trip_01', text: lineText('night_trip_01'), dream: true };
+  }
+  return { id: 'sleep_nest_01', text: lineText('sleep_nest_01'), dream: false };
+}
+
+const HOOK_MS = 6500;
 
 // Height of the open sky above the scene. The story line lives here,
 // clear of the window and the moon in the painting.
 const SKY_BAND = 'clamp(200px, 36vh, 340px)';
 
 export default function TonightRitual({ onClose }) {
+  const { state, actions } = useTask();
   const [phase, setPhase] = useState('enter');
   const [tapped, setTapped] = useState(false);
   const [{ text: story, idx: storyIdx }] = useState(() => pickStory());
+  // Decided once when the ritual opens, so a state change underneath
+  // (the fire, a trip) cannot swap the line mid-way.
+  const [hook] = useState(() => tonightHook(state, clockNow()));
+  const hookTimerRef = useRef(null);
   // Guards the curtain to black auto-advance. Without it, replay()
   // mid-curtain (or repeated taps) would leave a dangling 12s timer
   // that fires `tonight.complete` again and yanks the kid back to
@@ -117,13 +158,16 @@ export default function TonightRitual({ onClose }) {
       VoiceAudio.playLocalized('tonight_invite_01', 200);
     } else if (phase === 'story') {
       VoiceAudio.playLocalized(`tonight_story_${storyIdx}`, 600);
+    } else if (phase === 'hook') {
+      VoiceAudio.playLocalized(hook.id, 200);
     }
-  }, [phase, storyIdx]);
+  }, [phase, storyIdx, hook.id]);
 
   // Cleanup any pending curtain timer on unmount so an early dismiss
   // doesn't fire `tonight.complete` for a moment that didn't finish.
   useEffect(() => () => {
     if (curtainTimerRef.current) clearTimeout(curtainTimerRef.current);
+    if (hookTimerRef.current) clearTimeout(hookTimerRef.current);
   }, []);
 
   // ESC dismisses.
@@ -133,21 +177,36 @@ export default function TonightRitual({ onClose }) {
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
 
+  // The ritual reached its end: the evening is done, and a dream trip
+  // leaves now. Once per mount.
   const fireComplete = () => {
     if (completeFiredRef.current) return;
     completeFiredRef.current = true;
     track('tonight.complete');
+    actions?.completeTonight?.();
+    if (hook.dream) actions?.departTrip?.('night');
+  };
+
+  const startCurtain = () => {
+    if (hookTimerRef.current) {
+      clearTimeout(hookTimerRef.current);
+      hookTimerRef.current = null;
+    }
+    setPhase('curtain');
+    curtainTimerRef.current = setTimeout(() => {
+      setPhase('black');
+      fireComplete();
+      curtainTimerRef.current = null;
+    }, 12000);
   };
 
   const handleTap = () => {
     if (phase === 'story' && !tapped) {
       setTapped(true);
-      setPhase('curtain');
-      curtainTimerRef.current = setTimeout(() => {
-        setPhase('black');
-        fireComplete();
-        curtainTimerRef.current = null;
-      }, 12000);
+      setPhase('hook');
+      hookTimerRef.current = setTimeout(startCurtain, HOOK_MS);
+    } else if (phase === 'hook') {
+      startCurtain();
     } else if (phase === 'curtain') {
       // Kid tapped early to skip the curtain. Cancel pending timer,
       // jump straight to black, fire complete once.
@@ -158,16 +217,6 @@ export default function TonightRitual({ onClose }) {
       setPhase('black');
       fireComplete();
     }
-  };
-
-  const replay = () => {
-    if (curtainTimerRef.current) {
-      clearTimeout(curtainTimerRef.current);
-      curtainTimerRef.current = null;
-    }
-    completeFiredRef.current = false;
-    setPhase('enter');
-    setTapped(false);
   };
 
   // How much of the bedroom shows: none on the title card, all of it
@@ -214,6 +263,26 @@ export default function TonightRitual({ onClose }) {
 
       <SkyStars phase={phase} />
 
+      {/* The way out, from the first frame. */}
+      {phase !== 'black' && (
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onClose?.(); }}
+          aria-label="Schließen"
+          data-testid="tonight-close"
+          className="flex items-center justify-center rounded-full text-white"
+          style={{
+            position: 'absolute', zIndex: 3,
+            top: 'calc(12px + env(safe-area-inset-top, 0px))', right: 12,
+            width: 48, height: 48,
+            border: '2.5px solid rgba(255,255,255,0.85)', background: NIGHT_SKY,
+            touchAction: 'manipulation',
+          }}
+        >
+          <DoodleIcon name="close" size={22} />
+        </button>
+      )}
+
       {phase === 'enter' && (
         <div
           className="text-center"
@@ -235,6 +304,7 @@ export default function TonightRitual({ onClose }) {
       )}
 
       {phase === 'story' && <StoryLine text={story} />}
+      {phase === 'hook' && <StoryLine text={hook.text} kicker={null} />}
 
       <Lullaby active={phase === 'curtain'} />
 
@@ -271,13 +341,6 @@ export default function TonightRitual({ onClose }) {
             Schlaf gut.
           </div>
           <div style={{ display: 'flex', gap: 28, marginTop: 36 }}>
-            <QuietLink
-              tone="white"
-              onClick={(e) => { e.stopPropagation(); replay(); }}
-              style={{ touchAction: 'manipulation' }}
-            >
-              Nochmal
-            </QuietLink>
             <QuietLink
               tone="white"
               onClick={(e) => { e.stopPropagation(); onClose?.(); }}
@@ -395,7 +458,7 @@ function NightFall({ active }) {
 
 // ─── Story line ─────────────────────────────────────────────────
 
-function StoryLine({ text }) {
+function StoryLine({ text, kicker = 'Ronki erzählt' }) {
   return (
     <div
       style={{
@@ -408,12 +471,14 @@ function StoryLine({ text }) {
         textAlign: 'center',
       }}
     >
-      <span
-        className="bb-hand inline-block rounded-[10px] bg-sun px-4 py-1.5 text-lg uppercase leading-none text-ink"
-        style={{ transform: 'rotate(-3deg)', marginBottom: 16 }}
-      >
-        Ronki erzählt
-      </span>
+      {kicker && (
+        <span
+          className="bb-hand inline-block rounded-[10px] bg-sun px-4 py-1.5 text-lg uppercase leading-none text-ink"
+          style={{ transform: 'rotate(-3deg)', marginBottom: 16 }}
+        >
+          {kicker}
+        </span>
+      )}
       <p
         className="bb-display text-white"
         style={{
@@ -454,7 +519,12 @@ function Lullaby({ active }) {
       a.loop = true;
       // play() returns a promise on modern browsers; reject is fine
       // (file 404 / autoplay policy). We just won't have audio.
-      a.play().then(() => setAudioReady(true)).catch(() => setAudioReady(false));
+      // Some engines (and jsdom) return nothing from play().
+      let p;
+      try { p = a.play(); } catch { p = null; }
+      if (p && typeof p.then === 'function') {
+        p.then(() => setAudioReady(true)).catch(() => setAudioReady(false));
+      }
     } else {
       a.pause();
       a.currentTime = 0;
