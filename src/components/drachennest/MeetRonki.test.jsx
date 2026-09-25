@@ -4,14 +4,20 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, fireEvent, act, screen } from '@testing-library/react';
 
 vi.mock('../../context/TaskContext', () => ({ useTask: () => ({ state: {}, actions: {} }) }));
-vi.mock('../../lib/analytics', () => ({ track: vi.fn() }));
-const voice = vi.hoisted(() => ({ play: null }));
+const analytics = vi.hoisted(() => ({ track: null }));
+vi.mock('../../lib/analytics', () => {
+  analytics.track = vi.fn();
+  return { track: analytics.track };
+});
+const voice = vi.hoisted(() => ({ play: null, playLocalized: null }));
 vi.mock('../../utils/voiceAudio', () => {
   voice.play = vi.fn();
-  return { default: { play: voice.play, playLocalized: vi.fn(), playNarrator: vi.fn(), stop: vi.fn() } };
+  voice.playLocalized = vi.fn();
+  return { default: { play: voice.play, playLocalized: voice.playLocalized, playNarrator: vi.fn(), stop: vi.fn() } };
 });
 
 import MeetRonki, { EGGS, NAME_CHIPS } from './MeetRonki';
+import { lineText } from '../../data/ronkiLines';
 
 const OLD_IDS = ['amber', 'teal', 'rose', 'violet', 'forest', 'sunset'];
 
@@ -45,7 +51,7 @@ describe('MeetRonki hatch beat (reduced motion, no clip)', () => {
 
   it('runs approach, shelf, wobble, the still hatch, meet, name and close, then reports the pick', () => {
     const onComplete = vi.fn();
-    const { container } = render(<MeetRonki onComplete={onComplete} />);
+    const { container } = render(<MeetRonki onComplete={onComplete} needsParent />);
 
     // approach: caption, no eggs yet
     expect(screen.getByText('Da hinten leuchtet etwas.')).toBeTruthy();
@@ -83,10 +89,10 @@ describe('MeetRonki hatch beat (reduced motion, no clip)', () => {
     expect(confirm.disabled).toBe(false);
     fireEvent.click(confirm);
 
-    // close: Ronki says the nickname back; tap anywhere reports the
-    // nickname as companionName, never as the child's name
-    expect(screen.getByText('Ich bin Funki! Bis morgen. Versprochen.')).toBeTruthy();
-    fireEvent.click(screen.getByLabelText('tippen zum schließen'));
+    // close: Ronki says the nickname back and asks for a parent; the pill
+    // reports the nickname as companionName, never as the child's name
+    expect(screen.getByText('Ich bin Funki! Und wie heißt du?')).toBeTruthy();
+    fireEvent.click(screen.getByText('Mama oder Papa ist da').closest('button'));
     expect(onComplete).toHaveBeenCalledWith({ companionVariant: 'sunset', companionName: 'Funki' });
     expect(onComplete.mock.calls[0][0]).not.toHaveProperty('heroName');
   });
@@ -102,7 +108,7 @@ describe('MeetRonki name chips', () => {
 
   function toNamePage() {
     const onComplete = vi.fn();
-    const utils = render(<MeetRonki onComplete={onComplete} />);
+    const utils = render(<MeetRonki onComplete={onComplete} needsParent />);
     act(() => { vi.advanceTimersByTime(3600); });
     fireEvent.click(screen.getByLabelText('Ei wählen: Blau'));
     // each phase sets its timer after it renders, so advance step by step
@@ -138,8 +144,8 @@ describe('MeetRonki name chips', () => {
     fireEvent.change(input, { target: { value: '  Drachi  ' } });
     expect(screen.getByLabelText('Glut: anhören und wählen').getAttribute('aria-pressed')).toBe('false');
     fireEvent.click(confirm);
-    expect(screen.getByText('Ich bin Drachi! Bis morgen. Versprochen.')).toBeTruthy();
-    fireEvent.click(screen.getByLabelText('tippen zum schließen'));
+    expect(screen.getByText('Ich bin Drachi! Und wie heißt du?')).toBeTruthy();
+    fireEvent.click(screen.getByText('Mama oder Papa ist da').closest('button'));
     expect(onComplete).toHaveBeenCalledWith({ companionVariant: 'teal', companionName: 'Drachi' });
   });
 
@@ -150,7 +156,7 @@ describe('MeetRonki name chips', () => {
     fireEvent.click(screen.getByLabelText('Pieks: anhören und wählen'));
     expect(container.querySelector('#mr-name')).toBeNull();
     fireEvent.click(screen.getByText('so soll er heißen').closest('button'));
-    expect(screen.getByText('Ich bin Pieks! Bis morgen. Versprochen.')).toBeTruthy();
+    expect(screen.getByText('Ich bin Pieks! Und wie heißt du?')).toBeTruthy();
   });
 
   it('caps a typed name at 18 characters without cutting an emoji in half', () => {
@@ -166,5 +172,106 @@ describe('MeetRonki name chips', () => {
     toNamePage();
     const confirm = screen.getByText('so soll er heißen').closest('button');
     expect(confirm.closest('.sticky')).not.toBeNull();
+  });
+});
+
+/** Walk to the close phase with a given set of props. */
+function toClose(props) {
+  const onComplete = vi.fn();
+  const utils = render(<MeetRonki onComplete={onComplete} {...props} />);
+  act(() => { vi.advanceTimersByTime(3600); });
+  fireEvent.click(screen.getByLabelText('Ei wählen: Gelb'));
+  act(() => { vi.advanceTimersByTime(1400); });
+  act(() => { vi.advanceTimersByTime(1400); });
+  act(() => { vi.advanceTimersByTime(4500); });
+  fireEvent.click(screen.getByLabelText('Knisti: anhören und wählen'));
+  fireEvent.click(screen.getByText('so soll er heißen').closest('button'));
+  return { ...utils, onComplete };
+}
+
+describe('MeetRonki card link (egg first for everyone)', () => {
+  beforeEach(() => { vi.useFakeTimers(); mockReducedMotion(true); });
+  afterEach(() => { vi.useRealTimers(); });
+
+  it('shows "Ich habe schon eine Karte" on the approach and the shelf and calls onWantsCard', () => {
+    const onWantsCard = vi.fn();
+    render(<MeetRonki onComplete={vi.fn()} onWantsCard={onWantsCard} />);
+    fireEvent.click(screen.getByText('Ich habe schon eine Karte').closest('button'));
+    expect(onWantsCard).toHaveBeenCalledTimes(1);
+    act(() => { vi.advanceTimersByTime(3600); });
+    expect(screen.getByLabelText('Ei wählen: Rot')).toBeTruthy();
+    fireEvent.click(screen.getByText('Ich habe schon eine Karte').closest('button'));
+    expect(onWantsCard).toHaveBeenCalledTimes(2);
+    // gone once an egg is picked
+    fireEvent.click(screen.getByLabelText('Ei wählen: Rot'));
+    expect(screen.queryByText('Ich habe schon eine Karte')).toBeNull();
+  });
+
+  it('hides the card link when no onWantsCard is given', () => {
+    render(<MeetRonki onComplete={vi.fn()} />);
+    expect(screen.queryByText('Ich habe schon eine Karte')).toBeNull();
+    act(() => { vi.advanceTimersByTime(3600); });
+    expect(screen.queryByText('Ich habe schon eine Karte')).toBeNull();
+  });
+});
+
+describe('MeetRonki close', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    mockReducedMotion(true);
+    voice.playLocalized.mockClear();
+    analytics.track.mockClear();
+  });
+  afterEach(() => { vi.useRealTimers(); });
+
+  it('no card: asks the name, then for a parent; the pill is there at once', () => {
+    const { onComplete } = toClose({ needsParent: true });
+    expect(screen.getByText(lineText('meet_askname_01', { nick: 'Knisti' }))).toBeTruthy();
+    expect(screen.getByText(lineText('meet_getparent_01'))).toBeTruthy();
+    const pill = screen.getByText('Mama oder Papa ist da').closest('button');
+    expect(pill.disabled).toBe(false);
+    // voiced without the name: askname first, getparent after
+    act(() => { vi.advanceTimersByTime(3000); });
+    const ids = voice.playLocalized.mock.calls.map(c => c[0]);
+    expect(ids.indexOf('meet_askname_01')).toBeGreaterThan(-1);
+    expect(ids.indexOf('meet_getparent_01')).toBeGreaterThan(ids.indexOf('meet_askname_01'));
+    expect(ids).not.toContain('meet_close_01');
+    expect(screen.queryByText(/Bis morgen/)).toBeNull();
+    fireEvent.click(pill);
+    fireEvent.click(pill);
+    expect(onComplete).toHaveBeenCalledTimes(1);
+    expect(onComplete).toHaveBeenCalledWith({ companionVariant: 'amber', companionName: 'Knisti' });
+  });
+
+  it('without needsParent and without a child name it still asks for a parent', () => {
+    toClose({});
+    expect(screen.getByText('Mama oder Papa ist da')).toBeTruthy();
+  });
+
+  it('card family: knows the child, "Ja, das bin ich" plays meet_yes_01 and then completes', () => {
+    const { onComplete } = toClose({ needsParent: false, childName: 'Mia' });
+    expect(screen.getByText('Mia')).toBeTruthy();
+    expect(screen.getByText(lineText('meet_knowname_01', { kind: 'Mia' }))).toBeTruthy();
+    expect(screen.queryByText('Mama oder Papa ist da')).toBeNull();
+    expect(voice.playLocalized.mock.calls.map(c => c[0])).toContain('meet_knowname_01');
+    const pill = screen.getByText('Ja, das bin ich').closest('button');
+    expect(pill.disabled).toBe(false);
+    fireEvent.click(pill);
+    fireEvent.click(pill);
+    expect(voice.playLocalized.mock.calls.filter(c => c[0] === 'meet_yes_01')).toHaveLength(1);
+    expect(screen.getByText(lineText('meet_yes_01'))).toBeTruthy();
+    expect(onComplete).not.toHaveBeenCalled();
+    act(() => { vi.advanceTimersByTime(2000); });
+    expect(onComplete).toHaveBeenCalledTimes(1);
+    expect(onComplete).toHaveBeenCalledWith({ companionVariant: 'amber', companionName: 'Knisti' });
+  });
+
+  it('fires the funnel events for the egg pick and the name', () => {
+    toClose({ needsParent: true });
+    const names = analytics.track.mock.calls.map(c => c[0]);
+    expect(names).toContain('onboarding.egg.pick');
+    expect(names).toContain('onboarding.name.confirm');
+    fireEvent.click(screen.getByText('Mama oder Papa ist da').closest('button'));
+    expect(analytics.track.mock.calls.map(c => c[0])).toContain('ronki.hatch');
   });
 });
