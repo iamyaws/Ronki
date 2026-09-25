@@ -11,6 +11,7 @@ import {
   PaperCard,
   DoodleIcon,
   SceneLoop,
+  useReducedMotion,
 } from '../bilderbuch';
 import FeelingDoodle from '../JournalFeelings';
 import RonkiSpeechBubble from './RonkiSpeechBubble';
@@ -110,6 +111,28 @@ export default function RoomHub({ onNavigate }) {
   const [showPresence, setShowPresence] = useState(false);
   const [showStyleSheet, setShowStyleSheet] = useState(false);
   const [floatingHearts, setFloatingHearts] = useState([]);
+  const reduced = useReducedMotion();
+
+  // "Wie geht's dir?" entry on the room (Marc, 25 Sep 2026, on Astra's
+  // design review R3): the room stays the first thing a kid sees, and one
+  // small sticker at its bottom edge leads to the full feelings picker
+  // below. Tapping scrolls there, rings the tiles for a moment and puts
+  // focus on the first one. No state change until a feeling is picked.
+  const moodRef = useRef(null);
+  const [moodNudge, setMoodNudge] = useState(false);
+  const nudgeTimers = useRef([]);
+  useEffect(() => () => nudgeTimers.current.forEach(clearTimeout), []);
+  const openFeelings = () => {
+    const el = moodRef.current;
+    if (!el) return;
+    el.scrollIntoView?.({ behavior: reduced ? 'auto' : 'smooth', block: 'center' });
+    nudgeTimers.current.forEach(clearTimeout);
+    setMoodNudge(true);
+    nudgeTimers.current = [
+      setTimeout(() => setMoodNudge(false), 1600),
+      setTimeout(() => el.querySelector('button')?.focus?.({ preventScroll: true }), reduced ? 0 : 450),
+    ];
+  };
 
   const variant = state?.companionVariant || 'forest';
   const stageIdx = getCatStage(state?.catEvo ?? 0);
@@ -349,12 +372,39 @@ export default function RoomHub({ onNavigate }) {
           {/* Ronki's line, anchored above his head. Tap to dismiss is
               wired inside the component. */}
           <RonkiSpeechBubble style={{ top: 'auto', bottom: bubbleBottom }} />
+
+          {state?.moodAM === null && (
+            <button
+              type="button"
+              onClick={openFeelings}
+              aria-label="Wie geht's dir? Gefühl aussuchen"
+              className="bb-press flex items-center gap-2 font-headline font-semibold text-ink"
+              style={{
+                position: 'absolute',
+                right: 12,
+                bottom: 12,
+                zIndex: 6,
+                padding: '8px 14px 8px 10px',
+                borderRadius: 999,
+                border: '2.5px solid var(--color-ink)',
+                background: 'var(--color-paper)',
+                fontSize: 17,
+                lineHeight: 1.1,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              <FeelingDoodle idx={3} size={24} />
+              Wie geht's dir?
+            </button>
+          )}
         </div>
       </section>
 
       {/* Ronki asks how the day feels; picking a mood hides it for the day. */}
       {state?.moodAM === null && (
         <RonkiMoodPrompt
+          sectionRef={moodRef}
+          highlight={moodNudge}
           heroName={heroName}
           variant={variant}
           stageIdx={stageIdx}
@@ -591,9 +641,9 @@ const MOODS = [
   { idx: 5, label: 'Müde' },
 ];
 
-function RonkiMoodPrompt({ heroName, variant, stageIdx, onPick }) {
+function RonkiMoodPrompt({ sectionRef, highlight = false, heroName, variant, stageIdx, onPick }) {
   return (
-    <section style={{ padding: '20px 16px 0' }}>
+    <section ref={sectionRef} style={{ padding: '20px 16px 0', scrollMarginTop: 80 }}>
       <div className="flex items-end gap-3">
         <MoodChibi size={64} variant={variant} stage={stageIdx || 1} mood="normal" face />
         <div className="min-w-0 flex-1">
@@ -607,7 +657,16 @@ function RonkiMoodPrompt({ heroName, variant, stageIdx, onPick }) {
       </div>
       <div
         className="grid gap-3"
-        style={{ gridTemplateColumns: 'repeat(3, 1fr)', marginTop: 16 }}
+        style={{
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          marginTop: 16,
+          // A drawn cobalt ring for a moment after the room's entry is
+          // tapped, so the eye lands on the tiles (no motion needed).
+          borderRadius: 26,
+          outline: highlight ? '3px solid var(--color-cobalt)' : '3px solid transparent',
+          outlineOffset: 6,
+          transition: 'outline-color 300ms ease-out',
+        }}
         role="group"
         aria-label="Ronkis Frage beantworten"
       >
