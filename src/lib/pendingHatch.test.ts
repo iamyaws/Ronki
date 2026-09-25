@@ -1,5 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { PENDING_HATCH_KEY, savePendingHatch, takePendingHatch, clearPendingHatch } from './pendingHatch';
+// @ts-ignore: a Vite ?raw import; this project has no vite/client types.
+import appSource from '../App.jsx?raw';
+import { PENDING_HATCH_KEY, savePendingHatch, takePendingHatch, clearPendingHatch, stashLocalHatchForShareLink } from './pendingHatch';
+import { getActiveToken } from './profileToken';
 
 const NOW = Date.parse('2026-09-26T08:00:00Z');
 const unhatched = { kidIntroSeen: false, onboardingDone: false };
@@ -91,5 +94,77 @@ describe('pendingHatch', () => {
     expect(takePendingHatch(unhatched, at(NOW + 1000, A))).toEqual({
       kidIntroSeen: true, companionName: 'Funki', companionVariant: 'sunset',
     });
+  });
+});
+
+describe('stashLocalHatchForShareLink (SAVES-2: the ?p= share link path)', () => {
+  const T = 'd'.repeat(32);
+  const hatched = { kidIntroSeen: true, onboardingDone: false, companionName: 'Funki', companionVariant: 'sunset' };
+  const openLink = (token: string | null) => {
+    history.replaceState(null, '', token ? `/?p=${token}` : '/');
+  };
+  beforeEach(() => {
+    localStorage.clear();
+    openLink(null);
+  });
+
+  it('stashes a local hatch before the link token is consumed, and the load then keeps it', () => {
+    localStorage.setItem('hdx2_drachennest', JSON.stringify(hatched));
+    openLink(T);
+    expect(stashLocalHatchForShareLink()).toBe(true);
+    // AuthGate then consumes the token; the card seed (not hatched) loads.
+    expect(getActiveToken()).toBe(T);
+    expect(window.location.search).toBe('');
+    expect(takePendingHatch({ kidIntroSeen: false, onboardingDone: false }, { token: T })).toEqual({
+      kidIntroSeen: true, companionName: 'Funki', companionVariant: 'sunset',
+    });
+  });
+
+  it('a card whose Ronki already hatched keeps its own Ronki', () => {
+    localStorage.setItem('hdx2_drachennest', JSON.stringify(hatched));
+    openLink(T);
+    stashLocalHatchForShareLink();
+    expect(takePendingHatch({ kidIntroSeen: true, onboardingDone: true }, { token: T })).toBeNull();
+  });
+
+  it('writes nothing without a link token, for a sibling\'s local save, before the hatch or after onboarding', () => {
+    localStorage.setItem('hdx2_drachennest', JSON.stringify(hatched));
+    expect(stashLocalHatchForShareLink()).toBe(false);
+    openLink(T);
+    localStorage.setItem('ronki_local_owner', 'e'.repeat(32));
+    expect(stashLocalHatchForShareLink()).toBe(false);
+    localStorage.removeItem('ronki_local_owner');
+    localStorage.setItem('hdx2_drachennest', JSON.stringify({ ...hatched, kidIntroSeen: false }));
+    expect(stashLocalHatchForShareLink()).toBe(false);
+    localStorage.setItem('hdx2_drachennest', JSON.stringify({ ...hatched, onboardingDone: true }));
+    expect(stashLocalHatchForShareLink()).toBe(false);
+    localStorage.setItem('hdx2_drachennest', JSON.stringify({ ...hatched, companionName: '  ' }));
+    expect(stashLocalHatchForShareLink()).toBe(false);
+    localStorage.setItem('hdx2_drachennest', '{not json');
+    expect(stashLocalHatchForShareLink()).toBe(false);
+    expect(localStorage.getItem(PENDING_HATCH_KEY)).toBeNull();
+  });
+
+  it('the local save of this same card still stashes', () => {
+    localStorage.setItem('hdx2_drachennest', JSON.stringify(hatched));
+    localStorage.setItem('ronki_local_owner', T);
+    openLink(T);
+    expect(stashLocalHatchForShareLink()).toBe(true);
+  });
+});
+
+describe('AuthGate wiring (SAVES-2, INTEGRATION-1)', () => {
+  const src: string = appSource;
+  const gate = src.slice(src.indexOf('function AuthGate()'), src.indexOf('function OnboardingGate'));
+
+  it('stashes in the first render, before the effect that consumes the token', () => {
+    const stash = gate.indexOf('React.useState(() => { stashLocalHatchForShareLink();');
+    const consume = gate.indexOf('getActiveToken();');
+    expect(stash).toBeGreaterThan(-1);
+    expect(consume).toBeGreaterThan(stash);
+  });
+
+  it('the onboarding preview runs only in DEV builds', () => {
+    expect(gate).toContain("p.get('onboardingPreview') === '1' && import.meta.env.DEV");
   });
 });

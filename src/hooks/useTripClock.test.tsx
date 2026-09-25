@@ -6,7 +6,7 @@ import { render, act } from '@testing-library/react';
 const mockTask: { state: any; actions: any } = { state: null, actions: {} };
 vi.mock('../context/TaskContext', () => ({ useTask: () => mockTask }));
 
-import useTripClock, { TRIP_CLOCK_TICK_MS } from './useTripClock';
+import useTripClock, { TRIP_CLOCK_TICK_MS, STALE_HIDDEN_MS, tripClockPage } from './useTripClock';
 
 function Probe({ onClock }: { onClock: (c: any) => void }) {
   onClock(useTripClock());
@@ -99,6 +99,74 @@ describe('useTripClock', () => {
     mockTask.state = { expedition: { state: 'home' } };
     act(() => { vi.advanceTimersByTime(TRIP_CLOCK_TICK_MS * 3); });
     expect(mockTask.actions.checkNewDay).not.toHaveBeenCalled();
+  });
+
+  describe('a tab that comes back stale reloads instead of ticking (SAVES-1)', () => {
+    let realReload: () => void;
+    beforeEach(() => {
+      realReload = tripClockPage.reload;
+      tripClockPage.reload = vi.fn();
+    });
+    afterEach(() => {
+      tripClockPage.reload = realReload;
+      setVisibility('visible');
+    });
+
+    it('after more than 5 minutes hidden', () => {
+      vi.setSystemTime(new Date('2026-09-28T08:00:00'));
+      mockTask.state = { ...mockTask.state, lastDate: new Date('2026-09-28T08:00:00').toISOString().slice(0, 10) };
+      render(<Probe onClock={() => {}} />);
+      const check = mockTask.actions.checkNewDay;
+      const before = check.mock.calls.length;
+      act(() => { setVisibility('hidden'); });
+      vi.setSystemTime(new Date(new Date('2026-09-28T08:00:00').getTime() + STALE_HIDDEN_MS + 1000));
+      act(() => { setVisibility('visible'); });
+      expect(tripClockPage.reload).toHaveBeenCalledTimes(1);
+      expect(check.mock.calls.length).toBe(before);
+      // Nothing ticks after the reload was asked for.
+      act(() => { vi.advanceTimersByTime(TRIP_CLOCK_TICK_MS * 3); });
+      expect(check.mock.calls.length).toBe(before);
+      expect(mockTask.actions.arriveTrip).not.toHaveBeenCalled();
+    });
+
+    it('when the day key moved past lastDate, even after a short hide', () => {
+      vi.setSystemTime(new Date('2026-09-28T08:00:00'));
+      mockTask.state = { ...mockTask.state, lastDate: '2026-09-27' };
+      render(<Probe onClock={() => {}} />);
+      act(() => { setVisibility('hidden'); });
+      act(() => { setVisibility('visible'); });
+      expect(tripClockPage.reload).toHaveBeenCalledTimes(1);
+    });
+
+    it('not after a short hide on the same day', () => {
+      vi.setSystemTime(new Date('2026-09-28T08:00:00'));
+      mockTask.state = { ...mockTask.state, lastDate: new Date('2026-09-28T08:00:00').toISOString().slice(0, 10) };
+      render(<Probe onClock={() => {}} />);
+      act(() => { setVisibility('hidden'); });
+      vi.setSystemTime(new Date('2026-09-28T08:02:00'));
+      act(() => { setVisibility('visible'); });
+      expect(tripClockPage.reload).not.toHaveBeenCalled();
+    });
+
+    it('the 30 s interval does not tick while hidden', () => {
+      vi.setSystemTime(new Date('2026-09-28T08:00:00'));
+      render(<Probe onClock={() => {}} />);
+      const check = mockTask.actions.checkNewDay;
+      const before = check.mock.calls.length;
+      act(() => { setVisibility('hidden'); });
+      act(() => { vi.advanceTimersByTime(TRIP_CLOCK_TICK_MS * 4); });
+      expect(check.mock.calls.length).toBe(before);
+    });
+  });
+
+  it('a trip whose returnAt is more than a day ahead is due (LOOP-5)', () => {
+    vi.setSystemTime(new Date('2026-09-28T09:00:00'));
+    mockTask.state = {
+      ...mockTask.state,
+      expedition: { state: 'away', biome: 'morgenwald', returnAt: new Date('2026-10-03T17:00:00').toISOString() },
+    };
+    render(<Probe onClock={() => {}} />);
+    expect(mockTask.actions.arriveTrip).toHaveBeenCalled();
   });
 
   it('survives mocked actions that lack the loop functions', () => {

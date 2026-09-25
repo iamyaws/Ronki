@@ -19,7 +19,7 @@ import { track, setAnalyticsConsent } from '../lib/analytics';
 import type { EventName, EventProps } from '../lib/analytics';
 import { featureOn } from '../config/features';
 import { now as clockNow, dayKey, daysBetween } from '../loop/clock';
-import { blockAt, dayTripReturnAt, nightTripReturnAt } from '../loop/dayPhase';
+import { blockAt, dayTripReturnAt, eveningStartFor, nightTripReturnAt } from '../loop/dayPhase';
 import { evoAfterTreasure, stageOf } from '../loop/growth';
 import { EVENING_STARTS } from '../loop/types';
 import type { LoopActions, TripKind, EveningStart } from '../loop/types';
@@ -283,8 +283,13 @@ export interface TaskState {
   // ── Finch pass loop fields (26 Sep 2026, src/loop/types.ts LoopStateFields) ──
   /** Opened treasures so far. Old saves: backfilled from expeditionLog.length. */
   adventureCount?: number;
-  /** Day key (clock.dayKey) of the last departure; one trip per day. */
+  /** Day key (clock.dayKey) of the last departure; one trip per day. A
+   *  dream trip is stamped with the day of the evening it belongs to. */
   lastTripDate?: string | null;
+  /** ISO time of the last departure. A new trip needs 8 hours after it
+   *  (Astra FC-08: day keys are UTC, so the key alone can let a second
+   *  trip through around UTC midnight). */
+  lastTripAt?: string | null;
   /** Index into TRIPS of the next trip (wraps after 14). Old saves: 0. */
   tripCursor?: number;
   /** Trip ids whose treasure is on the shelf, in order found. */
@@ -812,10 +817,30 @@ function pickMorgenwaldMemento(log: ExpeditionMemento[]): ExpeditionMemento {
 
 // ── Finch pass loop helpers (26 Sep 2026) ──
 
-/** Treasures kept in expeditionLog (was 24 before the Finch pass). */
-export const EXPEDITION_LOG_CAP = 60;
+/** Treasures kept in expeditionLog (was 24 before the Finch pass, then 60).
+ *  The log is the shelf and the passport's keepsakes, so the cap sits far
+ *  above any real family (one treasure a day is under 400 a year; each
+ *  entry is a few hundred bytes). Astra FC-02. */
+export const EXPEDITION_LOG_CAP = 500;
 
 const homeExpedition = (): NonNullable<TaskState['expedition']> => ({ state: 'home', biome: 'morgenwald' });
+
+type RonkiMood = NonNullable<TaskState['ronkiMood']>;
+
+/** Ronki's ambient mood after the expiry step (spec R10, Astra FC-04):
+ *  a mood set on an earlier day, and any 'besorgt', go back to normal.
+ *  Runs on load and in the day transition, so no retired mood (a sad or
+ *  tired bad day, a streak 'magisch') stays on his face. */
+export function expireMood(
+  mood: unknown,
+  setDate: unknown,
+  day: string,
+): { ronkiMood: RonkiMood; ronkiMoodSetDate: string | undefined } {
+  const m = (typeof mood === 'string' ? mood : 'normal') as RonkiMood;
+  const d = typeof setDate === 'string' ? setDate : undefined;
+  if (m === 'besorgt' || (m !== 'normal' && d !== day)) return { ronkiMood: 'normal', ronkiMoodSetDate: undefined };
+  return { ronkiMood: m, ronkiMoodSetDate: d };
+}
 
 /** A non-negative whole number from a save, or the fallback. */
 function wholeOr(value: unknown, fallback: number): number {
@@ -831,6 +856,65 @@ export function migrateExpedition(raw: unknown): NonNullable<TaskState['expediti
   if (e.state === 'leaving') return homeExpedition();
   if (e.state !== 'home' && e.state !== 'away' && e.state !== 'waiting' && e.state !== 'night-away') return homeExpedition();
   return e;
+}
+
+/** Hours a new trip needs after the last departure (Astra FC-08). */
+export const TRIP_MIN_GAP_MS = 8 * 3600 * 1000;
+
+/** A returnAt further ahead than this is a wrong clock: the trip is due (LOOP-5). */
+const TRIP_MAX_AHEAD_MS = 24 * 3600 * 1000;
+
+/** True when an away trip may come home at `t`: returnAt passed, is
+ *  unreadable, or lies more than a day ahead (a trip sent while the
+ *  device clock ran ahead must not stay out for days). */
+export function tripIsDue(e: { returnAt?: string } | null | undefined, t: Date): boolean {
+  const r = e?.returnAt ? Date.parse(e.returnAt) : NaN;
+  if (!Number.isFinite(r)) return true;
+  return t.getTime() >= r || r - t.getTime() > TRIP_MAX_AHEAD_MS;
+}
+
+/** True when a trip of this kind may leave at `t` by the one-trip rules
+ *  (Astra FC-08): Ronki is home, the day key the trip would be stamped
+ *  with (a dream trip: the day of its evening) is not used yet, and the
+ *  last departure is at least 8 hours away. departTrip uses exactly this;
+ *  surfaces can ask it before they show a send-off. */
+export function tripAllowed(
+  s: { expedition?: { state?: string } | null; lastTripDate?: string | null; lastTripAt?: string | null; familyConfig?: { eveningStart?: string } | null } | null | undefined,
+  kind: TripKind,
+  t: Date,
+): boolean {
+  if (!s || (kind !== 'day' && kind !== 'night')) return false;
+  if ((s.expedition?.state || 'home') !== 'home') return false;
+  const key = kind === 'night' ? dayKey(eveningStartFor(t, s.familyConfig?.eveningStart)) : dayKey(t);
+  if (s.lastTripDate === key) return false;
+  const lastAt = s.lastTripAt ? Date.parse(s.lastTripAt) : NaN;
+  return !(Number.isFinite(lastAt) && Math.abs(t.getTime() - lastAt) < TRIP_MIN_GAP_MS);
+}
+
+/** ISO time as a Date, or null. */
+function parseIso(v: unknown): Date | null {
+  if (typeof v !== 'string') return null;
+  const ms = Date.parse(v);
+  return Number.isFinite(ms) ? new Date(ms) : null;
+}
+
+/** lastTripDate and lastTripAt for a loaded save (LOOP-7). A save from
+ *  before the Finch pass has neither: a trip that is away or waiting
+ *  used up the day it left, and a treasure opened today (the last shelf
+ *  entry is stamped at its departure) used up today. */
+export function tripStampsFromSave(raw: any, todayKey: string): { lastTripDate: string | null; lastTripAt: string | null } {
+  const savedDate = typeof raw?.lastTripDate === 'string' ? raw.lastTripDate : null;
+  const savedAt = parseIso(raw?.lastTripAt);
+  const e = raw?.expedition;
+  const outDeparted = e && (e.state === 'away' || e.state === 'waiting') ? parseIso(e.departedAt) : null;
+  const log = Array.isArray(raw?.expeditionLog) ? raw.expeditionLog : [];
+  const lastLogTs = log.length ? parseIso(log[log.length - 1]?.ts) : null;
+  const fromLog = lastLogTs && dayKey(lastLogTs) === todayKey ? lastLogTs : null;
+  const legacy = outDeparted || fromLog;
+  return {
+    lastTripDate: savedDate ?? (legacy ? dayKey(legacy) : null),
+    lastTripAt: savedAt ? savedAt.toISOString() : (legacy ? legacy.toISOString() : null),
+  };
 }
 
 type LoopEvent = [EventName, EventProps?];
@@ -868,13 +952,33 @@ function openTreasure(prev: TaskState, memento: ExpeditionMemento, tripIdHint?: 
   };
 }
 
-/** Today's main quests for a routine, keeping every quest whose id stays
- *  as it is (done, completions, streak). Side quests stay as they are. */
+/** Today's main quests for a routine. Today's list keeps the holiday or
+ *  school set that built it (the Ferien switch says "ab morgen"), read
+ *  from the ids of today's main quests; only without any main quest does
+ *  prev.vacMode decide. Every quest of the same kind carries over its
+ *  done, completions and streak, across the s_/v_ prefix too (LOOP-6,
+ *  KIDUX-6). Side quests stay as they are. */
 function questsForRoutine(prev: TaskState, routine: RoutineConfig): Quest[] {
-  const old = new Map((prev.quests || []).map(q => [q.id, q] as const));
-  const main = buildDay(!!prev.vacMode, routine)
+  const prevMain = (prev.quests || []).filter(q => !q.sideQuest);
+  const vacToday = prevMain.some(q => q.id.startsWith('v_'))
+    ? true
+    : prevMain.some(q => q.id.startsWith('s_')) ? false : !!prev.vacMode;
+  const old = new Map(prevMain.map(q => [q.id, q] as const));
+  const oldByKind = new Map<string, Quest>();
+  for (const q of prevMain) {
+    const k = taskKind(q.id);
+    if (k && !oldByKind.has(`${q.anchor}:${k}`)) oldByKind.set(`${q.anchor}:${k}`, q);
+  }
+  const main = buildDay(vacToday, routine)
     .filter(q => !q.sideQuest)
-    .map(q => old.get(q.id) || { ...q, streak: (prev.sm || {})[q.id] || 0 });
+    .map(q => {
+      const same = old.get(q.id);
+      if (same) return same;
+      const k = taskKind(q.id);
+      const kin = k ? oldByKind.get(`${q.anchor}:${k}`) : undefined;
+      if (kin) return { ...q, done: kin.done, completions: kin.completions, streak: kin.streak };
+      return { ...q, streak: (prev.sm || {})[q.id] || 0 };
+    });
   const sides = (prev.quests || []).filter(q => q.sideQuest);
   return [...main, ...sides];
 }
@@ -935,6 +1039,7 @@ export function createInitialState(): TaskState {
     // Finch pass loop fields.
     adventureCount: 0,
     lastTripDate: null,
+    lastTripAt: null,
     tripCursor: 0,
     treasuresFound: [],
     stageSeen: 0,
@@ -1087,6 +1192,12 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
   const [celebTick, setCelebTick] = useState(0);
   const saveTimer = useRef<ReturnType<typeof setTimeout>>();
   const cloudTimer = useRef<ReturnType<typeof setTimeout>>();
+  // SAVES-3: the latest state and whether a debounced save still waits,
+  // so leaving the page (pagehide, tab hidden) can write it at once.
+  const stateRef = useRef<TaskState | null>(null);
+  stateRef.current = state;
+  const localSavePending = useRef(false);
+  const cloudSavePending = useRef(false);
   // Forward-reference to syncRonkiMood so earlier-declared callbacks
   // (e.g. `complete`) can trigger it without hitting the TDZ. Assigned
   // below once syncRonkiMood is declared.
@@ -1281,9 +1392,10 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
           // Bonding Agent migration — saves predating Apr 2026 don't have
           // these fields. Default to normal mood + schedule a first bad
           // day 14-21d out so returning users aren't ambushed on next open.
-          // Finch pass (spec R10): 'besorgt' is gone, it loads as normal.
-          ronkiMood: (raw as any).ronkiMood === 'besorgt' ? 'normal' : ((raw as any).ronkiMood || 'normal'),
-          ronkiMoodSetDate: (raw as any).ronkiMood === 'besorgt' ? undefined : (raw as any).ronkiMoodSetDate,
+          // Finch pass (spec R10, Astra FC-04): 'besorgt' is gone, and a
+          // mood from an earlier day (an old bad day, a streak 'magisch')
+          // expires at load, as syncRonkiMood would.
+          ...expireMood((raw as any).ronkiMood, (raw as any).ronkiMoodSetDate, today()),
           ronkiNextBadDayDate: (raw as any).ronkiNextBadDayDate || scheduleNextBadRonkiDay(new Date()),
           ronkiLearnedSkills: (raw as any).ronkiLearnedSkills || [],
           ronkiSkillPractice: (raw as any).ronkiSkillPractice || {},
@@ -1362,7 +1474,9 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
           // ── Finch pass loop fields (26 Sep 2026). Defaults for old
           // saves; catEvo is never moved here (spec R6).
           adventureCount: wholeOr((raw as any).adventureCount, Array.isArray((raw as any).expeditionLog) ? (raw as any).expeditionLog.length : 0),
-          lastTripDate: typeof (raw as any).lastTripDate === 'string' ? (raw as any).lastTripDate : null,
+          // A save from before the pass: a trip out today, or a treasure
+          // from today, used up today's trip (LOOP-7).
+          ...tripStampsFromSave(raw, today()),
           tripCursor: wholeOr((raw as any).tripCursor, 0),
           treasuresFound: Array.isArray((raw as any).treasuresFound)
             ? (raw as any).treasuresFound.filter((t: unknown) => typeof t === 'string')
@@ -1424,8 +1538,9 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
             }
           }
         }
-        // Day transition: rebuild quests if date changed
-        if (s.lastDate !== today()) {
+        // Day transition: rebuild quests when the day moved forward. A
+        // clock that went back never runs a transition (LOOP-5).
+        if (!s.lastDate || s.lastDate < today()) {
           s = applyDayTransition(s);
         }
         // Ensure boss exists
@@ -1460,7 +1575,9 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!state) return;
     clearTimeout(saveTimer.current);
+    localSavePending.current = true;
     saveTimer.current = setTimeout(async () => {
+      localSavePending.current = false;
       // Merge into full GameState for storage compatibility
       const raw = await storage.load() as GameState | null;
       const merged = { ...(raw || {}), ...state } as GameState;
@@ -1474,7 +1591,9 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
     const activeToken = getActiveToken();
     if (activeToken) {
       clearTimeout(cloudTimer.current);
+      cloudSavePending.current = true;
       cloudTimer.current = setTimeout(async () => {
+        cloudSavePending.current = false;
         // Finch pass (Astra FC-01): nothing is written to a card before a
         // cloud read for it has reached the server in this session. A
         // failed first read must never become an overwrite of a dragon
@@ -1515,6 +1634,45 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
       clearTimeout(cloudTimer.current);
     };
   }, [state, user]);
+
+  // ── Leaving the page writes a waiting save at once (SAVES-3). The
+  // debounced cloud save (1.5 s) dies with a killed or evicted tab, and on
+  // a same-day tie the next cold start would take the older cloud row and
+  // replay the departure or the treasure. Only a save that still waits is
+  // written, and the cloud only after a read reached it (Astra FC-01). ──
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof document === 'undefined') return;
+    const flush = () => {
+      const s = stateRef.current;
+      if (!s) return;
+      const localDue = localSavePending.current;
+      const token = cloudSavePending.current ? getActiveToken() : null;
+      const cloudDue = !!token && storage.cloudReadOk(token);
+      if (!localDue && !cloudDue) return;
+      // The synchronous local mirror (storage.ts writes it on every save)
+      // stands in for the async storage.load() merge of the timers.
+      let mirror: GameState | null = null;
+      try { mirror = JSON.parse(localStorage.getItem('hdx2_drachennest') || 'null'); } catch { /* private mode */ }
+      const merged = { ...(mirror || {}), ...s } as GameState;
+      if (localDue) {
+        clearTimeout(saveTimer.current);
+        localSavePending.current = false;
+        try { void storage.save(merged); } catch { /* best effort */ }
+      }
+      if (cloudDue && token) {
+        clearTimeout(cloudTimer.current);
+        cloudSavePending.current = false;
+        try { void storage.cloudSaveByToken(token, merged); } catch { /* best effort */ }
+      }
+    };
+    const onVisibility = () => { if (document.visibilityState === 'hidden') flush(); };
+    document.addEventListener('visibilitychange', onVisibility);
+    window.addEventListener('pagehide', flush);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('pagehide', flush);
+    };
+  }, []);
 
   // ── Consent timing (Finch pass): the parent step (or the website card)
   // settles the consent choice. Before it, funnel events wait in memory
@@ -1573,7 +1731,6 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
     let activeMissions = [...(s.activeMissions || [])];
     let completedMissions = [...(s.completedMissions || [])];
     let missionHp = 0;
-    let missionEvo = 0;
     const gearAwarded: string[] = [];
 
     activeMissions = activeMissions.map(m => {
@@ -1590,7 +1747,6 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
       if (newProg >= def.target && !completedMissions.includes(m.id)) {
         completedMissions.push(m.id);
         missionHp += def.reward.hp;
-        missionEvo += def.reward.evo;
         // Award gear for this mission
         const gear = GEAR_ITEMS.find(g => g.missionId === def.id);
         if (gear && !gearAwarded.includes(gear.id)) gearAwarded.push(gear.id);
@@ -1600,7 +1756,9 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
     });
     // Remove completed missions from active
     activeMissions = activeMissions.filter(m => !completedMissions.includes(m.id) || !s.completedMissions?.includes(m.id));
-    s = { ...s, hp: (s.hp || 0) + missionHp, catEvo: (s.catEvo || 0) + missionEvo, gearInventory: [...(s.gearInventory || []), ...gearAwarded] };
+    // Finch pass (Astra FC-03, spec R6): a legacy mission keeps its record,
+    // HP and gear, but Ronki grows only when a treasure is opened.
+    s = { ...s, hp: (s.hp || 0) + missionHp, gearInventory: [...(s.gearInventory || []), ...gearAwarded] };
 
     // Rebuild quests for today (filtered by the family routine, spec R15), preserve streaks
     const quests = buildDay(s.vacMode, s.familyConfig?.routine).map(q => ({
@@ -1651,6 +1809,8 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
       activeMissions,
       completedMissions,
       lastDate: today(),
+      // A tab left open over midnight expires yesterday's mood too (FC-04).
+      ...expireMood(s.ronkiMood, s.ronkiMoodSetDate, today()),
       dt: 0,
       moodAM: null,
       moodPM: null,
@@ -1943,7 +2103,6 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
       let activeMissions = [...(prev.activeMissions || [])];
       let completedMissions = [...(prev.completedMissions || [])];
       let bonusHp = 0;
-      let bonusEvo = 0;
       const newGear: string[] = [];
       activeMissions = activeMissions.map(m => {
         const def = WEEKLY_MISSIONS.find(wm => wm.id === m.id);
@@ -1952,7 +2111,6 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
         if (newProg >= def.target && !completedMissions.includes(m.id)) {
           completedMissions.push(m.id);
           bonusHp += def.reward.hp;
-          bonusEvo += def.reward.evo;
           const gear = GEAR_ITEMS.find(g => g.missionId === def.id);
           if (gear && !(prev.gearInventory || []).includes(gear.id)) newGear.push(gear.id);
           queueCelebration({ type: 'victory', payload: { mission: def.title, hp: def.reward.hp, evo: def.reward.evo } });
@@ -1965,7 +2123,8 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
         // Water sip: +1 HP (was +2). Kept small-positive so the bar
         // fill still mints a tangible point but 6 sips = +6/day, not +12.
         hp: (prev.hp || 0) + 1 + bonusHp,
-        catEvo: (prev.catEvo || 0) + bonusEvo,
+        // Finch pass (Astra FC-03): no catEvo from a mission; growth comes
+        // only from opened treasures (spec R6).
         activeMissions,
         completedMissions,
         gearInventory: [...(prev.gearInventory || []), ...newGear],
@@ -2041,6 +2200,9 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
         ...prev,
         onboardingDone: true,
         onboardingDate: prev.onboardingDate || new Date().toISOString().slice(0, 10),
+        // The child just met Ronki: no "Ich hab von dir geträumt" return
+        // line on the first Nest open (KIDUX-11, own read O1).
+        greetedDate: dayKey(clockNow()),
         eggType: cfg?.eggType || prev.eggType,
         heroGender: cfg?.heroGender || prev.heroGender || null,
         catEvo: babyEvo,
@@ -2243,6 +2405,7 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
         ...prev,
         // Finch pass: the old path also uses up today's trip.
         lastTripDate: dayKey(now),
+        lastTripAt: now.toISOString(),
         expedition: {
           state: 'away' as const,
           biome: 'morgenwald' as const,
@@ -2304,8 +2467,11 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
       const e = prev.expedition || homeExpedition();
       if (e.state !== 'home') return prev;
       const t = clockNow();
-      const key = dayKey(t);
-      if (prev.lastTripDate === key) return prev;
+      // One trip a day (tripAllowed): a dream trip belongs to the evening
+      // it starts in, also after midnight (Astra FC-08, LOOP-4), and day
+      // keys are UTC, so never two departures within 8 hours.
+      if (!tripAllowed(prev, kind, t)) return prev;
+      const key = kind === 'night' ? dayKey(eveningStartFor(t, prev.familyConfig?.eveningStart)) : dayKey(t);
       const trip = tripAt(wholeOr(prev.tripCursor, 0));
       const back = kind === 'day'
         ? dayTripReturnAt(t, prev.familyConfig?.eveningStart)
@@ -2324,6 +2490,7 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
       const next: TaskState = {
         ...prev,
         lastTripDate: key,
+        lastTripAt: ts,
         expedition: {
           state: 'away',
           biome: 'morgenwald',
@@ -2344,9 +2511,9 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
       if (!prev) return prev;
       const e = prev.expedition;
       if (!e || e.state !== 'away') return prev;
-      const r = e.returnAt ? Date.parse(e.returnAt) : NaN;
-      // A trip without a readable return time comes home rather than stay out forever.
-      if (Number.isFinite(r) && clockNow().getTime() < r) return prev;
+      // A trip without a readable return time, or one more than a day
+      // ahead (wrong clock), comes home rather than stay out (LOOP-5).
+      if (!tripIsDue(e, clockNow())) return prev;
       return withEvents(
         { ...prev, expedition: { ...e, state: 'waiting' } },
         [['expedition.return', { biome: e.biome || 'morgenwald' }]],
@@ -2386,7 +2553,17 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
     if (!EVENING_STARTS.includes(value)) return;
     setState(prev => {
       if (!prev || prev.familyConfig?.eveningStart === value) return prev;
-      return { ...prev, familyConfig: { ...prev.familyConfig, eveningStart: value } };
+      const next: TaskState = { ...prev, familyConfig: { ...prev.familyConfig, eveningStart: value } };
+      // A day trip that is out comes home at the new evening start (the
+      // picker promises that). The trip clock brings him home at once if
+      // that time already passed. A waiting treasure and a dream trip keep
+      // their times (Astra FC-09).
+      const e = prev.expedition;
+      if (e && e.state === 'away' && e.kind === 'day') {
+        const left = parseIso(e.departedAt) || clockNow();
+        next.expedition = { ...e, returnAt: dayTripReturnAt(left, value).toISOString() };
+      }
+      return next;
     });
   }, []);
 
@@ -2424,7 +2601,9 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
   const checkNewDay = useCallback(() => {
     setState(prev => {
       if (!prev) return prev;
-      if (prev.lastDate === dayKey(clockNow())) return prev;
+      // Only forward: a clock set back (or a key from another device's
+      // clock) never rebuilds the day (LOOP-5).
+      if (prev.lastDate && dayKey(clockNow()) <= prev.lastDate) return prev;
       return applyDayTransition(prev);
     });
   }, []);

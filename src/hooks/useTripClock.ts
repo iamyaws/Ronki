@@ -1,12 +1,18 @@
 /**
  * useTripClock (Finch pass, 26 Sep 2026). Mounted once in AppContent.
  *
- * The one clock of the loop. On mount, whenever the tab becomes visible
- * again, and every 30 seconds it:
+ * The one clock of the loop. On mount and every 30 seconds while the tab
+ * is visible it:
  *   1. runs the day transition when the day changed while the app stayed
  *      open (actions.checkNewDay), before any fire or departure check;
  *   2. brings Ronki home (actions.arriveTrip) once his trip is due, on any
  *      screen, so the return no longer needs the Expedition screen.
+ *
+ * A tab that comes back after a while never ticks on its old state
+ * (SAVES-1). When it was hidden for more than 5 minutes, or the day key
+ * moved past state.lastDate, the page reloads instead, so the load path
+ * merges the cloud row (another device may have played meanwhile) before
+ * any day transition or arrival runs and gets saved over it.
  *
  * Returns the current time, its day key and the block of the day, and
  * re-renders at least every 30 seconds so surfaces follow the clock.
@@ -19,11 +25,26 @@ import type { TripClock } from '../loop/types';
 
 export const TRIP_CLOCK_TICK_MS = 30_000;
 
-/** True when an away trip is due home at `t` (a trip without a readable return time is due). */
+/** Hidden longer than this, the tab reloads when it comes back (SAVES-1). */
+export const STALE_HIDDEN_MS = 5 * 60 * 1000;
+
+/** The page reload, swappable in tests. */
+export const tripClockPage = {
+  reload: (): void => { window.location.reload(); },
+};
+
+/** A returnAt further ahead than this is a wrong clock (LOOP-5). */
+const MAX_AHEAD_MS = 24 * 3600 * 1000;
+
+/** True when an away trip is due home at `t`: returnAt passed, unreadable, or more than a day ahead. */
 function tripDue(expedition: { state?: string; returnAt?: string } | null | undefined, t: Date): boolean {
   if (!expedition || expedition.state !== 'away') return false;
   const r = expedition.returnAt ? Date.parse(expedition.returnAt) : NaN;
-  return !Number.isFinite(r) || t.getTime() >= r;
+  return !Number.isFinite(r) || t.getTime() >= r || r - t.getTime() > MAX_AHEAD_MS;
+}
+
+function tabHidden(): boolean {
+  return typeof document !== 'undefined' && document.visibilityState === 'hidden';
 }
 
 export default function useTripClock(): TripClock {
@@ -35,8 +56,12 @@ export default function useTripClock(): TripClock {
   const actionsRef = useRef(actions);
   stateRef.current = state;
   actionsRef.current = actions;
+  // When the tab went hidden (ms), and whether a reload is on its way.
+  const hiddenAtRef = useRef<number | null>(null);
+  const reloadingRef = useRef(false);
 
   const tick = useCallback(() => {
+    if (reloadingRef.current) return;
     const t = clockNow();
     setNowT(t);
     const a = actionsRef.current as Partial<typeof actions> | undefined;
@@ -47,14 +72,33 @@ export default function useTripClock(): TripClock {
 
   useEffect(() => {
     // The first check runs in the effect below, as soon as state is loaded.
-    const id = setInterval(tick, TRIP_CLOCK_TICK_MS);
-    const onVisible = () => {
-      if (typeof document === 'undefined' || document.visibilityState === 'visible') tick();
+    // The interval ticks only while the tab is visible (SAVES-1).
+    const id = setInterval(() => { if (!tabHidden()) tick(); }, TRIP_CLOCK_TICK_MS);
+    const onVisibility = () => {
+      if (tabHidden()) {
+        if (hiddenAtRef.current === null) hiddenAtRef.current = clockNow().getTime();
+        return;
+      }
+      const hiddenAt = hiddenAtRef.current;
+      hiddenAtRef.current = null;
+      if (reloadingRef.current) return;
+      const t = clockNow();
+      const lastDate = stateRef.current?.lastDate;
+      const dayMoved = typeof lastDate === 'string' && lastDate !== '' && dayKey(t) > lastDate;
+      const longAway = hiddenAt !== null && t.getTime() - hiddenAt > STALE_HIDDEN_MS;
+      if (stateRef.current && (dayMoved || longAway)) {
+        // Stale state: reload so the load path merges the cloud first.
+        // Nothing ticks (and so nothing is saved) until the page is new.
+        reloadingRef.current = true;
+        tripClockPage.reload();
+        return;
+      }
+      tick();
     };
-    document.addEventListener('visibilitychange', onVisible);
+    document.addEventListener('visibilitychange', onVisibility);
     return () => {
       clearInterval(id);
-      document.removeEventListener('visibilitychange', onVisible);
+      document.removeEventListener('visibilitychange', onVisibility);
     };
   }, [tick]);
 
