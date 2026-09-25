@@ -15,8 +15,8 @@ export default function Home() {
   return (
     <PainterlyShell>
       <PageMeta
-        title="Ronki: Der Drachen-Gefährte für Kinder-Routinen"
-        description="Ronki trägt die Routine mit. Ein Drachen-Gefährte, der Kinder durch den Alltag begleitet. Ohne Streaks, ohne Werbung, ohne Dark Patterns."
+        title="Ronki: Morgenroutine und Abendroutine für Kinder, ohne Streit"
+        description="Kostenlose Routine-Vorlagen zum Ausdrucken und ein Drachen-Begleiter: So schaffen Kinder von 5 bis 8 ihre Morgen- und Abendschritte selbst. Ohne Werbung."
         canonicalPath="/"
         locale="de"
         alternates={{ de: '/', en: '/en' }}

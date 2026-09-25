@@ -16,6 +16,7 @@ export default function RatgeberAbendroutineGrundschulkind() {
       category="Abendroutine"
       readMinutes={10}
       publishedAt="2026-04-19"
+      updatedAt="2026-09-15"
       ogImage="/og-ratgeber-abendroutine.jpg"
       heroImage="/art/bioms/Sternenmeer_sea-of-stars.webp"
       heroAlt="Malerischer Sternenhimmel über einer Abendlandschaft, ruhiger Übergang in die Nacht."

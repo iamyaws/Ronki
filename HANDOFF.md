@@ -40,6 +40,36 @@ Marc's ask: make the new Bilderbuch design live in the real PWA, benchmarked aga
 
 **Follow-ups.** Parent dashboard and legal pages still carry hard-coded teal accents (readable, not restyled). Freunde, micropedia creatures, mini-games, bosses and birthday scenes keep their old painterly art. The first-breath fire puff is still a gradient. `CaveStyleSheet` keeps the old look. Belohnungsbank copy still names Funkelzeit (pre-existing). Material Symbols still loads from Google for screens outside the core loop. The Profile's Pflege and Erinnerungen segments and the Buch are restyled but not reachable from any tab (pre-existing). Animated WebP on an old iPad and a Fire HD is untested on a real device.
 
+## Where things stand (25 September 2026, overnight)
+
+Growth engine approved by Marc: spec [docs/strategy/2026-09-25-growth-engine-design.md](docs/strategy/2026-09-25-growth-engine-design.md) (read its last section, "Changes the same night"), plan [docs/superpowers/plans/2026-09-25-foundation-and-launch.md](docs/superpowers/plans/2026-09-25-foundation-and-launch.md), keyword map [docs/strategy/2026-09-25-keyword-map.md](docs/strategy/2026-09-25-keyword-map.md). Astra reviews (not in git): `C:\Users\öööö\ronki\reviews\`. Launch kit (not in git): `C:\Users\öööö\ronki\launch\2026-09-26\KIT.md`.
+
+**Found and fixed on 25 Sep:**
+- Supabase paused again on 23 Sep although the weekly keep-alive answered 200 on 21 Sep. Restored by Fable via the Supabase MCP the same day (ACTIVE_HEALTHY). Keep-alive is now daily with two RPCs (PR 15). If a pause warning arrives within three weeks, move to Pro (Marc's rule).
+- Plausible trial dead (stats deleted around 23 Oct). Umami replaces it (PR 17, draft, waits for Marc's website id).
+- `C:\Users\öööö\ronki` was a broken worktree (its admin entry in `louis-quest/.git/worktrees` was gone). Re-registered; working tree matched `design/bilderbuch` exactly. `design/bilderbuch` was already on GitHub.
+- Flow check on production (phone viewport and API): template page, print, PDFs, lead insert, card create and load all work. Test rows deleted.
+- Baseline: 3 cards (last real sync 18 May 2026), 0 activity rows, 0 leads, 4 waitlist addresses (April). Nobody used Ronki since the backend died in May.
+
+**Design note:** the Bilderbuch site went live at 19:49 UTC through PR 14 (section above), while this work was under way. All branches below were brought up to date with that `main`; share pictures and the launch kit use the Bilderbuch look. PR 18 (design/bilderbuch alone) became redundant and shows as merged.
+
+**PRs (Marc, 26 Sep: "merge into main for the work that you feel is all green and ready to move"; Fable merges what is green and reviewed, drafts wait):**
+- PR 15 `foundation/2026-09-25`: daily keep-alive, gate 1 on 15 Dec, home title, article update dates, spec, plan, keyword map. Astra code review: no findings.
+- PR 16 `launch/share-previews` (stacked on 15): share pictures of the real sheets on the four template pages, short links `/morgen`, `/li`, `/ig`, `/tt`, `/yt` in the root `vercel.json` with a host rule (both Vercel projects read the root file; project root is `.`). Check after merge: `curl -I https://www.ronki.de/morgen`.
+- PR 17 `analytics/umami` (draft, stacked on 16): Umami helper, script tag with placeholder id, privacy copy. `website/tests/umami-snippet.test.ts` fails until the real id is in.
+- PR 19 `content/zeitumstellung`: new Ratgeber article /ratgeber/zeitumstellung-kinder for the clock change on 25 Oct 2026 (keyword map move 3), five opened sources, two re-checked by Fable. Astra rep 3 found four points (step cadence against the autumn source, one overstated study claim, an unsourced meal rule, spring advice cited as autumn); all fixed. Independent of 15 to 17.
+- PR 20 `mail/brevo-doi` (draft, stacked on 17): Brevo double opt-in. Migration `20260926000100_leads_brevo_doi.sql` NOT applied (trigger via pg_net, key and ids from Vault, inert until set), `scripts/brevo-setup.mjs`, `/bestaetigt` page, privacy copy naming Brevo. Waits for Marc's account, DKIM at GoDaddy, key in `.env.local`. Must not merge before Brevo is live (the privacy text names it).
+
+**Launch kit (Bilderbuch look, reviewed):** `C:\Users\öööö\ronki\launch\2026-09-26\KIT.md` with carousel, story, share picture and the app icon as profile picture; art copied from `public/art/bilderbuch/`; renderer `launch/tools/carousel.mjs`. Astra reps 1 to 3 closed.
+
+**Follow-ups found tonight:** the live template page promises a timetable ("Nach ein paar Wochen macht dein Kind die Schritte..."; Astra R2-01, site copy, Marc's call); the no-email print route could sit above the email form (R2-02); the printable sheets still use emoji-style icons while the app and the kit use the new task pictures (regenerate `website/public/vorlagen/*` with `scripts/print-vorlagen.mjs` once the sheets use the art).
+
+**Next steps, in order:** Marc merges 15, then 16 (and 19 any time); Umami signup, id into PR 17, merge, check a live pageview; messages from the kit (Sunday evening); Instagram, TikTok, YouTube accounts and first posts; LinkedIn Monday; Brevo double opt-in during the week (plan Task 8). Week of 28 Sep: Abendroutine refresh (keyword map #1), clock-change page before 25 Oct, character sheet, render script.
+
+**Gates:** gate 1 (pull) 15 Dec 2026, gate 2 (reach) 15 Mar 2027 counting all unpaid visitors by source. Umami Hobby keeps six months of data: note the monthly numbers in this file.
+
+Local build note: `louis-quest` needed `npm ci` (qrcode was missing from node_modules); Vercel builds from a clean install and was never affected.
+
 ## Where things stand (14 September 2026)
 
 Revival check done, nothing built. Full write-up (German): [docs/strategy/2026-09-14-wiederbelebungs-check.md](docs/strategy/2026-09-14-wiederbelebungs-check.md). Raw Search Console export: `docs/analytics/gsc-2026-09-14/`.
@@ -51,8 +81,8 @@ Revival check done, nothing built. Full write-up (German): [docs/strategy/2026-0
 
 Full text with the queries: PRD section 12 ([docs/prd/RONKI-V2-PRD.md](docs/prd/RONKI-V2-PRD.md)). Short form:
 
-- **Gate 1, pull, check on 14 Nov 2026:** at least one family we do not know created a card since go-live and used it on three or more distinct days (`profiles` joined with `profile_activity`, subtract our own cards). Plausible cross-check: "Karte erstellt", "CTA Klick" by `cta`.
-- **Gate 2, reach, check on 15 Mar 2027:** at least 500 organic visitors per month on ronki.de (Plausible, Google, average Jan and Feb 2027) and at least 100 distinct addresses across leads and waitlist (`select public.leads_count();`).
+- **Gate 1, pull, check on 15 Dec 2026 (moved from 14 Nov on 25 Sep 2026):** at least one family we do not know created a card since go-live and used it on three or more distinct days (`profiles` joined with `profile_activity`, subtract our own cards). Umami cross-check: "Karte erstellt", "CTA Klick" by `cta`.
+- **Gate 2, reach, check on 15 Mar 2027:** at least 500 unpaid visitors per month on ronki.de (Umami, search plus social, no ads, by source; average Jan and Feb 2027) and at least 100 distinct addresses across leads and waitlist (`select public.leads_count();`).
 - Outcomes: both pass, start v2 Phase 1. Pull only, keep the app alive and work on reach. Reach only, keep the site as content asset, freeze the app, no v2. Neither, Ronki stays a family project. Ticklers for both dates sit in the HQ Fristen register.
 
 ## LIVE since 16 Sep 2026

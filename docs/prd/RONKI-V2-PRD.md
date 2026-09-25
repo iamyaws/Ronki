@@ -278,7 +278,7 @@ Context: the revival check of 14 September 2026 (`docs/strategy/2026-09-14-wiede
 
 ### 12.1 Gate 1, pull: does the app draw anyone we do not know?
 
-Checked on **14 November 2026** (60 days after go-live). Passes when at least one family we do not know has created a card since go-live and used it on three or more distinct days.
+Checked on **15 December 2026** (moved from 14 November by Marc on 25 Sep 2026: the backend was paused again from 23 to 25 Sep and the social launch starts in October, so 14 November would judge about four weeks of traffic). Passes when at least one family we do not know has created a card since go-live and used it on three or more distinct days.
 
 Query (Supabase SQL editor, run as owner):
 
@@ -293,11 +293,11 @@ having count(distinct a.day) >= 3
 order by days desc;
 ```
 
-Subtract our own cards (Louis, test cards) by their first eight characters; Marc has the printed cards. Cross-check in Plausible: "Karte erstellt" events since go-live, "CTA Klick" split by `cta`.
+Subtract our own cards (Louis, test cards) by their first eight characters; Marc has the printed cards. Cross-check in Umami (replaced Plausible on 25 Sep 2026): "Karte erstellt" events since go-live, "CTA Klick" split by `cta`.
 
 ### 12.2 Gate 2, reach: can the site reach parents without paid acquisition?
 
-Checked on **15 March 2027**. Passes when both hold: at least 500 organic visitors per month on ronki.de (Plausible, source Google, average of January and February 2027) and at least 100 distinct email addresses across leads and waitlist (`select public.leads_count();`).
+Checked on **15 March 2027**. Passes when both hold: at least 500 unpaid visitors per month on ronki.de (Umami, all unpaid sources: search and social, no ads, reported by source; average of January and February 2027; definition set by Marc on 25 Sep 2026) and at least 100 distinct email addresses across leads and waitlist (`select public.leads_count();`).
 
 Supporting reads: Search Console clicks per month, "Vorlage Download" events per template, positions for "kind trödelt morgens", "abendroutine kinder", "morgenroutine vorlage".
 

@@ -16,6 +16,7 @@ export default function RatgeberMorgenTroedeln() {
       category="Morgenroutine"
       readMinutes={8}
       publishedAt="2026-04-19"
+      updatedAt="2026-09-15"
       ogImage="/og-ratgeber-morgen-troedeln.jpg"
       heroImage="/art/routines/getting-ready.webp"
       heroAlt="Malerische Morgenszene: Kind zieht sich an, warmes Licht fällt durchs Fenster."
