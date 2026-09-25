@@ -851,7 +851,7 @@ function OnboardingGate() {
  *   0 — CombinedParentSetup        sets parentOnboardingDone, parentPin,
  *                                  analyticsEnabled, familyConfig
  *   1 — HandoffBackCard            sets parentHandoffBackSeen
- *   2 — MeetRonki                  collects {heroName, companionVariant};
+ *   2 — MeetRonki                  collects {companionName, companionVariant};
  *                                  sets kidIntroSeen
  *   3 — TeachFireStep              calls completeOnboarding(...) which
  *                                  sets onboardingDone + taughtSignature
@@ -869,7 +869,7 @@ function OnboardingChain({ previewLoop, onComplete }) {
   // kid finishes naming Ronki — the most embarrassing possible time
   // to crash. Pulling it once at the chain level so all phases share it.
   const { t } = useTranslation();
-  const [meetData, setMeetData] = React.useState({ heroName: '', companionVariant: 'forest' });
+  const [meetData, setMeetData] = React.useState({ companionName: '', companionVariant: 'forest' });
 
   // Compute phase from state gates so resume works.
   const phase =
@@ -930,14 +930,16 @@ function OnboardingChain({ previewLoop, onComplete }) {
   if (phase === 2) {
     return (
       <MeetRonki
-        onComplete={({ heroName, companionVariant }) => {
-          // Persist what the kid picked + named — TeachFireStep needs
-          // companionVariant for its theming, completeOnboarding needs
-          // heroName when TeachFireStep finishes.
-          setMeetData({ heroName: heroName || '', companionVariant: companionVariant || 'forest' });
+        onComplete={({ companionName, companionVariant }) => {
+          // Persist what the kid picked and named. The name is Ronki's
+          // nickname (companionName). Until 25 Sep 2026 it travelled as
+          // heroName and completeOnboarding copied it into
+          // familyConfig.childName, so the dragon's name replaced the
+          // child's own name from the parent setup ("Hallo Funki!").
+          setMeetData({ companionName: companionName || '', companionVariant: companionVariant || 'forest' });
           actions.patchState?.({
             kidIntroSeen: true,
-            heroName: heroName || state?.heroName,
+            companionName: companionName || state?.companionName,
             companionVariant: companionVariant || state?.companionVariant,
           });
         }}
@@ -958,9 +960,11 @@ function OnboardingChain({ previewLoop, onComplete }) {
       t={t}
       ProgressBar={NoProgressBar}
       onComplete={() => {
+        // No heroName here: completeOnboarding would copy it into the
+        // child's name. The child's name comes only from the parent setup
+        // or the profile card.
         actions.completeOnboarding?.({
           companionVariant: state?.companionVariant || meetData.companionVariant,
-          heroName: state?.heroName || meetData.heroName,
           heroGender: null,
           taughtSignature: 'fire',
         });

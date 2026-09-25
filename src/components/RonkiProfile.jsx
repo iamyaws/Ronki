@@ -118,6 +118,17 @@ const PROFILE_QUIPS = {
   ],
 };
 
+/**
+ * The profile title names Ronki by the nickname the kid gave him at the
+ * hatch (MeetRonki name chips, 25 Sep 2026): "Funki ist gut drauf."
+ * Every title starts with "Ronki"; the body copy keeps the species name.
+ */
+export function withNickname(title, nickname) {
+  const nick = (nickname || '').trim();
+  if (!nick || nick === 'Ronki' || typeof title !== 'string') return title;
+  return title.replace(/^Ronki\b/, nick);
+}
+
 function pickProfileQuip(mood, rollKey) {
   const pool = PROFILE_QUIPS[mood] || PROFILE_QUIPS.normal;
   const dayIdx = Math.floor(Date.now() / 86_400_000);
@@ -513,7 +524,10 @@ export default function RonkiProfile({ onNavigate }) {
                 {stageName} · {lang === 'de' ? 'Stufe' : 'Stage'} {stage}
               </p>
               <h1 className="bb-display text-ink" style={{ fontSize: 30, margin: '0 0 8px 0' }}>
-                {moodCopy.title[lang] || MOOD_CARD_COPY.normal.title[lang] || MOOD_CARD_COPY.normal.title.de}
+                {withNickname(
+                  moodCopy.title[lang] || MOOD_CARD_COPY.normal.title[lang] || MOOD_CARD_COPY.normal.title.de,
+                  state.companionName,
+                )}
               </h1>
               <p className="font-body text-ink-soft"
                  style={{ fontSize: 17, lineHeight: 1.45, margin: 0, textWrap: 'pretty' }}>

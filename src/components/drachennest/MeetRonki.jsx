@@ -9,6 +9,7 @@ import {
   MotionTicks,
   PaperCard,
   PillButton,
+  QuietLink,
   SceneLoop,
   SpeechBubble,
   useReducedMotion,
@@ -85,11 +86,35 @@ const LINES = {
   close: { who: 'Ronki', text: 'Bis morgen. Versprochen.' },
 };
 
+/**
+ * Name chips (PRD 5.2, Marc 25 Sep 2026): the kid gives Ronki a nickname
+ * by tapping, not typing. Each chip plays Ronki trying the name on
+ * (public/audio/ronki/de_name_chip_<id>.mp3, scripts/gen-name-chip-voices.py),
+ * so a pre-reader picks by ear. Typing stays behind "selbst schreiben".
+ * The pick is Ronki's nickname (companionName); it never touches the
+ * child's own name any more.
+ */
+export const NAME_CHIPS = [
+  { id: 'ronki', name: 'Ronki' },
+  { id: 'funki', name: 'Funki' },
+  { id: 'flaemmchen', name: 'Flämmchen' },
+  { id: 'glut', name: 'Glut' },
+  { id: 'pieks', name: 'Pieks' },
+  { id: 'knisti', name: 'Knisti' },
+];
+
+/** The close line says the nickname back, so the pick lands. */
+function closeLine(nick) {
+  return nick ? `Ich bin ${nick}! Bis morgen. Versprochen.` : LINES.close.text;
+}
+
 export default function MeetRonki({ onComplete }) {
   useTask();
   const [phase, setPhase] = useState('approach');
   const [picked, setPicked] = useState(null);
   const [name, setName] = useState('');
+  const [chipId, setChipId] = useState(null);
+  const [typing, setTyping] = useState(false);
   const [voiceKey, setVoiceKey] = useState(0);
 
   // Auto-advance through the phases the kid does not drive. Each branch
@@ -142,6 +167,15 @@ export default function MeetRonki({ onComplete }) {
     setVoiceKey(v => v + 1);
   }, []);
 
+  const pickChip = (chip) => {
+    if (phase !== 'name') return;
+    setChipId(chip.id);
+    setName(chip.name);
+    setTyping(false);
+    // Names sound the same in both languages: play the German take.
+    VoiceAudio.play(`de_name_chip_${chip.id}`);
+  };
+
   const confirmName = () => {
     const trimmed = name.trim();
     if (!trimmed) return;
@@ -156,7 +190,7 @@ export default function MeetRonki({ onComplete }) {
     // runs after this surface and flips onboardingDone. See App.jsx
     // OnboardingChain.
     const egg = EGGS.find(e => e.id === picked);
-    onComplete?.({ companionVariant: egg?.variant || 'forest', heroName: name.trim() });
+    onComplete?.({ companionVariant: egg?.variant || 'forest', companionName: name.trim() });
   };
 
   const cur = LINES[phase];
@@ -218,7 +252,7 @@ export default function MeetRonki({ onComplete }) {
       {/* Name and close: Ronki on white. */}
       {(phase === 'name' || phase === 'close') && (
         <div
-          className="absolute inset-0 flex flex-col items-center px-6 mr-fade"
+          className="absolute inset-0 flex flex-col items-center px-6 mr-fade overflow-y-auto"
           style={{
             paddingTop: 'calc(24px + env(safe-area-inset-top, 0px))',
             paddingBottom: 'calc(24px + env(safe-area-inset-bottom, 0px))',
@@ -227,26 +261,59 @@ export default function MeetRonki({ onComplete }) {
           <div className="flex-1 flex flex-col items-center justify-center gap-5 w-full max-w-sm">
             {cur && (
               <SpeechBubble key={voiceKey} side="bottom" size="lg" className="mr-line-in" style={{ maxWidth: 300 }}>
-                {cur.text}
+                {phase === 'close' ? closeLine(name.trim()) : cur.text}
               </SpeechBubble>
             )}
-            <MoodChibi stage={1} mood="normal" variant={EGGS.find(e => e.id === picked)?.variant} size={phase === 'close' ? 260 : 220} bare label="Ronki" />
+            {/* Smaller on the name page so the chips fit on a phone. */}
+            <MoodChibi stage={1} mood="normal" variant={EGGS.find(e => e.id === picked)?.variant} size={phase === 'close' ? 260 : 150} bare label="Ronki" />
           </div>
 
           {phase === 'name' && (
             <div className="w-full max-w-sm flex flex-col items-center gap-4 mr-line-in" style={{ animationDelay: '300ms' }}>
-              <label htmlFor="mr-name" className="sr-only">Name für Ronki</label>
-              <input
-                id="mr-name"
-                type="text"
-                value={name}
-                onChange={e => setName(e.target.value.slice(0, 18))}
-                placeholder="hier tippen"
-                autoFocus
-                autoComplete="off"
-                className="w-full min-w-0 rounded-[14px] border-[2.5px] border-ink bg-white px-4 py-3 text-center font-headline font-semibold text-ink placeholder:text-ink-soft/60 focus:outline-none focus:border-cobalt"
-                style={{ fontSize: 22, lineHeight: 1.2 }}
-              />
+              <div
+                className="grid w-full gap-3"
+                // Three per row where they fit, two on narrow phones, so a
+                // long name like "Flämmchen" never runs over its chip.
+                style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))' }}
+                role="group"
+                aria-label="Namen für Ronki"
+              >
+                {NAME_CHIPS.map(chip => (
+                  <ChoiceTile
+                    key={chip.id}
+                    label={chip.name}
+                    selected={chipId === chip.id}
+                    aria-label={`${chip.name}: anhören und wählen`}
+                    onClick={() => pickChip(chip)}
+                    className="w-full"
+                    style={{ minWidth: 0, minHeight: 88, paddingLeft: 4, paddingRight: 4 }}
+                  >
+                    <DoodleIcon name="sound" size={26} style={{ color: 'var(--color-cobalt)' }} />
+                  </ChoiceTile>
+                ))}
+              </div>
+
+              {typing ? (
+                <>
+                  <label htmlFor="mr-name" className="sr-only">Eigener Name für Ronki</label>
+                  <input
+                    id="mr-name"
+                    type="text"
+                    value={chipId ? '' : name}
+                    onChange={e => { setChipId(null); setName(e.target.value.slice(0, 18)); }}
+                    placeholder="hier tippen"
+                    autoFocus
+                    autoComplete="off"
+                    className="w-full min-w-0 rounded-[14px] border-[2.5px] border-ink bg-white px-4 py-3 text-center font-headline font-semibold text-ink placeholder:text-ink-soft/60 focus:outline-none focus:border-cobalt"
+                    style={{ fontSize: 22, lineHeight: 1.2 }}
+                  />
+                </>
+              ) : (
+                <QuietLink tone="cobalt" onClick={() => { setTyping(true); setChipId(null); setName(''); }}>
+                  selbst schreiben
+                </QuietLink>
+              )}
+
               <PillButton full size="lg" onClick={confirmName} disabled={!name.trim()}>
                 so soll er heißen
               </PillButton>

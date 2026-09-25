@@ -460,6 +460,10 @@ export interface TaskState {
   /** One of COMPANION_VARIANTS.id — Louis's picked colorway at onboarding.
    *  Undefined for saves that pre-date the variant system (triggers migration). */
   companionVariant?: string;
+  /** The nickname the kid gave Ronki at the hatch (name chips or typed,
+   *  25 Sep 2026). Ronki stays the species and brand name; this is shown
+   *  where he speaks about himself. Never copied into familyConfig.childName. */
+  companionName?: string;
 
   // ── Bonding Agent (Apr 2026) ──
   // Ronki has rare bad days (every 14-21 days, app-decided, never Louis).
