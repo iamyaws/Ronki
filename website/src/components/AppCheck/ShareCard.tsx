@@ -27,11 +27,11 @@ const CARD_W = 1200;
 const CARD_H = 675;
 
 const COLORS = {
-  cream: '#FDF8F0',
-  teal: '#1A3C3F',
+  cream: '#FFFFFF',
+  teal: '#040812',
   tealDark: '#0E2A2C',
-  sage: '#50A082',
-  mustard: '#FCD34D',
+  sage: '#0544B0',
+  mustard: '#FDD134',
   ink: '#1A2022',
   inkSoft: 'rgba(26, 32, 34, 0.65)',
 };
@@ -117,8 +117,8 @@ async function buildCardPng(props: Props): Promise<Blob> {
 
   // Soft mustard glow (top-left)
   const tlGlow = ctx.createRadialGradient(180, 140, 40, 180, 140, 380);
-  tlGlow.addColorStop(0, 'rgba(252, 211, 77, 0.32)');
-  tlGlow.addColorStop(1, 'rgba(252, 211, 77, 0)');
+  tlGlow.addColorStop(0, 'rgba(253, 209, 52, 0.32)');
+  tlGlow.addColorStop(1, 'rgba(253, 209, 52, 0)');
   ctx.fillStyle = tlGlow;
   ctx.fillRect(0, 0, CARD_W, CARD_H);
 
@@ -131,8 +131,8 @@ async function buildCardPng(props: Props): Promise<Blob> {
     CARD_H - 160,
     420,
   );
-  brGlow.addColorStop(0, 'rgba(80, 160, 130, 0.30)');
-  brGlow.addColorStop(1, 'rgba(80, 160, 130, 0)');
+  brGlow.addColorStop(0, 'rgba(5, 68, 176, 0.30)');
+  brGlow.addColorStop(1, 'rgba(5, 68, 176, 0)');
   ctx.fillStyle = brGlow;
   ctx.fillRect(0, 0, CARD_W, CARD_H);
 
@@ -198,7 +198,7 @@ async function buildCardPng(props: Props): Promise<Blob> {
   ctx.fillText('ronki.de/tools/app-check', 80, stripY + 32);
 
   ctx.font = '500 16px "Plus Jakarta Sans", system-ui, sans-serif';
-  ctx.fillStyle = 'rgba(253, 248, 240, 0.7)';
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
   const ctaText = 'Eltern-Check für Kinder-Apps';
   const ctaW = ctx.measureText(ctaText).width;
   ctx.fillText(ctaText, CARD_W - 80 - ctaW, stripY + 32);
@@ -245,7 +245,7 @@ export function ShareCard(props: Props) {
         type="button"
         onClick={handleDownload}
         disabled={status === 'rendering'}
-        className="group inline-flex items-center gap-2 rounded-full border border-teal/30 bg-cream px-5 py-3 text-sm text-teal-dark font-display font-semibold hover:bg-teal-dark hover:text-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-cream disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="group inline-flex items-center gap-2 rounded-full border border-teal/30 bg-cream px-5 py-3 text-sm text-ink font-display font-semibold hover:bg-teal-dark hover:text-cream focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-cream disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
         {status === 'rendering' ? (
           <>
@@ -268,7 +268,7 @@ export function ShareCard(props: Props) {
         WhatsApp oder ein Eltern-Chat.
       </p>
       {status === 'error' && (
-        <p role="alert" className="text-sm text-teal-dark">
+        <p role="alert" className="text-sm text-ink">
           Bild-Erzeugung hat nicht geklappt. Versuch es bitte gleich noch
           mal, oder mach einen Screenshot der Result-Seite.
         </p>

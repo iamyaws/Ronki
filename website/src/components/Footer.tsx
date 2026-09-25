@@ -1,53 +1,36 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { WaitlistCTA } from './WaitlistCTA';
+import { ClosingBand } from './ClosingBand';
 import { trackEvent } from '../lib/analytics';
 import { getLaunchCopy, LAUNCH_STATE } from '../config/launch-state';
+import { RonkiWordmark } from './primitives/RonkiWordmark';
+import { WashiTape } from './primitives/WashiTape';
 
-function TapeTopLeft() {
-  return (
-    <svg
-      className="absolute -top-4 left-6 sm:left-10 w-24 h-10 -rotate-[8deg]"
-      viewBox="0 0 120 40"
-      fill="none"
-      aria-hidden
-    >
-      <rect x="0" y="4" width="120" height="32" rx="2" fill="#6B8F71" fillOpacity="0.55" />
-      <line x1="8" y1="14" x2="112" y2="14" stroke="#fff" strokeOpacity="0.12" strokeWidth="1" strokeDasharray="6 4" />
-      <line x1="8" y1="26" x2="112" y2="26" stroke="#fff" strokeOpacity="0.12" strokeWidth="1" strokeDasharray="6 4" />
-    </svg>
-  );
-}
+type FooterProps = {
+  /** The night closing band that ends the page. Pages that already end
+   *  on a dark CTA block of their own pass false, so no two dark blocks
+   *  stack up at the bottom. */
+  closing?: boolean;
+  /** Start page only: the band also carries the three install steps. */
+  install?: boolean;
+};
 
-function TapeBottomRight() {
-  return (
-    <svg
-      className="absolute -bottom-4 right-6 sm:right-10 w-24 h-10 rotate-[8deg]"
-      viewBox="0 0 120 40"
-      fill="none"
-      aria-hidden
-    >
-      <rect x="0" y="4" width="120" height="32" rx="2" fill="#6B8F71" fillOpacity="0.55" />
-      <line x1="8" y1="14" x2="112" y2="14" stroke="#fff" strokeOpacity="0.12" strokeWidth="1" strokeDasharray="6 4" />
-      <line x1="8" y1="26" x2="112" y2="26" stroke="#fff" strokeOpacity="0.12" strokeWidth="1" strokeDasharray="6 4" />
-    </svg>
-  );
-}
-
-export function Footer() {
+export function Footer({ closing = true, install = false }: FooterProps) {
   const copy = getLaunchCopy(LAUNCH_STATE);
   const year = new Date().getFullYear();
 
   return (
-    <footer className="relative px-6 pt-10 pb-12">
-      <div className="relative max-w-6xl mx-auto rounded-3xl bg-cream/80 backdrop-blur-sm border border-teal/10 px-8 sm:px-12 pt-16 pb-10 shadow-sm">
-        <TapeTopLeft />
-        <TapeBottomRight />
+    <>
+      {closing && <ClosingBand install={install} />}
+      <footer className="relative bg-white px-5 sm:px-6 pt-8 pb-10">
+      <div className="relative max-w-6xl mx-auto rounded-[28px] bg-white border-2 border-ink px-6 sm:px-12 pt-12 pb-8">
+        <WashiTape className="-top-4 left-6 sm:left-10 w-24 h-10" rotate={-8} />
+        <WashiTape className="-bottom-4 right-6 sm:right-10 w-24 h-10" rotate={8} />
 
-        <div className="flex flex-col gap-12">
+        <div className="flex flex-col gap-10">
           <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
+            initial={{ opacity: 1, y: 8 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.7 }}
             /* Stack vertically up to medium viewports; only flip to side-
@@ -57,8 +40,10 @@ export function Footer() {
                room (~960px inner minus 320px CTA = 640px paragraph). */
             className="flex flex-col lg:flex-row lg:items-center gap-6 lg:gap-10"
           >
+            {/* The card CTA lives in the closing band above the footer
+                now, so this line is the footer's own quiet sign-off. */}
             <p
-              className="font-display font-semibold text-2xl sm:text-3xl leading-snug text-teal-dark lg:flex-1 lg:max-w-2xl"
+              className="font-display font-semibold text-2xl sm:text-3xl leading-snug text-ink lg:flex-1 lg:max-w-2xl"
               style={{
                 hyphens: 'manual',
                 WebkitHyphens: 'manual',
@@ -67,13 +52,6 @@ export function Footer() {
             >
               {copy.footerMicro}
             </p>
-            {/* Fixed-ish width on lg+ so the long CTA helper-text doesn't
-                spread this column wide and squeeze the paragraph. 380px
-                fits 'Ronki ausprobieren →' comfortably plus helper text
-                wrapped on 2-3 lines. */}
-            <div className="w-full lg:w-[380px] shrink-0">
-              <WaitlistCTA launchState={LAUNCH_STATE} />
-            </div>
           </motion.div>
 
           {/* Four-column grid on desktop: Ronki (product), Mitmachen
@@ -83,23 +61,23 @@ export function Footer() {
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {/* ── Ronki (product understanding) ────────── */}
             <div>
-              <p className="text-xs uppercase tracking-[0.15em] text-teal/60 mb-4 font-medium">
+              <p className="text-xs uppercase tracking-[0.15em] text-cobalt mb-4 font-display font-bold">
                 Ronki
               </p>
               <nav aria-label="Ronki" className="flex flex-col gap-2 text-sm">
-                <Link to="/" className="text-teal-dark/75 hover:text-teal-dark transition-colors w-fit py-2.5">
+                <Link to="/" className="text-ink/85 hover:text-cobalt transition-colors w-fit py-2.5">
                   Start
                 </Link>
-                <Link to="/wie-es-funktioniert" className="text-teal-dark/75 hover:text-teal-dark transition-colors w-fit py-2.5">
+                <Link to="/wie-es-funktioniert" className="text-ink/85 hover:text-cobalt transition-colors w-fit py-2.5">
                   Wie es funktioniert
                 </Link>
-                <Link to="/fuer-eltern" className="text-teal-dark/75 hover:text-teal-dark transition-colors w-fit py-2.5">
+                <Link to="/fuer-eltern" className="text-ink/85 hover:text-cobalt transition-colors w-fit py-2.5">
                   Für Eltern
                 </Link>
-                <Link to="/wissenschaft" className="text-teal-dark/75 hover:text-teal-dark transition-colors w-fit py-2.5">
+                <Link to="/wissenschaft" className="text-ink/85 hover:text-cobalt transition-colors w-fit py-2.5">
                   Wissenschaft
                 </Link>
-                <Link to="/faq" className="text-teal-dark/75 hover:text-teal-dark transition-colors w-fit py-2.5">
+                <Link to="/faq" className="text-ink/85 hover:text-cobalt transition-colors w-fit py-2.5">
                   Häufige Fragen
                 </Link>
               </nav>
@@ -107,14 +85,14 @@ export function Footer() {
 
             {/* ── Mitmachen (community hub) ─────────────── */}
             <div>
-              <p className="text-xs uppercase tracking-[0.15em] text-sage mb-4 font-medium">
+              <p className="text-xs uppercase tracking-[0.15em] text-cobalt mb-4 font-display font-bold">
                 Mitmachen
               </p>
               <nav aria-label="Mitmachen" className="flex flex-col gap-2 text-sm">
                 <Link
                   to="/mitmachen"
                   onClick={() => trackEvent('Mitmachen Click', { source: 'footer' })}
-                  className="text-teal-dark hover:text-sage transition-colors w-fit py-2.5 font-display font-semibold"
+                  className="text-ink hover:text-sage transition-colors w-fit py-2.5 font-display font-semibold"
                 >
                   Gründungs-Familien
                 </Link>
@@ -123,17 +101,17 @@ export function Footer() {
                   onClick={() => trackEvent('Discord Click', { source: 'footer' })}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-teal-dark/75 hover:text-teal-dark transition-colors w-fit py-2.5 inline-flex items-center gap-1.5"
+                  className="text-ink/85 hover:text-cobalt transition-colors w-fit py-2.5 inline-flex items-center gap-1.5"
                 >
                   Discord-Community
                   <span aria-hidden className="text-sage/70 text-[10px] leading-none">↗</span>
                 </a>
-                <Link to="/installieren" className="text-teal-dark/75 hover:text-teal-dark transition-colors w-fit py-2.5">
+                <Link to="/installieren" className="text-ink/85 hover:text-cobalt transition-colors w-fit py-2.5">
                   Ronki installieren
                 </Link>
                 <a
                   href="mailto:hallo@ronki.de"
-                  className="text-teal-dark/75 hover:text-teal-dark transition-colors w-fit py-2.5"
+                  className="text-ink/85 hover:text-cobalt transition-colors w-fit py-2.5"
                 >
                   hallo@ronki.de
                 </a>
@@ -142,17 +120,17 @@ export function Footer() {
 
             {/* ── Entdecken (content) ───────────────────── */}
             <div>
-              <p className="text-xs uppercase tracking-[0.15em] text-teal/60 mb-4 font-medium">
+              <p className="text-xs uppercase tracking-[0.15em] text-cobalt mb-4 font-display font-bold">
                 Entdecken
               </p>
               <nav aria-label="Entdecken" className="flex flex-col gap-2 text-sm">
-                <Link to="/ratgeber" className="text-teal-dark/75 hover:text-teal-dark transition-colors w-fit py-2.5">
+                <Link to="/ratgeber" className="text-ink/85 hover:text-cobalt transition-colors w-fit py-2.5">
                   Ratgeber
                 </Link>
-                <Link to="/vorlagen" className="text-teal-dark/75 hover:text-teal-dark transition-colors w-fit py-2.5">
+                <Link to="/vorlagen" className="text-ink/85 hover:text-cobalt transition-colors w-fit py-2.5">
                   Vorlagen zum Ausdrucken
                 </Link>
-                <Link to="/drachen-sammelkarten" className="text-teal-dark/75 hover:text-teal-dark transition-colors w-fit py-2.5">
+                <Link to="/drachen-sammelkarten" className="text-ink/85 hover:text-cobalt transition-colors w-fit py-2.5">
                   Drachen-Sammelkarten
                 </Link>
                 <a
@@ -160,7 +138,7 @@ export function Footer() {
                   onClick={() => trackEvent('Compendium Click', { source: 'footer' })}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-teal-dark/75 hover:text-teal-dark transition-colors w-fit py-2.5 inline-flex items-center gap-1.5"
+                  className="text-ink/85 hover:text-cobalt transition-colors w-fit py-2.5 inline-flex items-center gap-1.5"
                 >
                   Drachen-Compendium
                   <span aria-hidden className="text-teal/50 text-[10px] leading-none">↗</span>
@@ -170,31 +148,31 @@ export function Footer() {
 
             {/* ── Rechtliches + Mehr ────────────────────── */}
             <div>
-              <p className="text-xs uppercase tracking-[0.15em] text-teal/60 mb-4 font-medium">
+              <p className="text-xs uppercase tracking-[0.15em] text-cobalt mb-4 font-display font-bold">
                 Rechtliches &amp; Mehr
               </p>
               <nav aria-label="Rechtliches und Mehr" className="flex flex-col gap-2 text-sm">
-                <Link to="/impressum" className="text-teal-dark/75 hover:text-teal-dark transition-colors w-fit py-2.5">
+                <Link to="/impressum" className="text-ink/85 hover:text-cobalt transition-colors w-fit py-2.5">
                   Impressum
                 </Link>
-                <Link to="/datenschutz" className="text-teal-dark/75 hover:text-teal-dark transition-colors w-fit py-2.5">
+                <Link to="/datenschutz" className="text-ink/85 hover:text-cobalt transition-colors w-fit py-2.5">
                   Datenschutz
                 </Link>
-                <Link to="/agb" className="text-teal-dark/75 hover:text-teal-dark transition-colors w-fit py-2.5">
+                <Link to="/agb" className="text-ink/85 hover:text-cobalt transition-colors w-fit py-2.5">
                   AGB
                 </Link>
                 <a
                   href="https://ko-fi.com/ronkiapp"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-teal-dark/75 hover:text-teal-dark transition-colors w-fit py-2.5 inline-flex items-center gap-1.5"
+                  className="text-ink/85 hover:text-cobalt transition-colors w-fit py-2.5 inline-flex items-center gap-1.5"
                 >
                   <span aria-hidden>🍨</span> Louis ein Eis ausgeben
                   <span aria-hidden className="text-teal/50 text-[10px] leading-none">↗</span>
                 </a>
                 <Link
                   to="/en"
-                  className="text-teal-dark/75 hover:text-teal-dark transition-colors w-fit py-2.5 inline-flex items-center gap-1.5"
+                  className="text-ink/85 hover:text-cobalt transition-colors w-fit py-2.5 inline-flex items-center gap-1.5"
                 >
                   <span aria-hidden>🇬🇧</span> English version
                 </Link>
@@ -202,16 +180,15 @@ export function Footer() {
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-6 pt-8 border-t border-teal/10">
-            <p className="font-display font-extrabold text-6xl sm:text-8xl leading-none tracking-tighter text-teal-dark/10">
-              ronki
-            </p>
-            <p className="text-xs text-teal-dark/70">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-6 pt-8 border-t-2 border-ink/15">
+            <RonkiWordmark size={56} tone="cobalt" />
+            <p className="text-xs text-ink/75">
               © {year} Ronki · Ein unabhängiges Projekt · Keine Werbepartner, keine Cookies.
             </p>
           </div>
         </div>
       </div>
-    </footer>
+      </footer>
+    </>
   );
 }

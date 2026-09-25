@@ -142,17 +142,17 @@ export default function PrintA6FlyerKids() {
 
         /* ── Front ─────────────────────────────────────────────── */
         .flyer-front-kid {
-          background: #FDF8F0;
+          background: #FFFFFF;
           background-image:
-            radial-gradient(ellipse 120% 80% at 50% 0%, #FDE589 0%, transparent 55%),
-            radial-gradient(ellipse 100% 60% at 50% 100%, rgba(80,160,130,0.18) 0%, transparent 65%);
+            radial-gradient(ellipse 120% 80% at 50% 0%, #FFE68A 0%, transparent 55%),
+            radial-gradient(ellipse 100% 60% at 50% 100%, rgba(5,68,176,0.18) 0%, transparent 65%);
         }
         .flyer-front-kid::before {
           content: "";
           position: absolute;
           top: 0; left: 0; right: 0;
           height: 4mm;
-          background: linear-gradient(90deg, #FCD34D, #50A082);
+          background: linear-gradient(90deg, #FDD134, #0544B0);
         }
         .front-inner {
           height: 100%;
@@ -176,9 +176,9 @@ export default function PrintA6FlyerKids() {
           width: 2.5mm;
           height: 2.5mm;
           border-radius: 50%;
-          background: radial-gradient(circle, #FFE88A 0%, #FCD34D 60%, transparent 70%);
+          background: radial-gradient(circle, #FFE88A 0%, #FDD134 60%, transparent 70%);
           opacity: 0.75;
-          box-shadow: 0 0 1.5mm rgba(252,211,77,0.6);
+          box-shadow: 0 0 1.5mm rgba(253,209,52,0.6);
         }
 
         .eyebrow-kid {
@@ -190,7 +190,7 @@ export default function PrintA6FlyerKids() {
           text-transform: uppercase;
           margin: 0 0 3mm;
           padding: 0.8mm 2mm;
-          background: rgba(252,211,77,0.45);
+          background: rgba(253,209,52,0.45);
           border-radius: 999px;
         }
 
@@ -216,7 +216,7 @@ export default function PrintA6FlyerKids() {
           font-size: 19pt;
           line-height: 1.08;
           letter-spacing: -0.02em;
-          color: #1A3C3F;
+          color: #040812;
           margin: 0 0 2mm;
           text-align: center;
         }
@@ -226,7 +226,7 @@ export default function PrintA6FlyerKids() {
           font-weight: 700;
           font-size: 13pt;
           font-style: italic;
-          color: #50A082;
+          color: #0544B0;
           margin: 0 0 5mm;
         }
 
@@ -234,11 +234,11 @@ export default function PrintA6FlyerKids() {
           font-family: 'Be Vietnam Pro', system-ui, sans-serif;
           font-size: 9pt;
           line-height: 1.45;
-          color: rgba(26,60,63,0.78);
+          color: rgba(4,8,18,0.78);
           margin: 0 0 auto;
         }
         .hint-kid strong {
-          color: #1A3C3F;
+          color: #040812;
           font-weight: 700;
         }
 
@@ -253,17 +253,17 @@ export default function PrintA6FlyerKids() {
 
         /* ── Back ──────────────────────────────────────────────── */
         .flyer-back-kid {
-          background: #FDF8F0;
+          background: #FFFFFF;
           background-image:
-            radial-gradient(ellipse 80% 60% at 100% 0%, rgba(80,160,130,0.18) 0%, transparent 60%),
-            radial-gradient(ellipse 90% 50% at 0% 100%, rgba(252,211,77,0.2) 0%, transparent 55%);
+            radial-gradient(ellipse 80% 60% at 100% 0%, rgba(5,68,176,0.18) 0%, transparent 60%),
+            radial-gradient(ellipse 90% 50% at 0% 100%, rgba(253,209,52,0.2) 0%, transparent 55%);
         }
         .flyer-back-kid::before {
           content: "";
           position: absolute;
           top: 0; left: 0; right: 0;
           height: 4mm;
-          background: linear-gradient(90deg, #50A082, #FCD34D);
+          background: linear-gradient(90deg, #0544B0, #FDD134);
         }
         .back-inner {
           height: 100%;
@@ -276,7 +276,7 @@ export default function PrintA6FlyerKids() {
           font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
           font-size: 10pt;
           font-weight: 800;
-          color: #1A3C3F;
+          color: #040812;
           letter-spacing: -0.01em;
           text-transform: none;
           margin: 0 0 5mm;
@@ -304,8 +304,8 @@ export default function PrintA6FlyerKids() {
           width: 9mm;
           height: 9mm;
           border-radius: 50%;
-          background: #50A082;
-          color: #FDF8F0;
+          background: #0544B0;
+          color: #FFFFFF;
           font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
           font-weight: 800;
           font-size: 12pt;
@@ -321,19 +321,19 @@ export default function PrintA6FlyerKids() {
           font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
           font-weight: 700;
           font-size: 10pt;
-          color: #1A3C3F;
+          color: #040812;
           margin: 0 0 0.8mm;
           line-height: 1.2;
         }
         .step-sub {
           font-family: 'Be Vietnam Pro', system-ui, sans-serif;
           font-size: 8pt;
-          color: rgba(26,60,63,0.7);
+          color: rgba(4,8,18,0.7);
           margin: 0;
           line-height: 1.35;
         }
         .step-sub strong {
-          color: #1A3C3F;
+          color: #040812;
           font-weight: 700;
         }
 
@@ -353,7 +353,7 @@ export default function PrintA6FlyerKids() {
           font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
           font-weight: 700;
           font-size: 7.5pt;
-          color: #50A082;
+          color: #0544B0;
           letter-spacing: 0.06em;
           text-transform: uppercase;
           margin: 0;
@@ -363,7 +363,7 @@ export default function PrintA6FlyerKids() {
           font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
           font-size: 9pt;
           line-height: 1.35;
-          color: rgba(26,60,63,0.6);
+          color: rgba(4,8,18,0.6);
           margin: auto 0 0;
           text-align: center;
         }
@@ -413,8 +413,8 @@ const instructionBarStyle: React.CSSProperties = {
   position: 'sticky',
   top: 16,
   zIndex: 20,
-  background: '#1A3C3F',
-  color: '#FDF8F0',
+  background: '#040812',
+  color: '#FFFFFF',
   padding: '10px 18px',
   borderRadius: 999,
   fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
@@ -429,8 +429,8 @@ const instructionBarStyle: React.CSSProperties = {
 
 const printBtnStyle: React.CSSProperties = {
   marginLeft: 'auto',
-  background: '#FCD34D',
-  color: '#1A3C3F',
+  background: '#FDD134',
+  color: '#040812',
   border: 0,
   padding: '6px 14px',
   borderRadius: 999,

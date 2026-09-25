@@ -37,7 +37,7 @@ export default function VorlageAbend() {
       eyebrow="Abend"
       title="Die Abendroutine"
       description="Vier Schritte bis ins Bett. Dein Kind malt den Kreis aus, wenn ein Schritt geschafft ist."
-      accent="#4338ca"
+      accent="#0544B0"
       pageTitle="Abendroutine Vorlage für Kinder zum Ausdrucken"
       pageIntro="Vier Schritte vom Zähneputzen bis Licht aus, mit Bildern, die dein Kind auch ohne Lesen versteht. Druck diese Seite direkt aus, ohne Anmeldung, oder hol dir das fertige PDF."
       metaTitle={META_TITLE}

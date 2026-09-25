@@ -10,7 +10,7 @@ type Props = {
 export function SpotlightCard({
   children,
   className = '',
-  spotlightColor = 'rgba(252, 211, 77, 0.35)',
+  spotlightColor = 'rgba(253, 209, 52, 0.35)',
 }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();

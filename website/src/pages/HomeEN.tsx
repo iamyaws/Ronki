@@ -57,7 +57,7 @@ function EnglishWaitlist() {
           placeholder="your@email.com"
           aria-label="Email"
           required
-          className="flex-1 bg-transparent pl-6 pr-2 py-3.5 text-base text-teal-dark placeholder:text-teal-dark/35 focus:outline-none"
+          className="flex-1 bg-transparent pl-6 pr-2 py-3.5 text-base text-ink placeholder:text-ink/35 focus:outline-none"
         />
         <button
           type="submit"
@@ -126,14 +126,14 @@ export default function HomeEN() {
             animate={reduced ? { opacity: 0.07 } : { opacity: [0.05, 0.1, 0.05] }}
             transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
             className="absolute -top-32 -right-32 w-[480px] h-[480px] rounded-full"
-            style={{ background: 'radial-gradient(circle, #FCD34D 0%, transparent 70%)' }}
+            style={{ background: 'radial-gradient(circle, #FDD134 0%, transparent 70%)' }}
           />
           <motion.div
             initial={{ opacity: 0 }}
             animate={reduced ? { opacity: 0.06 } : { opacity: [0.04, 0.09, 0.04] }}
             transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 3 }}
             className="absolute -bottom-40 -left-40 w-[520px] h-[520px] rounded-full"
-            style={{ background: 'radial-gradient(circle, #50a082 0%, transparent 65%)' }}
+            style={{ background: 'radial-gradient(circle, #0544B0 0%, transparent 65%)' }}
           />
         </div>
 
@@ -207,7 +207,7 @@ export default function HomeEN() {
                   <div
                     aria-hidden
                     className="absolute -inset-10 rounded-full blur-3xl opacity-30"
-                    style={{ background: 'radial-gradient(circle, #FCD34D 0%, transparent 70%)' }}
+                    style={{ background: 'radial-gradient(circle, #FDD134 0%, transparent 70%)' }}
                   />
                   <img
                     src="/art/routines/brushing-teeth.webp"
@@ -253,7 +253,7 @@ export default function HomeEN() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.7 }}
-            className="font-display font-bold text-4xl sm:text-5xl lg:text-6xl leading-[1.1] tracking-tight text-teal-dark max-w-3xl"
+            className="font-display font-bold text-4xl sm:text-5xl lg:text-6xl leading-[1.1] tracking-tight text-ink max-w-3xl"
           >
             Your child's dragon.{' '}
             <em className="italic text-sage whitespace-nowrap">Not your alarm clock.</em>
@@ -271,7 +271,7 @@ export default function HomeEN() {
             <p>
               Kids love it because the dragon is theirs. You love it because you don't have to repeat yourself ten times. The whole thing is designed to fade away once the routine sticks. The dragon literally goes to sleep.
             </p>
-            <p className="font-display font-semibold text-teal-dark">
+            <p className="font-display font-semibold text-ink">
               No ads. No streaks that break. No data sold to anyone. Built in Germany, fully DSGVO/GDPR compliant.
             </p>
           </motion.div>
@@ -285,7 +285,7 @@ export default function HomeEN() {
             initial={{ opacity: 0, y: 8 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-[0.7rem] uppercase tracking-[0.2em] text-teal-dark/60 font-semibold mb-6"
+            className="text-[0.7rem] uppercase tracking-[0.2em] text-ink/60 font-semibold mb-6"
           >
             Our promise
           </motion.p>
@@ -293,7 +293,7 @@ export default function HomeEN() {
             initial={{ opacity: 0, y: 12 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="font-display font-bold text-3xl sm:text-4xl lg:text-5xl leading-[1.1] tracking-tight text-teal-dark mb-10"
+            className="font-display font-bold text-3xl sm:text-4xl lg:text-5xl leading-[1.1] tracking-tight text-ink mb-10"
           >
             The honest list.
           </motion.h2>
@@ -313,7 +313,7 @@ export default function HomeEN() {
                     {String(i + 1).padStart(2, '0')}
                   </span>
                   <div className="flex-1">
-                    <p className="relative font-display font-bold text-2xl sm:text-3xl leading-tight inline-block text-teal-dark">
+                    <p className="relative font-display font-bold text-2xl sm:text-3xl leading-tight inline-block text-ink">
                       {item.label}
                       <motion.span
                         aria-hidden
@@ -351,7 +351,7 @@ export default function HomeEN() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.7 }}
-            className="font-display font-bold text-3xl sm:text-4xl lg:text-5xl leading-[1.1] tracking-tight text-teal-dark"
+            className="font-display font-bold text-3xl sm:text-4xl lg:text-5xl leading-[1.1] tracking-tight text-ink"
           >
             Ronki isn't a product. It's an{' '}
             <em className="italic text-sage whitespace-nowrap">experiment</em> with my son.
@@ -369,7 +369,7 @@ export default function HomeEN() {
             <p>
               Then Louis started first grade and suddenly every kid talks about Roblox and Fortnite while we're still fighting about brushing teeth and packing the schoolbag. I thought: if other apps are so good at capturing attention, why not build one that does the opposite? One that quietly reminds, accompanies, and eventually makes itself unnecessary.
             </p>
-            <p className="font-display font-semibold text-teal-dark">
+            <p className="font-display font-semibold text-ink">
               My measure of success: Ronki has done its job when your child doesn't need it anymore. As a gamer-dad, I know that's a terrible engagement metric. But it's a damn good parenting metric.
             </p>
             <p className="text-ink/60">
@@ -387,12 +387,12 @@ export default function HomeEN() {
           viewport={{ once: true, margin: '-10%' }}
           transition={{ duration: 0.7 }}
           className="max-w-5xl mx-auto rounded-3xl bg-teal-dark p-8 sm:p-12 lg:p-16 relative overflow-hidden"
-          style={{ boxShadow: '0 30px 60px -20px rgba(45,90,94,0.5)' }}
+          style={{ boxShadow: '0 30px 60px -20px rgba(4,8,18,0.5)' }}
         >
           <div
             aria-hidden
             className="absolute top-0 right-0 w-96 h-96 -mr-32 -mt-32 rounded-full blur-[100px] pointer-events-none"
-            style={{ background: 'rgba(80,160,130,0.35)' }}
+            style={{ background: 'rgba(5,68,176,0.35)' }}
           />
           <div className="relative z-10 text-center max-w-3xl mx-auto">
             <p className="text-[0.65rem] uppercase tracking-[0.15em] text-cream/70 font-semibold mb-4">
@@ -429,7 +429,7 @@ export default function HomeEN() {
             initial={{ opacity: 0, y: 12 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="font-display font-bold text-3xl sm:text-4xl lg:text-5xl leading-[1.1] tracking-tight text-teal-dark mb-4"
+            className="font-display font-bold text-3xl sm:text-4xl lg:text-5xl leading-[1.1] tracking-tight text-ink mb-4"
           >
             Ronki is waiting for your child.
           </motion.h2>
@@ -463,13 +463,13 @@ export default function HomeEN() {
             </p>
           </div>
           <div className="flex items-center gap-6 text-sm">
-            <Link to="/" className="text-teal-dark/75 hover:text-teal-dark transition-colors font-display font-semibold">
+            <Link to="/" className="text-ink/75 hover:text-ink transition-colors font-display font-semibold">
               🇩🇪 Deutsche Seite
             </Link>
-            <Link to="/impressum" className="text-teal-dark/75 hover:text-teal-dark transition-colors">
+            <Link to="/impressum" className="text-ink/75 hover:text-ink transition-colors">
               Imprint (DE)
             </Link>
-            <Link to="/datenschutz" className="text-teal-dark/75 hover:text-teal-dark transition-colors">
+            <Link to="/datenschutz" className="text-ink/75 hover:text-ink transition-colors">
               Privacy (DE)
             </Link>
           </div>

@@ -71,7 +71,7 @@ export default function PrintA4Poster() {
           {/* Mid body */}
           <p className="body-text">
             Wenn morgens noch{' '}
-            <span style={{ fontStyle: 'italic', color: '#2D5A5E' }}>
+            <span style={{ fontStyle: 'italic', color: '#0544B0' }}>
               „Zähne putzen!"
             </span>{' '}
             durchs Haus schallt, legt Ronki die Reihenfolge für dein Kind
@@ -106,7 +106,7 @@ export default function PrintA4Poster() {
       <style>{`
         .print-root {
           font-family: 'Be Vietnam Pro', system-ui, sans-serif;
-          color: #1A3C3F;
+          color: #040812;
           min-height: 100vh;
           padding: 32px 16px 64px;
           display: flex;
@@ -120,8 +120,8 @@ export default function PrintA4Poster() {
           position: sticky;
           top: 16px;
           z-index: 20;
-          background: #1A3C3F;
-          color: #FDF8F0;
+          background: #040812;
+          color: #FFFFFF;
           padding: 10px 18px;
           border-radius: 999px;
           font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
@@ -135,8 +135,8 @@ export default function PrintA4Poster() {
         }
         .print-btn {
           margin-left: auto;
-          background: #FCD34D;
-          color: #1A3C3F;
+          background: #FDD134;
+          color: #040812;
           border: 0;
           padding: 6px 14px;
           border-radius: 999px;
@@ -151,10 +151,10 @@ export default function PrintA4Poster() {
         .poster-page {
           width: 210mm;
           height: 297mm;
-          background: #FDF8F0;
+          background: #FFFFFF;
           background-image:
-            radial-gradient(ellipse 70% 45% at 75% 18%, rgba(252,211,77,0.22) 0%, transparent 60%),
-            radial-gradient(ellipse 60% 40% at 15% 82%, rgba(80,160,130,0.14) 0%, transparent 60%);
+            radial-gradient(ellipse 70% 45% at 75% 18%, rgba(253,209,52,0.22) 0%, transparent 60%),
+            radial-gradient(ellipse 60% 40% at 15% 82%, rgba(5,68,176,0.14) 0%, transparent 60%);
           overflow: hidden;
           box-shadow: 0 16px 40px rgba(0,0,0,0.12);
           position: relative;
@@ -166,7 +166,7 @@ export default function PrintA4Poster() {
           left: 0;
           right: 0;
           height: 4mm;
-          background: #FCD34D;
+          background: #FDD134;
         }
         .poster-inner {
           height: 100%;
@@ -179,7 +179,7 @@ export default function PrintA4Poster() {
           font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
           font-size: 9pt;
           font-weight: 700;
-          color: #2D5A5E;
+          color: #0544B0;
           letter-spacing: 0.28em;
           text-transform: uppercase;
           margin: 0 0 6mm;
@@ -192,7 +192,7 @@ export default function PrintA4Poster() {
           font-size: 90pt;
           line-height: 0.9;
           letter-spacing: -0.04em;
-          color: #1A3C3F;
+          color: #040812;
           margin: 0;
           text-align: center;
         }
@@ -203,7 +203,7 @@ export default function PrintA4Poster() {
           font-size: 17pt;
           line-height: 1.2;
           letter-spacing: -0.01em;
-          color: #2D5A5E;
+          color: #0544B0;
           margin: 4mm 0 0;
           text-align: center;
           text-wrap: balance;
@@ -222,14 +222,14 @@ export default function PrintA4Poster() {
           height: 90mm;
           object-fit: cover;
           border-radius: 10mm;
-          box-shadow: 0 10mm 20mm -5mm rgba(26,60,63,0.25);
+          box-shadow: 0 10mm 20mm -5mm rgba(4,8,18,0.25);
         }
 
         .body-text {
           font-family: 'Be Vietnam Pro', system-ui, sans-serif;
           font-size: 11pt;
           line-height: 1.5;
-          color: rgba(26,60,63,0.8);
+          color: rgba(4,8,18,0.8);
           margin: 0 0 6mm;
           text-align: center;
           text-wrap: pretty;
@@ -244,7 +244,7 @@ export default function PrintA4Poster() {
           gap: 10mm;
           align-items: center;
           padding-top: 6mm;
-          border-top: 0.5mm solid rgba(26,60,63,0.15);
+          border-top: 0.5mm solid rgba(4,8,18,0.15);
         }
         .cta-text {
           min-width: 0;
@@ -253,7 +253,7 @@ export default function PrintA4Poster() {
           font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
           font-weight: 700;
           font-size: 11pt;
-          color: #1A3C3F;
+          color: #040812;
           margin: 0 0 2mm;
           letter-spacing: -0.005em;
         }
@@ -273,7 +273,7 @@ export default function PrintA4Poster() {
           font-family: 'Be Vietnam Pro', system-ui, sans-serif;
           font-size: 9.5pt;
           line-height: 1.35;
-          color: #1A3C3F;
+          color: #040812;
         }
         .cta-steps > li::before {
           content: counter(step, decimal-leading-zero);
@@ -283,17 +283,17 @@ export default function PrintA4Poster() {
           font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
           font-weight: 800;
           font-size: 8pt;
-          color: #50A082;
+          color: #0544B0;
           letter-spacing: 0.03em;
         }
         .cta-steps strong {
-          color: #1A3C3F;
+          color: #040812;
           font-weight: 700;
         }
         .cta-footer {
           font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
           font-size: 7pt;
-          color: rgba(26,60,63,0.55);
+          color: rgba(4,8,18,0.55);
           margin: 0;
           letter-spacing: 0.02em;
           line-height: 1.4;
@@ -309,13 +309,13 @@ export default function PrintA4Poster() {
           width: 42mm;
           height: 42mm;
           border-radius: 3mm;
-          background: #FDF8F0;
+          background: #FFFFFF;
         }
         .qr-label {
           font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
           font-weight: 700;
           font-size: 8pt;
-          color: #2D5A5E;
+          color: #0544B0;
           letter-spacing: 0.04em;
           text-transform: uppercase;
           margin: 0;

@@ -81,7 +81,7 @@ export function ProfileCardFront({ childName, tokenFragment }: FrontProps) {
           >
             <defs>
               <linearGradient id="profileBg" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#FDE589" />
+                <stop offset="0%" stopColor="#FFE68A" />
                 <stop offset="100%" stopColor="#F2BC5B" />
               </linearGradient>
             </defs>
@@ -203,7 +203,7 @@ export const profileCardCss = `
     width: 105mm;
     height: 148mm;
     overflow: hidden;
-    box-shadow: 0 10px 30px rgba(26,60,63,0.18);
+    box-shadow: 0 10px 30px rgba(4,8,18,0.18);
     position: relative;
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
@@ -218,7 +218,7 @@ export const profileCardCss = `
 
   /* ── FRONT ─────────────────────────────────── */
   .profile-card-front {
-    background: #1A3C3F;
+    background: #040812;
     padding: 4mm;
   }
   .profile-holo-bg {
@@ -227,9 +227,9 @@ export const profileCardCss = `
     border-radius: 4mm;
     overflow: hidden;
     background:
-      radial-gradient(ellipse 140% 100% at 30% 20%, #2D5A5E 0%, transparent 60%),
-      radial-gradient(ellipse 120% 80% at 80% 80%, #50A082 0%, transparent 55%),
-      #1A3C3F;
+      radial-gradient(ellipse 140% 100% at 30% 20%, #0544B0 0%, transparent 60%),
+      radial-gradient(ellipse 120% 80% at 80% 80%, #0544B0 0%, transparent 55%),
+      #040812;
     z-index: 1;
   }
   .profile-holo-stripe {
@@ -239,8 +239,8 @@ export const profileCardCss = `
       115deg,
       transparent 30%,
       rgba(255,232,138,0.25) 42%,
-      rgba(252,211,77,0.35) 48%,
-      rgba(80,160,130,0.3) 52%,
+      rgba(253,209,52,0.35) 48%,
+      rgba(5,68,176,0.3) 52%,
       rgba(255,255,255,0.15) 58%,
       transparent 68%
     );
@@ -256,11 +256,11 @@ export const profileCardCss = `
     height: 100%;
     border-radius: 3.5mm;
     padding: 4mm 4mm 3.5mm;
-    background: linear-gradient(180deg, rgba(26,60,63,0.35), rgba(26,60,63,0.15));
-    border: 0.5mm solid rgba(252,211,77,0.6);
+    background: linear-gradient(180deg, rgba(4,8,18,0.35), rgba(4,8,18,0.15));
+    border: 0.5mm solid rgba(253,209,52,0.6);
     box-shadow:
-      inset 0 0 0 0.3mm rgba(252,211,77,0.25),
-      inset 0 0 8mm rgba(26,60,63,0.4);
+      inset 0 0 0 0.3mm rgba(253,209,52,0.25),
+      inset 0 0 8mm rgba(4,8,18,0.4);
     display: flex;
     flex-direction: column;
     gap: 3mm;
@@ -279,7 +279,7 @@ export const profileCardCss = `
     font-size: 6.5pt;
     font-weight: 800;
     letter-spacing: 0.18em;
-    color: #FCD34D;
+    color: #FDD134;
     margin: 0 0 0.8mm;
     text-transform: uppercase;
   }
@@ -288,7 +288,7 @@ export const profileCardCss = `
     font-size: 22pt;
     font-weight: 700;
     letter-spacing: 0.04em;
-    color: #FDF8F0;
+    color: #FFFFFF;
     margin: 0;
     line-height: 0.9;
     text-shadow: 0 0.5mm 1mm rgba(0,0,0,0.3);
@@ -300,8 +300,8 @@ export const profileCardCss = `
     text-overflow: clip;
   }
   .profile-hp {
-    background: #FCD34D;
-    color: #1A3C3F;
+    background: #FDD134;
+    color: #040812;
     border-radius: 2mm;
     padding: 1.2mm 2.2mm;
     display: flex;
@@ -325,10 +325,10 @@ export const profileCardCss = `
     aspect-ratio: 200/140;
     border-radius: 2.5mm;
     overflow: hidden;
-    background: #FDE589;
-    border: 0.4mm solid #FCD34D;
+    background: #FFE68A;
+    border: 0.4mm solid #FDD134;
     box-shadow:
-      inset 0 0 0 0.2mm rgba(26,60,63,0.2),
+      inset 0 0 0 0.2mm rgba(4,8,18,0.2),
       0 1mm 3mm rgba(0,0,0,0.3);
   }
   .profile-portrait-frame {
@@ -351,7 +351,7 @@ export const profileCardCss = `
     position: absolute;
     width: 4mm;
     height: 4mm;
-    border: 0.4mm solid #FCD34D;
+    border: 0.4mm solid #FDD134;
     opacity: 0.8;
     z-index: 2;
   }
@@ -364,16 +364,16 @@ export const profileCardCss = `
   .profile-mission {
     text-align: center;
     padding: 3mm 3mm 2.5mm;
-    background: rgba(253,248,240,0.94);
+    background: rgba(255,255,255,0.94);
     border-radius: 2.5mm;
-    border: 0.3mm solid rgba(252,211,77,0.4);
+    border: 0.3mm solid rgba(253,209,52,0.4);
   }
   .profile-mission-label {
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-size: 6.5pt;
     font-weight: 800;
     letter-spacing: 0.20em;
-    color: #50A082;
+    color: #0544B0;
     text-transform: uppercase;
     margin: 0 0 0.8mm;
   }
@@ -382,7 +382,7 @@ export const profileCardCss = `
     font-size: 17pt;
     font-weight: 700;
     letter-spacing: 0.16em;
-    color: #1A3C3F;
+    color: #040812;
     margin: 0 0 1mm;
   }
   .profile-mission-tag {
@@ -390,7 +390,7 @@ export const profileCardCss = `
     font-size: 7.5pt;
     font-weight: 600;
     font-style: italic;
-    color: #50A082;
+    color: #0544B0;
     margin: 0;
   }
 
@@ -408,7 +408,7 @@ export const profileCardCss = `
     font-size: 8pt;
     font-weight: 900;
     letter-spacing: 0.16em;
-    color: #FCD34D;
+    color: #FDD134;
     margin: 0;
     text-shadow: 0 0.3mm 0.5mm rgba(0,0,0,0.4);
   }
@@ -416,24 +416,24 @@ export const profileCardCss = `
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-size: 7.5pt;
     font-weight: 500;
-    color: rgba(253,248,240,0.75);
+    color: rgba(255,255,255,0.75);
     margin: 0;
   }
-  .profile-owner strong { color: #FDF8F0; font-weight: 800; }
+  .profile-owner strong { color: #FFFFFF; font-weight: 800; }
 
   /* ── BACK ─────────────────────────────────── */
   .profile-card-back {
-    background: #FDF8F0;
+    background: #FFFFFF;
     background-image:
-      radial-gradient(ellipse 90% 60% at 100% 0%, rgba(80,160,130,0.18) 0%, transparent 60%),
-      radial-gradient(ellipse 90% 50% at 0% 100%, rgba(252,211,77,0.22) 0%, transparent 55%);
+      radial-gradient(ellipse 90% 60% at 100% 0%, rgba(5,68,176,0.18) 0%, transparent 60%),
+      radial-gradient(ellipse 90% 50% at 0% 100%, rgba(253,209,52,0.22) 0%, transparent 55%);
   }
   .profile-card-back::before {
     content: "";
     position: absolute;
     top: 0; left: 0; right: 0;
     height: 4mm;
-    background: linear-gradient(90deg, #50A082, #FCD34D);
+    background: linear-gradient(90deg, #0544B0, #FDD134);
   }
   .profile-back-inner {
     height: 100%;
@@ -447,7 +447,7 @@ export const profileCardCss = `
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-size: 7.5pt;
     font-weight: 800;
-    color: #50A082;
+    color: #0544B0;
     letter-spacing: 0.22em;
     text-transform: uppercase;
     margin: 0 0 2.5mm;
@@ -458,7 +458,7 @@ export const profileCardCss = `
     font-size: 18pt;
     line-height: 1.05;
     letter-spacing: -0.01em;
-    color: #1A3C3F;
+    color: #040812;
     margin: 0 0 1.2mm;
   }
   .profile-back-sub {
@@ -466,20 +466,20 @@ export const profileCardCss = `
     font-weight: 700;
     font-size: 10pt;
     font-style: italic;
-    color: #50A082;
+    color: #0544B0;
     margin: 0 0 4mm;
   }
 
   /* QR box */
   .profile-back-qr-box {
     background: #FFFFFF;
-    border: 0.6mm solid #FCD34D;
+    border: 0.6mm solid #FDD134;
     border-radius: 2.5mm;
     padding: 4mm;
     margin: 0 0 4mm;
     box-shadow:
-      0 1.2mm 2.5mm rgba(26,60,63,0.18),
-      inset 0 0 0 0.2mm rgba(26,60,63,0.08);
+      0 1.2mm 2.5mm rgba(4,8,18,0.18),
+      inset 0 0 0 0.2mm rgba(4,8,18,0.08);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -495,7 +495,7 @@ export const profileCardCss = `
     font-size: 7pt;
     font-weight: 700;
     letter-spacing: 0.08em;
-    color: rgba(26,60,63,0.65);
+    color: rgba(4,8,18,0.65);
     margin: 0;
     text-transform: uppercase;
   }
@@ -520,8 +520,8 @@ export const profileCardCss = `
     width: 5mm;
     height: 5mm;
     border-radius: 50%;
-    background: #50A082;
-    color: #FDF8F0;
+    background: #0544B0;
+    color: #FFFFFF;
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-size: 8pt;
     font-weight: 900;
@@ -534,7 +534,7 @@ export const profileCardCss = `
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-size: 9pt;
     font-weight: 600;
-    color: #1A3C3F;
+    color: #040812;
     line-height: 1.3;
   }
 
@@ -542,7 +542,7 @@ export const profileCardCss = `
   .profile-back-foot {
     margin-top: auto;
     padding-top: 2mm;
-    border-top: 0.3mm dashed rgba(26,60,63,0.25);
+    border-top: 0.3mm dashed rgba(4,8,18,0.25);
     width: 100%;
   }
   .profile-back-foot-code {
@@ -550,7 +550,7 @@ export const profileCardCss = `
     font-size: 12pt;
     font-weight: 700;
     letter-spacing: 0.20em;
-    color: #1A3C3F;
+    color: #040812;
     margin: 0 0 1mm;
     text-align: center;
   }
@@ -558,19 +558,19 @@ export const profileCardCss = `
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-size: 8pt;
     font-weight: 600;
-    color: #1A3C3F;
+    color: #040812;
     margin: 0 0 0.8mm;
   }
-  .profile-back-foot-brand strong { color: #50A082; font-weight: 800; }
+  .profile-back-foot-brand strong { color: #0544B0; font-weight: 800; }
   .profile-back-foot-lost {
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-size: 6.5pt;
     font-weight: 500;
-    color: rgba(26,60,63,0.55);
+    color: rgba(4,8,18,0.55);
     margin: 0;
     line-height: 1.3;
   }
-  .profile-back-foot-lost strong { color: #50A082; }
+  .profile-back-foot-lost strong { color: #0544B0; }
 `;
 
 /**

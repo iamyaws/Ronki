@@ -379,7 +379,7 @@ export default function RatgeberWasKinderAppsMachen() {
         kannst die Bewertung speichern und teilen wenn du willst.{' '}
         <a
           href="/tools/app-check"
-          className="font-semibold text-teal-dark underline decoration-mustard underline-offset-4 hover:decoration-teal"
+          className="font-semibold text-ink underline decoration-mustard underline-offset-4 hover:decoration-teal"
         >
           Hier zum App-Check
         </a>

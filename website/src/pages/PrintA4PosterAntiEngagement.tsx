@@ -128,8 +128,8 @@ export default function PrintA4PosterAntiEngagement() {
           position: sticky;
           top: 16px;
           z-index: 20;
-          background: #1A3C3F;
-          color: #FDF8F0;
+          background: #040812;
+          color: #FFFFFF;
           padding: 10px 18px;
           border-radius: 999px;
           font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
@@ -143,8 +143,8 @@ export default function PrintA4PosterAntiEngagement() {
         }
         .print-btn {
           margin-left: auto;
-          background: #FCD34D;
-          color: #1A3C3F;
+          background: #FDD134;
+          color: #040812;
           border: 0;
           padding: 6px 14px;
           border-radius: 999px;
@@ -162,19 +162,19 @@ export default function PrintA4PosterAntiEngagement() {
           overflow: hidden;
           box-shadow: 0 16px 40px rgba(0,0,0,0.12);
           position: relative;
-          background: #1A3C3F;
+          background: #040812;
           background-image:
-            radial-gradient(ellipse 70% 45% at 75% 18%, rgba(252,211,77,0.22) 0%, transparent 60%),
-            radial-gradient(ellipse 60% 40% at 15% 82%, rgba(80,160,130,0.14) 0%, transparent 60%),
-            radial-gradient(ellipse 55% 35% at 85% 95%, rgba(252,211,77,0.22) 0%, transparent 65%);
-          color: #FDF8F0;
+            radial-gradient(ellipse 70% 45% at 75% 18%, rgba(253,209,52,0.22) 0%, transparent 60%),
+            radial-gradient(ellipse 60% 40% at 15% 82%, rgba(5,68,176,0.14) 0%, transparent 60%),
+            radial-gradient(ellipse 55% 35% at 85% 95%, rgba(253,209,52,0.22) 0%, transparent 65%);
+          color: #FFFFFF;
         }
         .poster-page::before {
           content: "";
           position: absolute;
           top: 0; left: 0; right: 0;
           height: 4mm;
-          background: #FCD34D;
+          background: #FDD134;
         }
         .poster-inner {
           height: 100%;
@@ -205,7 +205,7 @@ export default function PrintA4PosterAntiEngagement() {
           font-weight: 800;
           font-size: 13pt;
           letter-spacing: -0.04em;
-          color: #FDF8F0;
+          color: #FFFFFF;
           line-height: 1;
         }
 
@@ -214,7 +214,7 @@ export default function PrintA4PosterAntiEngagement() {
           font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
           font-size: 9pt;
           font-weight: 700;
-          color: #FCD34D;
+          color: #FDD134;
           letter-spacing: 0.28em;
           text-transform: uppercase;
           margin: 0 0 6mm;
@@ -226,7 +226,7 @@ export default function PrintA4PosterAntiEngagement() {
           font-size: 38pt;
           line-height: 1.08;
           letter-spacing: -0.03em;
-          color: #FDF8F0;
+          color: #FFFFFF;
           margin: 0;
           text-align: center;
           max-width: 174mm;
@@ -235,7 +235,7 @@ export default function PrintA4PosterAntiEngagement() {
         }
         .headline em {
           font-style: italic;
-          color: #FCD34D;
+          color: #FDD134;
           font-weight: 800;
         }
         .subline {
@@ -244,7 +244,7 @@ export default function PrintA4PosterAntiEngagement() {
           font-size: 14pt;
           line-height: 1.25;
           letter-spacing: -0.01em;
-          color: rgba(253,248,240,0.72);
+          color: rgba(255,255,255,0.72);
           margin: 6mm 0 0;
           text-align: center;
         }
@@ -300,7 +300,7 @@ export default function PrintA4PosterAntiEngagement() {
           font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
           font-size: 8pt;
           font-weight: 600;
-          color: rgba(253,248,240,0.55);
+          color: rgba(255,255,255,0.55);
           margin: 3mm 0 0;
           text-align: center;
           letter-spacing: 0.02em;
@@ -319,7 +319,7 @@ export default function PrintA4PosterAntiEngagement() {
           font-family: 'Be Vietnam Pro', system-ui, sans-serif;
           font-size: 11pt;
           line-height: 1.5;
-          color: rgba(253,248,240,0.88);
+          color: rgba(255,255,255,0.88);
           margin: 0;
           text-align: center;
         }
@@ -328,11 +328,11 @@ export default function PrintA4PosterAntiEngagement() {
           font-size: 12.5pt;
           font-weight: 600;
           line-height: 1.35;
-          color: #FDF8F0;
+          color: #FFFFFF;
         }
         .proof-beats em {
           font-style: italic;
-          color: #FCD34D;
+          color: #FDD134;
           font-weight: 700;
         }
 
@@ -343,13 +343,13 @@ export default function PrintA4PosterAntiEngagement() {
           gap: 10mm;
           align-items: center;
           padding-top: 6mm;
-          border-top: 0.5mm solid rgba(253,248,240,0.15);
+          border-top: 0.5mm solid rgba(255,255,255,0.15);
         }
         .cta-heading {
           font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
           font-weight: 800;
           font-size: 12pt;
-          color: #FDF8F0;
+          color: #FFFFFF;
           margin: 0 0 2mm;
           letter-spacing: -0.01em;
         }
@@ -369,7 +369,7 @@ export default function PrintA4PosterAntiEngagement() {
           font-family: 'Be Vietnam Pro', system-ui, sans-serif;
           font-size: 9.5pt;
           line-height: 1.35;
-          color: rgba(253,248,240,0.88);
+          color: rgba(255,255,255,0.88);
         }
         .cta-steps > li::before {
           content: counter(step, decimal-leading-zero);
@@ -379,17 +379,17 @@ export default function PrintA4PosterAntiEngagement() {
           font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
           font-weight: 800;
           font-size: 8pt;
-          color: #FCD34D;
+          color: #FDD134;
           letter-spacing: 0.03em;
         }
         .cta-steps strong {
-          color: #FDF8F0;
+          color: #FFFFFF;
           font-weight: 700;
         }
         .cta-footer {
           font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
           font-size: 7pt;
-          color: rgba(253,248,240,0.55);
+          color: rgba(255,255,255,0.55);
           margin: 0;
           letter-spacing: 0.02em;
           line-height: 1.4;
@@ -404,13 +404,13 @@ export default function PrintA4PosterAntiEngagement() {
           width: 42mm;
           height: 42mm;
           border-radius: 3mm;
-          background: #1A3C3F;
+          background: #040812;
         }
         .qr-label {
           font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
           font-weight: 700;
           font-size: 8pt;
-          color: #FCD34D;
+          color: #FDD134;
           letter-spacing: 0.04em;
           text-transform: uppercase;
           margin: 0;

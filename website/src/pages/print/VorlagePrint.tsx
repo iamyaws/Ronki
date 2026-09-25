@@ -52,7 +52,7 @@ export const VORLAGE_PRINT_MORGEN: VorlagePrintTemplate = {
   title: 'Die Morgenroutine',
   description:
     'Vier Schritte bis zur Tasche. Trag eure Zeiten ein und hak ab, was geschafft ist.',
-  accent: '#d97706',
+  accent: '#0544B0',
   showTimes: true,
   steps: [
     { icon: '🪥', label: 'Zähne putzen', hint: 'Oben, unten, außen, innen.' },
@@ -70,7 +70,7 @@ export const VORLAGE_PRINT_ABEND: VorlagePrintTemplate = {
   title: 'Die Abendroutine',
   description:
     'Vier Schritte bis ins Bett. Trag eure Zeiten ein und hak ab, was geschafft ist.',
-  accent: '#4338ca',
+  accent: '#0544B0',
   showTimes: true,
   steps: [
     { icon: '🪥', label: 'Zähne putzen', hint: 'Auch die hinten im Mund.' },
@@ -87,7 +87,7 @@ export const VORLAGE_PRINT_KLEINE_GESCHWISTER: VorlagePrintTemplate = {
   eyebrow: 'Für die Kleinen',
   title: 'Mein Tag',
   description: 'Ganz einfach, nur mit Bildern. Ein Bild geschafft, ein Haken gesetzt.',
-  accent: '#50a082',
+  accent: '#0544B0',
   bigIcons: true,
   steps: [
     { icon: '🪥', label: '' },
@@ -113,7 +113,7 @@ export const VORLAGE_PRINT_ADHS: VorlagePrintTemplate = {
   title: 'Mein Morgen',
   description:
     'Sechs Schritte, jeden Tag in derselben Reihenfolge. Ein Bild, ein Wort, keine Uhrzeit.',
-  accent: '#0369a1',
+  accent: '#0544B0',
   compact: true,
   clipLane: true,
   nowMarker:
@@ -142,7 +142,7 @@ export const VORLAGE_PRINT_ADHS: VorlagePrintTemplate = {
 
 export function VorlagePrint({ template }: { template: VorlagePrintTemplate }) {
   useEffect(() => {
-    document.body.style.background = '#e4dfd6';
+    document.body.style.background = '#FFFFFF';
     return () => {
       document.body.style.background = '';
     };
@@ -265,11 +265,11 @@ const sheetCss = `
     position: sticky;
     top: 16px;
     z-index: 30;
-    background: #1A3C3F;
-    color: #FDF8F0;
+    background: #0544B0;
+    color: #FFFFFF;
     padding: 10px 18px;
     border-radius: 999px;
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-family: 'Fredoka', system-ui, sans-serif;
     font-size: 13px;
     display: flex;
     align-items: center;
@@ -282,12 +282,12 @@ const sheetCss = `
   .vp-bar-hint { opacity: 0.75; font-size: 11.5px; }
   .vp-bar-btn {
     margin-left: auto;
-    background: #FCD34D;
-    color: #1A3C3F;
+    background: #FFFFFF;
+    color: #040812;
     border: 0;
     padding: 6px 14px;
     border-radius: 999px;
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-family: 'Fredoka', system-ui, sans-serif;
     font-weight: 700;
     font-size: 12px;
     cursor: pointer;
@@ -299,7 +299,7 @@ const sheetCss = `
     min-height: 268mm;
     box-sizing: border-box;
     background: #ffffff;
-    color: #1A3C3F;
+    color: #040812;
     display: flex;
     flex-direction: column;
     padding: 0;
@@ -315,15 +315,16 @@ const sheetCss = `
   }
   .vp-eyebrow {
     display: inline-block;
-    background: var(--vp-accent);
-    color: #ffffff;
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-    font-weight: 700;
-    font-size: 8pt;
-    letter-spacing: 0.16em;
+    background: #FDD134;
+    color: #040812;
+    font-family: 'Gochi Hand', 'Comic Sans MS', cursive;
+    font-size: 13pt;
+    line-height: 1;
+    letter-spacing: 0.02em;
     text-transform: uppercase;
-    padding: 1.6mm 4mm;
-    border-radius: 999px;
+    padding: 2.2mm 4mm 1.4mm;
+    border-radius: 2.5mm;
+    transform: rotate(-3deg);
   }
   .vp-rule {
     flex: 1;
@@ -333,18 +334,18 @@ const sheetCss = `
     border-radius: 999px;
   }
   .vp-title {
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-    font-weight: 800;
+    font-family: 'Fredoka', system-ui, sans-serif;
+    font-weight: 700;
     font-size: 30pt;
     line-height: 1.05;
     letter-spacing: -0.02em;
     margin: 0 0 3mm;
-    color: #1A3C3F;
+    color: #040812;
   }
   .vp-desc {
     font-size: 11pt;
     line-height: 1.45;
-    color: rgba(26,60,63,0.7);
+    color: rgba(4,8,18,0.7);
     margin: 0;
     max-width: 150mm;
   }
@@ -354,15 +355,15 @@ const sheetCss = `
     display: flex;
     align-items: baseline;
     gap: 4mm;
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-family: 'Fredoka', system-ui, sans-serif;
     font-weight: 600;
     font-size: 12pt;
-    color: rgba(26,60,63,0.8);
+    color: rgba(4,8,18,0.8);
     margin: 9mm 0 7mm;
   }
   .vp-name-line {
     flex: 1;
-    border-bottom: 0.5mm dotted rgba(26,60,63,0.4);
+    border-bottom: 0.5mm dotted rgba(4,8,18,0.4);
     height: 6mm;
   }
 
@@ -382,14 +383,14 @@ const sheetCss = `
     min-height: 45mm;
     padding: 5mm 6mm;
     box-sizing: border-box;
-    border: 0.5mm solid rgba(26,60,63,0.18);
-    border-radius: 4mm;
+    border: 0.7mm solid rgba(4,8,18,0.85);
+    border-radius: 6mm;
     break-inside: avoid;
     page-break-inside: avoid;
   }
   .vp-num {
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-    font-weight: 800;
+    font-family: 'Fredoka', system-ui, sans-serif;
+    font-weight: 700;
     font-size: 13pt;
     color: var(--vp-accent);
     width: 7mm;
@@ -412,31 +413,31 @@ const sheetCss = `
     gap: 1.5mm;
   }
   .vp-label {
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-family: 'Fredoka', system-ui, sans-serif;
     font-weight: 700;
     font-size: 18pt;
     line-height: 1.15;
-    color: #1A3C3F;
+    color: #040812;
   }
   .vp-hint {
     font-size: 10pt;
     line-height: 1.35;
-    color: rgba(26,60,63,0.6);
+    color: rgba(4,8,18,0.6);
   }
   .vp-time {
     display: flex;
     align-items: baseline;
     gap: 2mm;
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-family: 'Fredoka', system-ui, sans-serif;
     font-size: 9pt;
     font-weight: 600;
-    color: rgba(26,60,63,0.45);
+    color: rgba(4,8,18,0.45);
     margin-top: 1mm;
   }
   .vp-time-line {
     display: inline-block;
     width: 22mm;
-    border-bottom: 0.4mm dotted rgba(26,60,63,0.4);
+    border-bottom: 0.4mm dotted rgba(4,8,18,0.4);
     height: 4mm;
   }
   .vp-check {
@@ -444,7 +445,7 @@ const sheetCss = `
     height: 20mm;
     flex-shrink: 0;
     border: 1mm solid var(--vp-accent);
-    border-radius: 3mm;
+    border-radius: 50%;
     background: #ffffff;
   }
 
@@ -459,7 +460,7 @@ const sheetCss = `
     border-radius: 3mm;
     font-size: 9.5pt;
     line-height: 1.35;
-    color: rgba(26,60,63,0.75);
+    color: rgba(4,8,18,0.75);
   }
 
   /* Clip lane --------------------------------------------------------- */
@@ -468,7 +469,7 @@ const sheetCss = `
     align-self: stretch;
     flex-shrink: 0;
     margin: -3mm 0 -3mm -3mm;
-    border-right: 0.4mm dashed rgba(26,60,63,0.28);
+    border-right: 0.4mm dashed rgba(4,8,18,0.28);
     border-radius: 3mm 0 0 3mm;
     background: var(--vp-accent);
     opacity: 0.12;
@@ -497,7 +498,7 @@ const sheetCss = `
     gap: 4mm;
   }
   .vp-timebar-label {
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-family: 'Fredoka', system-ui, sans-serif;
     font-weight: 700;
     font-size: 9pt;
     color: var(--vp-accent);
@@ -514,7 +515,7 @@ const sheetCss = `
     margin: 2.5mm 0 0;
     font-size: 8.5pt;
     line-height: 1.35;
-    color: rgba(26,60,63,0.5);
+    color: rgba(4,8,18,0.5);
   }
 
   /* Toddler variant -------------------------------------------------- */
@@ -528,15 +529,15 @@ const sheetCss = `
   .vp-foot {
     margin-top: auto;
     padding-top: 4mm;
-    border-top: 0.4mm solid rgba(26,60,63,0.15);
+    border-top: 0.4mm solid rgba(4,8,18,0.15);
     display: flex;
     align-items: baseline;
     justify-content: space-between;
     gap: 6mm;
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-family: 'Fredoka', system-ui, sans-serif;
     font-size: 8.5pt;
     font-weight: 600;
-    color: rgba(26,60,63,0.45);
+    color: rgba(4,8,18,0.45);
   }
   .vp-foot-url {
     color: var(--vp-accent);

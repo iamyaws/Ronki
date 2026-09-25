@@ -23,8 +23,9 @@ interface Props {
   eyebrow: string;
   /** One-line description for SEO + on-sheet subtitle. */
   description: string;
-  /** Accent color (hex). */
-  accent: string;
+  /** Legacy per-sheet accent hex. Bilderbuch draws every sheet in ink and
+   *  cobalt, so this is kept for the page props but no longer painted. */
+  accent?: string;
   /** Steps (3-5 ideal, fit one portrait A4). */
   steps: PrintStep[];
   /** True for the toddler variant, larger icons, no labels, bigger circles. */
@@ -55,7 +56,6 @@ export function RoutinePrintSheet({
   title,
   eyebrow,
   description,
-  accent,
   steps,
   bigIcons = false,
   footerLine = 'ronki.de',
@@ -79,32 +79,37 @@ export function RoutinePrintSheet({
       />
 
       {/* Screen-only toolbar, hidden when printing */}
-      <div className="print:hidden bg-cream min-h-dvh">
+      <div className="print:hidden bg-white min-h-dvh">
         <div className="max-w-3xl mx-auto px-6 py-6 flex items-center gap-4 flex-wrap">
           <Link
             to="/vorlagen"
-            className="inline-flex items-center gap-2 text-sm text-teal-dark/60 hover:text-teal-dark transition-colors"
+            className="inline-flex items-center gap-2 font-display font-semibold text-sm text-ink/70 hover:text-ink transition-colors"
           >
-            <span aria-hidden>←</span> Alle Vorlagen
+            <svg aria-hidden viewBox="0 0 64 64" className="h-3.5 w-3.5">
+              <use href="#bb-back" />
+            </svg>
+            Alle Vorlagen
           </Link>
           <div className="flex-1" />
           <button
             onClick={handlePrint}
             type="button"
-            className="inline-flex items-center gap-2 rounded-full bg-teal-dark px-5 py-2.5 text-cream font-display font-bold text-sm shadow-sm hover:shadow-md hover:bg-teal transition-all"
+            className="inline-flex items-center gap-2 rounded-full border-[2.5px] border-ink bg-white px-5 py-2.5 text-ink font-display font-bold text-sm transition-transform hover:-translate-y-0.5"
           >
-            <span aria-hidden>🖨️</span>
+            <svg aria-hidden viewBox="0 0 64 64" className="h-5 w-5 text-ink">
+              <use href="#bb-printer" />
+            </svg>
             Drucken
           </button>
         </div>
 
         {pageTitle && (
           <header className="max-w-3xl mx-auto px-6 pt-2 pb-8">
-            <h1 className="font-display font-bold text-3xl sm:text-4xl lg:text-5xl leading-[1.08] tracking-tight text-teal-dark">
+            <h1 className="bb-display text-3xl sm:text-4xl lg:text-5xl text-ink">
               {pageTitle}
             </h1>
             {pageIntro && (
-              <p className="mt-4 text-base sm:text-lg text-ink/75 leading-relaxed max-w-2xl">
+              <p className="mt-5 text-base sm:text-lg text-ink/75 leading-relaxed max-w-2xl">
                 {pageIntro}
               </p>
             )}
@@ -116,23 +121,17 @@ export function RoutinePrintSheet({
         )}
 
         <div className="max-w-3xl mx-auto px-6 pb-16">
-          <p className="text-xs uppercase tracking-[0.2em] text-teal font-medium mb-4">
+          <p className="bb-hand text-2xl uppercase text-cobalt leading-none mb-2">
             Vorschau
           </p>
           <p className="text-sm text-ink/70 mb-6 leading-relaxed">
             So wird deine Vorlage aussehen. Tipp auf „Drucken" oben rechts. Dein Browser zeigt dir dann die Druckvorschau, wo du auch auf „Als PDF speichern" umschalten kannst.
           </p>
-          <div
-            className="bg-white rounded-2xl overflow-hidden border border-teal/10"
-            style={{
-              boxShadow: '0 20px 50px -20px rgba(45,90,94,0.25)',
-            }}
-          >
+          <div className="bg-white rounded-[28px] overflow-hidden border-[3px] border-ink">
             <Sheet
               title={title}
               eyebrow={eyebrow}
               description={description}
-              accent={accent}
               steps={steps}
               bigIcons={bigIcons}
               footerLine={footerLine}
@@ -150,7 +149,6 @@ export function RoutinePrintSheet({
           title={title}
           eyebrow={eyebrow}
           description={description}
-          accent={accent}
           steps={steps}
           bigIcons={bigIcons}
           footerLine={footerLine}
@@ -169,23 +167,22 @@ function Sheet({
   title,
   eyebrow,
   description,
-  accent,
   steps,
   bigIcons,
   footerLine,
   heading: Heading,
 }: Pick<
   Props,
-  'title' | 'eyebrow' | 'description' | 'accent' | 'steps' | 'bigIcons' | 'footerLine'
+  'title' | 'eyebrow' | 'description' | 'steps' | 'bigIcons' | 'footerLine'
 > & { heading: 'h1' | 'h2' }) {
   const iconSize = bigIcons ? 'text-6xl sm:text-7xl' : 'text-4xl sm:text-5xl';
-  const circleSize = bigIcons
+  const ringSize = bigIcons
     ? 'w-20 h-20 sm:w-24 sm:h-24'
     : 'w-14 h-14 sm:w-16 sm:h-16';
 
   return (
     <div
-      className="bg-white text-teal-dark p-8 sm:p-12"
+      className="bg-white text-ink p-8 sm:p-12"
       style={{
         fontFamily: "'Be Vietnam Pro', system-ui, sans-serif",
         minHeight: '100%',
@@ -193,39 +190,23 @@ function Sheet({
     >
       {/* Header */}
       <header className="mb-10">
-        <div className="flex items-baseline gap-3 mb-3">
-          <span
-            className="inline-flex items-center rounded-full px-3 py-1 text-[0.65rem] font-bold uppercase tracking-[0.15em] text-white"
-            style={{ backgroundColor: accent }}
-          >
-            {eyebrow}
-          </span>
-          <span
-            aria-hidden
-            className="h-px flex-1"
-            style={{ backgroundColor: accent, opacity: 0.3 }}
-          />
-        </div>
-        <Heading
-          className="font-bold text-3xl sm:text-4xl leading-tight tracking-tight mb-2"
-          style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
-        >
+        <span className="bb-hand inline-block rounded-[10px] bg-sun px-4 py-1.5 text-xl uppercase leading-none text-ink -rotate-3">
+          {eyebrow}
+        </span>
+        <Heading className="bb-display mt-5 mb-3 text-3xl sm:text-4xl text-ink">
           {title}
         </Heading>
-        <p className="text-base text-teal-dark/65 leading-relaxed max-w-xl">
+        <p className="text-base text-ink/70 leading-relaxed max-w-xl">
           {description}
         </p>
       </header>
 
       {/* Name field */}
-      <div className="flex items-baseline gap-4 mb-8 border-b border-teal-dark/20 pb-2">
-        <span className="text-xs uppercase tracking-[0.15em] text-teal-dark/50 font-semibold">
-          Name
-        </span>
-        <span className="flex-1" />
-        <span className="text-xs uppercase tracking-[0.15em] text-teal-dark/50 font-semibold">
-          Datum
-        </span>
+      <div className="flex items-end gap-4 mb-8 font-display font-semibold text-base text-ink">
+        Das ist der Plan von
+        <svg aria-hidden viewBox="0 0 300 12" preserveAspectRatio="none" className="h-3 flex-1 text-ink">
+          <use href="#bb-line" />
+        </svg>
       </div>
 
       {/* Steps */}
@@ -233,7 +214,7 @@ function Sheet({
         {steps.map((step, i) => (
           <li
             key={i}
-            className="flex items-center gap-5 sm:gap-6 rounded-xl border border-teal-dark/15 p-4 sm:p-5"
+            className="flex items-center gap-5 sm:gap-6 rounded-[22px] border-[2.5px] border-ink p-4 sm:p-5"
             style={{ pageBreakInside: 'avoid' }}
           >
             <span
@@ -245,36 +226,33 @@ function Sheet({
             </span>
             <div className="flex-1 min-w-0">
               {step.label && (
-                <p
-                  className="font-bold text-lg sm:text-xl text-teal-dark leading-tight"
-                  style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
-                >
+                <p className="bb-display text-lg sm:text-xl text-ink">
                   {step.label}
                 </p>
               )}
               {step.hint && (
-                <p className="text-sm text-teal-dark/55 mt-1 leading-snug">
+                <p className="text-sm text-ink/65 mt-1 leading-snug">
                   {step.hint}
                 </p>
               )}
             </div>
-            <span
+            <svg
               aria-hidden
-              className={`shrink-0 rounded-full ${circleSize}`}
-              style={{
-                border: `3px solid ${accent}`,
-              }}
-            />
+              viewBox="0 0 64 64"
+              className={`shrink-0 text-cobalt ${ringSize}`}
+            >
+              <use href="#bb-ring" />
+            </svg>
           </li>
         ))}
       </ol>
 
       {/* Footer */}
-      <footer className="mt-12 pt-4 border-t border-teal-dark/10 flex items-baseline justify-between">
-        <p className="text-[0.7rem] uppercase tracking-[0.2em] text-teal-dark/40 font-semibold">
+      <footer className="mt-12 pt-4 border-t-2 border-ink/15 flex items-baseline justify-between gap-4">
+        <p className="bb-hand text-lg uppercase text-cobalt leading-none">
           Ausmalen, was geschafft ist
         </p>
-        <p className="text-[0.7rem] text-teal-dark/40 font-semibold">
+        <p className="font-display font-semibold text-xs text-ink/60">
           {footerLine}
         </p>
       </footer>

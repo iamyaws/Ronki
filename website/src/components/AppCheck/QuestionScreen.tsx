@@ -70,7 +70,7 @@ export function QuestionScreen({
       </div>
 
       {/* Prompt */}
-      <h2 className="font-display font-bold text-2xl sm:text-3xl text-teal-dark leading-snug">
+      <h2 className="font-display font-bold text-2xl sm:text-3xl text-ink leading-snug">
         {question.prompt}
       </h2>
 
@@ -114,7 +114,7 @@ export function QuestionScreen({
                 className={`flex-1 rounded-xl border-2 px-6 py-4 text-base font-display font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-cream disabled:opacity-60 disabled:cursor-not-allowed transition-all ${
                   selected
                     ? 'border-teal bg-teal text-cream shadow-md'
-                    : 'border-teal/20 bg-cream text-teal-dark hover:border-teal hover:shadow-sm'
+                    : 'border-teal/20 bg-cream text-ink hover:border-teal hover:shadow-sm'
                 }`}
               >
                 {opt.label}
@@ -131,8 +131,8 @@ export function QuestionScreen({
               disabled={disabled}
               className={`block sm:hidden w-full text-center text-sm py-2 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-cream disabled:opacity-60 disabled:cursor-not-allowed transition-colors ${
                 current === unclear.value
-                  ? 'text-teal-dark underline underline-offset-4 decoration-teal/40'
-                  : 'text-ink/55 hover:text-teal-dark hover:underline underline-offset-4'
+                  ? 'text-ink underline underline-offset-4 decoration-teal/40'
+                  : 'text-ink/55 hover:text-ink hover:underline underline-offset-4'
               }`}
             >
               {unclear.label}
@@ -144,8 +144,8 @@ export function QuestionScreen({
               disabled={disabled}
               className={`hidden sm:block w-full rounded-xl border px-6 py-3 text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-cream disabled:opacity-60 disabled:cursor-not-allowed transition-all ${
                 current === unclear.value
-                  ? 'border-teal-dark/40 bg-teal-dark/10 text-teal-dark'
-                  : 'border-teal/15 bg-cream/50 text-ink/65 hover:border-teal/30 hover:text-teal-dark'
+                  ? 'border-teal-dark/40 bg-teal-dark/10 text-ink'
+                  : 'border-teal/15 bg-cream/50 text-ink/65 hover:border-teal/30 hover:text-ink'
               }`}
             >
               {unclear.label}
@@ -160,7 +160,7 @@ export function QuestionScreen({
           type="button"
           onClick={onBack}
           disabled={disabled}
-          className="text-sm text-ink/55 hover:text-ink/80 focus:outline-none focus-visible:text-teal-dark focus-visible:underline underline-offset-4 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="text-sm text-ink/55 hover:text-ink/80 focus:outline-none focus-visible:text-ink focus-visible:underline underline-offset-4 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           ← Vorige Frage
         </button>

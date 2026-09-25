@@ -37,7 +37,7 @@ const CONCERNS: Concern[] = [
           Die Forschung dahinter liest du unter{' '}
           <Link
             to="/wissenschaft"
-            className="font-display font-semibold text-teal-dark underline decoration-teal/30 underline-offset-4 hover:decoration-teal hover:text-teal transition-colors"
+            className="font-display font-semibold text-ink underline decoration-teal/30 underline-offset-4 hover:decoration-teal hover:text-teal transition-colors"
           >
             Wissenschaft
           </Link>
@@ -81,7 +81,7 @@ const CONCERNS: Concern[] = [
           und Auftragsverarbeitern, findest du unter{' '}
           <Link
             to="/datenschutz"
-            className="font-display font-semibold text-teal-dark underline decoration-teal/30 underline-offset-4 hover:decoration-teal hover:text-teal transition-colors"
+            className="font-display font-semibold text-ink underline decoration-teal/30 underline-offset-4 hover:decoration-teal hover:text-teal transition-colors"
           >
             Datenschutz
           </Link>
@@ -109,7 +109,7 @@ const CONCERNS: Concern[] = [
           Die Quellen, auf die wir uns dabei stützen, findest du unter{' '}
           <Link
             to="/wissenschaft"
-            className="font-display font-semibold text-teal-dark underline decoration-teal/30 underline-offset-4 hover:decoration-teal hover:text-teal transition-colors"
+            className="font-display font-semibold text-ink underline decoration-teal/30 underline-offset-4 hover:decoration-teal hover:text-teal transition-colors"
           >
             Wissenschaft
           </Link>
@@ -140,7 +140,7 @@ const CONCERNS: Concern[] = [
             href="https://ko-fi.com/ronkiapp"
             target="_blank"
             rel="noopener noreferrer"
-            className="font-display font-semibold text-teal-dark underline decoration-teal/30 underline-offset-4 hover:decoration-teal hover:text-teal transition-colors"
+            className="font-display font-semibold text-ink underline decoration-teal/30 underline-offset-4 hover:decoration-teal hover:text-teal transition-colors"
           >
             Ko-fi
           </a>{' '}
@@ -166,7 +166,7 @@ const CONCERNS: Concern[] = [
           an{' '}
           <a
             href="mailto:hallo@ronki.de"
-            className="font-display font-semibold text-teal-dark underline decoration-teal/30 underline-offset-4 hover:decoration-teal hover:text-teal transition-colors"
+            className="font-display font-semibold text-ink underline decoration-teal/30 underline-offset-4 hover:decoration-teal hover:text-teal transition-colors"
           >
             hallo@ronki.de
           </a>{' '}
@@ -201,14 +201,14 @@ export default function FuerEltern() {
           >
             <Link
               to="/"
-              className="inline-flex items-center gap-2 text-sm text-teal-dark/60 hover:text-teal-dark transition-colors mb-10"
+              className="inline-flex items-center gap-2 text-sm text-ink/60 hover:text-ink transition-colors mb-10"
             >
               <span aria-hidden>&larr;</span> Zurück
             </Link>
             <p className="text-xs uppercase tracking-[0.2em] text-teal font-medium mb-6">
               Für Eltern
             </p>
-            <h1 className="font-display font-bold text-4xl sm:text-5xl lg:text-[3.75rem] leading-[1.04] tracking-tight text-teal-dark">
+            <h1 className="font-display font-bold text-4xl sm:text-5xl lg:text-[3.75rem] leading-[1.04] tracking-tight text-ink">
               Die Fragen, die ihr euch stellt.{' '}
               <em className="italic text-sage">Ehrliche Antworten.</em>
             </h1>
@@ -252,7 +252,7 @@ export default function FuerEltern() {
                 </span>
                 <span className="h-px flex-1 bg-teal/15" aria-hidden />
               </div>
-              <h2 className="font-display font-bold text-2xl sm:text-3xl leading-[1.15] tracking-tight text-teal-dark mb-5">
+              <h2 className="font-display font-bold text-2xl sm:text-3xl leading-[1.15] tracking-tight text-ink mb-5">
                 {c.question}
               </h2>
               <div className="flex flex-col gap-4 text-base sm:text-lg text-ink/75 leading-relaxed max-w-2xl">
@@ -275,12 +275,12 @@ export default function FuerEltern() {
             viewport={{ once: true }}
             transition={{ duration: 0.7, ease: EASE_OUT }}
           >
-            <p className="text-[0.7rem] uppercase tracking-[0.2em] text-teal-dark/60 font-semibold mb-6">
+            <p className="text-[0.7rem] uppercase tracking-[0.2em] text-ink/60 font-semibold mb-6">
               Wer baut das?
             </p>
             <h2
               id="maker-heading"
-              className="font-display font-bold text-3xl sm:text-4xl leading-[1.08] tracking-tight text-teal-dark mb-6"
+              className="font-display font-bold text-3xl sm:text-4xl leading-[1.08] tracking-tight text-ink mb-6"
             >
               Ein Vater. Ein Sohn. Ein Drache.
             </h2>
@@ -296,7 +296,7 @@ export default function FuerEltern() {
                 macht, steht im Abschnitt{' '}
                 <Link
                   to="/#ueber-mich-heading"
-                  className="font-display font-semibold text-teal-dark underline decoration-teal/30 underline-offset-4 hover:decoration-teal hover:text-teal transition-colors"
+                  className="font-display font-semibold text-ink underline decoration-teal/30 underline-offset-4 hover:decoration-teal hover:text-teal transition-colors"
                 >
                   Über den Macher
                 </Link>{' '}
@@ -317,12 +317,12 @@ export default function FuerEltern() {
             transition={{ duration: 0.7, ease: EASE_OUT }}
             className="rounded-3xl border border-teal/15 bg-cream/60 backdrop-blur-sm p-8 sm:p-10"
           >
-            <p className="text-[0.7rem] uppercase tracking-[0.2em] text-teal-dark/60 font-semibold mb-5">
+            <p className="text-[0.7rem] uppercase tracking-[0.2em] text-ink/60 font-semibold mb-5">
               Helft uns, den nächsten Artikel zu planen
             </p>
             <h2
               id="cta-heading"
-              className="font-display font-bold text-2xl sm:text-3xl leading-[1.12] tracking-tight text-teal-dark mb-5"
+              className="font-display font-bold text-2xl sm:text-3xl leading-[1.12] tracking-tight text-ink mb-5"
             >
               Welche Frage haben wir nicht beantwortet?
             </h2>
@@ -338,7 +338,7 @@ export default function FuerEltern() {
               Lieber per E-Mail? Schreibt direkt an{' '}
               <a
                 href="mailto:hallo@ronki.de"
-                className="font-display font-semibold text-teal-dark underline decoration-teal/30 underline-offset-4 hover:decoration-teal hover:text-teal transition-colors"
+                className="font-display font-semibold text-ink underline decoration-teal/30 underline-offset-4 hover:decoration-teal hover:text-teal transition-colors"
               >
                 hallo@ronki.de
               </a>

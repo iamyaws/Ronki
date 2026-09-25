@@ -23,8 +23,8 @@ const VORLAGEN: Vorlage[] = [
     description:
       'Vier Schritte, vier Kreise zum Ausmalen. Hängt neben den Zahnputzbecher und dein Kind folgt der Reihe selbst.',
     ages: '5–8 Jahre',
-    accent: '#d97706',
-    accentLight: 'rgba(217,119,6,0.12)',
+    accent: '#0544B0',
+    accentLight: 'rgba(5,68,176,0.12)',
   },
   {
     slug: 'abendroutine',
@@ -33,8 +33,8 @@ const VORLAGEN: Vorlage[] = [
     description:
       'Vier Schritte bis ins Bett. Keine Streit-Gespräche mehr darüber, was noch dran ist. Dein Kind sieht es selbst.',
     ages: '5–8 Jahre',
-    accent: '#4338ca',
-    accentLight: 'rgba(67,56,202,0.12)',
+    accent: '#0544B0',
+    accentLight: 'rgba(5,68,176,0.12)',
   },
   {
     slug: 'kleine-geschwister',
@@ -43,8 +43,8 @@ const VORLAGEN: Vorlage[] = [
     description:
       'Ganz einfache Bilder, keine Buchstaben. Der kleine Bruder oder die kleine Schwester darf mitmachen und mitfühlen.',
     ages: '2–4 Jahre',
-    accent: '#50a082',
-    accentLight: 'rgba(80,160,130,0.12)',
+    accent: '#0544B0',
+    accentLight: 'rgba(5,68,176,0.12)',
   },
   {
     slug: 'adhs',
@@ -53,8 +53,8 @@ const VORLAGEN: Vorlage[] = [
     description:
       'Sechs Schritte, ein Bild und ein Wort pro Schritt. Eine Wäscheklammer wandert am Rand nach unten und zeigt, was jetzt dran ist. Keine Uhr, kein Punktestand.',
     ages: '5–9 Jahre',
-    accent: '#0369a1',
-    accentLight: 'rgba(3,105,161,0.12)',
+    accent: '#0544B0',
+    accentLight: 'rgba(5,68,176,0.12)',
   },
 ];
 
@@ -76,14 +76,14 @@ export default function Vorlagen() {
           >
             <Link
               to="/"
-              className="inline-flex items-center gap-2 text-sm text-teal-dark/60 hover:text-teal-dark transition-colors mb-8"
+              className="inline-flex items-center gap-2 text-sm text-ink/60 hover:text-ink transition-colors mb-8"
             >
               <span aria-hidden>←</span> Zurück
             </Link>
             <p className="text-xs uppercase tracking-[0.2em] text-teal font-medium mb-6">
               Zum Ausdrucken
             </p>
-            <h1 className="font-display font-bold text-4xl sm:text-5xl lg:text-6xl leading-[1.04] tracking-tight text-teal-dark">
+            <h1 className="font-display font-bold text-4xl sm:text-5xl lg:text-6xl leading-[1.04] tracking-tight text-ink">
               Vorlagen für euren{' '}
               <em className="italic text-sage whitespace-nowrap">Kühlschrank</em>.
             </h1>
@@ -106,7 +106,7 @@ export default function Vorlagen() {
               whileHover={{ y: -4 }}
               className="group relative flex flex-col rounded-2xl bg-white overflow-hidden"
               style={{
-                boxShadow: '0 8px 28px -12px rgba(45,90,94,0.15)',
+                boxShadow: '0 8px 28px -12px rgba(4,8,18,0.15)',
               }}
             >
               <div
@@ -120,7 +120,7 @@ export default function Vorlagen() {
                 >
                   {v.ages}
                 </span>
-                <h2 className="font-display font-bold text-xl sm:text-2xl text-teal-dark leading-tight mb-2">
+                <h2 className="font-display font-bold text-xl sm:text-2xl text-ink leading-tight mb-2">
                   {v.title}
                 </h2>
                 <p className="text-xs uppercase tracking-[0.12em] text-ink/40 font-display font-semibold mb-4">
@@ -140,7 +140,7 @@ export default function Vorlagen() {
                 <p className="mt-3 text-center text-xs text-ink/55 leading-relaxed">
                   <Link
                     to={`/vorlagen/${v.slug}#pdf`}
-                    className="underline decoration-mustard underline-offset-4 hover:text-teal-dark"
+                    className="text-cobalt underline decoration-cobalt/50 underline-offset-4 hover:text-ink"
                   >
                     Als PDF zum Ausdrucken
                   </Link>
@@ -187,7 +187,7 @@ export default function Vorlagen() {
                 </p>
                 <Link
                   to="/drachen-sammelkarten"
-                  className="inline-flex items-center gap-2 rounded-full px-6 py-3.5 bg-mustard text-teal-dark font-display font-bold text-sm shadow-sm hover:shadow-md transition-all hover:gap-3"
+                  className="inline-flex items-center gap-2 rounded-full px-6 py-3.5 bg-white text-ink font-display font-bold text-sm transition-all hover:gap-3"
                 >
                   Zum Karten-Set
                   <span aria-hidden>→</span>
@@ -205,9 +205,9 @@ export default function Vorlagen() {
                         i === 1 ? '-4px' : '0'
                       })`,
                       background:
-                        'linear-gradient(180deg, #FDE589 0%, #F2BC5B 100%)',
+                        'linear-gradient(180deg, #FFE68A 0%, #F2BC5B 100%)',
                       boxShadow:
-                        '0 8px 20px -6px rgba(0,0,0,0.35), inset 0 0 0 1.5px rgba(252,211,77,0.7)',
+                        '0 8px 20px -6px rgba(0,0,0,0.35), inset 0 0 0 1.5px rgba(253,209,52,0.7)',
                     }}
                   >
                     <img
@@ -240,7 +240,7 @@ export default function Vorlagen() {
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            className="text-[0.7rem] uppercase tracking-[0.2em] text-teal-dark/60 font-semibold mb-4"
+            className="text-[0.7rem] uppercase tracking-[0.2em] text-ink/60 font-semibold mb-4"
           >
             So funktioniert's
           </motion.p>
@@ -248,7 +248,7 @@ export default function Vorlagen() {
             initial={{ opacity: 0, y: 8 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="font-display font-bold text-2xl sm:text-3xl text-teal-dark mb-6"
+            className="font-display font-bold text-2xl sm:text-3xl text-ink mb-6"
           >
             Aufhängen. Ausmalen. Weitermachen.
           </motion.h2>
