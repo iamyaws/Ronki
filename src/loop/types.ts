@@ -69,6 +69,8 @@ export interface LoopActions {
   completeTonight: () => void;
   /** Parent "Extras zeigen" toggle. */
   setExtras: (on: boolean) => void;
+  /** Runs the day transition when the day key changed while the app stayed open (called by useTripClock). */
+  checkNewDay: () => void;
 }
 
 /** What useTripClock() returns (mounted once in AppContent). */

@@ -27,6 +27,7 @@ _Orchestrator's synthesis. **Base: `docs/reviews/2026-09-26-finch-pass/design-fi
 | R11 | Voice | Missing mp3s stay silent with the text on screen. The voice-file test is a warning list, not a build gate. No voiced line contains a name (`{Nick}` and `{Kind}` appear only in the bubble text; the spoken version leaves the name out or uses "du"). | Kid and engineering judges, less-is-more. |
 | R12 | Games | Stay intact behind Extras (Marc's 26 Apr "add back all mini games"). Starfighter and CloudJump are not removed. | Engineering judge. |
 | R13 | Telemetry transport | Client events are fixed (funnel, `quest.complete`, `mood.pick`, `ronki.evolve`, consent timing). The `TO authenticated` insert policy is a backend decision and goes to Marc. | No schema changes tonight. |
+| R15 | Routine for existing saves | `buildDay` filters the morning and bedtime quests by `familyConfig.routine`, and a save without one gets `DEFAULT_ROUTINE` (5 morning, 4 evening) from the next day on, Louis included. Afternoon quests and side quests are not filtered. Parents change it in the dashboard. | Marc asked for less; 7 plus 5 tasks is a long fire for a first grader. Reversible per family. |
 | R14 | Gate 1 date | 15 Dec 2026 (Marc, 25 Sep; PR 15 merged). Astra read the stale PRD section 12. | DISAGREE with Astra on the fact. |
 
 ## 2. Changes to the base design, section by section
