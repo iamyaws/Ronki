@@ -64,6 +64,8 @@ const VoiceAudio = {
     if (!lineId) return;
     if (delayTimer) { clearTimeout(delayTimer); delayTimer = null; }
     const doPlay = () => {
+      // Never start a line in a hidden tab (LOOP-3-R2).
+      if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
       this.stop();
       const src = `${BASE}audio/narrator/${lineId}.mp3`;
       const audio = new Audio(src);
@@ -107,6 +109,8 @@ const VoiceAudio = {
     };
 
     const doPlay = () => {
+      // Never start a line in a hidden tab (LOOP-3-R2).
+      if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
       this.stop();
       const src = `${BASE}audio/narrator/${lineId}.mp3`;
       const audio = new Audio(src);
@@ -185,6 +189,8 @@ const VoiceAudio = {
     };
 
     const doPlay = () => {
+      // Never start a line in a hidden tab (LOOP-3-R2).
+      if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
       // Stop any currently playing line (don't overlap)
       this.stop();
       start(lineId, fallbackId);
@@ -199,6 +205,10 @@ const VoiceAudio = {
 
   /** Stop current playback */
   stop() {
+    // A queued line (the delay of play/playLocalized) is dropped too, so
+    // closing a sheet or hiding the tab never lets it start afterwards
+    // (Astra round 2, LOOP-3-R2; verifier O-V1).
+    if (delayTimer) { clearTimeout(delayTimer); delayTimer = null; }
     if (currentAudio) {
       currentAudio.pause();
       currentAudio.currentTime = 0;
@@ -242,5 +252,14 @@ const VoiceAudio = {
     if (muted) this.stop();
   },
 };
+
+// A hidden tab stops speaking and drops a queued line (LOOP-3-R2).
+if (typeof document !== 'undefined') {
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+      try { VoiceAudio.stop(); } catch { /* never breaks the app */ }
+    }
+  });
+}
 
 export default VoiceAudio;

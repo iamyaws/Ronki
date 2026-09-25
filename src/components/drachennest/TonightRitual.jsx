@@ -419,7 +419,7 @@ export default function TonightRitual({ onClose }) {
           }}
         >
           <div data-testid="tonight-sleep">
-            <MoodChibi size={220} variant={sleepLook.variant} stage={sleepLook.stage} mood="tired" bare />
+            <MoodChibi size={220} variant={sleepLook.variant} stage={sleepLook.stage} mood="tired" bare keepStage className="bb-idle-breathe" />
           </div>
           <div className="bb-display text-white text-center" style={{ fontSize: 44, marginTop: 18 }}>
             Schlaf gut.

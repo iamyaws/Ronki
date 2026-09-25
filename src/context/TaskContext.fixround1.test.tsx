@@ -140,8 +140,19 @@ describe('FC-08 / LOOP-4: a dream trip belongs to its evening; never two trips w
     await act(async () => { h.actions.departTrip('night'); });
     expect(h.state.expedition.state).toBe('away');
     expect(h.state.lastTripDate).toBe(dayOf(new Date('2026-09-28T17:00:00')));
-    // It counts from the start of its evening, so the next morning's trip is not blocked.
-    expect(h.state.lastTripAt).toBe(new Date('2026-09-28T17:00:00').toISOString());
+    // The actual departure time (Astra round 2); the 6 hour gap still lets
+    // the next morning's trip go.
+    expect(h.state.lastTripAt).toBe(new Date('2026-09-29T02:30:00').toISOString());
+  });
+
+  it('a dream trip at 03:59 is not followed by a day trip an hour later (Astra FC-08-R2)', async () => {
+    at('2026-09-29T05:01:00');
+    const h = await mount(louisToday({
+      lastTripDate: dayOf(new Date('2026-09-28T17:00:00')),
+      lastTripAt: new Date('2026-09-29T03:59:00').toISOString(),
+    }));
+    await act(async () => { h.actions.departTrip('day'); });
+    expect(h.state.expedition.state).toBe('home');
   });
 
   it('a late dream trip (23:30) does not block the next morning trip', async () => {
@@ -149,7 +160,7 @@ describe('FC-08 / LOOP-4: a dream trip belongs to its evening; never two trips w
     const h = await mount(louisToday({
       // What departTrip('night') at 23:30 on the 28th writes.
       lastTripDate: dayOf(new Date('2026-09-28T17:00:00')),
-      lastTripAt: new Date('2026-09-28T17:00:00').toISOString(),
+      lastTripAt: new Date('2026-09-28T23:30:00').toISOString(),
     }));
     await act(async () => { h.actions.departTrip('day'); });
     expect(h.state.expedition.state).toBe('away');

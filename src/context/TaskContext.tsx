@@ -286,7 +286,7 @@ export interface TaskState {
   /** Day key (clock.dayKey) of the last departure; one trip per day. A
    *  dream trip is stamped with the day of the evening it belongs to. */
   lastTripDate?: string | null;
-  /** ISO time of the last departure. A new trip needs 8 hours after it
+  /** ISO time of the last departure. A new trip needs 6 hours after it
    *  (Astra FC-08: day keys are UTC, so the key alone can let a second
    *  trip through around UTC midnight). */
   lastTripAt?: string | null;
@@ -821,7 +821,8 @@ function pickMorgenwaldMemento(log: ExpeditionMemento[]): ExpeditionMemento {
  *  The log is the shelf and the passport's keepsakes, so the cap sits far
  *  above any real family (one treasure a day is under 400 a year; each
  *  entry is a few hundred bytes). Astra FC-02. */
-export const EXPEDITION_LOG_CAP = 500;
+/** No longer applied (Astra FC-02, round 2): keepsakes are never dropped. Kept for callers. */
+export const EXPEDITION_LOG_CAP = Number.POSITIVE_INFINITY;
 
 const homeExpedition = (): NonNullable<TaskState['expedition']> => ({ state: 'home', biome: 'morgenwald' });
 
@@ -906,7 +907,8 @@ type LoopEvent = [EventName, EventProps?];
  *  the memento goes to the shelf, one more adventure, the next trip,
  *  and catEvo grows by at most one stage (spec R6, src/loop/growth.ts). */
 function openTreasure(prev: TaskState, memento: ExpeditionMemento, tripIdHint?: string): { next: TaskState; events: LoopEvent[] } {
-  const log = [...(prev.expeditionLog || []), memento].slice(-EXPEDITION_LOG_CAP);
+  // No cap: every keepsake stays on the shelf (Astra FC-02, round 2).
+  const log = [...(prev.expeditionLog || []), memento];
   const tripId = memento.tripId || tripIdHint;
   const found = Array.isArray(prev.treasuresFound) ? prev.treasuresFound : [];
   // A repeat after trip 14 goes to the shelf but adds no new treasure.
@@ -1577,31 +1579,29 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
       cloudSavePending.current = true;
       cloudTimer.current = setTimeout(async () => {
         cloudSavePending.current = false;
-        // Finch pass (Astra FC-01): nothing is written to a card before a
-        // cloud read for it has reached the server in this session. A
-        // failed first read must never become an overwrite of a dragon
-        // we could not see. A token made on this device (parent step) is
-        // probed once: "no row" lets the save through.
-        if (!storage.cloudReadOk(activeToken)) {
-          const probe = await storage.cloudLoadByToken(activeToken);
-          if (!storage.cloudReadOk(activeToken)) return; // still offline: local keeps everything
-          if (probe) {
-            // The card holds a state this session never loaded. Load it
-            // properly (the normal sync merges it) instead of overwriting.
-            // At most once per session, so a flaky network cannot loop.
-            try {
-              const key = `ronki_cloud_reload_${activeToken.slice(0, 8)}`;
-              if (!sessionStorage.getItem(key)) {
-                sessionStorage.setItem(key, '1');
-                window.location.reload();
-              }
-            } catch { /* no sessionStorage: stay local, never overwrite */ }
-            return;
-          }
-        }
+        // Finch pass (Astra FC-01, round 2): a cloud write only goes
+        // through while the card still carries the stamp this session last
+        // saw. A failed read writes nothing (local keeps everything). A
+        // card that another device wrote to since, or that this session
+        // never reconciled, is never overwritten: writes freeze and the
+        // page reloads once, so the normal sync merges the newer row.
         const raw = await storage.load() as GameState | null;
         const merged = { ...(raw || {}), ...state } as GameState;
-        await storage.cloudSaveByToken(activeToken, merged);
+        const result = await storage.cloudSaveChecked(activeToken, merged);
+        if (result === 'conflict') {
+          storage.freezeWrites();
+          // Reload to merge the newer row. A loop guard only: if the last
+          // conflict reload was less than a minute ago, stay frozen instead
+          // of reloading again (a genuinely later conflict reloads fine).
+          try {
+            const key = `ronki_cloud_reload_${activeToken.slice(0, 8)}`;
+            const last = Number(sessionStorage.getItem(key) || 0);
+            if (!last || Date.now() - last > 60_000) {
+              sessionStorage.setItem(key, String(Date.now()));
+              window.location.reload();
+            }
+          } catch { /* no sessionStorage: stay frozen, never overwrite */ }
+        }
       }, 1500);
     } else if (user) {
       clearTimeout(cloudTimer.current);
@@ -1630,7 +1630,9 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
       if (!s) return;
       const localDue = localSavePending.current;
       const token = cloudSavePending.current ? getActiveToken() : null;
-      const cloudDue = !!token && storage.cloudReadOk(token);
+      // Only right after a checked save confirmed this device is current;
+      // a page leaving must not push a state that fell behind (round 2).
+      const cloudDue = !!token && storage.cloudReadOk(token) && storage.recentlyVerified(token, 20_000);
       if (!localDue && !cloudDue) return;
       // The synchronous local mirror (storage.ts writes it on every save)
       // stands in for the async storage.load() merge of the timers.
@@ -2452,7 +2454,7 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
       const t = clockNow();
       // One trip a day (tripAllowed): a dream trip belongs to the evening
       // it starts in, also after midnight (Astra FC-08, LOOP-4), and day
-      // keys are UTC, so never two departures within 8 hours.
+      // keys are UTC, so never two departures within 6 hours.
       if (!tripAllowed(prev, kind, t)) return prev;
       const key = kind === 'night' ? dayKey(eveningStartFor(t, prev.familyConfig?.eveningStart)) : dayKey(t);
       const trip = tripAt(wholeOr(prev.tripCursor, 0));
@@ -2473,10 +2475,9 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
       const next: TaskState = {
         ...prev,
         lastTripDate: key,
-        // A dream trip counts from the start of its evening, so one that
-        // leaves late (23:30) does not block the next morning's trip under
-        // the 8 hour rule (review fix round 1, verifier S).
-        lastTripAt: kind === 'night' ? eveningStartFor(t, prev.familyConfig?.eveningStart).toISOString() : ts,
+        // The actual departure time; the gap rule (tripRules) measures
+        // between real departures (Astra FC-08, round 2).
+        lastTripAt: ts,
         expedition: {
           state: 'away',
           biome: 'morgenwald',

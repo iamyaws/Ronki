@@ -258,7 +258,8 @@ describe('receiveTreasure', () => {
     at('2026-09-28T17:10:00');
     await act(async () => { h.actions.arriveTrip(); });
     await act(async () => { h.actions.receiveTreasure(); });
-    expect(EXPEDITION_LOG_CAP).toBe(500);
+    // No cap at all since Astra round 2: every keepsake stays.
+    expect(EXPEDITION_LOG_CAP).toBe(Number.POSITIVE_INFINITY);
     expect(h.state.expeditionLog).toHaveLength(61);
     expect(h.state.expeditionLog[0].id).toBe('m0');
     expect(h.state.expeditionLog[60].tripId).toBe('t01');

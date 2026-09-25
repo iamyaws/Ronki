@@ -8,13 +8,16 @@ import type { TripKind } from './types';
 import { dayKey } from './clock';
 import { eveningStartFor } from './dayPhase';
 
-/** Never two departures within this gap (Astra FC-08). */
-export const TRIP_MIN_GAP_MS = 8 * 3600 * 1000;
+/** Never two departures within this gap, measured between the actual
+ *  departures (Astra FC-08, round 2): 6 hours lets a dream trip at 23:30
+ *  and the next morning's trip at 07:10 both happen, and stops a trip at
+ *  04:00 from being followed by another an hour later. */
+export const TRIP_MIN_GAP_MS = 6 * 3600 * 1000;
 
 /** True when a trip of this kind may leave at `t` by the one-trip rules
  *  (Astra FC-08): Ronki is home, the day key the trip would be stamped
  *  with (a dream trip: the day of its evening) is not used yet, and the
- *  last departure is at least 8 hours away. departTrip uses exactly this;
+ *  last departure is at least 6 hours away. departTrip uses exactly this;
  *  surfaces can ask it before they show a send-off. */
 export function tripAllowed(
   s: { expedition?: { state?: string } | null; lastTripDate?: string | null; lastTripAt?: string | null; familyConfig?: { eveningStart?: string } | null } | null | undefined,

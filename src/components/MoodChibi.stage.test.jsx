@@ -33,3 +33,20 @@ describe('MoodChibi growth stages', () => {
     expect(container.querySelector('img').getAttribute('src')).toMatch(/ronki\/proud\.webp$/);
   });
 });
+
+// Astra round 2 (FC-05-R2): keepStage keeps the child's own look when a
+// mood has no art for that stage. Asserts the resolved image paths.
+import { moodKeepingStage, resolveRonkiArt as resolveArt } from './MoodChibi';
+describe('keepStage', () => {
+  it('the hatchling stays in its shell when tired, the grown Ronki stays grown when happy', () => {
+    const baby = resolveArt({ mood: moodKeepingStage('tired', 1), stage: 1, variant: 'forest' });
+    expect(baby).toMatch(/ronki\/baby/);
+    const grown = resolveArt({ mood: moodKeepingStage('happy', 4), stage: 4 });
+    expect(grown).toMatch(/ronki\/grown\.webp$/);
+    const legend = resolveArt({ mood: moodKeepingStage('tired', 5), stage: 5 });
+    expect(legend).toMatch(/ronki\/legendary\.webp$/);
+    // Where the stage has the mood, nothing changes.
+    expect(moodKeepingStage('happy', 1)).toBe('happy');
+    expect(moodKeepingStage('tired', 2)).toBe('tired');
+  });
+});

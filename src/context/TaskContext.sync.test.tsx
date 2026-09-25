@@ -17,10 +17,15 @@ import louisSave from '../test/fixtures/save-louis-like.json';
 
 const TOKEN = 'c'.repeat(32);
 let saved: any;
-const cloud = { readOk: true, loadReadOk: true, probeOk: true, probeRow: null as any };
+const cloud = {
+  readOk: true, loadReadOk: true, probeOk: true, probeRow: null as any,
+  // Astra round 2: the result the checked save reports, whether this
+  // device was verified current lately, and whether writes froze.
+  checkResult: 'saved' as 'saved' | 'conflict' | 'offline', verified: true, frozen: false,
+};
 
-vi.mock('../utils/storage', () => ({
-  default: {
+vi.mock('../utils/storage', () => {
+  const api: any = {
     load: vi.fn(async () => saved),
     save: vi.fn(async () => {}),
     syncLoad: vi.fn(async () => saved),
@@ -28,9 +33,19 @@ vi.mock('../utils/storage', () => ({
     cloudLoadByToken: vi.fn(async () => { cloud.readOk = cloud.probeOk; return cloud.probeOk ? cloud.probeRow : null; }),
     cloudReadOk: vi.fn(() => cloud.readOk),
     cloudSave: vi.fn(async () => {}),
+    // A real write (upsert) happens only through this spy.
     cloudSaveByToken: vi.fn(async () => {}),
-  },
-}));
+    cloudSaveChecked: vi.fn(async (token: string, state: any) => {
+      if (cloud.frozen) return 'frozen';
+      if (cloud.checkResult === 'saved') await api.cloudSaveByToken(token, state);
+      return cloud.checkResult;
+    }),
+    recentlyVerified: vi.fn(() => cloud.verified),
+    freezeWrites: vi.fn(() => { cloud.frozen = true; }),
+    writesFrozen: vi.fn(() => cloud.frozen),
+  };
+  return { default: api };
+});
 vi.mock('./AuthContext', () => ({ useAuth: () => ({ user: null }) }));
 vi.mock('../lib/profileToken', () => ({
   getActiveToken: () => TOKEN,
@@ -93,7 +108,7 @@ function louisToday(extra: Record<string, unknown> = {}): any {
 
 beforeEach(() => {
   vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'Date'] });
-  Object.assign(cloud, { readOk: true, loadReadOk: true, probeOk: true, probeRow: null });
+  Object.assign(cloud, { readOk: true, loadReadOk: true, probeOk: true, probeRow: null, checkResult: 'saved', verified: true, frozen: false });
   upsert.mockClear();
   probe.mockClear();
   localSave.mockClear();
@@ -108,46 +123,44 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-describe('FC-01: nothing is written to the card before a cloud read reached it', () => {
-  it('a failed read and a failed probe: no upsert, one probe per save', async () => {
+describe('FC-01 and round 2: the card is written only while this device is current', () => {
+  const checked = () => storage.cloudSaveChecked as unknown as ReturnType<typeof vi.fn>;
+  const freeze = () => storage.freezeWrites as unknown as ReturnType<typeof vi.fn>;
+
+  it('offline (the read failed): nothing written, nothing frozen, no reload', async () => {
     at('2026-09-28T07:10:00');
-    cloud.loadReadOk = false;
-    cloud.probeOk = false;
+    cloud.checkResult = 'offline';
     const h = await mount(louisToday());
-    await act(async () => { vi.advanceTimersByTime(2000); });
-    await settle();
-    expect(upsert).not.toHaveBeenCalled();
-    expect(probe).toHaveBeenCalledTimes(1);
     await act(async () => { h.actions.complete('s_wash'); });
     await act(async () => { vi.advanceTimersByTime(2000); });
     await settle();
+    expect(checked()).toHaveBeenCalled();
     expect(upsert).not.toHaveBeenCalled();
-    expect(probe).toHaveBeenCalledTimes(2);
+    expect(freeze()).not.toHaveBeenCalled();
     expect(reload).not.toHaveBeenCalled();
   });
 
-  it('a probe that finds no row lets the save through', async () => {
+  it('current: the checked save writes to the card', async () => {
     at('2026-09-28T07:10:00');
-    cloud.loadReadOk = false;
-    await mount(louisToday());
+    const h = await mount(louisToday());
+    await drainSaves();
+    await act(async () => { h.actions.complete('s_wash'); });
     await act(async () => { vi.advanceTimersByTime(2000); });
     await settle();
-    expect(probe).toHaveBeenCalledTimes(1);
     expect(upsert).toHaveBeenCalledTimes(1);
     expect(upsert.mock.calls[0][0]).toBe(TOKEN);
   });
 
-  it('a probe that finds a row reloads once and never overwrites it', async () => {
+  it('conflict (another device wrote, or a row was never reconciled): writes freeze, one reload, no overwrite', async () => {
     at('2026-09-28T07:10:00');
-    cloud.loadReadOk = false;
-    cloud.probeRow = { onboardingDone: true, companionName: 'Glut' };
+    cloud.checkResult = 'conflict';
     const h = await mount(louisToday());
     await act(async () => { vi.advanceTimersByTime(2000); });
     await settle();
+    expect(freeze()).toHaveBeenCalled();
     expect(reload).toHaveBeenCalledTimes(1);
     expect(upsert).not.toHaveBeenCalled();
-    // The reload did not happen (test): a later save probes again, still no write, no second reload.
-    cloud.readOk = false;
+    // The reload did not happen (test): later saves stay frozen, no second reload within a minute.
     await act(async () => { h.actions.complete('s_wash'); });
     await act(async () => { vi.advanceTimersByTime(2000); });
     await settle();
@@ -238,6 +251,17 @@ describe('SAVES-3: leaving the page writes a waiting save at once', () => {
     await act(async () => { h.actions.complete('s_wash'); });
     act(() => { window.dispatchEvent(new Event('pagehide')); });
     expect(upsert).toHaveBeenCalledTimes(1);
+  });
+
+  it('no cloud flush when this device was not verified current in the last 20 s (round 2)', async () => {
+    at('2026-09-28T07:10:00');
+    const h = await mount(louisToday());
+    await drainSaves();
+    cloud.verified = false;
+    await act(async () => { h.actions.departTrip('day'); });
+    act(() => { setVisibility('hidden'); });
+    expect(upsert).not.toHaveBeenCalled();
+    expect(localSave).toHaveBeenCalledTimes(1);
   });
 
   it('keeps the FC-01 guard: no cloud flush before a read reached the card', async () => {

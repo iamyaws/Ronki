@@ -84,6 +84,15 @@ export const VARIANT_TO_EGG = {
 };
 
 /** Resolve the art file for a mood and stage (exported for tests and callers). */
+/** The mood to draw so the stage's own look survives (see keepStage). */
+export function moodKeepingStage(mood, stage) {
+  const key = MOOD_TO_ART[mood] || 'calm';
+  const st = Number.isFinite(stage) ? stage : 2;
+  if (st === 1 && key !== 'calm' && key !== 'happy') return 'normal';
+  if (st >= 4 && key !== 'calm') return 'normal';
+  return mood;
+}
+
 export function resolveRonkiArt({ mood = 'normal', stage = 2, animated = false, reduced = false, variant } = {}) {
   const moodKey = MOOD_TO_ART[mood] || 'calm';
   const st = Number.isFinite(stage) ? stage : 2;
@@ -212,10 +221,16 @@ export default function MoodChibi({
   label,
   className = '',
   style,
+  keepStage = false,
 }) {
   const reduced = useReducedMotion();
   const boxRef = useRef(null);
   const live = useAnimationGate(boxRef, animated && !reduced);
+  // keepStage (Finch pass, Astra FC-05-R2): when a mood has no art for this
+  // stage (the shelled hatchling only has calm and happy; the grown and
+  // legendary Ronki only calm), show the stage's own calm portrait instead
+  // of the generic young one, so the child's Ronki never changes looks.
+  mood = keepStage ? moodKeepingStage(mood, stage) : mood;
   const moodKey = MOOD_TO_ART[mood] || 'calm';
   const primary = resolveRonkiArt({ mood, stage, animated: live, reduced, variant });
   const isLoop = primary.includes('/loops/');

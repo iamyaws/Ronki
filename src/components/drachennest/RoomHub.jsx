@@ -589,6 +589,7 @@ export default function RoomHub({ onNavigate, onOpenParental, onOpenTonight }) {
                           variant={variant}
                           stage={stageIdx}
                           mood={cutoutMood}
+                          keepStage
                           bare
                           animated={!pauseScene}
                           style={{ width: '100%', height: '100%' }}
