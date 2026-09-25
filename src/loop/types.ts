@@ -73,9 +73,9 @@ export interface LoopActions {
 
 /** What useTripClock() returns (mounted once in AppContent). */
 export interface TripClock {
-  /** Current time (in DEV, ?clock=YYYY-MM-DDTHH:MM overrides it). */
+  /** Current time (clock.now(); in DEV main.jsx may shift the global Date with ?clock=). */
   now: Date;
-  /** Local date YYYY-MM-DD of now. */
+  /** Day key of now (clock.dayKey, the same key as TaskContext today()). */
   today: string;
   block: Block;
 }
