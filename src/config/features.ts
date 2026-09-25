@@ -29,7 +29,9 @@ export const FEATURES: FeatureFlags = {
   dayStrip: false,
   /** RonkiProfile with drawer, segments and EvolutionTree. The Ronki tab shows the passport. */
   legacyProfile: false,
-  /** Expedition screen (Karte, Naturtagebuch, DiaryModal). Departure and return happen in the Nest. */
+  /** Expedition screen (Karte, Naturtagebuch, DiaryModal). Departure and return happen in the Nest.
+   *  Note: the Nest no longer has a Karte tile, so flipping this alone brings nothing back;
+   *  the Expedition component stays in the code for a later return (review INTEGRATION-2). */
   expeditionMap: false,
   /** Micropedia discoveries, FriendIntroCeremony takeovers, FreundCallbackCard. */
   friends: false,
