@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { tripAllowed } from '../../loop/tripRules';
 import { useTask } from '../../context/TaskContext';
 import { track } from '../../lib/analytics';
 import VoiceAudio from '../../utils/voiceAudio';
@@ -139,11 +140,15 @@ function pickStory() {
  */
 export function tonightHook(state, when) {
   const today = dayKey(when);
-  if (state?.lastTripDate === today) {
+  // The dream is promised only when the engine will really send him
+  // (tripAllowed: one trip a day, 8 hours apart), never as a promise
+  // departTrip would then ignore.
+  const dreamOk = tripAllowed(state, 'night', when);
+  if (state?.lastTripDate === today || (!dreamOk && state?.lastTripAt)) {
     const trip = tripAt((state?.tripCursor ?? 0) + (state?.expedition?.pendingMemento ? 1 : 0));
     return { id: trip.hookVoice, text: trip.hook, dream: false };
   }
-  if (fireOfBlock(state || {}, 'evening', when).full) {
+  if (dreamOk && fireOfBlock(state || {}, 'evening', when).full) {
     return { id: 'night_trip_01', text: lineText('night_trip_01'), dream: true };
   }
   return { id: 'sleep_nest_01', text: lineText('sleep_nest_01'), dream: false };

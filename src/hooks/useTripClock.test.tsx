@@ -46,12 +46,15 @@ describe('useTripClock', () => {
   });
 
   it('honours the family evening start and the night after TonightRitual', () => {
-    vi.setSystemTime(new Date('2026-09-28T17:15:00'));
+    // Small steps: a jump of hours between two ticks reads as a device
+    // that slept and reloads instead (see the last test in this file).
+    vi.setSystemTime(new Date('2026-09-28T17:29:40'));
     let clock: any;
     const { rerender } = render(<Probe onClock={(c) => { clock = c; }} />);
     expect(clock.block).toBe('day');
-    vi.setSystemTime(new Date('2026-09-28T19:45:00'));
-    mockTask.state = { ...mockTask.state, eveningRitualCompletedAt: new Date('2026-09-28T19:40:00').toISOString() };
+    act(() => { vi.advanceTimersByTime(TRIP_CLOCK_TICK_MS); });
+    expect(clock.block).toBe('evening');
+    mockTask.state = { ...mockTask.state, eveningRitualCompletedAt: new Date().toISOString() };
     rerender(<Probe onClock={(c) => { clock = c; }} />);
     act(() => { vi.advanceTimersByTime(TRIP_CLOCK_TICK_MS); });
     expect(clock.block).toBe('night');
@@ -72,7 +75,7 @@ describe('useTripClock', () => {
   });
 
   it('brings Ronki home once the trip is due, not before, and checks the day first', () => {
-    vi.setSystemTime(new Date('2026-09-28T16:00:00'));
+    vi.setSystemTime(new Date('2026-09-28T17:29:50'));
     const order: string[] = [];
     mockTask.actions = {
       checkNewDay: vi.fn(() => order.push('day')),
@@ -84,7 +87,6 @@ describe('useTripClock', () => {
     };
     render(<Probe onClock={() => {}} />);
     expect(mockTask.actions.arriveTrip).not.toHaveBeenCalled();
-    vi.setSystemTime(new Date('2026-09-28T17:30:05'));
     act(() => { vi.advanceTimersByTime(TRIP_CLOCK_TICK_MS); });
     expect(mockTask.actions.arriveTrip).toHaveBeenCalledTimes(1);
     expect(order.slice(-2)).toEqual(['day', 'arrive']);
@@ -173,5 +175,28 @@ describe('useTripClock', () => {
     mockTask.actions = {};
     expect(() => render(<Probe onClock={() => {}} />)).not.toThrow();
     act(() => { vi.advanceTimersByTime(TRIP_CLOCK_TICK_MS); });
+  });
+
+  // Review fix round 1 (verifier S): a visible tab can sleep without a
+  // visibility event. The next tick sees the gap and reloads, with every
+  // write frozen first. Last in this file: the freeze is one way.
+  it('a visible tab whose timers slept reloads with writes frozen', async () => {
+    const storage = (await import('../utils/storage')).default;
+    const realReload = tripClockPage.reload;
+    tripClockPage.reload = vi.fn();
+    try {
+      mockTask.state = { ...mockTask.state, lastDate: '2026-09-28' };
+      vi.setSystemTime(new Date('2026-09-28T09:00:00'));
+      render(<Probe onClock={() => {}} />);
+      mockTask.actions.checkNewDay.mockClear();
+      // The device slept 20 minutes, then the interval fires once.
+      vi.setSystemTime(new Date('2026-09-28T09:20:00'));
+      act(() => { vi.advanceTimersByTime(TRIP_CLOCK_TICK_MS); });
+      expect(tripClockPage.reload).toHaveBeenCalledTimes(1);
+      expect(storage.writesFrozen()).toBe(true);
+      expect(mockTask.actions.checkNewDay).not.toHaveBeenCalled();
+    } finally {
+      tripClockPage.reload = realReload;
+    }
   });
 });

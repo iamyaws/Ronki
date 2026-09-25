@@ -859,7 +859,8 @@ export function migrateExpedition(raw: unknown): NonNullable<TaskState['expediti
 }
 
 /** Hours a new trip needs after the last departure (Astra FC-08). */
-export const TRIP_MIN_GAP_MS = 8 * 3600 * 1000;
+export { TRIP_MIN_GAP_MS, tripAllowed } from '../loop/tripRules';
+import { TRIP_MIN_GAP_MS, tripAllowed } from '../loop/tripRules';
 
 /** A returnAt further ahead than this is a wrong clock: the trip is due (LOOP-5). */
 const TRIP_MAX_AHEAD_MS = 24 * 3600 * 1000;
@@ -871,24 +872,6 @@ export function tripIsDue(e: { returnAt?: string } | null | undefined, t: Date):
   const r = e?.returnAt ? Date.parse(e.returnAt) : NaN;
   if (!Number.isFinite(r)) return true;
   return t.getTime() >= r || r - t.getTime() > TRIP_MAX_AHEAD_MS;
-}
-
-/** True when a trip of this kind may leave at `t` by the one-trip rules
- *  (Astra FC-08): Ronki is home, the day key the trip would be stamped
- *  with (a dream trip: the day of its evening) is not used yet, and the
- *  last departure is at least 8 hours away. departTrip uses exactly this;
- *  surfaces can ask it before they show a send-off. */
-export function tripAllowed(
-  s: { expedition?: { state?: string } | null; lastTripDate?: string | null; lastTripAt?: string | null; familyConfig?: { eveningStart?: string } | null } | null | undefined,
-  kind: TripKind,
-  t: Date,
-): boolean {
-  if (!s || (kind !== 'day' && kind !== 'night')) return false;
-  if ((s.expedition?.state || 'home') !== 'home') return false;
-  const key = kind === 'night' ? dayKey(eveningStartFor(t, s.familyConfig?.eveningStart)) : dayKey(t);
-  if (s.lastTripDate === key) return false;
-  const lastAt = s.lastTripAt ? Date.parse(s.lastTripAt) : NaN;
-  return !(Number.isFinite(lastAt) && Math.abs(t.getTime() - lastAt) < TRIP_MIN_GAP_MS);
 }
 
 /** ISO time as a Date, or null. */
@@ -2490,7 +2473,10 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
       const next: TaskState = {
         ...prev,
         lastTripDate: key,
-        lastTripAt: ts,
+        // A dream trip counts from the start of its evening, so one that
+        // leaves late (23:30) does not block the next morning's trip under
+        // the 8 hour rule (review fix round 1, verifier S).
+        lastTripAt: kind === 'night' ? eveningStartFor(t, prev.familyConfig?.eveningStart).toISOString() : ts,
         expedition: {
           state: 'away',
           biome: 'morgenwald',

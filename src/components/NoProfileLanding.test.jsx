@@ -133,16 +133,38 @@ describe('NoProfileLanding as the scan sheet', () => {
   });
 
   it('opened from the egg, the sheet speaks scan_open_01 once; not from the parent step or without a way back', () => {
-    const { unmount, rerender } = render(<NoProfileLanding onBack={vi.fn()} reload={vi.fn()} />);
-    expect(mocks.playLocalized).toHaveBeenCalledWith('scan_open_01', 300);
-    rerender(<NoProfileLanding onBack={vi.fn()} reload={vi.fn()} />);
-    expect(mocks.playLocalized.mock.calls.filter(c => c[0] === 'scan_open_01')).toHaveLength(1);
-    unmount();
-    mocks.playLocalized.mockClear();
-    const parent = render(<NoProfileLanding onBack={vi.fn()} backToEgg={false} reload={vi.fn()} />);
-    parent.unmount();
-    render(<NoProfileLanding reload={vi.fn()} />);
-    expect(mocks.playLocalized.mock.calls.map(c => c[0])).not.toContain('scan_open_01');
+    vi.useFakeTimers();
+    try {
+      const { unmount, rerender } = render(<NoProfileLanding onBack={vi.fn()} reload={vi.fn()} />);
+      act(() => { vi.advanceTimersByTime(300); });
+      expect(mocks.playLocalized).toHaveBeenCalledWith('scan_open_01', 0);
+      rerender(<NoProfileLanding onBack={vi.fn()} reload={vi.fn()} />);
+      act(() => { vi.advanceTimersByTime(300); });
+      expect(mocks.playLocalized.mock.calls.filter(c => c[0] === 'scan_open_01')).toHaveLength(1);
+      unmount();
+      mocks.playLocalized.mockClear();
+      const parent = render(<NoProfileLanding onBack={vi.fn()} backToEgg={false} reload={vi.fn()} />);
+      act(() => { vi.advanceTimersByTime(300); });
+      parent.unmount();
+      render(<NoProfileLanding reload={vi.fn()} />);
+      act(() => { vi.advanceTimersByTime(300); });
+      expect(mocks.playLocalized.mock.calls.map(c => c[0])).not.toContain('scan_open_01');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('going back within the delay cancels scan_open_01 (verifier O-V1)', () => {
+    vi.useFakeTimers();
+    try {
+      const { unmount } = render(<NoProfileLanding onBack={vi.fn()} reload={vi.fn()} />);
+      act(() => { vi.advanceTimersByTime(100); });
+      unmount();
+      act(() => { vi.advanceTimersByTime(500); });
+      expect(mocks.playLocalized.mock.calls.map(c => c[0])).not.toContain('scan_open_01');
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('the voiced scan_open_01 line exists in finchLines and as a German recording', async () => {

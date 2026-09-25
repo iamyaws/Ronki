@@ -43,6 +43,7 @@
     "night_trip_01": { "text": "Heute Nacht flieg ich im Traum los. Zum Frühstück bin ich wieder da." },
     "eve_moon_01": { "text": "Schlafen gehen? Ich komm mit." },
     "sleep_nest_01": { "text": "Schlaf gut. Ich bin hier im Nest." },
+    "slowdown_01": { "text": "Huch, so schnell! Ich komm gar nicht hinterher. Machen wir langsam?" },
 
     "grow_left_1": { "text": "Nur noch ein Abenteuer, dann werd ich größer!" },
     "grow_left_2": { "text": "Noch zwei Abenteuer, dann werd ich größer." },

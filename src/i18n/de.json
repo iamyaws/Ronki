@@ -240,7 +240,7 @@
   "parentOnboarding.pin.title": "PIN setzen",
   "parentOnboarding.pin.body": "Setze deinen Eltern-PIN. Er schützt Bildschirmzeit, Belohnungen und Routine-Anpassungen.",
   "parentOnboarding.pin.primary": "PIN jetzt setzen (empfohlen)",
-  "parentOnboarding.pin.secondary": "Später. 1234 bleibt aktiv",
+  "parentOnboarding.pin.secondary": "Später, 1234 bleibt aktiv",
   "parentOnboarding.pin.confirm": "Zur Bestätigung noch einmal eingeben",
   "parentOnboarding.pin.mismatch": "Die beiden PINs passen nicht zusammen. Versuche es noch einmal.",
   "parentOnboarding.family.title": "Wer ist dein Kind?",

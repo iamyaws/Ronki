@@ -140,7 +140,20 @@ describe('FC-08 / LOOP-4: a dream trip belongs to its evening; never two trips w
     await act(async () => { h.actions.departTrip('night'); });
     expect(h.state.expedition.state).toBe('away');
     expect(h.state.lastTripDate).toBe(dayOf(new Date('2026-09-28T17:00:00')));
-    expect(h.state.lastTripAt).toBe(new Date('2026-09-29T02:30:00').toISOString());
+    // It counts from the start of its evening, so the next morning's trip is not blocked.
+    expect(h.state.lastTripAt).toBe(new Date('2026-09-28T17:00:00').toISOString());
+  });
+
+  it('a late dream trip (23:30) does not block the next morning trip', async () => {
+    at('2026-09-29T07:10:00');
+    const h = await mount(louisToday({
+      // What departTrip('night') at 23:30 on the 28th writes.
+      lastTripDate: dayOf(new Date('2026-09-28T17:00:00')),
+      lastTripAt: new Date('2026-09-28T17:00:00').toISOString(),
+    }));
+    await act(async () => { h.actions.departTrip('day'); });
+    expect(h.state.expedition.state).toBe('away');
+    expect(h.state.expedition.kind).toBe('day');
   });
 
   it('a new day key alone does not allow a second trip within 8 hours', async () => {

@@ -161,8 +161,9 @@ describe('arriveTrip', () => {
     const h = await mount(louisToday(), { withClock: true });
     await act(async () => { h.actions.departTrip('day'); });
     expect(h.state.expedition.state).toBe('away');
-    at('2026-09-28T17:00:10');
-    await act(async () => { vi.advanceTimersByTime(30_000); });
+    // A visible tablet lives through the day in 30 s ticks (a jump of
+    // hours between two ticks reads as a device that slept and reloads).
+    await act(async () => { vi.advanceTimersByTime((9 * 60 + 50) * 60 * 1000 + 40_000); });
     await settle();
     expect(h.state.expedition.state).toBe('waiting');
     expect(h.state.expedition.pendingMemento.tripId).toBe('t01');

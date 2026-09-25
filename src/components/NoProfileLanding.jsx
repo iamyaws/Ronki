@@ -109,7 +109,11 @@ export default function NoProfileLanding({ onBack, backToEgg = true, onBeforeOpe
   // the parent step, where a grown-up reads the sheet.
   const fromEgg = !!onBack && backToEgg;
   useEffect(() => {
-    if (fromEgg) VoiceAudio.playLocalized('scan_open_01', 300);
+    if (!fromEgg) return undefined;
+    // Own timer, so going back within the delay cancels the line too
+    // (verifier O-V1); stop() on unmount ends it if it already started.
+    const t = setTimeout(() => VoiceAudio.playLocalized('scan_open_01', 0), 300);
+    return () => { clearTimeout(t); try { VoiceAudio.stop?.(); } catch { /* ignore */ } };
   }, [fromEgg]);
 
   /** Store the token and reload, the same way a successful scan does. */

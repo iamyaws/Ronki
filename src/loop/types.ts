@@ -51,7 +51,7 @@ export interface LoopConfig {
  * All are idempotent guards: calling one in the wrong state is a no-op.
  */
 export interface LoopActions {
-  /** home -> away. Needs lastTripDate !== today. Picks the trip at tripCursor. */
+  /** home -> away when tripAllowed (src/loop/tripRules.ts): one trip per day key, 8 hours apart. Picks the trip at tripCursor. */
   departTrip: (kind: TripKind) => void;
   /** away -> waiting when now >= returnAt (called by useTripClock). */
   arriveTrip: () => void;
@@ -91,8 +91,10 @@ export interface TripClock {
 export interface LoopStateFields {
   /** Opened treasures so far. Old saves: backfilled from expeditionLog.length. */
   adventureCount?: number;
-  /** Day key (see clock.dayKey) of the last departure; one trip per day. */
+  /** Day key (see clock.dayKey) of the last departure; a dream trip uses the day of its evening. */
   lastTripDate?: string | null;
+  /** ISO time of the last departure (a dream trip: its evening start); departures stay 8 hours apart. */
+  lastTripAt?: string | null;
   /** Index into TRIPS of the next trip (wraps after 14). Old saves: 0. */
   tripCursor?: number;
   /** Trip ids whose treasure is on the shelf, in order found. */

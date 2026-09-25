@@ -318,3 +318,18 @@ describe('storage syncLoadByToken after a failed cloud read', () => {
     expect(rpcMock.mock.calls.filter(([fn]) => fn === 'profile_upsert')).toHaveLength(1);
   });
 });
+
+// Review fix round 1 (SAVES-1): a stale page that is about to reload
+// writes nothing. Last in this file on purpose: the freeze is one way.
+describe('storage.freezeWrites', () => {
+  it('blocks the local save and the cloud save from then on', async () => {
+    rpcMock.mockReset();
+    rpcMock.mockResolvedValue({ data: null, error: null });
+    storage.freezeWrites();
+    expect(storage.writesFrozen()).toBe(true);
+    await storage.save({ onboardingDone: true, marker: 'stale' });
+    expect(mockStore['hdx2_drachennest']).toBeUndefined();
+    await storage.cloudSaveByToken('d'.repeat(32), { marker: 'stale' });
+    expect(rpcMock).not.toHaveBeenCalled();
+  });
+});

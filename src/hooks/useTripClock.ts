@@ -22,16 +22,25 @@ import { useTask } from '../context/TaskContext';
 import { now as clockNow, dayKey } from '../loop/clock';
 import { blockAt } from '../loop/dayPhase';
 import type { TripClock } from '../loop/types';
+import storage from '../utils/storage';
 
 export const TRIP_CLOCK_TICK_MS = 30_000;
 
 /** Hidden longer than this, the tab reloads when it comes back (SAVES-1). */
 export const STALE_HIDDEN_MS = 5 * 60 * 1000;
 
-/** The page reload, swappable in tests. */
+/** The page reload, swappable in tests. Freezes every write first, so
+ *  nothing this stale page still renders (a greeting, a timer, the
+ *  pagehide flush) can save its old state over newer cloud data. */
 export const tripClockPage = {
   reload: (): void => { window.location.reload(); },
 };
+
+function reloadStale(): void {
+  // Optional call: storage is mocked in some tests without it.
+  (storage as { freezeWrites?: () => void }).freezeWrites?.();
+  tripClockPage.reload();
+}
 
 /** A returnAt further ahead than this is a wrong clock (LOOP-5). */
 const MAX_AHEAD_MS = 24 * 3600 * 1000;
@@ -73,7 +82,24 @@ export default function useTripClock(): TripClock {
   useEffect(() => {
     // The first check runs in the effect below, as soon as state is loaded.
     // The interval ticks only while the tab is visible (SAVES-1).
-    const id = setInterval(() => { if (!tabHidden()) tick(); }, TRIP_CLOCK_TICK_MS);
+    // A visible tab can still have slept (a closed laptop lid, some Android
+    // screens turn off without a visibility event): a long gap between
+    // ticks, or a day that moved on, reloads instead of ticking.
+    let lastTickAt = clockNow().getTime();
+    const id = setInterval(() => {
+      if (tabHidden() || reloadingRef.current) return;
+      const t = clockNow();
+      const gap = t.getTime() - lastTickAt;
+      lastTickAt = t.getTime();
+      const lastDate = stateRef.current?.lastDate;
+      const dayMoved = typeof lastDate === 'string' && lastDate !== '' && dayKey(t) > lastDate;
+      if (stateRef.current && (gap > STALE_HIDDEN_MS || dayMoved)) {
+        reloadingRef.current = true;
+        reloadStale();
+        return;
+      }
+      tick();
+    }, TRIP_CLOCK_TICK_MS);
     const onVisibility = () => {
       if (tabHidden()) {
         if (hiddenAtRef.current === null) hiddenAtRef.current = clockNow().getTime();
@@ -90,7 +116,7 @@ export default function useTripClock(): TripClock {
         // Stale state: reload so the load path merges the cloud first.
         // Nothing ticks (and so nothing is saved) until the page is new.
         reloadingRef.current = true;
-        tripClockPage.reload();
+        reloadStale();
         return;
       }
       tick();

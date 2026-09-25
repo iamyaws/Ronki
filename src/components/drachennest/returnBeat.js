@@ -20,6 +20,7 @@
  * base design section 3.
  */
 import { blockAt, isWeekend } from '../../loop/dayPhase';
+import { tripAllowed } from '../../loop/tripRules';
 import { fireFor, fireOfBlock, isFirstDay } from '../../loop/fire';
 import { dayKey } from '../../loop/clock';
 import { returnLineFor } from '../../data/ronkiLines';
@@ -92,7 +93,9 @@ export function nestBeat(state, now) {
   if (block === 'night') return { ...base, mode: 'night' };
 
   if (block === 'morning') {
-    if (fire.total > 0 && fire.full && !tripToday) return { ...base, mode: 'departure' };
+    // tripAllowed is the engine's own rule (one trip a day, 8 hours apart),
+    // so the Nest never shows a send-off that departTrip would ignore.
+    if (fire.total > 0 && fire.full && tripAllowed(state, 'day', now)) return { ...base, mode: 'departure' };
     if (fire.total > 0 && !fire.full) return { ...base, mode: 'fire' };
     return { ...base, mode: 'stay' };
   }
@@ -105,7 +108,7 @@ export function nestBeat(state, now) {
     // with tasks does (LOOP-1, KIDUX-7).
     const morning = fireOfBlock(state || {}, 'morning', now);
     const realMorning = morning.lit - morning.bonus > 0;
-    if ((!firstDay || realMorning) && morning.total > 0 && morning.full && !tripToday) {
+    if ((!firstDay || realMorning) && morning.total > 0 && morning.full && tripAllowed(state, 'day', now)) {
       return { ...base, fire: morning, mode: 'departure' };
     }
     return { ...base, mode: 'stay' };

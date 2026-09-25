@@ -27,6 +27,11 @@ function openDB(): Promise<IDBDatabase> {
 /** Per token: did this session's last cloud read reach the server? (Astra FC-01) */
 const cloudReadStatus = new Map<string, 'ok' | 'failed'>();
 
+/** Set just before a stale page reloads (useTripClock). From then on this
+ *  page writes nothing, locally or to the cloud: its in-memory state may be
+ *  older than what another device saved (review fix round 1, SAVES-1). */
+let writesFrozen = false;
+
 const storage = {
   // ── Local (IndexedDB with localStorage fallback) ──
   async load(): Promise<GameState | null> {
@@ -61,7 +66,18 @@ const storage = {
     }
   },
 
+  /** Stop every write from this page (see writesFrozen). One way: only a reload clears it. */
+  freezeWrites(): void {
+    writesFrozen = true;
+  },
+
+  /** True once freezeWrites() ran on this page. */
+  writesFrozen(): boolean {
+    return writesFrozen;
+  },
+
   async save(state: GameState): Promise<void> {
+    if (writesFrozen) return;
     // Apr 2026 fix: writes go to BOTH IndexedDB AND localStorage every
     // time, and the IDB write awaits transaction commit before resolving.
     //
@@ -198,6 +214,7 @@ const storage = {
 
   async cloudSaveByToken(token: string, state: GameState): Promise<void> {
     if (!token || !/^[a-f0-9]{32}$/.test(token)) return;
+    if (writesFrozen) return;
     try {
       // profile_upsert stamps updated_at server-side and records today
       // in profile_activity, which is what the active-family counter
