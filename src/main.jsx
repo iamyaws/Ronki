@@ -1,3 +1,5 @@
+// DEV-only ?clock= shift for loop tests; must run before anything reads Date.
+import './devClock';
 import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
