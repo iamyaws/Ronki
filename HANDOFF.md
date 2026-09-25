@@ -4,6 +4,28 @@ _Single source of truth: done, in flight, backlog. Update before any /compact an
 
 ---
 
+## Where things stand (25 September 2026, overnight)
+
+Growth engine approved by Marc: spec [docs/strategy/2026-09-25-growth-engine-design.md](docs/strategy/2026-09-25-growth-engine-design.md) (read its last section, "Changes the same night"), plan [docs/superpowers/plans/2026-09-25-foundation-and-launch.md](docs/superpowers/plans/2026-09-25-foundation-and-launch.md), keyword map [docs/strategy/2026-09-25-keyword-map.md](docs/strategy/2026-09-25-keyword-map.md). Astra reviews (not in git): `C:\Users\öööö\ronki\reviews\`. Launch kit (not in git): `C:\Users\öööö\ronki\launch\2026-09-26\KIT.md`.
+
+**Found and fixed on 25 Sep:**
+- Supabase paused again on 23 Sep although the weekly keep-alive answered 200 on 21 Sep. Restored by Fable via the Supabase MCP the same day (ACTIVE_HEALTHY). Keep-alive is now daily with two RPCs (PR 15). If a pause warning arrives within three weeks, move to Pro (Marc's rule).
+- Plausible trial dead (stats deleted around 23 Oct). Umami replaces it (PR 17, draft, waits for Marc's website id).
+- `C:\Users\öööö\ronki` was a broken worktree (its admin entry in `louis-quest/.git/worktrees` was gone). Re-registered; working tree matched `design/bilderbuch` exactly. `design/bilderbuch` was already on GitHub.
+- Flow check on production (phone viewport and API): template page, print, PDFs, lead insert, card create and load all work. Test rows deleted.
+- Baseline: 3 cards (last real sync 18 May 2026), 0 activity rows, 0 leads, 4 waitlist addresses (April). Nobody used Ronki since the backend died in May.
+
+**Open PRs (Fable cannot merge; the permission system blocks it, Marc merges):**
+- PR 15 `foundation/2026-09-25`: daily keep-alive, gate 1 on 15 Dec, home title, article update dates, spec, plan, keyword map. Astra code review: no findings.
+- PR 16 `launch/share-previews` (stacked on 15): share pictures of the real sheets on the four template pages, short links `/morgen`, `/li`, `/ig`, `/tt`, `/yt` in the root `vercel.json` with a host rule (both Vercel projects read the root file; project root is `.`). Check after merge: `curl -I https://www.ronki.de/morgen`.
+- PR 17 `analytics/umami` (draft, stacked on 16): Umami helper, script tag with placeholder id, privacy copy. `website/tests/umami-snippet.test.ts` fails until the real id is in.
+
+**Next steps, in order:** Marc merges 15 and 16; Umami signup, id into PR 17, merge, check a live pageview; messages from the kit (Sunday evening); Instagram, TikTok, YouTube accounts and first posts; LinkedIn Monday; Brevo double opt-in during the week (plan Task 8). Week of 28 Sep: Abendroutine refresh (keyword map #1), clock-change page before 25 Oct, character sheet, render script.
+
+**Gates:** gate 1 (pull) 15 Dec 2026, gate 2 (reach) 15 Mar 2027 counting all unpaid visitors by source. Umami Hobby keeps six months of data: note the monthly numbers in this file.
+
+Local build note: `louis-quest` needed `npm ci` (qrcode was missing from node_modules); Vercel builds from a clean install and was never affected.
+
 ## Where things stand (14 September 2026)
 
 Revival check done, nothing built. Full write-up (German): [docs/strategy/2026-09-14-wiederbelebungs-check.md](docs/strategy/2026-09-14-wiederbelebungs-check.md). Raw Search Console export: `docs/analytics/gsc-2026-09-14/`.

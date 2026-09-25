@@ -147,3 +147,17 @@ Total: 6 agents, about 650k subagent tokens, run one after another. After launch
 3. **Umami free-tier limits** confirmed at signup.
 4. **ElevenLabs credits** checked before the first slate.
 5. **App telemetry** (`telemetry_events` rejects anon inserts, HANDOFF follow-up 5) stays out of scope unless gate 1 needs it.
+
+## Changes the same night (25 Sep 2026, Marc: "go all out, use Astra, traffic by tomorrow")
+
+Astra rep 1 (sparring, high effort, with research) and Fable's own read agreed on the order: people Marc already reaches first, social second, search last. Reviews live in `C:\Users\öööö\ronki\reviews\` (not in git). What changed:
+
+- **Launch moves to the weekend of 26 to 27 Sep** with the existing morning printable. 19 Oct stays as the date the full two-week rhythm must run.
+- **Critical path is distribution, not production.** Character sheet, 18 motifs, the video render script, `/hallo` and IndexNow move to the week of 28 Sep. The first videos are adult hands with the printed sheet, filmed on a phone.
+- **Marc's time cap is 150 minutes a week including replies** (filming 30, review 20, publishing 25, replies 35, outreach 30, measuring 10). The earlier "2.5 hours plus 10 minutes a day" did not add up.
+- **Working allocation for 500 visitors a month by January:** about 200 from communities Marc and others share into, 200 from social, 100 from search. Replaced by observed rates after two weeks.
+- **Instagram is the first conversion channel** (bio link, story link stickers). TikTok shows a website field only with 1,000 followers or a registered business account; links in Shorts descriptions are not clickable. Calls to action are written per platform.
+- **Short tracked links** (`/morgen`, `/li`, `/ig`, `/tt`, `/yt`) land on the morning template with UTM tags; template pages share a picture of their own sheet (PR 16).
+- **Topic order from the keyword map** (`docs/strategy/2026-09-25-keyword-map.md`): refresh the Abendroutine article first (138 impressions at position 38, the biggest stuck page), then Kind trödelt morgens (96 at 30.6), build a clock-change page before 25 Oct, then "Kind anziehen ohne Streit", "Routine nach den Ferien", a "Wochenplan Kinder Vorlage" page, Advent. The morning template keeps its title (best click rate on the site, 9.09% at position 14.6).
+- **Baseline on 25 Sep:** 3 cards (last real sync 18 May 2026), 0 activity rows, 0 leads, 4 waitlist addresses from April. Tomorrow's traffic is the first real demand test.
+- **Merges need Marc.** The permission system blocks Fable from merging to production; PRs 15 to 17 wait for his go.
