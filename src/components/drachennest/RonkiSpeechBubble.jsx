@@ -1,28 +1,22 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { SpeechBubble } from '../bilderbuch';
 
 /**
- * RonkiSpeechBubble — rotating mood-line that hovers above Ronki.
+ * RonkiSpeechBubble: the rotating line Ronki says in his room.
  *
- * Direct port of the Begleiter Polish "Sprechblase mit rotierender
- * Laune". Six lines, cycles every ~4.2 seconds. Makes the screen
- * feel alive even when the kid isn't interacting.
+ * Bilderbuch cut (25 Sep 2026): the body is the shared SpeechBubble
+ * (paper fill, ink outline, tail pointing down at Ronki). Timing and
+ * copy are unchanged from the Begleiter Polish port: six lines, one
+ * every ~4.2 s, tap to dismiss, then a quiet window of ~6 s before
+ * the next line shows.
+ *
+ * Placement is the parent's job now: RoomHub positions the bubble
+ * right above Ronki's head from the measured scene geometry and
+ * passes it through `style` (and `className`). Without a style the
+ * bubble sits centred near the top of its positioned parent.
  *
  * Voice rule (feedback_no_ai_writing.md): no em-dashes, no tidy
- * three-beat fragments. The lines below were drafted under that
- * rule.
- *
- * Tap behaviour (Marc 25 Apr 2026): the bubble used to overlap the
- * top vitals arc icon. Two fixes:
- *   1) RoomHub now mounts this OUTSIDE the rh-ronki-stage so the
- *      bubble sits in the scene's empty top band, above the ring.
- *   2) Tap to "mark as read" — the bubble slides up and fades,
- *      then a quiet window of ~6s passes before the next line
- *      shows. Lets the kid clear the surface intentionally without
- *      losing the alive-feeling rotation.
- *
- * Future: pull lines from i18n + tie to vital state (low Hunger →
- * "Mein Bauch knurrt schon ein bisschen", low Liebe → "Magst du
- * mich mal kurz drücken?", etc.). For prototype: static rotation.
+ * three-beat fragments. The lines below were drafted under that rule.
  */
 
 const MOOD_LINES = [
@@ -37,7 +31,7 @@ const MOOD_LINES = [
 const ROTATE_MS = 4200;
 const QUIET_AFTER_DISMISS_MS = 6000;
 
-export default function RonkiSpeechBubble({ idx: idxProp }) {
+export default function RonkiSpeechBubble({ idx: idxProp, side = 'bottom', className = '', style }) {
   const [idx, setIdx] = useState(0);
   // 'visible' = bubble shown, 'dismissing' = play exit animation,
   // 'quiet' = waiting after a tap-dismiss before the next line cycles.
@@ -79,70 +73,29 @@ export default function RonkiSpeechBubble({ idx: idxProp }) {
       key={`${showIdx}-${phase}`}
       type="button"
       onClick={handleTap}
-      aria-label="Nachricht von Ronki — antippen zum Schließen"
+      aria-label="Nachricht von Ronki, antippen zum Schließen"
+      className={`rsb-root ${className}`}
       style={{
         position: 'absolute',
-        // Re-anchored even closer to Ronki (Marc 25 Apr 2026 third
-        // pass — "speech bubble needs to be very close to ronki
-        // again as in the start I feel before we started tweaking
-        // it"). Pushed top down to ~25% of the scene so the bubble
-        // sits right above Ronki's head rather than floating up
-        // near the cave-mouth. Tap-to-dismiss is the overlap
-        // mitigation per the earlier QA.
-        top: '25%',
+        top: 12,
         left: '50%',
-        right: 'auto',
         transform: 'translateX(-50%)',
-        background: '#ffffff',
-        border: '2px solid #124346',
-        borderRadius: '18px 18px 4px 18px',
-        padding: '9px 14px 10px',
-        font: '600 13px/1.3 "Nunito", sans-serif',
-        color: '#1e1b17',
-        maxWidth: 200,
-        textAlign: 'center',
-        boxShadow: '0 6px 14px -4px rgba(18,67,70,0.20)',
-        zIndex: 8,
+        maxWidth: 'min(300px, calc(100% - 32px))',
+        background: 'transparent',
+        border: 'none',
+        padding: 0,
         cursor: 'pointer',
+        textAlign: 'center',
+        zIndex: 8,
         animation: phase === 'dismissing'
           ? 'rsb-out 0.28s ease-in forwards'
           : 'rsb-in 0.4s ease-out',
+        ...style,
       }}
     >
-      {MOOD_LINES[showIdx]}
-      {/* Tail at the bottom-right of the bubble pointing down-right
-          toward Ronki — left-anchored bubble means the tail leans
-          INTO the scene rather than dropping straight onto the top
-          arc icon. Two stacked triangles so the dark border shows
-          through. */}
-      <span
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          bottom: -10,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: 0,
-          height: 0,
-          borderLeft: '8px solid transparent',
-          borderRight: '8px solid transparent',
-          borderTop: '10px solid #124346',
-        }}
-      />
-      <span
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          bottom: -7,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: 0,
-          height: 0,
-          borderLeft: '7px solid transparent',
-          borderRight: '7px solid transparent',
-          borderTop: '8px solid #ffffff',
-        }}
-      />
+      <SpeechBubble side={side} tone="paper" rotate={-1}>
+        {MOOD_LINES[showIdx]}
+      </SpeechBubble>
       <style>{`
         @keyframes rsb-in {
           0%   { opacity: 0; transform: translateX(-50%) translateY(-4px) scale(0.95); }

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTask } from '../context/TaskContext';
 import { getCatStage } from '../utils/helpers';
-import MoodChibi from './MoodChibi';
+import MoodChibi, { ambientMood } from './MoodChibi';
 
 /**
  * RonkiPortrait — state-aware chibi portrait of the kid's companion.
@@ -47,7 +47,9 @@ export default function RonkiPortrait({
   // (legend) with their own aura/wing treatments. getCatStage already
   // clamps to CAT_STAGES.length - 1.
   const resolvedStage = stage ?? getCatStage(state?.catEvo ?? 0);
-  const resolvedMood = mood ?? state?.ronkiMood ?? 'normal';
+  // An explicit mood prop wins (feelings screens); the ambient state
+  // never shows a worried Ronki after days away.
+  const resolvedMood = mood ?? ambientMood(state?.ronkiMood);
 
   const chibi = (
     <MoodChibi
@@ -67,18 +69,15 @@ export default function RonkiPortrait({
     );
   }
 
-  // Ringed variant — drops the chibi into a soft circle frame similar
-  // to the old `overflow-hidden rounded-full` image wrappers, but with
-  // a cream border instead of cropping the chibi.
+  // Ringed variant: a sky-wash circle with a thin ink outline (the
+  // Bilderbuch locket), the art sitting on it without being cropped.
   return (
     <div
-      className={`rounded-full flex items-center justify-center ${className}`}
+      className={`rounded-full flex items-center justify-center bg-sky-wash ${className}`}
       style={{
         width: size,
         height: size,
-        background: 'radial-gradient(circle at 50% 40%, rgba(255,248,242,0.12), rgba(18,67,70,0.25))',
-        border: '2px solid rgba(252,211,77,0.35)',
-        boxShadow: '0 0 40px rgba(252,211,77,0.18)',
+        border: '2px solid var(--color-ink)',
         ...style,
       }}
     >
