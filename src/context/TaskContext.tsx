@@ -1475,6 +1475,28 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
     if (activeToken) {
       clearTimeout(cloudTimer.current);
       cloudTimer.current = setTimeout(async () => {
+        // Finch pass (Astra FC-01): nothing is written to a card before a
+        // cloud read for it has reached the server in this session. A
+        // failed first read must never become an overwrite of a dragon
+        // we could not see. A token made on this device (parent step) is
+        // probed once: "no row" lets the save through.
+        if (!storage.cloudReadOk(activeToken)) {
+          const probe = await storage.cloudLoadByToken(activeToken);
+          if (!storage.cloudReadOk(activeToken)) return; // still offline: local keeps everything
+          if (probe) {
+            // The card holds a state this session never loaded. Load it
+            // properly (the normal sync merges it) instead of overwriting.
+            // At most once per session, so a flaky network cannot loop.
+            try {
+              const key = `ronki_cloud_reload_${activeToken.slice(0, 8)}`;
+              if (!sessionStorage.getItem(key)) {
+                sessionStorage.setItem(key, '1');
+                window.location.reload();
+              }
+            } catch { /* no sessionStorage: stay local, never overwrite */ }
+            return;
+          }
+        }
         const raw = await storage.load() as GameState | null;
         const merged = { ...(raw || {}), ...state } as GameState;
         await storage.cloudSaveByToken(activeToken, merged);

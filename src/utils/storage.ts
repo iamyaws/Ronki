@@ -24,6 +24,9 @@ function openDB(): Promise<IDBDatabase> {
   });
 }
 
+/** Per token: did this session's last cloud read reach the server? (Astra FC-01) */
+const cloudReadStatus = new Map<string, 'ok' | 'failed'>();
+
 const storage = {
   // ── Local (IndexedDB with localStorage fallback) ──
   async load(): Promise<GameState | null> {
@@ -166,11 +169,31 @@ const storage = {
       // profile_get returns null when there is no row, which is the
       // same "no cloud state yet" case the old maybeSingle() returned.
       const { data, error } = await supabase.rpc('profile_get', { p_token: token });
-      if (error || !data) return null;
+      // Finch pass (26 Sep 2026, Astra FC-01): remember whether the read
+      // really reached the server. A failed read and "no row" both return
+      // null, but only a successful read may let local state be written
+      // to this card (see cloudReadOk).
+      if (error) {
+        cloudReadStatus.set(token, 'failed');
+        return null;
+      }
+      cloudReadStatus.set(token, 'ok');
+      if (!data) return null;
       return ((data as { state?: GameState }).state as GameState) || null;
     } catch {
+      cloudReadStatus.set(token, 'failed');
       return null;
     }
+  },
+
+  /**
+   * True once a cloud read for this token has reached the server in this
+   * session (a row or a real "no row"). Until then nothing local may be
+   * written to the card: a failed read must never turn into an overwrite
+   * of an existing dragon (Astra FC-01, Finch pass 26 Sep 2026).
+   */
+  cloudReadOk(token: string): boolean {
+    return cloudReadStatus.get(token) === 'ok';
   },
 
   async cloudSaveByToken(token: string, state: GameState): Promise<void> {
@@ -275,8 +298,10 @@ const storage = {
 
     if (local && !cloud) {
       // Existing local profile getting tagged with a token for the
-      // first time, migrate to cloud.
-      this.cloudSaveByToken(token, local);
+      // first time, migrate to cloud. Only when the read really found no
+      // row: after a failed read the card may hold a dragon we could not
+      // see, so local stays local (Astra FC-01).
+      if (this.cloudReadOk(token)) this.cloudSaveByToken(token, local);
       return local;
     }
 

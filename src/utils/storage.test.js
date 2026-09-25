@@ -287,3 +287,34 @@ describe('storage syncLoadByToken sibling guard', () => {
     expect(localStorage.getItem('ronki_local_owner')).toBe(CARD_A);
   });
 });
+
+// Finch pass (26 Sep 2026, Astra FC-01): a local hatch must never be
+// pushed onto a card whose cloud read failed. Egg first means a device
+// often holds a hatched, not yet onboarded local state when a card is
+// scanned; a transient profile_get error used to upload it over the card.
+describe('storage syncLoadByToken after a failed cloud read', () => {
+  const T1 = 'b'.repeat(32);
+  const T2 = 'c'.repeat(32);
+  beforeEach(() => {
+    rpcMock.mockReset();
+  });
+
+  it('keeps a local hatch local when profile_get errors (no profile_upsert)', async () => {
+    mockStore['hdx2_drachennest'] = { kidIntroSeen: true, companionName: 'Funki', onboardingDone: false };
+    rpcMock.mockImplementation(async (fn) => (fn === 'profile_get'
+      ? { data: null, error: { message: 'network down' } }
+      : { data: null, error: null }));
+    const result = await storage.syncLoadByToken(T1);
+    expect(result).toMatchObject({ companionName: 'Funki' });
+    expect(storage.cloudReadOk(T1)).toBe(false);
+    expect(rpcMock.mock.calls.filter(([fn]) => fn === 'profile_upsert')).toHaveLength(0);
+  });
+
+  it('still migrates local to the card when the read really found no row', async () => {
+    mockStore['hdx2_drachennest'] = { kidIntroSeen: true, companionName: 'Funki', onboardingDone: false };
+    rpcMock.mockImplementation(async () => ({ data: null, error: null }));
+    await storage.syncLoadByToken(T2);
+    expect(storage.cloudReadOk(T2)).toBe(true);
+    expect(rpcMock.mock.calls.filter(([fn]) => fn === 'profile_upsert')).toHaveLength(1);
+  });
+});

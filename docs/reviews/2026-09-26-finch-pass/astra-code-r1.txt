@@ -1,0 +1,127 @@
+(node:19824) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[codex] Starting Codex task thread.
+[codex] Thread ready (01a0da6e-43aa-77d2-9a09-f4806752bc63).
+[codex] Turn started (01a0da6e-474c-7a30-b3ad-33c8dd34ddd6).
+[codex] Assistant message captured: I’ll read the brief and its referenced sources, then return the requested review without chan...
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content -Li...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content -Li... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content -Li...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content -Li... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "git status --sh...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "git status --sh... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content 'do...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content 'do... (exit 0)
+[codex] Assistant message captured: I’m tracing the save migration and daily loop against the rulings, including every path that ...
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content 'do...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content 'do... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content 'do...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content 'do... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command 'git diff 13f14e...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command 'git diff 13f14e... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command 'Get-Content src...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command 'Get-Content src... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command 'Get-Content src...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command 'Get-Content src... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command 'Get-Content src...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command 'Get-Content src... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command '$p=Get-Content ...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command '$p=Get-Content ... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command 'Get-Content src...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command 'Get-Content src... (exit 0)
+[codex] Assistant message captured: The new trip clock handles returns outside the map, and treasure collection is guarded agains...
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command 'Get-Content src...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command 'Get-Content src... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command 'git diff 13f14e...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command 'git diff 13f14e... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command '$p=Get-Content ...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command '$p=Get-Content ... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content src...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content src... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command 'Get-Content src...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command 'Get-Content src... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command 'Get-Content src...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command 'Get-Content src... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command 'Get-ChildItem s...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command 'Get-ChildItem s... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command 'Get-ChildItem s...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command 'Get-ChildItem s... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command 'Get-Content doc...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command 'Get-Content doc... (exit 0)
+[codex] Assistant message captured: I found two material risks: a failed card fetch can still reach the cloud-write path, and the...
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "@' const fs = r...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "@' const fs = r... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command 'Get-Content src...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command 'Get-Content src... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "@' const ts=req...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "@' const ts=req... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Select-String -...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Select-String -... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "@' const fs=req...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "@' const fs=req... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "@' const fs=req...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "@' const fs=req... (exit 0)
+[codex] Assistant message captured: The in-memory checks confirmed the cloud overwrite path, loss of an old keepsake at the log c...
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Select-String -...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Select-String -... (exit 0)
+[codex] Assistant message captured: Reviewed `13f14e6..57bca8c` through source inspection and isolated in-memory reproductions. N...
+[codex] Turn completion inferred after the main thread finished and subagent work drained.
+Reviewed `13f14e6..57bca8c` through source inspection and isolated in-memory reproductions. No files changed. Full tests, builds and browser checks were not run.
+
+**FC-01 | BLOCKER | [storage.ts:276](/C:/Users/öööö/ronki-finch/src/utils/storage.ts:276), scan-after-hatch path**  
+Claim: A failed card fetch can overwrite an existing cloud dragon with the local hatch.  
+Why it matters to the reader: I reproduced `profile_get` failing, followed by `profile_upsert` receiving the ownerless local hatch; the pending-hatch guard runs after this unsafe resolution.  
+Fix: Resolve scanned cards without the local-to-cloud migration branch. Keep the hatch isolated and prevent profile writes until the cloud read succeeds. Test fetch failure followed by write success, alongside the successful seed and existing-dragon cases.
+
+**FC-02 | SHOULD | [TaskContext.tsx:842](/C:/Users/öööö/ronki-finch/src/context/TaskContext.tsx:842)**  
+Claim: Opening another treasure eventually deletes earlier keepsakes.  
+Why it matters to the reader: The 61st entry removes the oldest memento, and the passport reads this capped log; legacy keepsakes have no `treasuresFound` identifier from which to recover them.  
+Fix: Store the permanent collection separately from bounded visit history, preserving every legacy memento. Replace the test that endorses a capped shelf with a retention test.
+
+**FC-03 | SHOULD | [TaskContext.tsx:1581](/C:/Users/öööö/ronki-finch/src/context/TaskContext.tsx:1581)**  
+Claim: Legacy missions still grow Ronki during day transition, contrary to R6’s treasure-only growth.  
+Why it matters to the reader: An in-memory old-save example with mission `em1` at 13/14 moved `catEvo` from 8 to 13 on rollover, crossing a stage with zero treasures opened.  
+Fix: Retain mission records but remove their evolution awards from the Finch path. Test old saves with nearly completed missions during both loading and midnight rollover.
+
+**FC-04 | SHOULD | [TaskContext.tsx:1285](/C:/Users/öööö/ronki-finch/src/context/TaskContext.tsx:1285), [RonkiPassport.jsx:68](/C:/Users/öööö/ronki-finch/src/components/RonkiPassport.jsx:68)**  
+Claim: Previously saved sad, tired and streak-derived moods can persist indefinitely.  
+Why it matters to the reader: Rehydration normalizes only `besorgt`; the new Nest and passport never call the expiry function, and completing tasks no longer calls it either, so disabling future bad days does not remove an existing sad dragon.  
+Fix: Normalize retired ambient moods during migration and run any remaining expiry independently of hidden screens. Test yesterday’s sad/tired save on both tabs, including after five days away.
+
+**FC-05 | SHOULD | [RoomHub.jsx:524](/C:/Users/öööö/ronki-finch/src/components/drachennest/RoomHub.jsx:524)**  
+Claim: Departure and return replace the child’s stage-specific Ronki with generic art.  
+Why it matters to the reader: `wave` and `cheer` bypass `MoodChibi` and receive neither stage nor egg variant, so a hatchling loses its shell and a grown dragon loses its grown appearance during central loop moments.  
+Fix: Preserve the current stage and variant in those states; animate the correct existing portrait where matching pose art is unavailable. Verify baby and legendary saves across home, departure and return.
+
+**FC-06 | SHOULD | [TeachBreathBeat.jsx:187](/C:/Users/öööö/ronki-finch/src/components/onboarding/TeachBreathBeat.jsx:187)**  
+Claim: The mandatory first hold still has no audible instruction for a non-reader.  
+Why it matters to the reader: Its introductory voice uses the hard-muted narrator, “Halte gedrückt” is text-only, and ordinary taps below 220 ms silently return to the prompt.  
+Fix: Give Ronki a spoken hold-and-release instruction before the first attempt, with a replay control and a visible demonstration. Verify the actual playback, not merely that a voice method was called.
+
+**FC-07 | SHOULD | [NowCard.jsx:28](/C:/Users/öööö/ronki-finch/src/components/drachennest/NowCard.jsx:28)**  
+Claim: A double tap can complete two different routine tasks.  
+Why it matters to the reader: The completion guard resets when the next quest renders; two immediate clicks in a React reproduction completed `s_wake` and `s_breakfast`, while the existing double-tap test holds the same quest prop fixed.  
+Fix: Carry a brief input guard across task changes, without a visible countdown. Test consecutive taps with the real next-task transition.
+
+**FC-08 | SHOULD | [clock.ts:23](/C:/Users/öööö/ronki-finch/src/loop/clock.ts:23)**  
+Claim: The daily departure guard and reset use UTC dates despite the specified local calendar day.  
+Why it matters to the reader: Berlin’s September day changes at 02:00 in this code; a dream departure after local midnight can be followed by another departure that morning, and a tablet left open does not reset at local midnight.  
+Fix: Use one local date-key convention for loading, onboarding, departures and rollover, with an explicit migration for existing keys. Test Berlin midnight and DST, plus a timezone where UTC midnight falls during normal waking hours.
+
+**FC-09 | SHOULD | [TaskContext.tsx:2363](/C:/Users/öööö/ronki-finch/src/context/TaskContext.tsx:2363)**  
+Claim: Changing the evening start changes the child’s screen immediately but leaves an active day trip’s return time unchanged.  
+Why it matters to the reader: Moving 18:30 to 17:00 can show the evening marker reached while Ronki remains away until 18:30, contradicting the picker’s return-time promise.  
+Fix: Update an active day trip’s return time consistently with the new setting, returning immediately if it is already due. Preserve waiting treasures and leave dream-trip timing intact.
+
+**FC-10 | SHOULD | [NavBar.jsx:65](/C:/Users/öööö/ronki-finch/src/components/NavBar.jsx:65)**  
+Claim: The development override `?reveal=all` remains effective in production.  
+Why it matters to the reader: With Extras enabled, it bypasses the retained journal and shop unlock rules despite the requirement that development overrides be gated.  
+Fix: Put the override behind `import.meta.env.DEV` and verify that a production build ignores it.
+
+**FC-11 | COULD | [de.json:6](/C:/Users/öööö/ronki-finch/src/i18n/de.json:6), corresponding English translations**  
+Claim: Shipped translation strings still contain long dashes, although the new Finch copy is clean.  
+Why it matters to the reader: The requested shipped-string guard is broader than checking newly added copy.  
+Fix: Replace the remaining long dashes in bundled translations and check string values separately from comments.
+
+**NOT YET: the new card-after-hatch path can overwrite an existing family’s cloud dragon when its read fails.**
+
