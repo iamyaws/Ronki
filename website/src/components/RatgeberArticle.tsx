@@ -23,6 +23,8 @@ interface Props {
   category: string;
   readMinutes: number;
   publishedAt: string;
+  /** Set only after a substantive rewrite. Shown next to the date and sent as dateModified. */
+  updatedAt?: string;
   heroImage?: string;
   heroAlt?: string;
   /** Short hand-written line under the hero picture. The alt text is a
@@ -135,6 +137,7 @@ export function RatgeberArticle({
   category,
   readMinutes,
   publishedAt,
+  updatedAt,
   heroImage,
   heroAlt,
   heroCaption = 'Aus Ronkis Welt',
@@ -147,6 +150,9 @@ export function RatgeberArticle({
     month: 'long',
     year: 'numeric',
   }).format(new Date(publishedAt));
+  const formattedUpdate = updatedAt
+    ? new Intl.DateTimeFormat('de-DE', { day: '2-digit', month: 'long', year: 'numeric' }).format(new Date(updatedAt))
+    : null;
 
   const fullUrl = `https://www.ronki.de/ratgeber/${slug}`;
   // Prefer the explicit ogImage, fall back to heroImage, then to the
@@ -171,6 +177,7 @@ export function RatgeberArticle({
         description={description}
         image={schemaImage}
         datePublished={publishedAt}
+        dateModified={updatedAt}
       />
       <BreadcrumbListSchema
         items={[
@@ -203,7 +210,8 @@ export function RatgeberArticle({
                 {category}
               </span>
               <span className="text-xs text-ink/50">
-                {formattedDate} · {readMinutes} Min. Lesezeit
+                {formattedDate}
+                {formattedUpdate && <>, aktualisiert am {formattedUpdate}</>} · {readMinutes} Min. Lesezeit
               </span>
             </div>
 
