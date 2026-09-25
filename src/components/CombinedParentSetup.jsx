@@ -82,7 +82,9 @@ export default function CombinedParentSetup({ existingFamilyConfig, onComplete }
       <main
         className="relative z-10 min-h-full flex flex-col px-5 max-w-md mx-auto"
         style={{
-          paddingTop: 'calc(2rem + env(safe-area-inset-top, 0px))',
+          // Clear the fixed alpha banner (it already absorbs the iOS safe
+          // area); the small egg sat half under it before.
+          paddingTop: 'calc(var(--alpha-banner-h, 28px) + 1.5rem)',
           paddingBottom: 'calc(2rem + env(safe-area-inset-bottom, 0px))',
         }}
       >

@@ -196,7 +196,7 @@ export default function MeetRonki({ onComplete }) {
             {EGGS.map((e, i) => (
               <ChoiceTile
                 key={e.id}
-                size="lg"
+                size="xl"
                 label={e.label}
                 aria-label={`Ei wählen: ${e.label}`}
                 onClick={() => pickEgg(e.id)}
@@ -205,7 +205,7 @@ export default function MeetRonki({ onComplete }) {
               >
                 <RonkiArt
                   pose={`egg-${e.id}`}
-                  size={64}
+                  size={100}
                   idle="bb-egg-wobble"
                   style={{ animationDelay: `${i * 0.45}s` }}
                 />

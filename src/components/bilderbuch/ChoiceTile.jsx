@@ -16,7 +16,8 @@ import DoodleIcon from './DoodleIcon';
  *   doodle       a DoodleIcon name; or pass `children` for custom art
  *   doodleColor  CSS colour for the doodle (default ink)
  *   selected     draws the cobalt ring and sets aria-pressed
- *   size         'md' (default, about 104 px) | 'lg' (about 132 px)
+ *   size         'md' (default, about 104 px) | 'lg' (about 132 px) |
+ *                'xl' (about 156 px, for picture choices like the eggs)
  *   filled       pass the doodle as a solid sticker
  */
 export default function ChoiceTile({
@@ -33,8 +34,10 @@ export default function ChoiceTile({
   children,
   ...rest
 }) {
-  const dims = size === 'lg' ? { minWidth: 132, minHeight: 132 } : { minWidth: 104, minHeight: 104 };
-  const iconSize = size === 'lg' ? 56 : 44;
+  const dims = size === 'xl'
+    ? { minWidth: 148, minHeight: 156 }
+    : size === 'lg' ? { minWidth: 132, minHeight: 132 } : { minWidth: 104, minHeight: 104 };
+  const iconSize = size === 'xl' ? 100 : size === 'lg' ? 56 : 44;
   return (
     <button
       type="button"
