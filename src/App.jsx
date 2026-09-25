@@ -104,6 +104,7 @@ import RonkisTag from './components/drachennest/RonkisTag';
 import AlphaBanner from './components/AlphaBanner';
 import SWUpdateBanner from './components/SWUpdateBanner';
 import { useAnalytics } from './hooks/useAnalytics';
+import MotionTicks from './components/bilderbuch/MotionTicks';
 
 // Tiny Suspense fallback for lazy-loaded tools/games. Intentionally
 // minimal — the chunks are small and a full "loading screen" treatment
@@ -111,8 +112,11 @@ import { useAnalytics } from './hooks/useAnalytics';
 // 6yo knows something's arriving rather than assuming the tap broke.
 function ToolLoadingFallback() {
   return (
-    <div className="flex items-center justify-center min-h-dvh bg-surface">
-      <p className="font-label text-sm text-on-surface-variant">Einen Moment…</p>
+    <div className="flex items-center justify-center min-h-dvh bg-white text-ink">
+      <p className="flex items-center gap-2 font-headline font-semibold text-lg">
+        <MotionTicks tone="cobalt" size={22} rotate={-30} />
+        Einen Moment…
+      </p>
     </div>
   );
 }

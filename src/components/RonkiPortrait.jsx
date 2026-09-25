@@ -67,18 +67,15 @@ export default function RonkiPortrait({
     );
   }
 
-  // Ringed variant — drops the chibi into a soft circle frame similar
-  // to the old `overflow-hidden rounded-full` image wrappers, but with
-  // a cream border instead of cropping the chibi.
+  // Ringed variant: a sky-wash circle with a thin ink outline (the
+  // Bilderbuch locket), the art sitting on it without being cropped.
   return (
     <div
-      className={`rounded-full flex items-center justify-center ${className}`}
+      className={`rounded-full flex items-center justify-center bg-sky-wash ${className}`}
       style={{
         width: size,
         height: size,
-        background: 'radial-gradient(circle at 50% 40%, rgba(255,248,242,0.12), rgba(18,67,70,0.25))',
-        border: '2px solid rgba(252,211,77,0.35)',
-        boxShadow: '0 0 40px rgba(252,211,77,0.18)',
+        border: '2px solid var(--color-ink)',
         ...style,
       }}
     >

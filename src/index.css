@@ -1,80 +1,198 @@
 @import "tailwindcss";
 
 /* ============================================================
-   Ronki "Mystic Meadow" Design System — Tailwind v4 Theme
-   Material Design 3 inspired tokens
+   Self-hosted fonts (copied from website/public/fonts, 25 Sep 2026).
+   Fredoka is the headline and UI print, Be Vietnam Pro the body face,
+   Gochi Hand the hand-note voice. Plus Jakarta Sans stays only for the
+   few inline font-family strings that still name it.
+   ============================================================ */
+
+@font-face {
+  font-family: "Fredoka";
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url("/fonts/fredoka-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Fredoka";
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url("/fonts/fredoka-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Gochi Hand";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/gochi-hand-latin.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Be Vietnam Pro";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/be-vietnam-pro-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Be Vietnam Pro";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/be-vietnam-pro-500.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Be Vietnam Pro";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/be-vietnam-pro-600.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/plus-jakarta-sans-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/plus-jakarta-sans-500.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/plus-jakarta-sans-600.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/plus-jakarta-sans-700.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url("/fonts/plus-jakarta-sans-800.woff2") format("woff2");
+}
+
+/* ============================================================
+   Ronki "Bilderbuch" Design System (25 Sep 2026), Tailwind v4 Theme.
+   The Material-style token names from Mystic Meadow are kept so every
+   existing utility (text-primary, bg-surface, ...) shifts at once.
+   Values come from docs/design-briefs/2026-09-16-bilderbuch-design-system.md
+   and the website's globals.css, so app and website read as one product.
+   Rules: no gradients in UI, no drop shadows (depth from ink outlines and
+   overlap), sun and ember never as small text on white.
    ============================================================ */
 
 @theme {
-  /* ── Primary (Deep Teal) ── */
-  --color-primary: #124346;
-  --color-primary-container: #2d5a5e;
+  /* ── Bilderbuch names (use these in new code) ── */
+  --color-cobalt: #0544b0;
+  --color-cobalt-deep: #04338a;
+  --color-sky: #41a2fb;
+  --color-sky-wash: #b9e3fc;
+  --color-ember: #ee4f35;
+  --color-sun: #fdd134;
+  --color-sun-deep: #7a5b00;          /* the only sun that may be text on white */
+  --color-night: #04225e;
+  --color-paper: #fdfbf3;
+  --color-paper-warm: #fdf6e1;
+  --color-paper-deep: #e8dbbf;
+  --color-ink: #040812;
+  --color-ink-soft: #3a4152;
+  --color-leaf: #4e9a4a;
+  --color-leaf-deep: #2e6e2b;
+  --color-worry: #6b4bb0;
+
+  /* ── Primary (cobalt) ── */
+  --color-primary: #0544b0;
+  --color-primary-container: #04338a;
   --color-on-primary: #ffffff;
-  --color-on-primary-container: #a2d0d4;
-  --color-primary-fixed: #bcebef;
-  --color-primary-fixed-dim: #a1cfd3;
-  --color-on-primary-fixed: #002022;
-  --color-on-primary-fixed-variant: #1f4d51;
-  --color-inverse-primary: #a1cfd3;
-  --color-surface-tint: #396569;
+  --color-on-primary-container: #ffffff;
+  --color-primary-fixed: #b9e3fc;
+  --color-primary-fixed-dim: #41a2fb;
+  --color-on-primary-fixed: #04225e;
+  --color-on-primary-fixed-variant: #04338a;
+  --color-inverse-primary: #b9e3fc;
+  --color-surface-tint: #0544b0;
 
-  /* ── Secondary ── */
-  --color-secondary: #735c00;
-  --color-secondary-container: #fcd34d;
+  /* ── Secondary (sun). `secondary` is a text role in the old utilities,
+        so it carries the deep readable sun; the container is the real sun. ── */
+  --color-secondary: #7a5b00;
+  --color-secondary-container: #fdd134;
   --color-on-secondary: #ffffff;
-  --color-on-secondary-container: #725b00;
-  --color-secondary-fixed: #ffe086;
-  --color-secondary-fixed-dim: #eac33e;
-  --color-on-secondary-fixed: #231b00;
-  --color-on-secondary-fixed-variant: #574500;
+  --color-on-secondary-container: #040812;
+  --color-secondary-fixed: #fdd134;
+  --color-secondary-fixed-dim: #f2c21c;
+  --color-on-secondary-fixed: #040812;
+  --color-on-secondary-fixed-variant: #7a5b00;
 
-  /* ── Tertiary (Forest Green) ── */
-  --color-tertiary: #004532;
-  --color-tertiary-container: #005f46;
+  /* ── Tertiary (leaf, growth moments) ── */
+  --color-tertiary: #2e6e2b;
+  --color-tertiary-container: #4e9a4a;
   --color-on-tertiary: #ffffff;
-  --color-on-tertiary-container: #86d7b6;
-  --color-tertiary-fixed: #a1f3d1;
-  --color-tertiary-fixed-dim: #86d6b6;
-  --color-on-tertiary-fixed: #002116;
-  --color-on-tertiary-fixed-variant: #00513b;
+  --color-on-tertiary-container: #040812;
+  --color-tertiary-fixed: #d6efd0;
+  --color-tertiary-fixed-dim: #a9d9a3;
+  --color-on-tertiary-fixed: #0f3a0e;
+  --color-on-tertiary-fixed-variant: #2e6e2b;
 
-  /* ── Error ── */
+  /* ── Error (a true red stays) ── */
   --color-error: #ba1a1a;
   --color-error-container: #ffdad6;
   --color-on-error: #ffffff;
   --color-on-error-container: #93000a;
 
-  /* ── Neutral / Surface ── */
-  --color-surface: #fff8f2;
-  --color-on-surface: #1e1b17;
-  --color-on-surface-variant: #404849;
+  /* ── Neutral / Surface: white ground, paper for cards ── */
+  --color-surface: #ffffff;
+  --color-on-surface: #040812;
+  --color-on-surface-variant: #3a4152;
   --color-surface-container-lowest: #ffffff;
-  --color-surface-container-low: #f9f2ec;
-  --color-surface-container: #f4ede6;
-  --color-surface-container-high: #eee7e0;
-  --color-surface-container-highest: #e8e1db;
-  --color-surface-variant: #e8e1db;
-  --color-surface-bright: #fff8f2;
-  --color-surface-dim: #dfd9d2;
-  --color-outline: #4d5556;            /* AAA 7:1+ on surface cream */
-  --color-outline-variant: #c0c8c9;
-  --color-inverse-surface: #33302c;
-  --color-inverse-on-surface: #f6f0e9;
+  --color-surface-container-low: #fdfbf3;
+  --color-surface-container: #fdf6e1;
+  --color-surface-container-high: #f3e9cc;
+  --color-surface-container-highest: #e8dbbf;
+  --color-surface-variant: #e8dbbf;
+  --color-surface-bright: #ffffff;
+  --color-surface-dim: #fdf6e1;
+  --color-outline: #040812;
+  --color-outline-variant: #cfcabb;
+  --color-inverse-surface: #04225e;
+  --color-inverse-on-surface: #ffffff;
 
-  /* ── Semantic ── */
-  --color-emerald: #34d399;
-  --color-emerald-dark: #059669;
+  /* ── Semantic: the old emerald success cue is now leaf ── */
+  --color-emerald: #4e9a4a;
+  --color-emerald-dark: #2e6e2b;
 
   /* ── Border Radius ── */
   --radius-DEFAULT: 1rem;
   --radius-lg: 2rem;
   --radius-xl: 3rem;
+  --radius-card: 1.75rem;              /* 28 px, the Bilderbuch frame */
 
   /* ── Fonts ── */
-  --font-headline: "Fredoka", sans-serif;
-  --font-body: "Be Vietnam Pro", sans-serif;
-  --font-ui: "Plus Jakarta Sans", sans-serif;
-  --font-label: "Plus Jakarta Sans", sans-serif;
+  --font-headline: "Fredoka", ui-rounded, system-ui, sans-serif;
+  --font-display: "Fredoka", ui-rounded, system-ui, sans-serif;
+  --font-body: "Be Vietnam Pro", system-ui, sans-serif;
+  --font-ui: "Fredoka", ui-rounded, system-ui, sans-serif;
+  --font-label: "Fredoka", ui-rounded, system-ui, sans-serif;
+  --font-hand: "Gochi Hand", "Comic Sans MS", cursive;
 
   /* ── Kids-safe typography scale (ages 6-8) ──
      Bumped 2px across the board for readability.
@@ -123,12 +241,18 @@
     scroll-behavior: smooth;
   }
   body {
-    background: #fff8f2;
-    font-family: "Be Vietnam Pro", sans-serif;
-    color: #1e1b17;
+    background: #ffffff;
+    font-family: "Be Vietnam Pro", system-ui, sans-serif;
+    color: #040812;
     letter-spacing: 0.01em;           /* early-reader legibility boost */
     overscroll-behavior: none;
     -webkit-font-smoothing: antialiased;
+  }
+  /* Headlines and UI print never break mid-word; Fredoka is the display
+     voice and a hyphenated word in it reads as a typo to a first grader. */
+  .font-headline, .font-display, .font-label, .font-ui, .bb-hand {
+    hyphens: manual;
+    -webkit-hyphens: manual;
   }
   /* Prevent iOS auto-zoom on input focus (requires ≥16px) */
   input, textarea, select {
@@ -157,19 +281,143 @@
    Card Components
    ============================================================ */
 
+/* Bilderbuch frame: ink outline, 28 px corners, no shadow. The old
+   .mm-card names stay so every card shifts at once. */
 .mm-card {
   background: #ffffff;
-  border: 1.5px solid rgba(0, 0, 0, 0.12);
-  border-radius: 1.25rem;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
+  border: 3px solid var(--color-ink);
+  border-radius: 1.75rem;
+  box-shadow: none;
 }
 
+/* "Elevated" is the one allowed depth device: a hard offset second sheet. */
 .mm-card-elevated {
   background: #ffffff;
-  border: 1.5px solid rgba(0, 0, 0, 0.12);
-  border-radius: 1.25rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.10), 0 2px 6px rgba(0, 0, 0, 0.06);
+  border: 3px solid var(--color-ink);
+  border-radius: 1.75rem;
+  box-shadow: 5px 6px 0 var(--color-ink);
 }
+
+/* ============================================================
+   Bilderbuch helpers (mirrors website/src/styles/globals.css)
+   ============================================================ */
+
+/* Display headline: Fredoka Bold, slightly tight, tight leading. */
+.bb-display {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.02;
+  text-wrap: balance;
+}
+
+/* Hand note voice, all caps on the boards. */
+.bb-hand {
+  font-family: var(--font-hand);
+  font-weight: 400;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+/* A hard offset paper shadow: reads as a second sheet, not a glow. */
+.bb-lift {
+  box-shadow: 5px 6px 0 var(--color-ink);
+}
+.bb-lift--cobalt {
+  box-shadow: 5px 6px 0 var(--color-cobalt);
+}
+
+/* A button you want to press: a hard edge under the pill that the pill
+   sinks into on tap. --press sets the edge colour: ink under the sun
+   pill on dark grounds, night under the cobalt pill on light ones. */
+.bb-press {
+  --press: var(--color-ink);
+  box-shadow: 0 5px 0 var(--press);
+  transition: transform 0.12s ease-out, box-shadow 0.12s ease-out;
+}
+.bb-press:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 0 var(--press);
+}
+.bb-press:active:not(:disabled) {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 var(--press);
+}
+.bb-press--night {
+  --press: var(--color-night);
+}
+.bb-press--cobalt {
+  --press: var(--color-cobalt-deep);
+}
+/* Inactive: flat, no edge to press into. */
+.bb-press:disabled {
+  box-shadow: none;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .bb-press,
+  .bb-press:hover:not(:disabled),
+  .bb-press:active:not(:disabled) {
+    transform: none;
+    transition: none;
+  }
+}
+
+/* Rounded frame with a drawn outline, used around every illustration. */
+.bb-frame {
+  border: 3px solid var(--color-ink);
+  border-radius: 28px;
+  overflow: hidden;
+  background: var(--color-paper);
+}
+.bb-frame > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Ronki idle loops for the still art: a few pixels, one transform each.
+   The global reduced-motion rule below switches them off. */
+@keyframes bb-idle-breathe {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50%      { transform: translateY(-2px) scale(1.015); }
+}
+@keyframes bb-idle-bob {
+  0%, 100% { transform: translateY(0); }
+  30%      { transform: translateY(-4px); }
+  60%      { transform: translateY(-1px); }
+}
+@keyframes bb-idle-sway {
+  0%, 100% { transform: rotate(-1.2deg); }
+  50%      { transform: rotate(1.2deg); }
+}
+@keyframes bb-idle-slow {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50%      { transform: translateY(1px) scale(0.99); }
+}
+@keyframes bb-idle-fidget {
+  0%, 100% { transform: translateX(0) rotate(0deg); }
+  25%      { transform: translateX(-2px) rotate(-1deg); }
+  75%      { transform: translateX(2px) rotate(1deg); }
+}
+@keyframes bb-idle-lift {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-3px) rotate(0.6deg); }
+}
+@keyframes bb-egg-wobble {
+  0%, 100% { transform: rotate(-2deg); }
+  25%      { transform: rotate(1.5deg); }
+  50%      { transform: rotate(-1.5deg); }
+  75%      { transform: rotate(2deg); }
+}
+.bb-idle-breathe { animation: bb-idle-breathe 3.6s ease-in-out infinite; transform-origin: 50% 90%; }
+.bb-idle-bob     { animation: bb-idle-bob 2.6s ease-in-out infinite; transform-origin: 50% 90%; }
+.bb-idle-sway    { animation: bb-idle-sway 4.2s ease-in-out infinite; transform-origin: 50% 90%; }
+.bb-idle-slow    { animation: bb-idle-slow 5s ease-in-out infinite; transform-origin: 50% 90%; }
+.bb-idle-fidget  { animation: bb-idle-fidget 3s ease-in-out infinite; transform-origin: 50% 90%; }
+.bb-idle-lift    { animation: bb-idle-lift 3.2s ease-in-out infinite; transform-origin: 50% 90%; }
+.bb-egg-wobble   { animation: bb-egg-wobble 3.8s ease-in-out infinite; transform-origin: 50% 92%; }
 
 /* ============================================================
    Interaction
@@ -187,7 +435,7 @@
    ============================================================ */
 
 .lotus-pattern {
-  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5c-5 10-15 15-15 25s10 15 15 25c5-10 15-15 15-25s-10-15-15-25z' fill='%23124346' fill-opacity='0.03'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5c-5 10-15 15-15 25s10 15 15 25c5-10 15-15 15-25s-10-15-15-25z' fill='%230544b0' fill-opacity='0.04'/%3E%3C/svg%3E");
 }
 
 /* ============================================================
@@ -197,6 +445,11 @@
 @keyframes slideUp {
   from { transform: translateY(100%); }
   to { transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes celebText {

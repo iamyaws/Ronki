@@ -5,6 +5,7 @@ import { isTabUnlocked, getTabUnlock } from '../data/tabUnlocks';
 import SFX from '../utils/sfx';
 import { triggerHaptic } from '../lib/haptics';
 import VoiceAudio from '../utils/voiceAudio';
+import DoodleIcon from './bilderbuch/DoodleIcon';
 
 // Map nav tab IDs to their voice line base IDs (Apr 2026 voice pass).
 // playLocalized resolves to de_/en_ at play time. Cooldown gates this
@@ -33,16 +34,16 @@ const NAV_VOICE_COOLDOWN_MS = 12000; // min gap between any two nav-tap voice li
 //
 // Dev override: ?reveal=all or ?reveal=N still forces unlock state so
 // Marc can preview any stage without touching Louis's real save.
+// Icons are Bilderbuch doodles (DoodleIcon names), drawn in the marker
+// style of the boards: a little house for the Nest, the sun for Heute,
+// Ronki's face for his page, the open book for the Tagebuch, the bag
+// for the Laden. The 'Nest' label is Marc's (Lager to Nest, 25 Apr 2026).
 const TAB_KEYS = [
-  // 'cottage' — small house-with-chimney glyph that reads as
-  // "Ronki's cozy place" without committing to a single visual
-  // metaphor (cave / nest / camp). Pairs with the 'Nest' label
-  // Marc landed on (Lager → Nest, 25 Apr 2026).
-  { id: 'hub',     key: 'nav.hub',     icon: 'cottage' },
-  { id: 'quests',  key: 'nav.quests',  icon: 'sunny' },
-  { id: 'ronki',   key: 'nav.ronki',   icon: 'pets' },
-  { id: 'journal', key: 'nav.journal', icon: 'auto_stories' },
-  { id: 'shop',    key: 'nav.shop',    icon: 'shopping_bag' },
+  { id: 'hub',     key: 'nav.hub',     icon: 'home' },
+  { id: 'quests',  key: 'nav.quests',  icon: 'sun' },
+  { id: 'ronki',   key: 'nav.ronki',   icon: 'dragon' },
+  { id: 'journal', key: 'nav.journal', icon: 'book' },
+  { id: 'shop',    key: 'nav.shop',    icon: 'bag' },
 ];
 
 function useRevealOverride() {
@@ -177,25 +178,13 @@ export default function NavBar({ active = 'quests', onNavigate }) {
               role="dialog"
               aria-modal="false"
               aria-label={t('nav.locked.sheetTitle')}
-              className="rounded-2xl p-4"
-              style={{
-                background: 'rgba(18,67,70,0.94)',
-                color: '#fff',
-                backdropFilter: 'blur(16px) saturate(160%)',
-                WebkitBackdropFilter: 'blur(16px) saturate(160%)',
-                boxShadow: '0 16px 40px -12px rgba(18,67,70,0.5), 0 4px 12px -4px rgba(0,0,0,0.25)',
-                border: '1px solid rgba(252,211,77,0.22)',
-              }}
+              className="rounded-[22px] p-4 bg-paper text-ink border-[3px] border-ink"
             >
               <div className="flex items-start gap-2.5">
-                <span
-                  className="material-symbols-outlined shrink-0 mt-0.5"
-                  style={{ fontSize: 22, color: '#fcd34d', fontVariationSettings: "'FILL' 1" }}
-                  aria-hidden="true"
-                >
-                  lock
+                <span className="shrink-0 mt-0.5 text-cobalt" aria-hidden="true">
+                  <DoodleIcon name="lock" size={22} />
                 </span>
-                <p className="font-body text-[14px] leading-snug flex-1">
+                <p className="font-headline font-semibold text-[16px] leading-snug flex-1">
                   {t(hintUnlock.hintKey, hintVars)}
                 </p>
               </div>
@@ -206,38 +195,49 @@ export default function NavBar({ active = 'quests', onNavigate }) {
               aria-hidden="true"
               style={{
                 position: 'absolute',
-                bottom: -6,
-                left: Math.max(16, Math.min(triangleLeft, sheetWidth - 16)),
+                bottom: -8,
+                left: Math.max(18, Math.min(triangleLeft, sheetWidth - 18)),
                 transform: 'translateX(-50%) rotate(45deg)',
-                width: 12,
-                height: 12,
-                background: 'rgba(18,67,70,0.94)',
-                borderRight: '1px solid rgba(252,211,77,0.22)',
-                borderBottom: '1px solid rgba(252,211,77,0.22)',
+                width: 14,
+                height: 14,
+                background: 'var(--color-paper)',
+                borderRight: '3px solid var(--color-ink)',
+                borderBottom: '3px solid var(--color-ink)',
               }}
             />
           </div>
       )}
 
       <nav
-        className="fixed bottom-0 left-0 w-full z-50"
+        className="fixed bottom-0 left-0 w-full z-50 bg-white"
         style={{
-          // Design-adapted nav (Ronki *.Polish.html). Cream glass with heavy
-          // blur+saturate, rounded-top, softer downward shadow so the bar
-          // feels like a floating shelf instead of a hard footer.
-          background: 'rgba(255,248,242,0.92)',
-          backdropFilter: 'blur(20px) saturate(160%)',
-          WebkitBackdropFilter: 'blur(20px) saturate(160%)',
-          borderTopLeftRadius: 32,
-          borderTopRightRadius: 32,
-          boxShadow: '0 -12px 28px -12px rgba(18,67,70,0.18)',
+          // Bilderbuch tab bar: a white shelf with a drawn ink line along
+          // the top. No blur, no shadow; the line is the depth.
+          paddingTop: 3,
         }}
       >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          viewBox="0 0 600 6"
+          preserveAspectRatio="none"
+          className="absolute left-0 top-0 w-full"
+          style={{ height: 6, overflow: 'visible', color: 'var(--color-ink)' }}
+        >
+          <path
+            d="M0 3 C 80 1.5 160 4.5 240 3 C 330 1.5 420 4.5 510 3 C 550 2.2 580 2.8 600 3"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="3"
+            strokeLinecap="round"
+            vectorEffect="non-scaling-stroke"
+          />
+        </svg>
         <div
-          className="flex justify-around items-center max-w-lg mx-auto"
+          className="flex justify-around items-end max-w-lg mx-auto"
           style={{
-            padding: '14px 18px',
-            paddingBottom: 'max(22px, env(safe-area-inset-bottom, 22px))',
+            padding: '10px 10px 0',
+            paddingBottom: 'max(18px, env(safe-area-inset-bottom, 18px))',
           }}
         >
           {TAB_KEYS.map(tab => {
@@ -261,95 +261,66 @@ export default function NavBar({ active = 'quests', onNavigate }) {
                 key={tab.id}
                 ref={(el) => { btnRefsRef.current[tab.id] = el; }}
                 data-tab-id={tab.id}
-                aria-label={locked ? `${label} — ${t('nav.locked.aria')}` : label}
+                aria-label={locked ? `${label}, ${t('nav.locked.aria')}` : label}
+                aria-current={isActive ? 'page' : undefined}
                 aria-disabled={locked ? 'true' : 'false'}
                 onClick={() => handleTap(tab, locked)}
-                className="relative flex flex-col items-center transition-all duration-300 active:scale-95"
-                style={
-                  isActive
-                    ? {
-                        // Horizontal pill with teal gradient + warm shadow.
-                        // Wider, flatter than our old circular pill — reads as
-                        // "you are here" without shouting.
-                        gap: 4,
-                        padding: '10px 16px',
-                        minWidth: 52,
-                        borderRadius: 22,
-                        background: 'linear-gradient(180deg, #2d5a5e 0%, #124346 100%)',
-                        color: '#ffffff',
-                        boxShadow: '0 8px 18px -6px rgba(18,67,70,0.4)',
-                      }
-                    : {
-                        gap: 4,
-                        padding: '8px 6px',
-                        minWidth: 52,
-                        color: locked ? 'rgba(107,101,91,0.38)' : '#6b655b',
-                        opacity: locked ? 0.55 : 1,
-                        borderRadius: isFreshUnlock ? 14 : undefined,
-                        animation: isFreshUnlock
-                          ? 'navTabUnlockPulse 1.8s ease-in-out infinite'
-                          : undefined,
-                      }
-                }
+                className="relative flex flex-col items-center justify-end transition-colors duration-200 active:scale-95"
+                style={{
+                  gap: 3,
+                  padding: '6px 6px 4px',
+                  minWidth: 60,
+                  minHeight: 56,
+                  color: isActive ? 'var(--color-cobalt)' : 'var(--color-ink)',
+                  opacity: locked ? 0.35 : isActive ? 1 : 0.72,
+                }}
               >
+                <DoodleIcon name={tab.icon} size={28} stroke={isActive ? 6 : 5} />
                 <span
-                  className="material-symbols-outlined"
-                  style={{
-                    fontSize: 22,
-                    fontVariationSettings: isActive ? "'FILL' 1, 'wght' 500" : "'FILL' 0, 'wght' 400",
-                  }}
-                >
-                  {tab.icon}
-                </span>
-                <span
-                  className="font-label font-bold uppercase"
-                  style={{ fontSize: 9, letterSpacing: '0.14em', lineHeight: 1 }}
+                  className="font-headline font-semibold"
+                  style={{ fontSize: 13, lineHeight: 1, letterSpacing: '0.005em' }}
                 >
                   {label}
                 </span>
-                {/* Sparkle accents on freshly-unlocked tabs — three tiny
-                     stars in gold that fade in/out on the unlock pulse.
-                     Hidden once the coachmark is dismissed. */}
+                {/* Short hand-drawn dash under the active label. */}
+                <svg
+                  aria-hidden="true"
+                  focusable="false"
+                  viewBox="0 0 40 8"
+                  width="28"
+                  height="6"
+                  style={{ overflow: 'visible', opacity: isActive ? 1 : 0, transition: 'opacity 0.2s' }}
+                >
+                  <path
+                    d="M3 5 C 12 2.5 24 6 37 3"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="3.5"
+                    strokeLinecap="round"
+                  />
+                </svg>
+                {/* Sun sparkle on freshly-unlocked tabs: a small sticker
+                     that twinkles until the coachmark is dismissed. */}
                 {isFreshUnlock && (
-                  <>
-                    <span aria-hidden="true" style={{
-                      position: 'absolute', top: 2, right: 8, width: 4, height: 4,
-                      borderRadius: '50%', background: '#fcd34d',
-                      boxShadow: '0 0 6px 2px rgba(252,211,77,0.8)',
-                      animation: 'navTabUnlockSparkle 1.6s ease-in-out 0.2s infinite',
-                    }} />
-                    <span aria-hidden="true" style={{
-                      position: 'absolute', top: 18, left: 6, width: 3, height: 3,
-                      borderRadius: '50%', background: '#fde68a',
-                      boxShadow: '0 0 5px 1.5px rgba(253,230,138,0.7)',
-                      animation: 'navTabUnlockSparkle 1.8s ease-in-out 0.8s infinite',
-                    }} />
-                    <span aria-hidden="true" style={{
-                      position: 'absolute', bottom: 10, right: 4, width: 3, height: 3,
-                      borderRadius: '50%', background: '#f59e0b',
-                      boxShadow: '0 0 5px 1.5px rgba(245,158,11,0.7)',
-                      animation: 'navTabUnlockSparkle 2.1s ease-in-out 1.1s infinite',
-                    }} />
-                  </>
+                  <span
+                    aria-hidden="true"
+                    className="absolute text-sun"
+                    style={{
+                      top: -2, right: 4,
+                      animation: 'navTabUnlockSparkle 1.6s ease-in-out infinite',
+                    }}
+                  >
+                    <DoodleIcon name="sparkle" size={16} filled stroke={3} />
+                  </span>
                 )}
-                {/* Padlock badge on locked tabs — tiny, bottom-right of the icon */}
+                {/* Padlock badge on locked tabs: the lock doodle, top right. */}
                 {locked && (
                   <span
                     aria-hidden="true"
-                    className="material-symbols-outlined absolute"
-                    style={{
-                      top: 2,
-                      right: 6,
-                      fontSize: 12,
-                      color: 'rgba(18,67,70,0.55)',
-                      background: 'rgba(255,248,242,0.92)',
-                      borderRadius: '50%',
-                      padding: 1,
-                      fontVariationSettings: "'FILL' 1",
-                      lineHeight: 1,
-                    }}
+                    className="absolute flex items-center justify-center rounded-full bg-white text-ink"
+                    style={{ top: 0, right: 4, width: 18, height: 18, border: '2px solid var(--color-ink)' }}
                   >
-                    lock
+                    <DoodleIcon name="lock" size={11} stroke={7} />
                   </span>
                 )}
               </button>
@@ -363,14 +334,10 @@ export default function NavBar({ active = 'quests', onNavigate }) {
           from { opacity: 0; transform: translateY(6px); }
           to   { opacity: 1; transform: translateY(0); }
         }
-        @keyframes navTabUnlockPulse {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(252,211,77,0); }
-          50%      { box-shadow: 0 0 0 4px rgba(252,211,77,0.35), 0 0 16px 4px rgba(252,211,77,0.45); }
-        }
         @keyframes navTabUnlockSparkle {
-          0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.3); }
-          50%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-          100% { opacity: 0; transform: translate(-50%, -50%) scale(1.4); }
+          0%   { opacity: 0.3; transform: scale(0.6) rotate(-10deg); }
+          50%  { opacity: 1; transform: scale(1.1) rotate(8deg); }
+          100% { opacity: 0.3; transform: scale(0.6) rotate(-10deg); }
         }
       `}</style>
     </>
