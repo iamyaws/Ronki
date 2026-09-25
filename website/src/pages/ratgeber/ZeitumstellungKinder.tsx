@@ -6,17 +6,6 @@ import {
   Callout,
 } from '../../components/RatgeberArticle';
 
-/* Beispielplan für Weg 1: vier Abende mit 15-Minuten-Schritten vor der
- * Umstellung am Sonntag, 25. Oktober 2026. Ausgangspunkt: Abendessen
- * 18:00 Uhr, Licht aus 19:30 Uhr. */
-const STEP_PLAN = [
-  { day: 'Mittwoch, 21. Oktober', dinner: '18:15', lightsOut: '19:45' },
-  { day: 'Donnerstag, 22. Oktober', dinner: '18:30', lightsOut: '20:00' },
-  { day: 'Freitag, 23. Oktober', dinner: '18:45', lightsOut: '20:15' },
-  { day: 'Samstag, 24. Oktober', dinner: '19:00', lightsOut: '20:30' },
-  { day: 'Sonntag, 25. Oktober (neue Zeit)', dinner: '18:00', lightsOut: '19:30' },
-];
-
 export default function RatgeberZeitumstellungKinder() {
   return (
     <RatgeberArticle
@@ -71,8 +60,8 @@ export default function RatgeberZeitumstellungKinder() {
         <p>
           Die Uhr springt, der Körper nicht. Ein Kind, das bisher um 19 Uhr
           müde war, ist es jetzt schon um 18 Uhr. Ein Kind, das um 6 Uhr wach
-          wurde, wird jetzt um 5 Uhr wach. So beschreibt es die ärztliche
-          Leiterin des Schlaflabors der Grazer Universitäts-Kinderklinik.
+          wurde, wird jetzt um 5 Uhr wach. So beschreibt es Astrid Sonnleitner,
+          ärztliche Leiterin des Schlaflabors der Grazer Universitäts-Kinderklinik.
         </p>
         <p>
           Nachstellen kann sich die innere Uhr vor allem über Tageslicht. Es
@@ -81,10 +70,10 @@ export default function RatgeberZeitumstellungKinder() {
       </Callout>
 
       <p>
-        Für den Schlaf ist der Herbst meist die sanftere Umstellung. Eine
-        Übersichtsarbeit über 27 Studien mit Menschen von 6 bis 85 Jahren fand
-        die deutlicheren Schlafprobleme nach der Umstellung im Frühjahr. Die
-        Rückkehr zur Normalzeit gab eher etwas Schlaf zurück.
+        Eine Übersichtsarbeit über 27 Studien mit Menschen von 6 bis 85
+        Jahren beschreibt vor allem nach der Umstellung im Frühjahr kürzeren
+        oder schlechteren Schlaf und mehr Schläfrigkeit. Die Ergebnisse der
+        einzelnen Studien waren unterschiedlich.
       </p>
 
       <p>
@@ -105,58 +94,16 @@ export default function RatgeberZeitumstellungKinder() {
       <h3>Weg 1: Vorher in kleinen Schritten verschieben</h3>
 
       <p>
-        Die Idee: du schiebst Essen und Schlafenszeit schon vor dem Sonntag
-        ein Stück nach hinten. Dann ist der Sprung erledigt, bevor die Uhr
-        springt. Die Grazer Kinderschlafmedizinerin rät zu Schritten von 10
-        bis 15 Minuten und lässt sich dafür gerne mehrere Tage pro Schritt
-        Zeit. Die Kinder- und Jugendärzte im Netz nennen für das Frühjahr, dort
-        in die andere Richtung, etwa 15 Minuten pro Tag. Schon zwei, drei Tage
-        Vorlauf können helfen.
+        Du kannst Essen und Schlafenszeit vor der Umstellung schrittweise
+        nach hinten verschieben. Astrid Sonnleitner empfiehlt dafür 10 bis 15
+        Minuten alle drei bis vier Tage. Nach der Umstellung nennt sie Schritte
+        alle zwei bis drei Tage.
       </p>
 
       <p>
-        So kann das aussehen, wenn es bei euch bisher um 18 Uhr Abendessen
-        gibt und um 19:30 Uhr Licht aus ist:
-      </p>
-
-      <div className="overflow-x-auto">
-        <table className="w-full text-left">
-          <caption className="text-left text-sm pb-2">
-            Ein Beispiel mit vier 15-Minuten-Schritten. Die Zeiten sind
-            Platzhalter, schieb sie auf euren Abend.
-          </caption>
-          <thead>
-            <tr>
-              <th scope="col" className="py-2 pr-4">
-                Tag
-              </th>
-              <th scope="col" className="py-2 pr-4">
-                Abendessen
-              </th>
-              <th scope="col" className="py-2">
-                Licht aus
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {STEP_PLAN.map((row) => (
-              <tr key={row.day}>
-                <th scope="row" className="py-2 pr-4 align-top font-normal">
-                  {row.day}
-                </th>
-                <td className="py-2 pr-4 align-top">{row.dinner} Uhr</td>
-                <td className="py-2 align-top">{row.lightsOut} Uhr</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      <p>
-        Am Sonntag steht wieder 19:30 Uhr auf der Uhr. Für den Körper deines
-        Kindes ist das dieselbe Zeit wie 20:30 Uhr am Samstag. Es gibt also
-        keinen Sprung mehr, nur die gewohnten Zahlen. Das Frühstück ziehst du
-        mit, soweit es geht.
+        Ein Beispiel für den ersten Schritt: Aus Abendessen um 18 Uhr und Licht
+        aus um 19:30 Uhr werden 18:15 Uhr und 19:45 Uhr. Behalte diese Zeiten
+        zunächst drei bis vier Tage bei.
       </p>
 
       <p>
@@ -173,8 +120,9 @@ export default function RatgeberZeitumstellungKinder() {
       <p>
         Stell am Samstagabend alle Uhren um, bevor ihr ins Bett geht. Ab
         Sonntag läuft alles nach der neuen Uhr: Frühstück, Mittagessen,
-        Abendessen, Abendroutine, Licht aus. Die Mahlzeiten werden nicht
-        vorgezogen, nur weil die innere Uhr drängelt.
+        Abendessen, Abendroutine, Licht aus. Orientiere dich bei den Mahlzeiten
+        an der neuen Uhr. Hat dein Kind vorher Hunger, biete ihm etwas zu
+        essen an.
       </p>
 
       <p>
@@ -212,7 +160,7 @@ export default function RatgeberZeitumstellungKinder() {
             Frühstück, Mittag und Abendessen zur gewohnten Uhrzeit, gerechnet
             nach der neuen Uhr. Feste Essens- und Schlafzeiten helfen Kindern,
             sich an den neuen Rhythmus zu gewöhnen. Wenn um 5:30 Uhr der Magen
-            knurrt, gibt es eine Kleinigkeit. Das Frühstück bleibt, wo es war.
+            knurrt, gibt es eine Kleinigkeit.
           </p>
         </StepCard>
         <StepCard n={3} title="Derselbe Abendablauf, in derselben Reihenfolge">
@@ -267,9 +215,8 @@ export default function RatgeberZeitumstellungKinder() {
           Kuscheltier. Sag das am Abend vorher, nicht um 5 Uhr.
         </li>
         <li>
-          <strong>Den Tag nicht vorziehen.</strong> Frühstück zur gewohnten
-          Zeit nach der neuen Uhr. Wer um 5:30 Uhr frühstückt, will um 11 Uhr
-          Mittagessen, und der ganze Tag rutscht nach vorne.
+          <strong>Mahlzeiten mitplanen.</strong> Überlege, wie Frühstück,
+          Mittagessen und Abendessen in euren Tag nach der neuen Uhr passen.
         </li>
         <li>
           <strong>Abends Schritt für Schritt später werden.</strong> 10 bis 15
@@ -283,8 +230,8 @@ export default function RatgeberZeitumstellungKinder() {
         Kinder gewöhnen sich meist recht schnell an die neue Zeit, sagt die
         Grazer Kinderschlafmedizinerin. In der Regel dauert es ein bis zwei
         Wochen, je nach innerer Uhr auch mal länger. Bei vielen Kindern läuft
-        die Umstellung fast unbemerkt. Die Kinder- und Jugendärzte im Netz
-        nennen dieselbe Spanne, wenn der Ablauf konsequent bleibt.
+        die Umstellung fast unbemerkt. Für die Frühjahrsumstellung nennen die
+        Kinder- und Jugendärzte im Netz ebenfalls ein bis zwei Wochen.
       </p>
 
       <p>
@@ -294,10 +241,9 @@ export default function RatgeberZeitumstellungKinder() {
 
       <Callout type="achtung" label="Wann ein zweiter Blick sich lohnt">
         <p>
-          Wenn die Schlafprobleme nach zwei Wochen nicht besser werden, sprich
-          mit deiner Kinderarztpraxis. Und gib Melatonin oder Schlafmittel
-          nicht ohne ärztlichen Rat. Das betonen die Kinder- und Jugendärzte
-          ausdrücklich.
+          Bei anhaltenden Schlafproblemen sprich mit deiner Kinderarztpraxis.
+          Gib deinem Kind Melatonin oder Schlafmittel nur nach ärztlicher
+          Beratung.
         </p>
       </Callout>
 
@@ -305,9 +251,9 @@ export default function RatgeberZeitumstellungKinder() {
 
       <Callout type="ausprobieren">
         <p>
-          <strong>Erstens:</strong> Entscheide dich für einen Weg. Für Weg 1
-          startest du am Mittwoch, 21. Oktober. Für Weg 2 musst du nur am
-          Samstagabend die Uhren umstellen.
+          <strong>Erstens:</strong> Entscheide dich für einen Weg. Du kannst
+          vor Sonntag mit einem kleinen Schritt beginnen oder die Zeiten danach
+          nach und nach verschieben.
         </p>
         <p>
           <strong>Zweitens:</strong> Häng den Abendablauf auf Kinderhöhe auf.
@@ -363,7 +309,7 @@ export default function RatgeberZeitumstellungKinder() {
           >
             Vorbereitung auf die Zeitumstellung
           </a>
-          , 23.03.2026. Tageslicht als wichtigster Taktgeber, etwa 15 Minuten
+          , 23.03.2026, zur Umstellung auf Sommerzeit. Tageslicht als wichtigster Taktgeber, etwa 15 Minuten
           pro Tag, Bildschirme 30 Minuten vor der Abendroutine aus, dunkle und
           ruhige Schlafumgebung, ein bis zwei Wochen Anpassung, Melatonin nur
           nach ärztlicher Beratung.
@@ -393,8 +339,8 @@ export default function RatgeberZeitumstellungKinder() {
             sleep and sleepiness: a systematic review
           </a>
           , Sleep Medicine Reviews 84, 2025. 27 Studien, Menschen von 6 bis 85
-          Jahren. Deutlichere Schlafprobleme nach der Umstellung im Frühjahr,
-          die Rückkehr zur Normalzeit gibt teilweise Schlaf zurück.
+          Jahren; unterschiedliche Ergebnisse, Hinweise auf Schlafprobleme
+          besonders nach der Frühjahrsumstellung.
         </li>
       </ul>
 
