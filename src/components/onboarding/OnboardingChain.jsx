@@ -34,7 +34,8 @@ import FirstDayIntro from './FirstDayIntro';
  * A card scanned after a local hatch: the child's picks go into the
  * ronki_pending_hatch stash just before the token is stored, and are
  * applied after the reload when the loaded card has not met Ronki yet
- * (spec R7, src/lib/pendingHatch.ts).
+ * and the active token is the one the stash was written for (spec R7,
+ * src/lib/pendingHatch.ts).
  *
  * `previewLoop` (?onboardingPreview=1): after onboardingDone fires, waits
  * about 2 s and resets the gates so designers can cycle the chain.
@@ -68,7 +69,10 @@ export default function OnboardingChain({ previewLoop, onComplete }) {
   useEffect(() => {
     if (!state || stashCheckedRef.current) return;
     stashCheckedRef.current = true;
-    const fields = takePendingHatch(state);
+    let token = null;
+    try { token = getActiveToken(); } catch { token = null; }
+    // Bound to the card it was written for: under any other token it is dropped.
+    const fields = takePendingHatch(state, { token });
     if (fields) actions.patchState?.(fields);
   }, [state, actions]);
 
@@ -95,13 +99,20 @@ export default function OnboardingChain({ previewLoop, onComplete }) {
   const childName = state.familyConfig?.childName || '';
 
   if (phase === 'scan') {
+    // From the egg the way back is the egg; from the parent step it is that step.
     return (
       <NoProfileLanding
         onBack={() => setWantsCard(false)}
-        onBeforeOpen={() => {
-          // The child already met Ronki on this device: keep the dragon.
-          if (state.kidIntroSeen && state.companionName) {
-            savePendingHatch({ companionName: state.companionName, companionVariant: state.companionVariant || 'forest' });
+        backToEgg={!state.kidIntroSeen}
+        onBeforeOpen={(token) => {
+          // The child already met Ronki on this device: keep the dragon,
+          // bound to the card that is about to open.
+          if (state.kidIntroSeen && state.companionName && token) {
+            savePendingHatch({
+              companionName: state.companionName,
+              companionVariant: state.companionVariant || 'forest',
+              token,
+            });
           }
         }}
       />

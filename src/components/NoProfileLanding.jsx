@@ -4,7 +4,7 @@ import { track } from '../lib/analytics';
 import VoiceAudio from '../utils/voiceAudio';
 import { lineText } from '../data/ronkiLines';
 import { RonkiArt } from './MoodChibi';
-import { MotionTicks, PaperCard, PillButton, QuietLink } from './bilderbuch';
+import { DoodleIcon, MotionTicks, PaperCard, PillButton } from './bilderbuch';
 
 const TOKEN_REGEX = /^[a-f0-9]{32}$/;
 
@@ -78,14 +78,18 @@ const SLEEPY_CAMERA = new Set(['NotAllowedError', 'PermissionDeniedError', 'NotF
  *
  * Finch pass (26 Sep 2026, base 2.3, PRD 5.3): no longer a wall. Egg
  * first for everyone; this is the scan sheet the quiet "Ich habe schon
- * eine Karte" opens. "Zurück zum Ei" goes back (prop onBack). A camera
+ * eine Karte" opens. A picture back control at the top goes back (prop
+ * onBack): a drawn arrow plus a small egg when it leads to the egg
+ * (prop backToEgg, default true), so a child who cannot read finds the
+ * way back by picture; the label reads "Zurück zum Ei" or "Zurück". A camera
  * that is denied or missing shows Ronki's kid line "Die Kamera schläft
  * noch. Hol mal Mama oder Papa." (scan_camera_sleep_01, voiced), and a
  * parent field takes the share link or the bare code, so a denied camera
- * no longer ends the flow. onBeforeOpen runs right before the token is
- * stored (the chain stashes a local hatch there, spec R7).
+ * no longer ends the flow. onBeforeOpen(token) runs right before the
+ * token is stored (the chain stashes a local hatch there, bound to that
+ * token, spec R7).
  */
-export default function NoProfileLanding({ onBack, onBeforeOpen, reload = defaultReload } = {}) {
+export default function NoProfileLanding({ onBack, backToEgg = true, onBeforeOpen, reload = defaultReload } = {}) {
   const [mode, setMode] = useState('choice'); // 'choice' | 'scan'
   const [scanError, setScanError] = useState('');
   const [scanStatus, setScanStatus] = useState('');
@@ -97,7 +101,7 @@ export default function NoProfileLanding({ onBack, onBeforeOpen, reload = defaul
 
   /** Store the token and reload, the same way a successful scan does. */
   const openToken = (token) => {
-    try { onBeforeOpen?.(); } catch { /* the stash is best effort */ }
+    try { onBeforeOpen?.(token); } catch { /* the stash is best effort */ }
     setActiveToken(token);
     stopScan();
     reload();
@@ -303,10 +307,19 @@ export default function NoProfileLanding({ onBack, onBeforeOpen, reload = defaul
         }}
       >
         {onBack && (
-          <div className="flex justify-start -mt-2 mb-2">
-            <QuietLink tone="ink" onClick={() => { stopScan(); onBack(); }}>
-              Zurück zum Ei
-            </QuietLink>
+          <div className="flex justify-start -mt-3 mb-2">
+            {/* The way back, by picture: a drawn arrow and (to the egg) the egg. */}
+            <button
+              type="button"
+              data-testid="scan-back"
+              aria-label={backToEgg ? 'Zurück zum Ei' : 'Zurück'}
+              onClick={() => { stopScan(); onBack(); }}
+              className="inline-flex items-center gap-2 min-h-[64px] min-w-[64px] -ml-2 pl-2 pr-4 rounded-full bg-transparent text-ink font-headline font-semibold text-lg focus:outline-none focus-visible:ring-[3px] focus-visible:ring-cobalt"
+            >
+              <DoodleIcon name="back" size={30} />
+              {backToEgg && <RonkiArt pose="egg-sun" size={48} />}
+              <span>{backToEgg ? 'Zurück zum Ei' : 'Zurück'}</span>
+            </button>
           </div>
         )}
 

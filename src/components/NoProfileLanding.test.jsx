@@ -49,6 +49,7 @@ describe('NoProfileLanding as the scan sheet', () => {
     expect(mocks.setActiveToken).toHaveBeenCalledWith(TOKEN);
     expect(reload).toHaveBeenCalledTimes(1);
     expect(order).toEqual(['before', 'token']);
+    expect(onBeforeOpen).toHaveBeenCalledWith(TOKEN);
     mocks.setActiveToken.mockImplementation(() => {});
   });
 
@@ -115,5 +116,30 @@ describe('NoProfileLanding as the scan sheet', () => {
     unmount();
     render(<NoProfileLanding reload={vi.fn()} />);
     expect(screen.queryByText('Zurück zum Ei')).toBeNull();
+    expect(screen.queryByTestId('scan-back')).toBeNull();
+  });
+
+  it('the back control is a big picture button: drawn arrow plus the egg', () => {
+    const onBack = vi.fn();
+    render(<NoProfileLanding onBack={onBack} reload={vi.fn()} />);
+    const back = screen.getByTestId('scan-back');
+    expect(back.getAttribute('aria-label')).toBe('Zurück zum Ei');
+    expect(back.querySelector('svg')).toBeTruthy();
+    expect(back.className).toContain('min-h-[64px]');
+    // the egg picture sits inside the control
+    expect(back.children.length).toBeGreaterThanOrEqual(3);
+    fireEvent.click(back);
+    expect(onBack).toHaveBeenCalledTimes(1);
+  });
+
+  it('from the parent step the back control reads "Zurück", without the egg', () => {
+    const onBack = vi.fn();
+    render(<NoProfileLanding onBack={onBack} backToEgg={false} reload={vi.fn()} />);
+    const back = screen.getByTestId('scan-back');
+    expect(back.getAttribute('aria-label')).toBe('Zurück');
+    expect(screen.queryByText('Zurück zum Ei')).toBeNull();
+    expect(back.children.length).toBe(2);
+    fireEvent.click(back);
+    expect(onBack).toHaveBeenCalledTimes(1);
   });
 });

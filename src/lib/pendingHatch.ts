@@ -13,6 +13,11 @@
  * whose Ronki already hatched (another device, an onboarded cloud row)
  * keeps its own Ronki and the stash is dropped. src/utils/storage.ts is
  * not touched.
+ *
+ * The stash is bound to the token of the card it was written for. It
+ * applies only while that same token is active; under any other token
+ * (a sibling's card opened later on the same device) it is dropped, so
+ * one child's picks never land in another child's card.
  */
 
 export const PENDING_HATCH_KEY = 'ronki_pending_hatch';
@@ -25,8 +30,18 @@ export interface PendingHatch {
   companionVariant: string;
 }
 
+export interface PendingHatchToSave extends PendingHatch {
+  /** The token of the card about to be opened. Required. */
+  token: string;
+}
+
 interface Stash extends PendingHatch {
+  token: string;
   savedAt: number;
+}
+
+function normToken(t: unknown): string {
+  return typeof t === 'string' ? t.trim().toLowerCase() : '';
 }
 
 interface HatchState {
@@ -34,12 +49,18 @@ interface HatchState {
   onboardingDone?: boolean;
 }
 
-/** Remember the child's picks before the card scan reloads the app. */
-export function savePendingHatch(h: PendingHatch, nowMs: number = Date.now()): void {
+/**
+ * Remember the child's picks before the card scan reloads the app.
+ * Without a name or without the card's token nothing is written.
+ */
+export function savePendingHatch(h: PendingHatchToSave, nowMs: number = Date.now()): void {
   if (!h || !h.companionName) return;
+  const token = normToken(h.token);
+  if (!token) return;
   const stash: Stash = {
     companionName: String(h.companionName),
     companionVariant: String(h.companionVariant || 'forest'),
+    token,
     savedAt: nowMs,
   };
   try { localStorage.setItem(PENDING_HATCH_KEY, JSON.stringify(stash)); } catch { /* private mode */ }
@@ -59,6 +80,7 @@ function read(): Stash | null {
     return {
       companionName: v.companionName,
       companionVariant: typeof v.companionVariant === 'string' && v.companionVariant ? v.companionVariant : 'forest',
+      token: normToken(v.token),
       savedAt: Number(v.savedAt) || 0,
     };
   } catch {
@@ -69,20 +91,27 @@ function read(): Stash | null {
 /**
  * The fields to patch into the loaded state, or null.
  *
- * Applies only to a state that has not met Ronki yet. Drops (and
- * clears) the stash for a state that already has its own Ronki, and a
- * stash older than a day. A stash that applies stays until the state
+ * Applies only to a state that has not met Ronki yet, loaded under the
+ * token the stash was written for. Drops (and clears) the stash for a
+ * state that already has its own Ronki, for any other token (or none),
+ * and a stash older than a day. A stash that applies stays until the state
  * shows kidIntroSeen (the next call drops it) or clearPendingHatch()
  * runs at onboardingDone, so a reload before the patch is saved still
  * finds it.
  */
 export function takePendingHatch(
   state: HatchState | null | undefined,
-  nowMs: number = Date.now(),
+  opts: { token?: string | null; nowMs?: number } = {},
 ): { kidIntroSeen: true; companionName: string; companionVariant: string } | null {
   if (!state) return null;
+  const nowMs = typeof opts.nowMs === 'number' ? opts.nowMs : Date.now();
   const stash = read();
   if (!stash) {
+    clearPendingHatch();
+    return null;
+  }
+  const token = normToken(opts.token);
+  if (!stash.token || !token || stash.token !== token) {
     clearPendingHatch();
     return null;
   }

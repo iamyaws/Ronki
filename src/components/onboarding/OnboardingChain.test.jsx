@@ -50,7 +50,7 @@ vi.mock('../drachennest/MeetRonki', () => stub('meet', (p) => (
 vi.mock('../NoProfileLanding', () => stub('scan', (p) => (
   <>
     <button onClick={p.onBack}>back</button>
-    <button onClick={p.onBeforeOpen}>before</button>
+    <button onClick={() => p.onBeforeOpen('d'.repeat(32))}>before</button>
   </>
 )));
 vi.mock('../CombinedParentSetup', () => stub('parent', (p) => (
@@ -193,6 +193,7 @@ describe('OnboardingChain', () => {
     mount();
     fireEvent.click(screen.getByText('card'));
     expect(screenName()).toBe('scan');
+    expect(h.lastProps.scan.backToEgg).toBe(true);
     // the child has not hatched: nothing to stash
     fireEvent.click(screen.getByText('before'));
     expect(localStorage.getItem(PENDING_HATCH_KEY)).toBeNull();
@@ -208,11 +209,22 @@ describe('OnboardingChain', () => {
     expect(screenName()).toBe('scan');
     fireEvent.click(screen.getByText('before'));
     const stash = JSON.parse(localStorage.getItem(PENDING_HATCH_KEY));
-    expect(stash).toMatchObject({ companionName: 'Knisti', companionVariant: 'teal' });
+    expect(stash).toMatchObject({ companionName: 'Knisti', companionVariant: 'teal', token: 'd'.repeat(32) });
+    expect(h.lastProps.scan.backToEgg).toBe(false);
+  });
+
+  it('a stash written for card A is dropped when card B loads (sibling card)', () => {
+    savePendingHatch({ companionName: 'Knisti', companionVariant: 'teal', token: 'a'.repeat(32) });
+    h.token = 'e'.repeat(32);
+    h.state = seed();
+    mount();
+    expect(h.actions.patchState).not.toHaveBeenCalled();
+    expect(localStorage.getItem(PENDING_HATCH_KEY)).toBeNull();
+    expect(screenName()).toBe('meet');
   });
 
   it('after the reload the stash applies to an unhatched card and the chain goes on', () => {
-    savePendingHatch({ companionName: 'Knisti', companionVariant: 'teal' });
+    savePendingHatch({ companionName: 'Knisti', companionVariant: 'teal', token: 'c'.repeat(32) });
     h.token = 'c'.repeat(32);
     h.state = seed();
     mount();
@@ -220,7 +232,7 @@ describe('OnboardingChain', () => {
   });
 
   it('a stash is dropped for a card whose Ronki already hatched', () => {
-    savePendingHatch({ companionName: 'Knisti', companionVariant: 'teal' });
+    savePendingHatch({ companionName: 'Knisti', companionVariant: 'teal', token: 'c'.repeat(32) });
     h.token = 'c'.repeat(32);
     h.state = { ...seed(), kidIntroSeen: true, companionName: 'Flämmchen' };
     mount();
