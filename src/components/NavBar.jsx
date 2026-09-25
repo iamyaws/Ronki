@@ -33,7 +33,7 @@ const NAV_VOICE_COOLDOWN_MS = 12000; // min gap between any two nav-tap voice li
 // Hector feedback: "hidden tabs feel off, grey them out and tell me when
 // they open." Unlock criteria live in data/tabUnlocks.ts.
 //
-// Dev override: ?reveal=all or ?reveal=N still forces unlock state so
+// Dev override (DEV builds only): ?reveal=all forces unlock state so
 // Marc can preview any stage without touching Louis's real save.
 // Icons are Bilderbuch doodles (DoodleIcon names), drawn in the marker
 // style of the boards: a little house for the Nest, the sun for Heute,
@@ -73,7 +73,11 @@ function useRevealOverride() {
   // because it masked real state changes, making it impossible to preview
   // an unlock firing. To preview the locked look now, start a fresh
   // profile via onboarding (or clear IndexedDB).
+  //
+  // Fix round 1 (Astra FC-10): DEV builds only. A production build ignores
+  // the query, so it can never bypass the unlock rules on a real device.
   const [param] = useState(() => {
+    if (!import.meta.env.DEV) return null;
     if (typeof window === 'undefined') return null;
     return new URLSearchParams(window.location.search).get('reveal');
   });
