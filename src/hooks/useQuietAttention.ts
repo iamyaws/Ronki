@@ -38,7 +38,13 @@ export function useQuietAttention(currentView: string): void {
     ) {
       lastFiredRef.current = now;
       // Graceful fallback: VoiceAudio.play() no-ops on missing file or muted state.
-      VoiceAudio.playLocalized('slowdown_01', 400);
+      // de_slowdown_01.mp3 was recorded in the Finch pass (GUARDRAILS-6); a
+      // throwing player still never breaks the view change that triggered it.
+      try {
+        VoiceAudio.playLocalized('slowdown_01', 400);
+      } catch {
+        // stay silent
+      }
       // Reset the window so we don't fire again immediately on the 4th advance
       timestampsRef.current = [];
     }

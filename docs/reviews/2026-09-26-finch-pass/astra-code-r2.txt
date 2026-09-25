@@ -1,0 +1,71 @@
+(node:46892) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[codex] Starting Codex task thread.
+[codex] Thread ready (01a0da98-b12b-71d2-87c8-f5d0d6df2c57).
+[codex] Turn started (01a0da98-b4d7-7342-8c9e-341debedbb9f).
+[codex] Assistant message captured: I’ll read the review brief and its referenced files, then return the requested assessment wit...
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content -Li...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content -Li... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content doc...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content doc... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command 'Get-ChildItem -...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command 'Get-ChildItem -... (exit 0)
+[codex] Assistant message captured: I’m checking the save guards at the point where a cloud write actually happens, including tim...
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command 'Get-Content src...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command 'Get-Content src... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command 'git diff 57bca8...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command 'git diff 57bca8... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command 'Get-Content doc...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command 'Get-Content doc... (exit 0)
+[codex] Assistant message captured: The first-read fix blocks the initial overwrite, but a successful recovery probe enables writ...
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content -Li...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content -Li... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content src...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content src... (exit 0)
+[codex] Assistant message captured: The art fix still loses Ronki’s stage in some cases: `MoodChibi` receives the right props, bu...
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "@' const fs=req...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "@' const fs=req... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "git diff 57bca8...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "git diff 57bca8... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "@' const fs=req...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "@' const fs=req... (exit 0)
+[codex] Assistant message captured: The in-memory checks confirmed two remaining overwrite paths: recovery after a previous reloa...
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Select-String -...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Select-String -... (exit 0)
+[codex] Assistant message captured: Reviewed `57bca8c..91b5321` through source inspection and isolated in-memory checks. No files...
+[codex] Turn completion inferred after the main thread finished and subagent work drained.
+Reviewed `57bca8c..91b5321` through source inspection and isolated in-memory checks. No files changed. No full suite, build, browser or audible-playback verification.
+
+**FC-01-R2 | BLOCKER | [TaskContext.tsx:1586](/C:/Users/öööö/ronki-finch/src/context/TaskContext.tsx:1586)**  
+Claim: A successful recovery probe can still let the local hatch overwrite an existing cloud dragon.  
+Why it matters to the reader: I reproduced a failed initial read, a successful probe with the session’s reload marker already set, then a subsequent save sending the local hatch to `profile_upsert`, because the probe sets `cloudReadOk` without hydrating its result.  
+Fix: Keep writes blocked until the returned cloud state is reconciled, and freeze writes before requesting reload; test subsequent saves and pagehide without manually resetting `cloud.readOk` as the current test does.
+
+**SAVES-1-R2 | BLOCKER | [useTripClock.ts:115](/C:/Users/öööö/ronki-finch/src/hooks/useTripClock.ts:115), [TaskContext.tsx:1578](/C:/Usersöööö/ronki-finch/src/context/TaskContext.tsx:1578)**  
+Claim: The five-minute threshold and separate clock timer still permit stale-device overwrites.  
+Why it matters to the reader: A phone hidden at 16:59 can resume at 17:01 after the tablet collected the treasure, run `arriveTrip` against its old state and save it; I reproduced the unguarded wake actions, and a pending save after sleep without visibility events can likewise run before the 30-second clock freezes writes.  
+Fix: Reconcile on every resume before mutations or flushes, enforce freshness at the write boundary, and reject outdated cloud revisions; test short absences and a suspended pending save, not only long absences with drained timers.
+
+**FC-05-R2 | SHOULD | [MoodChibi.jsx:95](/C:/Users/öööö/ronki-finch/src/components/MoodChibi.jsx:95)**  
+Claim: Passing stage and variant does not preserve them in the selected return and sleeping moods.  
+Why it matters to the reader: The actual resolver returns generic `happy.webp` for stages 4 and 5 on return, and generic `sleepy.webp` for stages 1, 4 and 5 at bedtime, so the hatchling loses its shell and grown Ronki loses his grown appearance.  
+Fix: Preserve the stage-specific portrait and animate it when matching mood art is unavailable; assert resolved image paths rather than only `MoodChibi` props. I accept the separately explained flying picture in DepartureSheet.
+
+**FC-08-R2 | CHALLENGE | [TaskContext.tsx:2479](/C:/Users/öööö/ronki-finch/src/context/TaskContext.tsx:2479)**  
+Claim: The shared rule is consistent, but the evening-start timestamp does not enforce eight hours between actual departures.  
+Why it matters to the reader: In Berlin I reproduced a dream departure at 03:59, treasure collection after 05:00 and an allowed day departure at 05:01, only 62 minutes later, while UTC rollover still resets the app at 02:00 in summer or 01:00 in winter.  
+Fix: Separate the evening’s accounting date from the actual departure timestamp and enforce the gap against the latter, or explicitly approve this exception to the once-per-calendar-day requirement. I would not close FC-08 as fixed under the existing requirement.
+
+**LOOP-3-R2 | SHOULD | [RoomHub.jsx:300](/C:/Users/öööö/ronki-finch/src/components/drachennest/RoomHub.jsx:300)**  
+Claim: Presence is checked when automatic speech is scheduled, not when it starts.  
+Why it matters to the reader: Switching away during the delayed context line still allows playback in a hidden tab, because neither the visibility handler nor the playback callback cancels or rechecks it.  
+Fix: Cancel queued automatic speech on hiding and recheck presence at playback time; leave the line eligible for replay when the child returns.
+
+**FC-02-R2 | SHOULD | [TaskContext.tsx:909](/C:/Users/öööö/ronki-finch/src/context/TaskContext.tsx:909)**  
+Claim: Raising the shelf cap from 60 to 500 postpones keepsake deletion.  
+Why it matters to the reader: The 501st entry still removes the oldest keepsake, including legacy items without a recoverable `tripId`, contrary to permanent retention.  
+Fix: Separate permanent keepsakes from bounded history, or remove the destructive cap and test retention beyond it.
+
+The `?p=` stash now runs before token consumption and checks ownership. FC-06’s spoken instruction, short-tap replay and demonstration are wired; its audio file exists. FC-07’s guard survives task changes. Both translation dictionaries contain zero em/en dashes in string values. German defaults correctly while preserving saved English choices, with German audio fallback. The ritual commits at hook entry and automatically closes **20 seconds after reaching black**, approximately 60 seconds after opening without taps.
+
+**NOT YET: a device can still overwrite the family’s cloud dragon with state it has not reconciled.**

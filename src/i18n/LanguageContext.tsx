@@ -38,16 +38,10 @@ function getInitialLang(): Lang {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved === 'en' || saved === 'de') return saved;
   } catch {}
-  // 2. Auto-detect from browser / phone language config
-  try {
-    const browserLangs = navigator.languages ?? [navigator.language];
-    for (const bl of browserLangs) {
-      const tag = bl.toLowerCase();
-      if (tag.startsWith('de')) return 'de';
-      if (tag.startsWith('en')) return 'en';
-    }
-  } catch {}
-  // 3. Fallback — primary audience is German-speaking
+  // 2. No auto-detect for now (Finch pass, 26 Sep 2026, review
+  // INTEGRATION-3): Ronki's new lines and voices exist only in German, so
+  // an English browser would get English buttons next to German bubbles.
+  // German until a parent picks English in the Eltern-Bereich.
   return 'de';
 }
 

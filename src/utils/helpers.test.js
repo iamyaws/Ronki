@@ -132,6 +132,82 @@ describe('buildDay', () => {
   });
 });
 
+describe('buildDay with a family routine (spec R15)', () => {
+  const MONDAY = new Date(2026, 8, 28, 7, 0); // Monday 28 Sep 2026
+  const SATURDAY = new Date(2026, 8, 26, 7, 0);
+  const main = (qs, anchor) => qs.filter(q => !q.sideQuest && q.anchor === anchor).map(q => q.id);
+
+  it('without a routine uses the default: 5 morning, 4 bedtime on a school day', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(MONDAY);
+    const qs = buildDay(false);
+    expect(main(qs, 'morning')).toEqual(['s_wake', 's_breakfast', 's_teeth_am', 's_dress', 's_packcheck']);
+    expect(main(qs, 'bedtime')).toEqual(['s_teeth_pm', 's_wash_pm', 's_pyjama', 's_cuddle']);
+    vi.useRealTimers();
+  });
+
+  it('keeps the afternoon, hobby and side quests unfiltered', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(MONDAY);
+    const qs = buildDay(false, { morning: [], evening: [] });
+    expect(main(qs, 'morning')).toEqual([]);
+    expect(main(qs, 'bedtime')).toEqual([]);
+    expect(qs.find(q => q.id === 's_move')).toBeDefined();
+    expect(qs.find(q => q.id === 'ft')).toBeDefined(); // Monday
+    expect(qs.filter(q => q.sideQuest).length).toBe(2);
+    vi.useRealTimers();
+  });
+
+  it('filters by kind with a chosen routine', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(MONDAY);
+    const qs = buildDay(false, { morning: ['wake', 'water', 'teeth_am'], evening: ['dinner', 'pyjama'] });
+    expect(main(qs, 'morning')).toEqual(['s_wake', 's_water', 's_teeth_am']);
+    expect(main(qs, 'bedtime')).toEqual(['s_dinner', 's_pyjama']);
+    vi.useRealTimers();
+  });
+
+  it('uses the same kinds for the holiday list', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(MONDAY);
+    const qs = buildDay(true, { morning: ['wake', 'dress', 'packcheck'], evening: ['cuddle'] });
+    // v_ has no school bag, so packcheck simply finds nothing
+    expect(main(qs, 'morning')).toEqual(['v_wake', 'v_dress']);
+    expect(main(qs, 'bedtime')).toEqual(['v_cuddle']);
+    expect(qs.find(q => q.id === 'v_outside')).toBeDefined();
+    vi.useRealTimers();
+  });
+
+  it('holiday default: the default kinds that exist in the holiday list', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(MONDAY);
+    const qs = buildDay(true);
+    expect(main(qs, 'morning')).toEqual(['v_wake', 'v_breakfast', 'v_teeth_am', 'v_dress']);
+    expect(main(qs, 'bedtime')).toEqual(['v_teeth_pm', 'v_wash_pm', 'v_pyjama', 'v_cuddle']);
+    vi.useRealTimers();
+  });
+
+  it('drops the school bag on a weekend even when it is in the routine', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(SATURDAY);
+    const qs = buildDay(false);
+    expect(main(qs, 'morning')).toEqual(['s_wake', 's_breakfast', 's_teeth_am', 's_dress']);
+    vi.useRealTimers();
+  });
+
+  it('ignores unknown kinds and a broken routine value', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(MONDAY);
+    const odd = buildDay(false, { morning: ['wake', 'fly', 42], evening: 'nope' });
+    expect(main(odd, 'morning')).toEqual(['s_wake']);
+    // a block that is not a list falls back to the default for that block
+    expect(main(odd, 'bedtime')).toEqual(['s_teeth_pm', 's_wash_pm', 's_pyjama', 's_cuddle']);
+    const junk = buildDay(false, 'junk');
+    expect(main(junk, 'morning').length).toBe(5);
+    vi.useRealTimers();
+  });
+});
+
 describe('getSky', () => {
   it('returns sunrise gradient at 0% progress', () => {
     expect(getSky(0, 10)).toContain('#F97316');

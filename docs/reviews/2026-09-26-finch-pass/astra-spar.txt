@@ -1,0 +1,137 @@
+(node:50416) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[codex] Starting Codex task thread.
+[codex] Thread ready (01a0da2e-4554-7d21-a938-41c320882123).
+[codex] Turn started (01a0da2e-4ad4-7a61-8e3e-a2d0f854f6a3).
+[codex] Assistant message captured: I’ll read the brief and its required sources, then return the requested review without changi...
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content -Li...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content -Li... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content -Li...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content -Li... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content -Li...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content -Li... (exit 0)
+[codex] Assistant message captured: The current handoff confirms that voice stays on as a reading aid and that existing saves nee...
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content -Li...
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content -Li...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content -Li... (exit 0)
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content -Li... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command '$p = Get-Conten...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command '$p = Get-Conten... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content -Li...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content -Li... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command '$p=Get-Content ...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command '$p=Get-Content ... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command '$p=Get-Content ...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command '$p=Get-Content ... (exit 0)
+[codex] Assistant message captured: The strongest change is a dependable return story on the home screen. The census shows why ti...
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command '$p=Get-Content ...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command '$p=Get-Content ... (exit 0)
+[codex] Assistant message captured: **1. Direction** The orchestrator is right about egg-first onboarding, fewer destinations, vo...
+[codex] Turn completion inferred after the main thread finished and subagent work drained.
+**1. Direction**
+
+The orchestrator is right about egg-first onboarding, fewer destinations, voiced interaction and a return story. It overbuilds the passport and doubles the appointment before making one trip dependable.
+
+**CHALLENGE:** “My dragon needs me” risks turning companionship into responsibility for Ronki’s wellbeing. Tasks can prepare an adventure; they must not determine whether Ronki is happy, available or affectionate.
+
+I would change four things:
+
+- Ship **two familiar meeting times, one daily adventure**, without an overnight expedition system.
+- Replace the current teaching beat. It forces failure on the first attempt, regardless of what the child does. One successful shared puff should count.
+- Make parent-selected routines actually drive the child’s screen. The census says those settings currently feed an unreachable component.
+- Cut the proposed passport to Ronki’s name, appearance and one remembered interaction. Age, traits, places and collection totals recreate the clutter being removed.
+
+“Reversible switch, so low risk” is too casual. Louis experiences a missing favourite immediately, even if its code survives.
+
+Also, gate 1 is **14 November**, not 15 December. Eight event names do not fix consent initialization or a failing telemetry transport.
+
+**2. Beat Finch for a six-year-old: five moves**
+
+1. **One pictured action beside Ronki.** A toothbrush, shirt or breakfast scene, spoken on entry and replayable by tapping. The child does the real action, then marks it done; “Heute nicht” is equally understandable.
+2. **Teach through success.** The child taps or holds to puff with Ronki. He responds immediately: “Das haben wir zusammen gemacht.” No compulsory failure or breath-holding contest.
+3. **Feelings remain available throughout the day.** A face button stays reachable after the morning check. The child can change their answer, sit quietly or choose one brief calming activity.
+4. **A return happens in the nest.** Ronki brings one visible object and tells its short story without requiring the child to discover the map. The object remains available after missed days.
+5. **Ronki helps put the device down.** After the morning send-off: “Jetzt geht dein Tag los.” After bedtime: “Schlaf gut.” No unlock ceremony, installation prompt or second reward follows.
+
+**3. The cut list**
+
+The smallest product needs **Nest as its only permanent child destination**, with short flows opening from it.
+
+| Stay or simplify | Hide behind switches; retain code and saves |
+|---|---|
+| **RoomHub**, persistent feelings entry, Ronki interaction | **MiniGames/Spielzeug**, all classic games, **ForscherEcke**, MINT games, **KristallHoehle**, stamina screens |
+| **RonkisTag**, showing the current routine and next pictured action | **Belohnungsbank/Laden**, redemption and currency displays |
+| **BeiRonkiSein**, **TonightRitual** | **RonkiProfile** drawers, EvolutionTree, Freunde, **Micropedia**, Feuer collection and ritual promotions |
+| **Expedition** state and home return; optional journey picture | **Journal**, **Buch**, Erinnerungen, MemoryWall, DiscoveryLog as separate destinations |
+| **GedankenWolken** as one optional feelings tool, after voice/exit checks | Remaining tool catalogue, Kraftwort, BaumPose, Ausmalbild |
+| **ParentalDashboard**, PIN, QR/share-link recovery, legal pages | **FriendIntroCeremony**, TabUnlockCelebration, automatic victory/shop prompts, random praise |
+| Existing **Fundstücke**, without empty collection slots | CaveStyleSheet stays hidden; legacy TaskList stays unreachable |
+
+Keep the public **Compendium** URL for existing website links. Move AlphaBanner feedback/language controls and PWA installation into the parent area.
+
+**Move the parent lock to Nest before hiding Laden:** currently the shop contains the only dashboard entrance.
+
+For existing families, preserve access to previously available extras through a parent compatibility switch. Default the reduced experience for new profiles. Do not wipe progress or run the PRD’s dormant-field deletion tonight.
+
+**4. First three minutes, no card**
+
+These are screen-time targets, not a deadline for completing real tasks.
+
+1. **0:00–0:15, egg shelf.** Four eggs; the child taps one and sees it hatch. Before speech, a visible tapping cue suffices. Ronki: “Hallo. Da bist du ja!” A separate parent card-link remains available.
+2. **0:15–0:35, name.** Existing voiced chips, Ronki selected initially, visible continue button. Child listens and chooses. “Wie soll ich heißen?”
+3. **0:35–0:55, shared puff.** Child touches the puff picture; Ronki copies the action successfully. “Pusten wir zusammen?” Then: “Jetzt kann ich das auch.”
+4. **0:55–1:40, parent handoff.** “Gib das Gerät kurz Mama oder Papa.” One sheet: child’s first name, pictured morning/evening defaults to confirm, editable evening time. Keep existing PIN handling and analytics off unless chosen. No email, account or installation task. Preserve the hatch locally if interrupted.
+5. **1:40–2:00, feelings.** Ronki beside face pictures. Child chooses or skips. “Wie geht’s dir gerade?” The reply acknowledges the feeling without rewarding a cheerful answer.
+6. **2:00–3:00, first shared moment.** Show one appropriate action, with a done and skip picture. “Was machen wir zuerst?” The nest then shows the next meeting using a sun or bedtime picture and a spoken explanation. At bedtime, offer a short welcome story immediately, then close.
+
+Do not end onboarding with an empty promise or send a newly met dragon away before the child has enjoyed his company.
+
+**5. The appointment**
+
+**Two meeting times, one adventure per day.** Morning prepares the outing; evening brings the story and closes the day. Breakfast can recall yesterday’s object, without inventing another trip.
+
+The fire should represent preparation, not hunger. Skipping a task must allow the routine to conclude and the adventure to proceed.
+
+Weekends retain the same morning/evening shape with school tasks removed. Holidays use a parent “Keine Schule” setting and a simple shared activity; do not build the six-card activity board tonight.
+
+At **19:30**, hatch, meet, hear the welcome story and sleep. The first outing starts the following morning. Day one needs a satisfying meeting, not necessarily a departure.
+
+If the family misses evening, the story waits. No expiry, overdue state, backlog of obligations or requirement to catch up.
+
+**6. Sticky without dark patterns**
+
+| Return trigger | Section 6 protection |
+|---|---|
+| Familiar morning/evening meeting | No consecutive-day requirement, reset or missed-day warning |
+| Next story and object | Fixed sequence, one per adventure, retained until opened; no rarity, reroll or task-dependent random prize |
+| Ronki remembers something learned together | Affection remains available without task completion; absence changes neither warmth nor possessions |
+| Gradual growth | At most one adventure credit per day; never subtract, never accelerate through extra sessions; no “only three more” home prompt |
+
+Use finite stories with a clear ending and no automatic next episode. No notifications tonight. Remove hidden streak-driven mood changes and inspect every source of sad/worried return faces. Merely hiding counters does not remove pressure.
+
+**7. Build risk tonight and assumptions**
+
+The highest risk is **attaching a local hatch to the wrong cloud identity**. Current storage resolves conflicts largely by day, treats ownerless caches as compatible and can upload local state when cloud loading returns nothing. A failed fetch must not become permission to overwrite an existing profile.
+
+Required tests:
+
+- No-card setup interrupted at every phase; QR seed, already-hatched QR profile, denied camera, share link, sibling switch and failed cloud fetch.
+- Existing-save fixtures preserve child/dragon names, stage, PIN, memories and pending expedition. New fields survive save, reload and sync.
+- Departure works without mounting Expedition; reopening after return time delivers once. Test midnight, daylight-saving changes, missed days and duplicate taps.
+- Parent routine edits affect the visible tasks; hidden side quests cannot block departure.
+- First win produces no hidden-feature takeover; every essential instruction works with actual audio and has an immediate exit.
+- Consent-off sends nothing; consent-on reaches storage successfully. Run app tests, name checks, builds and QR website regression checks.
+
+Likelihoods below are judgments, not measurements.
+
+| Assumption | Likely wrong? / Louis’s tablet consequence | Cheapest test / fallback |
+|---|---|---|
+| **A1** Fast hatch then setup | Medium-high: reload or scan loses/replaces his dragon | Interrupt setup and scan seeded/existing fixtures; isolate temporary hatch until identity resolves |
+| **A2** Fire and growth dots are understood | High: dots look like tappable rewards or incomplete chores | Ask Louis what happens next without explaining; use pictured tasks and voiced departure instead |
+| **A3** Story beats existing return mechanics | Medium: he ignores it or asks for games | Show one complete departure/return; retain compatibility access while shipping the story |
+| **A4** Cuts lose nothing | High: favourite play or journal disappears | Observe his normal route; restore specific extras through parent settings |
+| **A5** Expedition needs no rewrite | High as stated: trip remains stuck until map opens | Close immediately after departure, reopen after return; reuse art, move transitions outside the screen |
+| **A6** Routine settings already work | False in census: parent edits change nothing | Change one task and inspect child view; wire the actual task source before promising customization |
+
+**The single most important thing tonight: Ronki must keep the next-meeting promise without losing the child’s existing dragon.**
+

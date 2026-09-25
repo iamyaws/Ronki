@@ -1,108 +1,606 @@
 // @vitest-environment jsdom
 import React from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, fireEvent, act } from '@testing-library/react';
+import { render, fireEvent, act, screen } from '@testing-library/react';
 
-// Home reads TaskContext and talks to the voice bank and analytics; all
-// three are stubbed so the test only looks at the new "Wie geht's dir?"
-// entry (Marc, 25 Sep 2026, on Astra's design review R3).
-const setMood = vi.fn();
+// The Nest reads TaskContext and talks to the voice bank and analytics;
+// all three are stubbed. The clock is the faked system time.
 let mockState;
+const actions = {};
 vi.mock('../../context/TaskContext', () => ({
-  useTask: () => ({ state: mockState, actions: { setMood } }),
+  useTask: () => ({ state: mockState, actions }),
 }));
 vi.mock('../../utils/voiceAudio', () => ({
-  default: { playNarrator: vi.fn(), playLocalized: vi.fn(), isMuted: () => true },
+  default: { playNarrator: vi.fn(), playLocalized: vi.fn(), play: vi.fn(), stop: vi.fn(), isMuted: () => true },
 }));
 vi.mock('../../lib/analytics', () => ({ track: vi.fn() }));
 
+import VoiceAudio from '../../utils/voiceAudio';
 import RoomHub from './RoomHub';
+import { dayKey } from '../../loop/clock';
+import { lineText } from '../../data/ronkiLines';
 
-describe('RoomHub: the feelings entry on the room', () => {
-  let scrollSpy;
-  beforeEach(() => {
-    vi.useFakeTimers();
-    setMood.mockClear();
-    scrollSpy = vi.fn();
-    Element.prototype.scrollIntoView = scrollSpy;
-    mockState = {
-      catEvo: 12,
-      moodAM: null,
-      ronkiMood: 'normal',
-      companionVariant: 'forest',
-      familyConfig: { childName: 'Mia' },
-      quests: [],
-      expedition: { state: 'home' },
-      expeditionLog: [],
+// 2026-09-28 is a Monday.
+const MON = (hhmm) => new Date(`2026-09-28T${hhmm}:00`);
+
+const MORNING = ['s_wake', 's_breakfast', 's_teeth_am', 's_dress', 's_packcheck'];
+const EVENING = ['s_teeth_pm', 's_wash_pm', 's_pyjama', 's_cuddle'];
+
+function quests({ morningDone = 0, eveningDone = 0, moveDone = false } = {}) {
+  const q = [];
+  MORNING.forEach((id, i) => q.push({ id, name: id, anchor: 'morning', order: i + 1, done: i < morningDone }));
+  q.push({ id: 's_move', name: '10 Min bewegen', anchor: 'evening', order: 1, done: moveDone });
+  EVENING.forEach((id, i) => q.push({ id, name: id, anchor: 'bedtime', order: i + 1, done: i < eveningDone }));
+  // A side quest with a morning anchor never counts toward the fire.
+  q.push({ id: 'side_1', name: 'Side', anchor: 'morning', order: 9, done: false, sideQuest: true });
+  return q;
+}
+
+function baseState(when, extra = {}) {
+  return {
+    catEvo: 5,
+    stageSeen: 1,
+    adventureCount: 2,
+    tripCursor: 2,
+    ronkiMood: 'normal',
+    companionName: 'Funki',
+    companionVariant: 'forest',
+    familyConfig: { childName: 'Mia' },
+    onboardingDate: '2026-09-01',
+    greetedDate: dayKey(when),
+    lastGapDays: 1,
+    lastTripDate: null,
+    moodAM: null,
+    moodPM: null,
+    quests: quests(),
+    expedition: { state: 'home' },
+    expeditionLog: [],
+    ...extra,
+  };
+}
+
+function setup(when, extra = {}, props = {}) {
+  vi.setSystemTime(when);
+  mockState = baseState(when, extra);
+  const onOpenParental = vi.fn();
+  const onOpenTonight = vi.fn();
+  const onNavigate = vi.fn();
+  const utils = render(
+    <RoomHub onNavigate={onNavigate} onOpenParental={onOpenParental} onOpenTonight={onOpenTonight} {...props} />,
+  );
+  return { ...utils, onOpenParental, onOpenTonight, onNavigate };
+}
+
+const loud = (c) => c.querySelectorAll('[data-loud="true"]');
+const mode = (c) => c.querySelector('[data-mode]').getAttribute('data-mode');
+const bubble = () => screen.queryByTestId('ronki-bubble');
+
+beforeEach(() => {
+  vi.useFakeTimers();
+  for (const k of Object.keys(actions)) delete actions[k];
+  Object.assign(actions, {
+    complete: vi.fn(),
+    setMood: vi.fn(),
+    departTrip: vi.fn(),
+    receiveTreasure: vi.fn(),
+    markStageSeen: vi.fn(),
+    markGreeted: vi.fn(),
+  });
+  VoiceAudio.playLocalized.mockClear();
+});
+afterEach(() => {
+  vi.useRealTimers();
+});
+
+describe('RoomHub: one loud item per state', () => {
+  it('morning: the Jetzt card for the next task, the fire and the row', () => {
+    const { container } = setup(MON('07:10'));
+    expect(mode(container)).toBe('fire');
+    expect(loud(container)).toHaveLength(1);
+    const card = screen.getByTestId('now-card');
+    expect(card.getAttribute('data-loud')).toBe('true');
+    expect(card.getAttribute('data-quest')).toBe('s_wake');
+    const bowl = screen.getByTestId('fire-bowl');
+    expect(bowl.getAttribute('data-lit')).toBe('0');
+    expect(bowl.getAttribute('data-total')).toBe('5');
+    expect(screen.getByTestId('task-row').querySelectorAll('button')).toHaveLength(5);
+    // Ronki asks for the task in his bubble and says it once.
+    expect(bubble().textContent).toBe(lineText('task_ask_wake'));
+    act(() => { vi.advanceTimersByTime(500); });
+    expect(VoiceAudio.playLocalized).toHaveBeenCalledWith('task_ask_wake', 400);
+  });
+
+  it('morning: Geschafft completes the card task, lights a flame line, Später only reorders', () => {
+    const { container } = setup(MON('07:10'));
+    fireEvent.click(screen.getByText('Später'));
+    expect(actions.complete).not.toHaveBeenCalled();
+    expect(screen.getByTestId('now-card').getAttribute('data-quest')).toBe('s_breakfast');
+    expect(bubble().textContent).toBe(lineText('task_later_01'));
+    fireEvent.click(screen.getByText('Geschafft'));
+    expect(actions.complete).toHaveBeenCalledTimes(1);
+    expect(actions.complete).toHaveBeenCalledWith('s_breakfast');
+    expect(VoiceAudio.playLocalized).toHaveBeenCalledWith('fire_lit_01', 0);
+    expect(loud(container)).toHaveLength(1);
+  });
+
+  it('a tap in the task row picks the card task and never completes it', () => {
+    setup(MON('07:10'));
+    fireEvent.click(screen.getByLabelText('Anziehen'));
+    expect(actions.complete).not.toHaveBeenCalled();
+    expect(screen.getByTestId('now-card').getAttribute('data-quest')).toBe('s_dress');
+  });
+
+  it('full morning fire: Ronki cheers, then the send-off sheet, and Tschüss departs once', () => {
+    const { container } = setup(MON('07:40'), { quests: quests({ morningDone: 5 }) });
+    expect(mode(container)).toBe('departure');
+    expect(loud(container)).toHaveLength(1);
+    expect(screen.getByTestId('departure-card')).toBeTruthy();
+    expect(bubble().textContent).toBe(lineText('fire_full_morning_01'));
+    expect(screen.queryByTestId('departure-sheet')).toBeNull();
+    // The sheet waits for "Mein Feuer ist ganz warm! Jetzt kann ich losfliegen." (KIDUX-5).
+    act(() => { vi.advanceTimersByTime(3900); });
+    expect(screen.queryByTestId('departure-sheet')).toBeNull();
+    act(() => { vi.advanceTimersByTime(900); });
+    const sheet = screen.getByTestId('departure-sheet');
+    // Sky ground: no Morgenwald painting behind the cloud Ronki (own read O2).
+    for (const img of sheet.querySelectorAll('img')) expect(img.getAttribute('src')).not.toContain('morgenwald');
+    const pill = Array.from(sheet.querySelectorAll('button')).find(b => b.textContent.includes('Tschüss, Funki!'));
+    fireEvent.click(pill);
+    fireEvent.click(screen.getByText('Tschüss, Funki!'));
+    expect(actions.departTrip).toHaveBeenCalledTimes(1);
+    expect(actions.departTrip).toHaveBeenCalledWith('day');
+    expect(VoiceAudio.playLocalized).toHaveBeenCalledWith('trip_bye_school_01', 0);
+    expect(screen.queryByTestId('departure-sheet')).toBeNull();
+  });
+
+  it('a full morning with a trip already today does not send him again', () => {
+    const when = MON('07:40');
+    const { container } = setup(when, { quests: quests({ morningDone: 5 }), lastTripDate: dayKey(when) });
+    expect(mode(container)).toBe('stay');
+    expect(screen.queryByTestId('departure-card')).toBeNull();
+  });
+
+  it('day block, morning not full: Ronki stays home with the afternoon task', () => {
+    const { container } = setup(MON('13:00'), { quests: quests({ morningDone: 2 }) });
+    expect(mode(container)).toBe('stay');
+    expect(loud(container)).toHaveLength(1);
+    expect(screen.getByTestId('now-card').getAttribute('data-quest')).toBe('s_move');
+    // With a task on the card Ronki asks for it (KIDUX-12).
+    expect(bubble().textContent).toBe(lineText('task_ask_move'));
+    act(() => { vi.advanceTimersByTime(500); });
+    expect(VoiceAudio.playLocalized).toHaveBeenCalledWith('task_ask_move', 400);
+    expect(screen.queryByTestId('fire-bowl')).toBeNull();
+    expect(screen.getByTestId('ronki-cutout')).toBeTruthy();
+  });
+
+  it('day block with nothing left: sitting with Ronki is the loud item', () => {
+    const { container } = setup(MON('13:00'), { quests: quests({ moveDone: true }) });
+    expect(loud(container)).toHaveLength(1);
+    expect(loud(container)[0].textContent).toContain('Bei Ronki sitzen');
+  });
+
+  it('day 1 in the day block after an afternoon install: no departure (spec R4)', () => {
+    const when = MON('13:00');
+    const { container } = setup(when, {
+      onboardingDate: dayKey(when),
+      adventureCount: 0,
+      quests: quests({ moveDone: true }),
+    });
+    expect(mode(container)).toBe('stay');
+    expect(screen.queryByTestId('departure-card')).toBeNull();
+    expect(bubble().textContent).toBe(lineText('fd_start_day_01'));
+  });
+
+  it('day 1 in the day block: a morning filled with real tasks still sends him off (LOOP-1)', () => {
+    const when = MON('13:00');
+    const { container } = setup(when, {
+      onboardingDate: dayKey(when),
+      adventureCount: 0,
+      quests: quests({ morningDone: 3 }),
+    });
+    expect(mode(container)).toBe('departure');
+    expect(screen.getByTestId('departure-card')).toBeTruthy();
+  });
+
+  it('after a full morning the send-off still waits in the day block (not day 1)', () => {
+    const { container } = setup(MON('12:30'), { quests: quests({ morningDone: 5 }) });
+    expect(mode(container)).toBe('departure');
+  });
+
+  it('away: the room without Ronki, no bubble, the postcard is loud', () => {
+    const { container } = setup(MON('13:00'), { expedition: { state: 'away', kind: 'day', tripId: 't03' } });
+    expect(mode(container)).toBe('away');
+    expect(loud(container)).toHaveLength(1);
+    expect(screen.getByTestId('away-card').getAttribute('data-loud')).toBe('true');
+    expect(screen.queryByTestId('ronki-cutout')).toBeNull();
+    expect(bubble()).toBeNull();
+    // The afternoon task is still there, quietly.
+    expect(screen.getByTestId('now-card').getAttribute('data-loud')).toBeNull();
+    fireEvent.click(screen.getByTestId('away-card'));
+    expect(VoiceAudio.playLocalized).toHaveBeenCalledWith('away_day_01', 0);
+    expect(screen.getByTestId('away-peek')).toBeTruthy();
+  });
+
+  it('waiting: the wrapped treasure, the reveal, and receiveTreasure exactly once', () => {
+    const exp = {
+      state: 'waiting',
+      kind: 'day',
+      tripId: 't03',
+      pendingMemento: { id: 'm1', ts: 'x', emoji: '🪨', name: 'Bachstein', tripId: 't03' },
     };
-  });
-  afterEach(() => {
-    vi.useRealTimers();
-    delete Element.prototype.scrollIntoView;
-  });
-
-  it('shows the entry while today\'s feeling is open and leads to the picker', () => {
-    const { getByLabelText } = render(<RoomHub onNavigate={() => {}} />);
-    const entry = getByLabelText("Wie geht's dir? Gefühl aussuchen");
-    const group = getByLabelText('Ronkis Frage beantworten');
-    expect(group.style.outline).toContain('transparent');
-
-    fireEvent.click(entry);
-    expect(scrollSpy).toHaveBeenCalledTimes(1);
-    expect(group.style.outline).toContain('var(--color-cobalt)');
-    // Tapping the entry never picks a feeling by itself.
-    expect(setMood).not.toHaveBeenCalled();
-
-    act(() => { vi.advanceTimersByTime(1700); });
-    expect(group.style.outline).toContain('transparent');
+    const { container } = setup(MON('17:10'), { expedition: exp });
+    expect(mode(container)).toBe('waiting');
+    expect(loud(container)).toHaveLength(1);
+    expect(bubble().textContent).toBe(lineText('trip_back_01'));
+    fireEvent.click(screen.getByText('Aufmachen'));
+    const reveal = screen.getByTestId('treasure-reveal');
+    expect(reveal.textContent).toContain('Bachstein');
+    expect(reveal.textContent).toContain('Am Bach hab ich die Füße ins Wasser gehalten.');
+    const shelve = screen.getByText('Ins Regal stellen');
+    fireEvent.click(shelve);
+    fireEvent.click(shelve);
+    expect(actions.receiveTreasure).toHaveBeenCalledTimes(1);
+    expect(screen.queryByTestId('treasure-reveal')).toBeNull();
   });
 
-  it('puts the entry beside the greeting, outside the picture, so it can never cover Ronki', () => {
-    const { getByLabelText, container } = render(<RoomHub onNavigate={() => {}} />);
-    const entry = getByLabelText("Wie geht's dir? Gefühl aussuchen");
-    expect(container.querySelector('.bb-frame')).not.toBeNull();
-    expect(entry.closest('.bb-frame')).toBeNull();
-    expect(entry.closest('header')).not.toBeNull();
-    expect(entry.querySelector('svg')).not.toBeNull(); // the heart, not an answer's picture
+  it('evening: the evening fire with the moon card always there, quiet', () => {
+    const { container, onOpenTonight } = setup(MON('18:00'), { quests: quests({ morningDone: 5 }), lastTripDate: '2026-09-28' });
+    expect(mode(container)).toBe('fire');
+    expect(loud(container)).toHaveLength(1);
+    expect(screen.getByTestId('now-card').getAttribute('data-quest')).toBe('s_teeth_pm');
+    const moon = screen.getByTestId('moon-card');
+    expect(moon.getAttribute('data-loud')).toBeNull();
+    expect(moon.textContent).toContain(lineText('eve_moon_01'));
+    fireEvent.click(moon);
+    expect(onOpenTonight).toHaveBeenCalledTimes(1);
   });
 
-  it('scrolls the picker itself into view and focuses the first tile at once', () => {
-    const { getByLabelText } = render(<RoomHub onNavigate={() => {}} />);
-    const group = getByLabelText('Ronkis Frage beantworten');
-    fireEvent.click(getByLabelText("Wie geht's dir? Gefühl aussuchen"));
-    expect(scrollSpy.mock.contexts[0].contains(group)).toBe(true);
-    expect(document.activeElement.textContent).toContain('Gut');
+  it('waiting in the evening: the moon card is there quietly, the treasure stays the one loud item', () => {
+    const exp = {
+      state: 'waiting',
+      kind: 'day',
+      tripId: 't03',
+      pendingMemento: { id: 'm1', ts: 'x', emoji: '🪨', name: 'Bachstein', tripId: 't03' },
+    };
+    const { container, onOpenTonight } = setup(MON('17:10'), { expedition: exp });
+    expect(mode(container)).toBe('waiting');
+    expect(loud(container)).toHaveLength(1);
+    expect(loud(container)[0].getAttribute('data-testid')).toBe('treasure-card');
+    const moon = screen.getByTestId('moon-card');
+    expect(moon.getAttribute('data-loud')).toBeNull();
+    fireEvent.click(moon);
+    expect(onOpenTonight).toHaveBeenCalledTimes(1);
+    expect(actions.receiveTreasure).not.toHaveBeenCalled();
   });
 
-  it('never pulls focus back after the child moved on (Astra delta review R1)', () => {
-    const { getByLabelText } = render(<RoomHub onNavigate={() => {}} />);
-    fireEvent.click(getByLabelText("Wie geht's dir? Gefühl aussuchen"));
-    const tiles = getByLabelText('Ronkis Frage beantworten').querySelectorAll('button');
-    tiles[1].focus();
-    act(() => { vi.advanceTimersByTime(2000); });
-    expect(document.activeElement).toBe(tiles[1]);
+  it('waiting in the day block: no moon card yet', () => {
+    const exp = { state: 'waiting', kind: 'day', tripId: 't03', pendingMemento: { id: 'm1', ts: 'x', emoji: '🪨', name: 'Bachstein' } };
+    setup(MON('13:00'), { expedition: exp });
+    expect(screen.queryByTestId('moon-card')).toBeNull();
   });
 
-  it('a second tap restarts the ring, and unmounting during it is safe', () => {
-    const { getByLabelText, unmount } = render(<RoomHub onNavigate={() => {}} />);
-    const entry = getByLabelText("Wie geht's dir? Gefühl aussuchen");
-    const group = getByLabelText('Ronkis Frage beantworten');
-    fireEvent.click(entry);
-    act(() => { vi.advanceTimersByTime(1000); });
-    fireEvent.click(entry);
-    act(() => { vi.advanceTimersByTime(1000); });
-    expect(group.style.outline).toContain('var(--color-cobalt)');
-    act(() => { vi.advanceTimersByTime(700); });
-    expect(group.style.outline).toContain('transparent');
-    fireEvent.click(entry);
-    unmount();
-    expect(() => act(() => { vi.advanceTimersByTime(2000); })).not.toThrow();
+  it('the moon card falls back to onNavigate("tonight") without onOpenTonight', () => {
+    vi.setSystemTime(MON('19:00'));
+    mockState = baseState(MON('19:00'), { quests: quests({ morningDone: 5, eveningDone: 4 }) });
+    const onNavigate = vi.fn();
+    render(<RoomHub onNavigate={onNavigate} />);
+    fireEvent.click(screen.getByTestId('moon-card'));
+    expect(onNavigate).toHaveBeenCalledWith('tonight');
   });
 
-  it('hides the entry once a feeling is picked for today', () => {
-    mockState = { ...mockState, moodAM: 2 };
-    const { queryByLabelText } = render(<RoomHub onNavigate={() => {}} />);
-    expect(queryByLabelText("Wie geht's dir? Gefühl aussuchen")).toBeNull();
-    expect(queryByLabelText('Ronkis Frage beantworten')).toBeNull();
+  it('evening fire full: the moon card becomes the loud card', () => {
+    const { container } = setup(MON('19:00'), { quests: quests({ morningDone: 5, eveningDone: 4 }) });
+    expect(mode(container)).toBe('evening');
+    expect(loud(container)).toHaveLength(1);
+    expect(screen.getByTestId('moon-card').getAttribute('data-loud')).toBe('true');
+    expect(bubble().textContent).toBe(lineText('fire_full_evening_01'));
+    expect(screen.queryByTestId('now-card')).toBeNull();
+  });
+
+  it('night: Ronki asleep, no card, a tap says he is dreaming', () => {
+    const { container } = setup(MON('20:00'), { eveningRitualCompletedAt: MON('19:40').toISOString() });
+    expect(mode(container)).toBe('night');
+    expect(loud(container)).toHaveLength(0);
+    expect(screen.queryByTestId('now-card')).toBeNull();
+    expect(screen.queryByTestId('moon-card')).toBeNull();
+    fireEvent.click(screen.getByTestId('nest-asleep'));
+    expect(VoiceAudio.playLocalized).toHaveBeenCalledWith('away_sleep_01', 0);
+    expect(bubble().textContent).toBe(lineText('away_sleep_01'));
+  });
+
+  it('a dream trip shows him asleep too', () => {
+    const { container } = setup(MON('21:00'), { expedition: { state: 'away', kind: 'night', tripId: 't03' } });
+    expect(mode(container)).toBe('night');
+  });
+});
+
+describe('RoomHub: header, cuts and extras', () => {
+  it('the lock opens the parent area', () => {
+    const { onOpenParental } = setup(MON('07:10'));
+    fireEvent.click(screen.getByLabelText('Eltern-Bereich'));
+    expect(onOpenParental).toHaveBeenCalledTimes(1);
+  });
+
+  it('greets the child by name, with a fallback', () => {
+    setup(MON('07:10'));
+    expect(screen.getByText('Hallo Mia!')).toBeTruthy();
+  });
+
+  it('has no Karte, no Schriftrolle, no anchor tiles, and no Spielzeug without Extras', () => {
+    const { container } = setup(MON('07:10'));
+    const text = container.textContent;
+    for (const gone of ['Karte', 'Schriftrolle', 'Morgens', 'Nachmittag', 'Abends', 'Ronki ist bereit', 'Spielzeug', 'Fundstücke']) {
+      expect(text).not.toContain(gone);
+    }
+  });
+
+  it('shows Spielzeug only with the Extras switch', () => {
+    const { onNavigate } = setup(MON('07:10'), { extrasEnabled: true });
+    fireEvent.click(screen.getByText('Spielzeug'));
+    expect(onNavigate).toHaveBeenCalledWith('spiele');
+  });
+
+  it('the face button opens the feelings any time; a pick before noon writes moodAM', () => {
+    setup(MON('09:00'), { moodAM: 2 });
+    fireEvent.click(screen.getByTestId('face-button'));
+    expect(screen.getByTestId('feelings-sheet')).toBeTruthy();
+    fireEvent.click(screen.getByText('Gut'));
+    expect(actions.setMood).toHaveBeenCalledWith('moodAM', 3);
+  });
+
+  it('after Traurig, sitting with Ronki becomes the loud card for this open', () => {
+    const { container } = setup(MON('07:10'));
+    fireEvent.click(screen.getByTestId('face-button'));
+    fireEvent.click(screen.getByText('Traurig'));
+    fireEvent.click(screen.getByLabelText('Schließen'));
+    expect(loud(container)).toHaveLength(1);
+    expect(loud(container)[0].textContent).toContain('Bei Ronki sitzen');
+    expect(screen.getByTestId('now-card').getAttribute('data-loud')).toBeNull();
+  });
+
+  it('shows the last treasures, found only', () => {
+    setup(MON('07:10'), { expeditionLog: [{ id: 'a', emoji: '🍁', name: 'Ahornblatt' }] });
+    expect(screen.getByTestId('treasure-shelf').textContent).toBe('🍁');
+  });
+
+  it('no kid-facing text of any state speaks of streaks, missing or waiting', () => {
+    const bad = /streak|verpasst|vermisst|Serie|in Folge|wartet auf dich/i;
+    const cases = [
+      [MON('07:10'), {}],
+      [MON('07:40'), { quests: quests({ morningDone: 5 }) }],
+      [MON('13:00'), {}],
+      [MON('13:00'), { expedition: { state: 'away', kind: 'day' } }],
+      [MON('17:10'), { expedition: { state: 'waiting', kind: 'day', tripId: 't01', pendingMemento: { id: 'm', ts: 'x', emoji: '🍁', name: 'Ahornblatt' } } }],
+      [MON('19:00'), { quests: quests({ eveningDone: 4 }) }],
+      [MON('20:00'), { eveningRitualCompletedAt: MON('19:40').toISOString() }],
+      [MON('07:10'), { greetedDate: '2026-09-20', lastGapDays: 8 }],
+    ];
+    for (const [when, extra] of cases) {
+      const { container, unmount } = setup(when, extra);
+      act(() => { vi.advanceTimersByTime(4000); });
+      expect(container.textContent).not.toMatch(bad);
+      expect(document.body.textContent).not.toMatch(bad);
+      unmount();
+    }
+  });
+});
+
+describe('RoomHub: the return beat and growth', () => {
+  it('plays the return line on the first open of the day and marks it once', () => {
+    const { rerender } = setup(MON('07:10'), { greetedDate: '2026-09-22', lastGapDays: 6 });
+    expect(VoiceAudio.playLocalized).toHaveBeenCalledWith('return_long_01', 0);
+    expect(bubble().textContent).toBe(lineText('return_long_01'));
+    expect(actions.markGreeted).toHaveBeenCalledTimes(1);
+    rerender(<RoomHub onNavigate={() => {}} onOpenParental={() => {}} onOpenTonight={() => {}} />);
+    expect(actions.markGreeted).toHaveBeenCalledTimes(1);
+    // The greeting passes, the task ask comes back.
+    act(() => { vi.advanceTimersByTime(3700); });
+    expect(bubble().textContent).toBe(lineText('task_ask_wake'));
+  });
+
+  it('a Nest left open overnight greets again the next morning, once', () => {
+    const day1 = MON('19:00');
+    setup(day1, { greetedDate: '2026-09-27', quests: quests({ morningDone: 5 }) });
+    actions.markGreeted.mockImplementation(() => { mockState = { ...mockState, greetedDate: dayKey(new Date()) }; });
+    // The evening greeting of day 1 (the mock above only takes effect from now on).
+    expect(actions.markGreeted).toHaveBeenCalledTimes(1);
+    mockState = { ...mockState, greetedDate: dayKey(day1) };
+    VoiceAudio.playLocalized.mockClear();
+    // The tablet stays on the Nest; it is Tuesday morning now.
+    vi.setSystemTime(new Date('2026-09-29T07:10:00'));
+    act(() => {
+      document.dispatchEvent(new Event('visibilitychange'));
+      vi.advanceTimersByTime(30000);
+    });
+    expect(actions.markGreeted).toHaveBeenCalledTimes(2);
+    expect(VoiceAudio.playLocalized).toHaveBeenCalledWith('greet_day_01', 0);
+    act(() => { vi.advanceTimersByTime(30000); });
+    expect(actions.markGreeted).toHaveBeenCalledTimes(2);
+  });
+
+  it("a new day clears yesterday's Später order and the sit card after Traurig", () => {
+    const { container } = setup(MON('07:10'));
+    fireEvent.click(screen.getByText('Später'));
+    expect(screen.getByTestId('now-card').getAttribute('data-quest')).toBe('s_breakfast');
+    fireEvent.click(screen.getByTestId('face-button'));
+    fireEvent.click(screen.getByText('Traurig'));
+    fireEvent.click(screen.getByLabelText('Schließen'));
+    expect(screen.getByTestId('now-card').getAttribute('data-loud')).toBeNull();
+    mockState = { ...mockState, greetedDate: '2026-09-29' };
+    vi.setSystemTime(new Date('2026-09-29T07:10:00'));
+    act(() => { vi.advanceTimersByTime(30000); });
+    expect(screen.getByTestId('now-card').getAttribute('data-quest')).toBe('s_wake');
+    expect(screen.getByTestId('now-card').getAttribute('data-loud')).toBe('true');
+    expect(loud(container)).toHaveLength(1);
+  });
+
+  it('does not greet again once today is greeted', () => {
+    setup(MON('07:10'));
+    expect(actions.markGreeted).not.toHaveBeenCalled();
+  });
+
+  it('never shows Ronki sad on a return day', () => {
+    setup(MON('07:10'), { ronkiMood: 'sad', greetedDate: '2026-09-20', lastGapDays: 8 });
+    const imgs = Array.from(screen.getByTestId('ronki-cutout').querySelectorAll('img'));
+    expect(imgs.length).toBeGreaterThan(0);
+    for (const img of imgs) expect(img.getAttribute('src') || '').not.toMatch(/heavy|worried|sleepy/);
+  });
+
+  it('shows the growth beat for an unseen stage and marks it seen on Weiter', () => {
+    setup(MON('07:10'), { catEvo: 9, stageSeen: 1, adventureCount: 6 });
+    expect(screen.getByTestId('growth-beat')).toBeTruthy();
+    fireEvent.click(screen.getByText('Weiter'));
+    expect(actions.markStageSeen).toHaveBeenCalledWith(2);
+    expect(screen.queryByTestId('growth-beat')).toBeNull();
+  });
+
+  it('after the treasure in the evening, asks once how the day was (moodPM)', () => {
+    const exp = { state: 'waiting', kind: 'day', tripId: 't02', pendingMemento: { id: 'm', ts: 'x', emoji: '🪶', name: 'Feder' } };
+    setup(MON('17:30'), { expedition: exp });
+    fireEvent.click(screen.getByText('Aufmachen'));
+    fireEvent.click(screen.getByText('Ins Regal stellen'));
+    const sheet = screen.getByTestId('feelings-sheet');
+    expect(sheet.textContent).toContain(lineText('eve_mood_ask_01'));
+    fireEvent.click(screen.getByText('Okay'));
+    expect(actions.setMood).toHaveBeenCalledWith('moodPM', 2);
+  });
+});
+
+describe('RoomHub: fix round 1 (group N)', () => {
+  const rerenderWith = (rerender) => rerender(
+    <RoomHub onNavigate={() => {}} onOpenParental={() => {}} onOpenTonight={() => {}} />,
+  );
+
+  it('a double tap on Geschafft completes one task, not the next one too (KIDUX-1)', () => {
+    const { rerender } = setup(MON('07:10'));
+    actions.complete.mockImplementation((id) => {
+      mockState = { ...mockState, quests: mockState.quests.map(q => (q.id === id ? { ...q, done: true } : q)) };
+    });
+    fireEvent.click(screen.getByText('Geschafft'));
+    rerenderWith(rerender);
+    expect(screen.getByTestId('now-card').getAttribute('data-quest')).toBe('s_breakfast');
+    act(() => { vi.advanceTimersByTime(150); });
+    fireEvent.click(screen.getByText('Geschafft'));
+    expect(actions.complete).toHaveBeenCalledTimes(1);
+    expect(actions.complete).toHaveBeenCalledWith('s_wake');
+  });
+
+  it('after the last morning task the sheet opens only when the fire-full line is over (KIDUX-5)', () => {
+    const { rerender } = setup(MON('07:30'), { quests: quests({ morningDone: 4 }) });
+    actions.complete.mockImplementation((id) => {
+      mockState = { ...mockState, quests: mockState.quests.map(q => (q.id === id ? { ...q, done: true } : q)) };
+    });
+    fireEvent.click(screen.getByText('Geschafft'));
+    rerenderWith(rerender);
+    expect(screen.getByTestId('departure-card')).toBeTruthy();
+    // "Oh, das wärmt!" (2.4 s), then the 3.9 s line: the old 3.8 s cut it.
+    act(() => { vi.advanceTimersByTime(3800); });
+    expect(screen.queryByTestId('departure-sheet')).toBeNull();
+    act(() => { vi.advanceTimersByTime(2600); });
+    expect(screen.queryByTestId('departure-sheet')).toBeNull();
+    act(() => { vi.advanceTimersByTime(400); });
+    expect(screen.getByTestId('departure-sheet')).toBeTruthy();
+  });
+
+  it('at the send-off the task row is gone, also on day 1 (GUARDRAILS-3)', () => {
+    const when = MON('07:30');
+    setup(when, { onboardingDate: dayKey(when), adventureCount: 0, quests: quests({ morningDone: 3 }) });
+    expect(screen.getByTestId('departure-card')).toBeTruthy();
+    expect(screen.queryByTestId('task-row')).toBeNull();
+  });
+
+  it('back with a treasure and at the send-off Ronki keeps his own look, no pose art (FC-05)', () => {
+    const exp = { state: 'waiting', kind: 'day', tripId: 't03', pendingMemento: { id: 'm1', ts: 'x', emoji: '🪨', name: 'Bachstein', tripId: 't03' } };
+    for (const [when, extra] of [
+      [MON('17:10'), { catEvo: 0, companionVariant: 'sunset', expedition: exp }],
+      [MON('07:40'), { catEvo: 0, companionVariant: 'sunset', quests: quests({ morningDone: 5 }) }],
+    ]) {
+      const { unmount } = setup(when, extra);
+      const srcs = Array.from(screen.getByTestId('ronki-cutout').querySelectorAll('img')).map(i => i.getAttribute('src'));
+      expect(srcs.length).toBeGreaterThan(0);
+      expect(srcs[0]).toContain('eggs/egg-ember.webp');
+      for (const src of srcs) expect(src).not.toMatch(/ronki\/(wave|cheer)\.webp|ronki-cheer/);
+      unmount();
+    }
+  });
+
+  it('away in the morning block: the postcard is the only card, no task before school (O3)', () => {
+    const { container } = setup(MON('07:50'), { expedition: { state: 'away', kind: 'day', tripId: 't03' } });
+    expect(mode(container)).toBe('away');
+    expect(screen.queryByTestId('now-card')).toBeNull();
+    expect(loud(container)).toHaveLength(1);
+    // The postcard picture is the Morgenwald painting (O2).
+    expect(screen.getByTestId('postcard-picture').getAttribute('src')).toContain('scenes/morgenwald.webp');
+  });
+
+  it('a waiting morning greets once, with the return line only (KIDUX-11)', () => {
+    const exp = { state: 'waiting', kind: 'night', tripId: 't03', pendingMemento: { id: 'm1', ts: 'x', emoji: '🪨', name: 'Bachstein', tripId: 't03' } };
+    setup(MON('07:10'), { expedition: exp, greetedDate: '2026-09-27', lastGapDays: 1 });
+    act(() => { vi.advanceTimersByTime(5000); });
+    const ids = VoiceAudio.playLocalized.mock.calls.map(([id]) => id);
+    expect(ids).not.toContain('greet_day_01');
+    expect(ids).toContain('trip_back_night_01');
+    expect(actions.markGreeted).toHaveBeenCalledTimes(1);
+    expect(bubble().textContent).toBe(lineText('trip_back_night_01'));
+  });
+
+  it('a Nest left on overnight stays quiet when only the clock moves, and greets when the child taps (LOOP-3)', () => {
+    setup(MON('19:00'), { quests: quests({ morningDone: 5 }), lastTripDate: '2026-09-28' });
+    actions.markGreeted.mockImplementation(() => { mockState = { ...mockState, greetedDate: dayKey(new Date()) }; });
+    VoiceAudio.playLocalized.mockClear();
+    // 02:30 the next day: the day key moved, nobody is there.
+    mockState = { ...mockState, greetedDate: '2026-09-28', quests: quests(), lastTripDate: '2026-09-28' };
+    vi.setSystemTime(new Date('2026-09-29T02:30:00'));
+    act(() => { vi.advanceTimersByTime(30000); });
+    // 07:10: still only the clock.
+    vi.setSystemTime(new Date('2026-09-29T07:10:00'));
+    act(() => { vi.advanceTimersByTime(30000); });
+    expect(VoiceAudio.playLocalized).not.toHaveBeenCalled();
+    expect(actions.markGreeted).not.toHaveBeenCalled();
+    // The child touches the screen.
+    act(() => { window.dispatchEvent(new Event('pointerdown')); });
+    expect(actions.markGreeted).toHaveBeenCalledTimes(1);
+    expect(VoiceAudio.playLocalized).toHaveBeenCalledWith('greet_day_01', 0);
+    act(() => { vi.advanceTimersByTime(4000); });
+    expect(VoiceAudio.playLocalized.mock.calls.map(([id]) => id)).toContain('task_ask_wake');
+  });
+
+  it('a hidden tab never speaks or uses up the greeting (LOOP-3)', () => {
+    const vis = Object.getOwnPropertyDescriptor(Document.prototype, 'visibilityState')
+      || Object.getOwnPropertyDescriptor(document, 'visibilityState');
+    Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'hidden' });
+    try {
+      setup(MON('07:10'), { greetedDate: '2026-09-22', lastGapDays: 6 });
+      act(() => { vi.advanceTimersByTime(5000); });
+      expect(actions.markGreeted).not.toHaveBeenCalled();
+      expect(VoiceAudio.playLocalized).not.toHaveBeenCalled();
+    } finally {
+      delete document.visibilityState;
+      if (vis && !Object.getOwnPropertyDescriptor(Document.prototype, 'visibilityState')) {
+        Object.defineProperty(document, 'visibilityState', vis);
+      }
+    }
+  });
+
+  it('after sitting with Ronki, the task card is the loud one again (KIDUX-9)', () => {
+    const { container } = setup(MON('07:10'));
+    fireEvent.click(screen.getByTestId('face-button'));
+    fireEvent.click(screen.getByText('Traurig'));
+    const sheet = screen.getByTestId('feelings-sheet');
+    fireEvent.click(Array.from(sheet.querySelectorAll('button')).find(b => b.textContent.includes('Bei Ronki sitzen')));
+    expect(screen.getByTestId('now-card').getAttribute('data-loud')).toBeNull();
+    // A tap anywhere ends the sit.
+    fireEvent.click(screen.getByRole('dialog', { name: 'Bei Ronki sitzen' }));
+    expect(screen.getByTestId('now-card').getAttribute('data-loud')).toBe('true');
+    expect(loud(container)).toHaveLength(1);
+  });
+
+  it('the parent lock has a 48 px hit area (KIDUX-13)', () => {
+    setup(MON('07:10'));
+    const lock = screen.getByTestId('parent-lock');
+    expect(lock.style.width).toBe('48px');
+    expect(lock.style.height).toBe('48px');
+    const face = screen.getByTestId('face-button');
+    expect(parseInt(face.style.width, 10)).toBeGreaterThanOrEqual(48);
   });
 });

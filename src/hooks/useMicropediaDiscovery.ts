@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useTask } from '../context/TaskContext';
+import { featureOn } from '../config/features';
 
 /**
  * useMicropediaDiscovery — unlocks creatures when conditions match.
@@ -59,6 +60,9 @@ export function useMicropediaDiscovery(onDiscover?: (id: string) => void) {
   const { state, actions } = useTask();
 
   useEffect(() => {
+    // Finch pass (26 Sep 2026): friends are behind their switch. With it
+    // off there are no discoveries and no FriendIntroCeremony takeovers.
+    if (!featureOn('friends')) return;
     if (!state) return;
     const discovered: DiscoveredEntry[] = state.micropediaDiscovered || [];
     const discoveredIds = new Set(discovered.map(d => d.id));

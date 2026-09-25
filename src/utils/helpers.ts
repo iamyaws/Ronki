@@ -1,5 +1,6 @@
 import { LVL, SCHOOL_QUESTS, VACATION_QUESTS, FOOTBALL, CAT_STAGES, SIDE_QUESTS, SHOP_ITEMS, COMPANION_STAGES, BOSS_TIERS } from '../constants';
 import type { Quest, CatMood, ShopItem } from '../types';
+import { normalizeRoutine, taskKind } from '../data/taskKinds';
 
 export function getLevel(xp: number): number {
   let l = 1;
@@ -20,12 +21,29 @@ export function getLvlProg(xp: number): { cur: number; need: number } {
 // On Sat/Sun there's no schoolbag to pack, so skip them to avoid noise.
 const WEEKEND_SKIP_IDS = new Set(['s_lunchbox', 's_packcheck', 's_signature', 's7']);
 
-export function buildDay(vac: boolean): Quest[] {
+/**
+ * Today's quests. `routine` is the family routine (familyConfig.routine,
+ * Finch pass spec R15): the morning and bedtime main quests are kept only
+ * when their kind is in it. An absent or odd routine means DEFAULT_ROUTINE
+ * (normalizeRoutine). Afternoon ('evening') and 'hobby' quests and the side
+ * quests are never filtered.
+ */
+export function buildDay(vac: boolean, routine?: unknown): Quest[] {
   const d = new Date().getDay();
   const isWeekend = d === 0 || d === 6;
   const source = vac ? VACATION_QUESTS : SCHOOL_QUESTS;
+  const r = normalizeRoutine(routine);
+  const morningKinds = new Set<string>(r.morning);
+  const eveningKinds = new Set<string>(r.evening);
+  const inRoutine = (q: { id: string; anchor: string }): boolean => {
+    if (q.anchor !== 'morning' && q.anchor !== 'bedtime') return true;
+    const kind = taskKind(q.id);
+    if (!kind) return true;
+    return q.anchor === 'morning' ? morningKinds.has(kind) : eveningKinds.has(kind);
+  };
   const b: Quest[] = source
     .filter(q => !(isWeekend && !vac && WEEKEND_SKIP_IDS.has(q.id)))
+    .filter(inRoutine)
     .map(q => ({ ...q, done: false, streak: 0, completions: 0 }));
   if ((d === 1 || d === 3) && !vac) b.push({ ...FOOTBALL, done: false, streak: 0, completions: 0 });
   // Pick 2 random side-quests for the day

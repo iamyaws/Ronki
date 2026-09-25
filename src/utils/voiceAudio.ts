@@ -64,6 +64,8 @@ const VoiceAudio = {
     if (!lineId) return;
     if (delayTimer) { clearTimeout(delayTimer); delayTimer = null; }
     const doPlay = () => {
+      // Never start a line in a hidden tab (LOOP-3-R2).
+      if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
       this.stop();
       const src = `${BASE}audio/narrator/${lineId}.mp3`;
       const audio = new Audio(src);
@@ -107,6 +109,8 @@ const VoiceAudio = {
     };
 
     const doPlay = () => {
+      // Never start a line in a hidden tab (LOOP-3-R2).
+      if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
       this.stop();
       const src = `${BASE}audio/narrator/${lineId}.mp3`;
       const audio = new Audio(src);
@@ -135,34 +139,61 @@ const VoiceAudio = {
    */
   playLocalized(baseId: string, delayMs = 0) {
     if (!baseId) return;
-    this.play(`${readLang()}_${baseId}`, delayMs);
+    const lang = readLang();
+    // Finch pass fix round 1 (GUARDRAILS-4): most lines exist only as
+    // de_ files. On a device set to English, a missing en_ file falls
+    // back to the German file once, so Ronki never goes silent.
+    const fallback = lang === 'de' ? undefined : `de_${baseId}`;
+    this.play(`${lang}_${baseId}`, delayMs, fallback);
   },
 
-  /** Play a voice line by its ID (e.g., 'de_greet_01') */
-  play(lineId: string, delayMs = 0) {
+  /**
+   * Play a voice line by its ID (e.g., 'de_greet_01'). `fallbackId`, when
+   * given, is tried once if the first file fails to load (missing file).
+   */
+  play(lineId: string, delayMs = 0, fallbackId?: string) {
     if (this.isMuted()) return;
     if (!lineId) return;
 
     // Clear any pending delayed play
     if (delayTimer) { clearTimeout(delayTimer); delayTimer = null; }
 
-    const doPlay = () => {
-      // Stop any currently playing line (don't overlap)
-      this.stop();
-      const src = `${BASE}audio/ronki/${lineId}.mp3`;
+    const start = (id: string, nextFallback?: string) => {
+      const src = `${BASE}audio/ronki/${id}.mp3`;
       const audio = new Audio(src);
       audio.volume = 0.85;
-      // Duck for Ronki — separate reason from narrator so concurrent
+      // Duck for Ronki, a separate reason from narrator so concurrent
       // voicelines don't unduck prematurely.
       BackgroundMusic.duck('ronki');
-      const undock = () => BackgroundMusic.unduck('ronki');
+      let undocked = false;
+      const undock = () => {
+        if (undocked) return;
+        undocked = true;
+        BackgroundMusic.unduck('ronki');
+      };
       audio.addEventListener('ended', undock);
-      audio.addEventListener('error', undock);
-      audio.play().catch(() => {
-        // File doesn't exist or autoplay blocked — fail silently
+      audio.addEventListener('error', () => {
         undock();
+        // Retry once with the fallback file, only if this line is still
+        // the one playing (nothing stopped or replaced it meanwhile).
+        if (nextFallback && currentAudio === audio) {
+          currentAudio = null;
+          start(nextFallback);
+        }
       });
       currentAudio = audio;
+      audio.play().catch(() => {
+        // File doesn't exist or autoplay blocked: fail silently
+        undock();
+      });
+    };
+
+    const doPlay = () => {
+      // Never start a line in a hidden tab (LOOP-3-R2).
+      if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
+      // Stop any currently playing line (don't overlap)
+      this.stop();
+      start(lineId, fallbackId);
     };
 
     if (delayMs > 0) {
@@ -174,6 +205,10 @@ const VoiceAudio = {
 
   /** Stop current playback */
   stop() {
+    // A queued line (the delay of play/playLocalized) is dropped too, so
+    // closing a sheet or hiding the tab never lets it start afterwards
+    // (Astra round 2, LOOP-3-R2; verifier O-V1).
+    if (delayTimer) { clearTimeout(delayTimer); delayTimer = null; }
     if (currentAudio) {
       currentAudio.pause();
       currentAudio.currentTime = 0;
@@ -217,5 +252,14 @@ const VoiceAudio = {
     if (muted) this.stop();
   },
 };
+
+// A hidden tab stops speaking and drops a queued line (LOOP-3-R2).
+if (typeof document !== 'undefined') {
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+      try { VoiceAudio.stop(); } catch { /* never breaks the app */ }
+    }
+  });
+}
 
 export default VoiceAudio;

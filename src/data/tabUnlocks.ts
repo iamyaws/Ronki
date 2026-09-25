@@ -1,15 +1,18 @@
 import type { TaskState } from '../types';
 
 /**
- * Tab unlock criteria — drives the grey-locked NavBar pattern.
+ * Tab unlock criteria: drives the grey-locked NavBar pattern.
  *
  * Design (Apr 2026, Hector + Louis feedback):
- *   - Hub + Quests are always unlocked (the core loop — home + tasks).
+ *   - Hub + Quests are always unlocked (the core loop: home + tasks).
+ *   - Finch pass (26 Sep 2026): Ronki is always unlocked too. Tagebuch
+ *     and Laden only show with the parent Extras toggle, and without
+ *     FEATURES.tabUnlocks no lock hint is ever shown.
  *   - Other tabs start locked and unlock on MEANINGFUL criteria so each
  *     unlock feels earned, not like an arbitrary task counter.
  *   - Locked tabs render dimmed with a padlock; tapping shows a hint
  *     sheet with the exact unlock requirement and current progress.
- *   - When a tab transitions locked → unlocked, a toast + (optional)
+ *   - When a tab transitions locked to unlocked, a toast + (optional)
  *     voiceline fires once (tracked via `tabUnlocksSeen` on state).
  *   - First tap on a newly-unlocked tab shows a one-sentence coachmark
  *     so kids understand what the tab is FOR (tracked via
@@ -23,7 +26,7 @@ export interface TabUnlock {
   isUnlocked: (state: TaskState) => boolean;
   /** i18n key for the locked-state hint sheet. */
   hintKey: string;
-  /** Optional vars passed to t() for the hint — lets us show progress
+  /** Optional vars passed to t() for the hint; lets us show progress
    *  like "You have 28 of 50 stars." */
   hintVars?: (state: TaskState) => Record<string, string | number>;
   /** i18n key for the unlock toast ("Tagebuch freigeschaltet"). */
@@ -35,7 +38,10 @@ export interface TabUnlock {
 export const TAB_UNLOCKS: TabUnlock[] = [
   {
     tabId: 'ronki',
-    isUnlocked: (s) => (s.totalTasksDone || 0) >= 1,
+    // Finch pass (26 Sep 2026): Ronki's page (the passport) is open from
+    // day 1. Nothing to earn; the entry stays so the hint and toast keys
+    // resolve if FEATURES.tabUnlocks is ever switched back on.
+    isUnlocked: () => true,
     hintKey: 'nav.lock.ronki',
     toastKey: 'nav.unlock.ronki',
     coachmarkKey: 'nav.coach.ronki',
@@ -69,9 +75,9 @@ export function getTabUnlock(tabId: string): TabUnlock | undefined {
 }
 
 /** Returns true when a tab is unlocked for the given state (or has no
- *  unlock criteria at all — Hub + Quests fall through here as unlocked). */
+ *  unlock criteria at all; Hub + Quests fall through here as unlocked). */
 export function isTabUnlocked(tabId: string, state: TaskState | null): boolean {
-  if (!state) return true; // defensive — never hide nav during boot
+  if (!state) return true; // defensive: never hide nav during boot
   const u = getTabUnlock(tabId);
   if (!u) return true;
   return u.isUnlocked(state);
