@@ -13,7 +13,8 @@ import { StickerBurst, PaperCard, DoodleIcon, MotionTicks } from './bilderbuch';
  * the confetti canvas, paper cards with ink outlines, one cobalt pill.
  */
 
-// One cobalt pill per screen. CooldownButton keeps its ring and delay.
+// One cobalt pill per screen. CooldownButton guards it for about 1 s,
+// with no numbers and no ring (Marc, 25 Sep 2026).
 const PILL = 'w-full inline-flex items-center justify-center rounded-full bg-cobalt text-white font-headline font-bold text-xl min-h-[60px] px-8 bb-press bb-press--night';
 
 function Burst() {

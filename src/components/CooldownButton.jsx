@@ -65,8 +65,11 @@ export default function CooldownButton({ delay = GUARD_MAX_S, children, onClick,
       className={`relative ${ready ? 'active:scale-95' : 'cursor-default'} ${className}`}
       style={{
         ...style,
-        opacity: ready || waking ? 1 : 0.55,
-        transition: reduced || ready ? 'none' : `opacity ${guardMs}ms linear`,
+        // Reduced motion: stay dim until the tap really counts, then a plain
+        // switch. Once ready, no inline transition, so classes like
+        // .bb-press keep their own press transition (review workflow).
+        opacity: ready || (waking && !reduced) ? 1 : 0.55,
+        transition: ready ? undefined : reduced ? 'none' : `opacity ${guardMs}ms linear`,
       }}
     >
       <span className="flex items-center justify-center gap-2">

@@ -125,13 +125,14 @@ export default function RoomHub({ onNavigate }) {
   const openFeelings = () => {
     const el = moodRef.current;
     if (!el) return;
+    // Focus first (without scrolling), then scroll: a delayed focus would
+    // pull a keyboard user back to "Gut" after they already moved on
+    // (Astra delta review R1).
+    el.querySelector('button')?.focus?.({ preventScroll: true });
     el.scrollIntoView?.({ behavior: reduced ? 'auto' : 'smooth', block: 'center' });
     nudgeTimers.current.forEach(clearTimeout);
     setMoodNudge(true);
-    nudgeTimers.current = [
-      setTimeout(() => setMoodNudge(false), 1600),
-      setTimeout(() => el.querySelector('button')?.focus?.({ preventScroll: true }), reduced ? 0 : 450),
-    ];
+    nudgeTimers.current = [setTimeout(() => setMoodNudge(false), 1600)];
   };
 
   const variant = state?.companionVariant || 'forest';
@@ -258,6 +259,31 @@ export default function RoomHub({ onNavigate }) {
             Hallo {heroName}!
           </h1>
         </div>
+        {/* "Wie geht's dir?" sits beside the greeting, outside the picture:
+            always in the first view, never on Ronki or his bubble, on any
+            screen height (review workflow, 25 Sep 2026: inside the frame it
+            covered him on short phones). Its heart is not one of the answers. */}
+        {state?.moodAM === null && (
+          <button
+            type="button"
+            onClick={openFeelings}
+            aria-label="Wie geht's dir? Gefühl aussuchen"
+            className="bb-press shrink-0 flex items-center gap-2 font-headline font-semibold text-ink"
+            style={{
+              padding: '8px 14px 8px 10px',
+              marginBottom: 4,
+              borderRadius: 999,
+              border: '2.5px solid var(--color-ink)',
+              background: 'var(--color-paper)',
+              fontSize: 17,
+              lineHeight: 1.1,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            <DoodleIcon name="heart" size={22} filled style={{ color: 'var(--color-ember)' }} />
+            Wie geht's dir?
+          </button>
+        )}
       </header>
 
       {/* The room */}
@@ -372,32 +398,8 @@ export default function RoomHub({ onNavigate }) {
           {/* Ronki's line, anchored above his head. Tap to dismiss is
               wired inside the component. */}
           <RonkiSpeechBubble style={{ top: 'auto', bottom: bubbleBottom }} />
-
-          {state?.moodAM === null && (
-            <button
-              type="button"
-              onClick={openFeelings}
-              aria-label="Wie geht's dir? Gefühl aussuchen"
-              className="bb-press flex items-center gap-2 font-headline font-semibold text-ink"
-              style={{
-                position: 'absolute',
-                right: 12,
-                bottom: 12,
-                zIndex: 6,
-                padding: '8px 14px 8px 10px',
-                borderRadius: 999,
-                border: '2.5px solid var(--color-ink)',
-                background: 'var(--color-paper)',
-                fontSize: 17,
-                lineHeight: 1.1,
-                whiteSpace: 'nowrap',
-              }}
-            >
-              <FeelingDoodle idx={3} size={24} />
-              Wie geht's dir?
-            </button>
-          )}
         </div>
+
       </section>
 
       {/* Ronki asks how the day feels; picking a mood hides it for the day. */}
@@ -675,6 +677,7 @@ function RonkiMoodPrompt({ sectionRef, highlight = false, heroName, variant, sta
             key={m.idx}
             label={m.label}
             className="w-full"
+            style={{ minWidth: 0 }}
             onClick={() => onPick(m.idx)}
           >
             <FeelingDoodle idx={m.idx} size={44} />

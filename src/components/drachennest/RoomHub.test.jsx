@@ -57,6 +57,48 @@ describe('RoomHub: the feelings entry on the room', () => {
     expect(group.style.outline).toContain('transparent');
   });
 
+  it('puts the entry beside the greeting, outside the picture, so it can never cover Ronki', () => {
+    const { getByLabelText, container } = render(<RoomHub onNavigate={() => {}} />);
+    const entry = getByLabelText("Wie geht's dir? Gefühl aussuchen");
+    expect(container.querySelector('.bb-frame')).not.toBeNull();
+    expect(entry.closest('.bb-frame')).toBeNull();
+    expect(entry.closest('header')).not.toBeNull();
+    expect(entry.querySelector('svg')).not.toBeNull(); // the heart, not an answer's picture
+  });
+
+  it('scrolls the picker itself into view and focuses the first tile at once', () => {
+    const { getByLabelText } = render(<RoomHub onNavigate={() => {}} />);
+    const group = getByLabelText('Ronkis Frage beantworten');
+    fireEvent.click(getByLabelText("Wie geht's dir? Gefühl aussuchen"));
+    expect(scrollSpy.mock.contexts[0].contains(group)).toBe(true);
+    expect(document.activeElement.textContent).toContain('Gut');
+  });
+
+  it('never pulls focus back after the child moved on (Astra delta review R1)', () => {
+    const { getByLabelText } = render(<RoomHub onNavigate={() => {}} />);
+    fireEvent.click(getByLabelText("Wie geht's dir? Gefühl aussuchen"));
+    const tiles = getByLabelText('Ronkis Frage beantworten').querySelectorAll('button');
+    tiles[1].focus();
+    act(() => { vi.advanceTimersByTime(2000); });
+    expect(document.activeElement).toBe(tiles[1]);
+  });
+
+  it('a second tap restarts the ring, and unmounting during it is safe', () => {
+    const { getByLabelText, unmount } = render(<RoomHub onNavigate={() => {}} />);
+    const entry = getByLabelText("Wie geht's dir? Gefühl aussuchen");
+    const group = getByLabelText('Ronkis Frage beantworten');
+    fireEvent.click(entry);
+    act(() => { vi.advanceTimersByTime(1000); });
+    fireEvent.click(entry);
+    act(() => { vi.advanceTimersByTime(1000); });
+    expect(group.style.outline).toContain('var(--color-cobalt)');
+    act(() => { vi.advanceTimersByTime(700); });
+    expect(group.style.outline).toContain('transparent');
+    fireEvent.click(entry);
+    unmount();
+    expect(() => act(() => { vi.advanceTimersByTime(2000); })).not.toThrow();
+  });
+
   it('hides the entry once a feeling is picked for today', () => {
     mockState = { ...mockState, moodAM: 2 };
     const { queryByLabelText } = render(<RoomHub onNavigate={() => {}} />);
