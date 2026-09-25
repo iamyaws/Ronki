@@ -23,6 +23,7 @@ import useTripClock from './hooks/useTripClock';
 import { FEATURES, extrasOn } from './config/features';
 import BackgroundMusic from './utils/backgroundMusic';
 import { getActiveToken, ensureTokenForExistingProfile } from './lib/profileToken';
+import { stashLocalHatchForShareLink } from './lib/pendingHatch';
 import TeachFirePreview from './components/TeachFirePreview';
 import TeachRitualPreview from './components/TeachRitualPreview';
 // ParentOnboarding (5-step) replaced by CombinedParentSetup (1-step).
@@ -700,6 +701,12 @@ function AuthGate() {
     BackgroundMusic.init();
   }, []);
 
+  // Finch pass (SAVES-2): a share link opened on the tablet where the
+  // child already hatched Ronki keeps the hatch. The stash is written in
+  // the first render, before any effect (TaskProvider's load included)
+  // consumes the ?p= token; takePendingHatch applies it after the load.
+  React.useState(() => { stashLocalHatchForShareLink(); return null; });
+
   // QR-auth Phase 1 (Apr 27 2026): consume any ?p=<token> URL param
   // on first mount so subsequent boots have the token persisted to
   // localStorage. The full Supabase-keyed cloud-load by token is
@@ -720,15 +727,13 @@ function AuthGate() {
     );
   }
 
-  // Public routes — no auth required. ?compendium=1 renders the
-  // Ronki-Sammelbuch for website visitors and for showing Louis.
+  // Public routes, no auth required. ?compendium=1 renders the
+  // Ronki-Sammelbuch for website visitors and for showing Louis; it stays
+  // reachable in production (linked from the marketing site).
   // ?onboardingPreview=1 renders the onboarding flow for QA across
-  // viewports/browsers without needing an auth session.
-  //
-  // Both remain reachable in production — they're intentional public
-  // routes (Sammelbuch is linked from the marketing site; onboarding
-  // preview is how we smoke-test cross-device). Everything else that
-  // reads URL params is gated behind import.meta.env.DEV further down.
+  // viewports/browsers without needing an auth session. DEV builds only
+  // since the Finch pass (INTEGRATION-1): it runs on the real save and
+  // its loop resets onboarding and the routine of a real family.
   if (typeof window !== 'undefined') {
     const p = new URLSearchParams(window.location.search);
     if (p.get('compendium') === '1') {
@@ -746,8 +751,8 @@ function AuthGate() {
         </ToolErrorBoundary>
       );
     }
-    if (p.get('onboardingPreview') === '1') {
-      // Public QA route — runs the full lean chain end-to-end without
+    if (p.get('onboardingPreview') === '1' && import.meta.env.DEV) {
+      // QA route (DEV only): runs the full lean chain end-to-end without
       // an auth session. Wrapped in TaskProvider so MeetRonki and
       // TeachFireStep can patch state via useTask hooks. The chain
       // loops on completion (sets onboardingDone, then resets it
@@ -781,7 +786,7 @@ function AuthGate() {
     // (23 Apr 2026 rework). The new lean chain is reachable via
     // ?onboardingPreview=1 above. Old param redirects there for any
     // bookmarked preview links.
-    if (p.get('parentFirstPreview') === '1') {
+    if (p.get('parentFirstPreview') === '1' && import.meta.env.DEV) {
       const url = new URL(window.location.href);
       url.searchParams.delete('parentFirstPreview');
       url.searchParams.set('onboardingPreview', '1');

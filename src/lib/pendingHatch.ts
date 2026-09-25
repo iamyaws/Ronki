@@ -20,6 +20,8 @@
  * one child's picks never land in another child's card.
  */
 
+import { getLocalProfileOwner, readTokenFromUrl } from './profileToken';
+
 export const PENDING_HATCH_KEY = 'ronki_pending_hatch';
 
 /** A stash older than this is stale (the scan did not happen right away). */
@@ -120,4 +122,45 @@ export function takePendingHatch(
     return null;
   }
   return { kidIntroSeen: true, companionName: stash.companionName, companionVariant: stash.companionVariant };
+}
+
+/** localStorage mirror of the game save (src/utils/storage.ts LS_KEY). */
+const LOCAL_SAVE_KEY = 'hdx2_drachennest';
+
+/**
+ * The share link path (SAVES-2). A parent opens `?p=<token>` on the
+ * tablet where the child already hatched Ronki (kidIntroSeen and a name,
+ * no onboardingDone). The token is stored and the cloud row wins the
+ * load (the local hatch counts as pristine), so the named dragon would be
+ * gone. Call this before anything consumes the URL token (AuthGate, in
+ * its first render): it writes the same stash the scan path writes, and
+ * takePendingHatch applies it by the usual rules after the load.
+ *
+ * Nothing is written without a valid URL token, when the local save
+ * belongs to another card (a sibling's), or when the local Ronki has not
+ * hatched or is already onboarded. Returns true when it wrote the stash.
+ */
+export function stashLocalHatchForShareLink(): boolean {
+  try {
+    const urlToken = readTokenFromUrl();
+    if (!urlToken) return false;
+    const owner = getLocalProfileOwner();
+    if (owner && owner !== urlToken) return false;
+    const raw = localStorage.getItem(LOCAL_SAVE_KEY);
+    if (!raw) return false;
+    const local = JSON.parse(raw) as {
+      kidIntroSeen?: boolean;
+      onboardingDone?: boolean;
+      companionName?: unknown;
+      companionVariant?: unknown;
+    } | null;
+    if (!local || !local.kidIntroSeen || local.onboardingDone) return false;
+    const name = typeof local.companionName === 'string' ? local.companionName.trim() : '';
+    if (!name) return false;
+    const variant = typeof local.companionVariant === 'string' && local.companionVariant ? local.companionVariant : 'forest';
+    savePendingHatch({ companionName: name, companionVariant: variant, token: urlToken });
+    return true;
+  } catch {
+    return false;
+  }
 }
