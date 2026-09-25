@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import React from 'react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, fireEvent } from '@testing-library/react';
 
 // NavBar reads TaskContext and plays SFX, haptics and Ronki's nav voice;
@@ -62,6 +62,32 @@ describe('NavBar (Finch pass)', () => {
     expect(onNavigate).not.toHaveBeenCalled();
     expect(document.getElementById('nav-lock-hint-sheet')).toBeNull();
     expect(container.querySelector('[role="dialog"]')).toBeNull();
+  });
+
+  describe('?reveal=all (fix round 1, Astra FC-10)', () => {
+    afterEach(() => {
+      vi.unstubAllEnvs();
+      window.history.replaceState(null, '', '/');
+    });
+
+    const shopDisabled = () => {
+      mockState = { ...mockState, extrasEnabled: true, hp: 10 };
+      window.history.replaceState(null, '', '/?reveal=all');
+      const { container, unmount } = render(<NavBar active="hub" onNavigate={() => {}} />);
+      const value = container.querySelector('[data-tab-id="shop"]').getAttribute('aria-disabled');
+      unmount();
+      return value;
+    };
+
+    it('is ignored in a production build: locked tabs stay locked', () => {
+      vi.stubEnv('DEV', false);
+      expect(shopDisabled()).toBe('true');
+    });
+
+    it('still unlocks every tab in a DEV build', () => {
+      vi.stubEnv('DEV', true);
+      expect(shopDisabled()).toBe('false');
+    });
   });
 
   it('never shows the day strip tab while FEATURES.dayStrip is off', () => {
