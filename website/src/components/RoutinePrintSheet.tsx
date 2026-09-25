@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { trackEvent } from '../lib/analytics';
 import { PageMeta } from './PageMeta';
 
 /* ------------------------------------------------------------------ */
@@ -66,7 +67,11 @@ export function RoutinePrintSheet({
   metaDescription,
   children,
 }: Props) {
-  const handlePrint = () => window.print();
+  const handlePrint = () => {
+    // Counted apart from "Vorlage Download" (the PDF after the email form).
+    trackEvent('Vorlage Drucken', { vorlage: slug, weg: 'browser' });
+    window.print();
+  };
   const sheetHeading = pageTitle ? 'h2' : 'h1';
 
   return (
