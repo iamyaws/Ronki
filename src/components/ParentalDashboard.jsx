@@ -19,8 +19,30 @@ import {
   claimLocalProfile,
 } from '../lib/profileToken';
 import { useAnalytics } from '../hooks/useAnalytics';
+// Finch pass (26 Sep 2026): "Ronkis Tag" (routine, evening start,
+// Ferien, Extras). RoutinePicker is shared with the parent step and is
+// built in a parallel lane, so it is picked up through an eager glob:
+// the same static import once the file exists, and no build break while
+// it does not (the section then shows only Ferien and Extras).
+const ROUTINE_PICKER_MODULES = import.meta.glob('./onboarding/RoutinePicker.{jsx,tsx,js}', { eager: true });
+const RoutinePicker = Object.values(ROUTINE_PICKER_MODULES)[0]?.default || null;
+import { normalizeRoutine } from '../data/taskKinds';
+import { DEFAULT_EVENING_START } from '../loop/types';
+import { stonesToNext } from '../loop/growth';
 
 const PIN_CODE = '1234';
+
+/**
+ * The parent PIN lives in the save (state.parentPin, set in the parent
+ * step or on the website), the same value PinModal checks. Default 1234
+ * while parentPinIsDefault is not false. Never localStorage.ronki_pin
+ * (census 3.7: the old split let the dashboard and the gate disagree).
+ */
+export function pinMatches(state, entered) {
+  const expected = state?.parentPin || PIN_CODE;
+  const isDefault = state?.parentPinIsDefault !== false;
+  return entered === expected || (isDefault && entered === PIN_CODE);
+}
 const MOOD_EMOJIS = ['😢', '😕', '😐', '🙂', '😊', '🤩'];
 const MOOD_LABELS = ['Traurig', 'Besorgt', 'Okay', 'Gut', 'Toll', 'Müde'];
 const MOOD_COLORS = ['#ef4444', '#f97316', '#94a3b8', '#34d399', '#fcd34d', '#a78bfa'];
@@ -68,7 +90,7 @@ export default function ParentalDashboard({ onClose, currentView, preauthorized 
     }
   }, [tab]);
 
-  // Analytics: parent.dashboard.open — fire exactly once per mount. A
+  // Analytics: parent.dashboard.open, fire exactly once per mount. A
   // separate pass will wire toggle UI (analyticsEnabled, mood-history,
   // etc.) elsewhere in this component; we deliberately don't add any
   // UI here beyond this one useEffect.
@@ -84,7 +106,7 @@ export default function ParentalDashboard({ onClose, currentView, preauthorized 
       const next = pin + d;
       setPinError(false);
       if (next.length === 4) {
-        if (next === (localStorage.getItem('ronki_pin') || PIN_CODE)) {
+        if (pinMatches(state, next)) {
           setAuthed(true);
         } else {
           setPinError(true);
@@ -204,7 +226,7 @@ export default function ParentalDashboard({ onClose, currentView, preauthorized 
         </button>
       </header>
 
-      {/* Tab Bar — compact pills so all 4 fit on a 375px phone without
+      {/* Tab Bar, compact pills so all 4 fit on a 375px phone without
           horizontal scroll. Icon size, padding, gap and label size are all
           shrunk vs. the old tappable-but-clipped layout. Active tab also
           scrolls into view as a belt-and-braces fallback for narrower
@@ -264,10 +286,10 @@ function OverviewTab({ state, lang, t }) {
   const completedToday = (state.quests || []).filter(q => q.done && !q.sideQuest).length;
   const totalToday = (state.quests || []).filter(q => !q.sideQuest).length;
   const completionPct = totalToday > 0 ? Math.round((completedToday / totalToday) * 100) : 0;
-  // totalOrbs removed with the Wachstums-Orbs card — restore if orb feature ships
+  // totalOrbs removed with the Wachstums-Orbs card, restore if orb feature ships
 
   // ─── Build the curator summary: what will the child actually see today? ───
-  // Pulled from D3 (Kartenstapel) — parents are curators, not spectators. The
+  // Pulled from D3 (Kartenstapel), parents are curators, not spectators. The
   // dashboard's first job is to answer "what's queued for today" at a glance.
   const activeQuestLines = (state.parentQuestLines || []).filter(ql => !ql.completed && !ql.archived);
   const activeArcId = state.arcEngine?.activeArcId;
@@ -277,7 +299,7 @@ function OverviewTab({ state, lang, t }) {
   const poemActive = !!state.poemQuest && !state.poemQuest.completed;
 
   const items = [];
-  // Daily routine summary — always first, grounds everything else
+  // Daily routine summary, always first, grounds everything else
   items.push({
     icon: 'check_circle',
     title: `${totalToday} Aufgaben heute`,
@@ -285,7 +307,7 @@ function OverviewTab({ state, lang, t }) {
     color: '#059669',
     bg: 'rgba(5,150,105,0.08)',
   });
-  // Active parent-created quest-lines — Gedicht, Hausaufgaben etc.
+  // Active parent-created quest-lines, Gedicht, Hausaufgaben etc.
   activeQuestLines.forEach(ql => {
     const dayN = (ql.completedDayIds?.length || 0) + 1;
     items.push({
@@ -307,7 +329,7 @@ function OverviewTab({ state, lang, t }) {
       bg: 'rgba(5,150,105,0.08)',
     });
   }
-  // Active arc — the Freund adventure Louis is in the middle of
+  // Active arc, the Freund adventure Louis is in the middle of
   if (activeArcId) {
     items.push({
       icon: 'auto_stories',
@@ -349,6 +371,8 @@ function OverviewTab({ state, lang, t }) {
 
   return (
     <>
+      <RonkiStatusCard state={state} />
+
       {/* ─── Heute zeigen wir Louis ─── */}
       <div className="rounded-2xl p-5 mm-card" style={{
         background: 'linear-gradient(160deg, #fffbeb 0%, #fef3c7 60%, #fde68a 100%)',
@@ -385,7 +409,7 @@ function OverviewTab({ state, lang, t }) {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 gap-4">
-        {/* Completion Rate — Hero Card */}
+        {/* Completion Rate, Hero Card */}
         <div className="p-5 rounded-2xl relative overflow-hidden"
              style={{ background: 'linear-gradient(135deg, #124346, #2d5a5e)', boxShadow: '0 8px 24px rgba(18,67,70,0.25)' }}>
           <p className="font-label font-bold text-xs text-white/50 uppercase tracking-widest">Abschlussrate</p>
@@ -394,11 +418,11 @@ function OverviewTab({ state, lang, t }) {
         </div>
         {/* HP */}
         <StatCard label="Sterne" value={state.hp || 0} sub="Verfügbar" />
-        {/* Wachstums-Orbs removed — backlog item, not live yet. See
+        {/* Wachstums-Orbs removed, backlog item, not live yet. See
              backlog_evolution_orbs.md. Re-add when the orb sub-goals ship. */}
       </div>
 
-      {/* Mood — today + 7-day history */}
+      {/* Mood, today + 7-day history */}
       <div className="mm-card p-5">
         <div className="flex items-center justify-between">
           <SectionLabel icon="mood" text="Stimmung (7 Tage)" />
@@ -497,7 +521,7 @@ function OverviewTab({ state, lang, t }) {
           <div>
             <p className="font-label font-bold text-sm text-primary">Eltern-Guide</p>
             <p className="font-body text-xs text-on-surface-variant mt-1 leading-relaxed">
-              Ronki begleitet dein Kind durch den Tag — beim Aufstehen, bei den
+              Ronki begleitet dein Kind durch den Tag: beim Aufstehen, bei den
               Hausaufgaben, beim Schlafengehen. Keine Punktekonten, keine
               Bildschirmzeit-Tausche. Sterne sammeln sich für kleine echte
               Belohnungen, die ihr gemeinsam vereinbart.
@@ -513,25 +537,156 @@ function OverviewTab({ state, lang, t }) {
 // ═══════════════════════════════════════════════════════
 // FAMILY TAB
 // ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+// FINCH PASS (26 Sep 2026): Ronki status and "Ronkis Tag"
+// ═══════════════════════════════════════════════════════
+
+/** Where Ronki is right now, for the parent. */
+export function ronkiWhereLabel(expedition) {
+  const st = expedition?.state;
+  if (st === 'away') return 'unterwegs';
+  if (st === 'waiting') return 'zurück mit einem Schatz';
+  return 'zu Hause';
+}
+
+function RonkiStatusCard({ state }) {
+  const log = Array.isArray(state.expeditionLog) ? state.expeditionLog : [];
+  const adventures = Number.isFinite(state.adventureCount) ? state.adventureCount : log.length;
+  const nick = (state.companionName && String(state.companionName).trim()) || 'Ronki';
+  const stones = stonesToNext(state.catEvo, adventures);
+  return (
+    <div className="rounded-2xl p-5 bg-white" style={{ border: '2.5px solid var(--color-ink)' }} data-testid="ronki-status">
+      <h3 className="font-headline font-bold text-base text-ink mb-2">{nick}</h3>
+      <div className="flex flex-col gap-1 font-body text-ink" style={{ fontSize: 15 }}>
+        <p>Abenteuer: {adventures}</p>
+        <p>Gerade: {ronkiWhereLabel(state.expedition)}</p>
+        <p className="text-ink-soft">
+          {stones.top
+            ? 'Ronki ist ausgewachsen.'
+            : `Noch ${stones.left} Abenteuer bis zum nächsten Aussehen.`}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function SwitchRow({ label, line, on, onChange, testId }) {
+  return (
+    <div className="flex items-start gap-3">
+      <div className="flex-1 min-w-0">
+        <p className="font-headline font-semibold text-ink" style={{ fontSize: 16 }}>{label}</p>
+        <p className="font-body text-ink-soft" style={{ fontSize: 14, lineHeight: 1.4 }}>{line}</p>
+      </div>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={on ? 'true' : 'false'}
+        aria-label={label}
+        data-testid={testId}
+        onClick={() => onChange(!on)}
+        className="shrink-0 rounded-full transition-colors"
+        style={{
+          width: 56,
+          height: 32,
+          border: '2.5px solid var(--color-ink)',
+          background: on ? 'var(--color-cobalt)' : 'var(--color-paper)',
+          position: 'relative',
+          cursor: 'pointer',
+        }}
+      >
+        <span
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            top: 2,
+            left: on ? 26 : 2,
+            width: 23,
+            height: 23,
+            borderRadius: '50%',
+            background: '#ffffff',
+            border: '2px solid var(--color-ink)',
+            transition: 'left 0.15s',
+          }}
+        />
+      </button>
+    </div>
+  );
+}
+
+/**
+ * "Ronkis Tag": what the child does with Ronki in the morning and the
+ * evening, when the evening starts, the holiday list and the Extras.
+ * Every change is saved at once (no save button).
+ */
+export function RonkisTagSection({ state, actions, Picker = RoutinePicker }) {
+  const routine = normalizeRoutine(state.familyConfig?.routine);
+  const eveningStart = state.familyConfig?.eveningStart || DEFAULT_EVENING_START;
+  const vacation = state.vacMode === true;
+  const extras = state.extrasEnabled === true;
+
+  const handleRoutine = (next) => {
+    if (!next) return;
+    if (next.routine && JSON.stringify(next.routine) !== JSON.stringify(routine)) {
+      actions?.setRoutine?.(next.routine);
+    }
+    if (next.eveningStart && next.eveningStart !== eveningStart) {
+      actions?.setEveningStart?.(next.eveningStart);
+    }
+  };
+
+  return (
+    <section className="rounded-2xl p-5 bg-white flex flex-col gap-5" style={{ border: '2.5px solid var(--color-ink)' }} data-testid="ronkis-tag" aria-label="Ronkis Tag">
+      <div>
+        <h3 className="font-headline font-bold text-ink" style={{ fontSize: 18 }}>Ronkis Tag</h3>
+        <p className="font-body text-ink-soft" style={{ fontSize: 14, lineHeight: 1.4 }}>
+          Jede Aufgabe macht Ronkis Feuer wärmer. Weniger ist am Anfang mehr.
+        </p>
+      </div>
+      {Picker && <Picker routine={routine} eveningStart={eveningStart} onChange={handleRoutine} vacation={vacation} />}
+      <SwitchRow
+        label="Ferien"
+        line="Ab morgen kommen die Ferien-Aufgaben."
+        on={vacation}
+        onChange={(v) => actions?.patchState?.({ vacMode: v })}
+        testId="switch-ferien"
+      />
+      <SwitchRow
+        label="Extras zeigen"
+        line="Bringt Tagebuch, Laden und Spielzeug zurück."
+        on={extras}
+        onChange={(v) => actions?.setExtras?.(v)}
+        testId="switch-extras"
+      />
+    </section>
+  );
+}
+
 function FamilyTab({ state, actions, lang }) {
   const DAY_LABELS = lang === 'en' ? DAY_LABELS_EN : DAY_LABELS_DE;
   // Merge with DEFAULT so partial/legacy configs (e.g. from older state where only
   // childName + parentMessage were saved) don't crash on `.siblings.length` etc.
   // The reducer should also guarantee this, but defence-in-depth keeps the
   // dashboard from throwing if anyone writes a partial config in the future.
-  const rawConfig = state.familyConfig || {};
-  const config = {
-    ...DEFAULT_FAMILY_CONFIG,
-    ...rawConfig,
-    siblings: Array.isArray(rawConfig.siblings) ? rawConfig.siblings : DEFAULT_FAMILY_CONFIG.siblings,
-    dailyHabits: Array.isArray(rawConfig.dailyHabits) ? rawConfig.dailyHabits : DEFAULT_FAMILY_CONFIG.dailyHabits,
-    recurringActivities: Array.isArray(rawConfig.recurringActivities) ? rawConfig.recurringActivities : DEFAULT_FAMILY_CONFIG.recurringActivities,
-    parentMessage: (rawConfig.parentMessage && typeof rawConfig.parentMessage === 'object')
-      ? { ...DEFAULT_FAMILY_CONFIG.parentMessage, ...rawConfig.parentMessage }
-      : DEFAULT_FAMILY_CONFIG.parentMessage,
-    familyMotto: typeof rawConfig.familyMotto === 'string' ? rawConfig.familyMotto : DEFAULT_FAMILY_CONFIG.familyMotto,
-    affirmation: typeof rawConfig.affirmation === 'string' ? rawConfig.affirmation : DEFAULT_FAMILY_CONFIG.affirmation,
-  };
+  // Memoised on the saved config: a fresh object on every render made the
+  // reset effect below run after every render and loop forever (Finch
+  // pass fix, 26 Sep 2026; it froze the Familie tab in tests and spun
+  // the CPU in the app).
+  const savedConfig = state.familyConfig;
+  const config = React.useMemo(() => {
+    const rawConfig = savedConfig || {};
+    return {
+      ...DEFAULT_FAMILY_CONFIG,
+      ...rawConfig,
+      siblings: Array.isArray(rawConfig.siblings) ? rawConfig.siblings : DEFAULT_FAMILY_CONFIG.siblings,
+      dailyHabits: Array.isArray(rawConfig.dailyHabits) ? rawConfig.dailyHabits : DEFAULT_FAMILY_CONFIG.dailyHabits,
+      recurringActivities: Array.isArray(rawConfig.recurringActivities) ? rawConfig.recurringActivities : DEFAULT_FAMILY_CONFIG.recurringActivities,
+      parentMessage: (rawConfig.parentMessage && typeof rawConfig.parentMessage === 'object')
+        ? { ...DEFAULT_FAMILY_CONFIG.parentMessage, ...rawConfig.parentMessage }
+        : DEFAULT_FAMILY_CONFIG.parentMessage,
+      familyMotto: typeof rawConfig.familyMotto === 'string' ? rawConfig.familyMotto : DEFAULT_FAMILY_CONFIG.familyMotto,
+      affirmation: typeof rawConfig.affirmation === 'string' ? rawConfig.affirmation : DEFAULT_FAMILY_CONFIG.affirmation,
+    };
+  }, [savedConfig]);
   const [draft, setDraft] = useState(() => JSON.parse(JSON.stringify(config)));
   const [saved, setSaved] = useState(false);
   const [expandedSection, setExpandedSection] = useState(null);
@@ -553,7 +708,13 @@ function FamilyTab({ state, actions, lang }) {
   };
 
   const handleSave = () => {
-    actions.updateFamilyConfig(draft);
+    // Routine and evening start are saved by "Ronkis Tag" right away;
+    // this draft may be older, so the live values win.
+    const live = state.familyConfig || {};
+    const next = { ...draft };
+    if (live.routine !== undefined) next.routine = live.routine;
+    if (live.eveningStart !== undefined) next.eveningStart = live.eveningStart;
+    actions.updateFamilyConfig(next);
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
   };
@@ -562,6 +723,8 @@ function FamilyTab({ state, actions, lang }) {
 
   return (
     <>
+      <RonkisTagSection state={state} actions={actions} />
+
       {/* Child Profile */}
       <SectionCard icon="face" title="Kind" subtitle={draft.childName || 'Name eingeben'}
         expanded={expandedSection === 'child'} onToggle={() => toggle('child')} tint="#124346">
@@ -744,10 +907,10 @@ function FamilyTab({ state, actions, lang }) {
 
       {/* Parent Message */}
       <SectionCard icon="mail" title="Eltern-Nachricht"
-        subtitle={draft.parentMessage.enabled ? draft.parentMessage.title : 'Aus — wird nicht angezeigt'}
+        subtitle={draft.parentMessage.enabled ? draft.parentMessage.title : 'Aus, wird nicht angezeigt'}
         expanded={expandedSection === 'message'} onToggle={() => toggle('message')} tint="#735c00">
         <div className="space-y-4">
-          {/* Enable toggle — default off so Hub stays quiet until a parent opts in */}
+          {/* Enable toggle, default off so Hub stays quiet until a parent opts in */}
           <label className="flex items-start gap-3 p-4 rounded-2xl cursor-pointer active:scale-[0.99] transition-all"
                  style={{
                    background: draft.parentMessage.enabled ? 'rgba(252,211,77,0.14)' : 'rgba(0,0,0,0.03)',
@@ -761,7 +924,7 @@ function FamilyTab({ state, actions, lang }) {
             <div className="flex-1">
               <p className="font-label font-bold text-sm text-on-surface">Nachricht auf dem Hub zeigen</p>
               <p className="font-body text-xs text-on-surface-variant leading-relaxed mt-0.5">
-                Standardmäßig aus. Nur aktivieren, wenn du wirklich etwas sagen willst — sonst bleibt der Hub ruhig.
+                Standardmäßig aus. Nur aktivieren, wenn du wirklich etwas sagen willst, sonst bleibt der Hub ruhig.
               </p>
             </div>
           </label>
@@ -795,7 +958,7 @@ function FamilyTab({ state, actions, lang }) {
         </div>
       </SectionCard>
 
-      {/* Save Button — Golden CTA */}
+      {/* Save Button, Golden CTA */}
       <button onClick={handleSave}
         className="w-full py-4 rounded-full font-headline font-bold text-base flex items-center justify-center gap-3 active:scale-95 transition-all duration-200"
         style={{
@@ -1019,7 +1182,6 @@ function SettingsTab({ lang, setLang, t, actions, state, onOpenFeedback }) {
   const [resetDone, setResetDone] = useState(false);
   const [staminaFed, setStaminaFed] = useState(false);
   const stamina = useRonkiStamina();
-  const storedPin = () => localStorage.getItem('ronki_pin') || PIN_CODE;
 
   const handleFeedRonki = () => {
     actions?.restoreStamina?.();
@@ -1031,9 +1193,9 @@ function SettingsTab({ lang, setLang, t, actions, state, onOpenFeedback }) {
     const next = pinInput + d;
     setPinMsg(null);
     if (next.length < 4) { setPinInput(next); return; }
-    // 4th digit — evaluate
+    // 4th digit, evaluate
     if (pinPhase === 'current') {
-      if (next === storedPin()) {
+      if (pinMatches(state, next)) {
         setPinPhase('new'); setPinInput('');
       } else {
         setPinMsg({ ok: false, text: 'Falscher PIN' }); setPinInput('');
@@ -1042,7 +1204,8 @@ function SettingsTab({ lang, setLang, t, actions, state, onOpenFeedback }) {
       setNewPin(next); setPinPhase('confirm'); setPinInput('');
     } else if (pinPhase === 'confirm') {
       if (next === newPin) {
-        localStorage.setItem('ronki_pin', next);
+        // Written into the save, so the PIN gate (PinModal) uses it too.
+        actions?.patchState?.({ parentPin: next, parentPinIsDefault: false });
         setPinMsg({ ok: true, text: 'PIN geändert!' });
         setPinPhase(null); setPinInput(''); setNewPin('');
       } else {
@@ -1104,13 +1267,13 @@ function SettingsTab({ lang, setLang, t, actions, state, onOpenFeedback }) {
     const url = buildShareUrl(profileToken);
     try {
       if (navigator.share) {
-        await navigator.share({ title: 'Ronki — euer Profil', url });
+        await navigator.share({ title: 'Ronki: euer Profil', url });
         return;
       }
       await navigator.clipboard.writeText(url);
       setShareCopied(true);
       setTimeout(() => setShareCopied(false), 2400);
-    } catch { /* user cancelled / clipboard blocked — silent */ }
+    } catch { /* user cancelled / clipboard blocked, silent */ }
   };
   const handleResetToken = () => {
     if (!confirm('Neues Profil anlegen? Der alte QR-Code funktioniert dann nicht mehr.')) return;
@@ -1137,7 +1300,7 @@ function SettingsTab({ lang, setLang, t, actions, state, onOpenFeedback }) {
         margin: 2,
         width: 168,
         color: { dark: '#0c4a6e', light: '#ffffff' },
-      }).catch(() => { /* canvas not ready yet — next render handles it */ });
+      }).catch(() => { /* canvas not ready yet, next render handles it */ });
     }
     // Print-only canvas (large, dark navy on white for print contrast)
     if (qrPrintCanvasRef.current) {
@@ -1146,7 +1309,7 @@ function SettingsTab({ lang, setLang, t, actions, state, onOpenFeedback }) {
         margin: 2,
         width: 360,
         color: { dark: '#000000', light: '#ffffff' },
-      }).catch(() => { /* same — silent */ });
+      }).catch(() => { /* same, silent */ });
     }
   }, [profileToken]);
   const handlePrintQR = () => {
@@ -1154,12 +1317,12 @@ function SettingsTab({ lang, setLang, t, actions, state, onOpenFeedback }) {
     // hides everything except #qr-print-card. The kid + parent end up
     // with an A6-friendly card with the QR + 8-char code that can be
     // taped inside a wallet, fridge, school binder.
-    try { window.print(); } catch { /* unsupported — silent */ }
+    try { window.print(); } catch { /* unsupported, silent */ }
   };
   // ── Background music toggle ──
   // Off by default. When on, a soft cave-ambient pad plays under the
   // app and ducks during voicelines. Currently driven by an in-code
-  // synthesizer placeholder until Marc picks a real mp3 — see
+  // synthesizer placeholder until Marc picks a real mp3, see
   // docs/voice/voice-music-engine.md.
   const [musicOn, setMusicOnState] = useState(BackgroundMusic.isEnabled());
   const toggleMusic = (next) => {
@@ -1167,7 +1330,7 @@ function SettingsTab({ lang, setLang, t, actions, state, onOpenFeedback }) {
     setMusicOnState(next);
   };
 
-  // ── Haptics (three-state: off / gentle / normal) — 'gentle' is the
+  // ── Haptics (three-state: off / gentle / normal), 'gentle' is the
   //    default for age 6 (halved pulse durations, widened pauses).
   //    Research backbone in memory/Onboarding cross-browser churn audit. ──
   const hapticsEnabled = state?.hapticsEnabled !== false;
@@ -1182,7 +1345,7 @@ function SettingsTab({ lang, setLang, t, actions, state, onOpenFeedback }) {
     actions?.patchState?.({ analyticsEnabled: next });
   };
 
-  // ── RPG-Modus (dormant feature for older-cohort expansion) — default
+  // ── RPG-Modus (dormant feature for older-cohort expansion), default
   //    off. When enabled, surfaces the boss mechanic with HP rewards
   //    and combat UI for a different, more RPG-flavored experience
   //    under the same Ronki umbrella. Parent-opt-in, off by default. ──
@@ -1191,7 +1354,7 @@ function SettingsTab({ lang, setLang, t, actions, state, onOpenFeedback }) {
     actions?.patchState?.({ rpgModeEnabled: next });
   };
 
-  // ── Default-PIN warning banner — surfaces until parent customizes ──
+  // ── Default-PIN warning banner, surfaces until parent customizes ──
   const showDefaultPinBanner = state?.parentPinIsDefault !== false;
 
   // ── Minigame access mode (22 Apr 2026 playtest rework) ──
@@ -1231,7 +1394,7 @@ function SettingsTab({ lang, setLang, t, actions, state, onOpenFeedback }) {
   // ── Zeig-Moment toggle + counter reset ──
   // Default is OFF now (Marc Apr 2026: "rather annoying" out-of-the-box).
   // Parents opt IN and pick which ONE grown-up vouches. Single-vouch
-  // keeps the moment simple — Louis shows ONE parent, not both.
+  // keeps the moment simple, Louis shows ONE parent, not both.
   const zmEnabled = state?.familyConfig?.zeigMomentEnabled === true;
   const zmParent = state?.familyConfig?.zeigMomentParent === 'papa' ? 'papa' : 'mama';
   const zmCounts = state?.zeigMomentCounts || {};
@@ -1252,7 +1415,7 @@ function SettingsTab({ lang, setLang, t, actions, state, onOpenFeedback }) {
 
   return (
     <>
-      {/* Default-PIN warning banner — shows until parent customizes.
+      {/* Default-PIN warning banner, shows until parent customizes.
            Yellow accent, low-intensity "nudge" tone; parent can ignore
            and keep 1234 but it doesn't fade until they act. */}
       {showDefaultPinBanner && (
@@ -1281,7 +1444,7 @@ function SettingsTab({ lang, setLang, t, actions, state, onOpenFeedback }) {
       )}
 
       {/* Funkelzeit settings + Verlauf removed in cut #6 (25 Apr 2026
-          northstar — Funkelzeit feature deleted entirely). */}
+          northstar, Funkelzeit feature deleted entirely). */}
 
       {/* Zähneputzen-Modus */}
       <div className="rounded-2xl p-5"
@@ -1337,7 +1500,7 @@ function SettingsTab({ lang, setLang, t, actions, state, onOpenFeedback }) {
           <p className="font-label font-bold text-sm text-on-surface">Zeig-Moment</p>
         </div>
         <p className="font-body text-xs text-on-surface-variant mb-4 leading-relaxed">
-          Nach jeder Routine erinnert Ronki {state.familyConfig?.childName || 'dein Kind'} daran, <strong>einer</strong> Bezugsperson zu zeigen, was er geschafft hat. Nach 14 Mal pro Block verblasst die Erinnerung. Standardmäßig aus — viele Familien finden's am Anfang zu viel.
+          Nach jeder Routine erinnert Ronki {state.familyConfig?.childName || 'dein Kind'} daran, <strong>einer</strong> Bezugsperson zu zeigen, was er geschafft hat. Nach 14 Mal pro Block verblasst die Erinnerung. Standardmäßig aus. Viele Familien finden's am Anfang zu viel.
         </p>
         <div className="flex items-center justify-between mb-4 p-4 rounded-2xl"
              style={{ background: 'rgba(252,211,77,0.06)', border: '1px solid rgba(161,98,7,0.15)' }}>
@@ -1361,7 +1524,7 @@ function SettingsTab({ lang, setLang, t, actions, state, onOpenFeedback }) {
           </button>
         </div>
 
-        {/* Single-parent vouch picker — only shown when Zeig-Moment is ON.
+        {/* Single-parent vouch picker, only shown when Zeig-Moment is ON.
             Kept intentionally simple: radio between Mama and Papa. Only
             one vouches per cheer moment, never both. */}
         {zmEnabled && (
@@ -1399,7 +1562,7 @@ function SettingsTab({ lang, setLang, t, actions, state, onOpenFeedback }) {
               })}
             </div>
             <p className="font-label text-xs text-on-surface-variant mt-2 leading-relaxed">
-              Nur <strong>eine</strong> Bezugsperson bestätigt pro Cheer-Moment — nicht beide.
+              Nur <strong>eine</strong> Bezugsperson bestätigt pro Cheer-Moment, nicht beide.
             </p>
           </div>
         )}
@@ -1413,7 +1576,7 @@ function SettingsTab({ lang, setLang, t, actions, state, onOpenFeedback }) {
         </button>
       </div>
 
-      {/* Minispiele — access mode + stamina cap + optional time window */}
+      {/* Minispiele, access mode + stamina cap + optional time window */}
       <div className="rounded-2xl p-5"
            style={{ background: '#ffffff', border: '1.5px solid rgba(0,0,0,0.08)', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
         <div className="flex items-center gap-3 mb-2">
@@ -1455,7 +1618,7 @@ function SettingsTab({ lang, setLang, t, actions, state, onOpenFeedback }) {
           })}
         </div>
 
-        {/* Time-window picker — only visible in zeitfenster mode */}
+        {/* Time-window picker, only visible in zeitfenster mode */}
         {minigameMode === 'zeitfenster' && (
           <div className="mb-4 p-4 rounded-2xl" style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(180,83,9,0.18)' }}>
             <p className="font-label text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-3">
@@ -1492,7 +1655,7 @@ function SettingsTab({ lang, setLang, t, actions, state, onOpenFeedback }) {
           </div>
         )}
 
-        {/* Stamina cap — hidden in 'frei' because stamina is disabled there */}
+        {/* Stamina cap, hidden in 'frei' because stamina is disabled there */}
         {minigameMode !== 'frei' && (
           <div>
             <p className="font-label text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-3">
@@ -1524,7 +1687,7 @@ function SettingsTab({ lang, setLang, t, actions, state, onOpenFeedback }) {
         )}
       </div>
 
-      {/* Haptik — three-state (Aus / Sanft / Normal). Default Sanft for
+      {/* Haptik, three-state (Aus / Sanft / Normal). Default Sanft for
            age 6 per research. Sanft = halved pulses, widened pauses so
            the kid feels confirmation without startle. Normal = full
            Apple-style transients (10-30ms). Aus = completely silent. */}
@@ -1565,7 +1728,7 @@ function SettingsTab({ lang, setLang, t, actions, state, onOpenFeedback }) {
         </div>
       </div>
 
-      {/* RPG-Modus — parent-opt-in for older kids. When off (default),
+      {/* RPG-Modus, parent-opt-in for older kids. When off (default),
            Ronki runs the calm routine+care loop. When on, surfaces the
            dormant boss mechanic with HP rewards for a more challenge-
            flavored experience. Positioned as "for older kids" so parents
@@ -1609,9 +1772,9 @@ function SettingsTab({ lang, setLang, t, actions, state, onOpenFeedback }) {
         </div>
       </div>
 
-      {/* Analytics — opt-out of anonymous usage telemetry. Default ON
+      {/* Analytics, opt-out of anonymous usage telemetry. Default ON
            with first-run disclosure in Track A. No content ever leaves
-           the device (event names + enum props only — hard allowlist
+           the device (event names + enum props only, hard allowlist
            in src/lib/analytics.ts). */}
       <div className="rounded-2xl p-5"
            style={{ background: '#ffffff', border: '1.5px solid rgba(0,0,0,0.08)', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
@@ -1648,7 +1811,7 @@ function SettingsTab({ lang, setLang, t, actions, state, onOpenFeedback }) {
         </div>
       </div>
 
-      {/* Stimmen — Ronki + Drachenmutter audio toggles. Both default to ON
+      {/* Stimmen, Ronki + Drachenmutter audio toggles. Both default to ON
           since the 2026-04-27 voice ship (Harry as Ronki, Charlotte as
           Drachenmutter). Parent can mute either independently. */}
       <div className="rounded-2xl p-5"
@@ -1663,7 +1826,7 @@ function SettingsTab({ lang, setLang, t, actions, state, onOpenFeedback }) {
           <p className="font-label font-bold text-sm text-on-surface">Stimmen</p>
         </div>
         <p className="font-body text-xs text-on-surface-variant mb-4 leading-relaxed">
-          Ronki spricht selten und kurz — beim Kennenlernen, bei Abenteuern, vor dem Schlafen.
+          Ronki spricht selten und kurz: beim Kennenlernen, bei Abenteuern, vor dem Schlafen.
         </p>
 
         {/* Ronki toggle */}
@@ -1672,7 +1835,7 @@ function SettingsTab({ lang, setLang, t, actions, state, onOpenFeedback }) {
           <div className="flex-1">
             <p className="font-label font-bold text-sm text-on-surface">Ronki</p>
             <p className="font-label text-xs text-on-surface-variant mt-0.5">
-              {voiceMuted ? 'Stumm' : 'An — Kommentare zu Stimmung, Wetter, Aufgaben.'}
+              {voiceMuted ? 'Stumm' : 'An: Kommentare zu Stimmung, Wetter, Aufgaben.'}
             </p>
           </div>
           <button
@@ -1689,10 +1852,10 @@ function SettingsTab({ lang, setLang, t, actions, state, onOpenFeedback }) {
           </button>
         </div>
 
-        {/* Drachenmutter toggle removed Apr 27 — Ronki is the only
+        {/* Drachenmutter toggle removed Apr 27, Ronki is the only
             voice now. */}
 
-        {/* Hintergrundmusik toggle — soft cave-ambient pad. Currently
+        {/* Hintergrundmusik toggle, soft cave-ambient pad. Currently
             an in-code synth placeholder; swaps to a real mp3 once Marc
             picks one (see docs/voice/voice-music-engine.md). Ducks during
             any voiceline. */}
@@ -1701,7 +1864,7 @@ function SettingsTab({ lang, setLang, t, actions, state, onOpenFeedback }) {
           <div className="flex-1">
             <p className="font-label font-bold text-sm text-on-surface">Hintergrundmusik</p>
             <p className="font-label text-xs text-on-surface-variant mt-0.5">
-              {musicOn ? 'An — leise unter der App, leiser bei Stimmen.' : 'Aus'}
+              {musicOn ? 'An: leise unter der App, leiser bei Stimmen.' : 'Aus'}
             </p>
           </div>
           <button
@@ -1742,7 +1905,7 @@ function SettingsTab({ lang, setLang, t, actions, state, onOpenFeedback }) {
         </div>
       </div>
 
-      {/* Profil & Geräte — QR auth Phase 2 (QR canvas + share + print) */}
+      {/* Profil & Geräte, QR auth Phase 2 (QR canvas + share + print) */}
       {profileToken && (
         <div className="rounded-2xl p-5"
              style={{ background: '#ffffff', border: '1.5px solid rgba(0,0,0,0.08)', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
@@ -1754,10 +1917,10 @@ function SettingsTab({ lang, setLang, t, actions, state, onOpenFeedback }) {
             <p className="font-label font-bold text-sm text-on-surface">Profil &amp; Geräte</p>
           </div>
           <p className="font-body text-xs text-on-surface-variant mb-4 leading-relaxed">
-            Auf neuem Gerät? Scannt den QR-Code, druckt ihn als Karte aus oder teilt den Link — Ronki begrüßt euch dort wieder mit denselben Sternen.
+            Auf neuem Gerät? Scannt den QR-Code, druckt ihn als Karte aus oder teilt den Link. Ronki begrüßt euch dort wieder mit denselben Sternen.
           </p>
 
-          {/* QR canvas — primary affordance */}
+          {/* QR canvas, primary affordance */}
           <div className="flex flex-col items-center p-4 rounded-2xl mb-3"
                style={{ background: 'rgba(14,165,233,0.04)', border: '1px solid rgba(14,165,233,0.18)' }}>
             <canvas
@@ -1821,7 +1984,7 @@ function SettingsTab({ lang, setLang, t, actions, state, onOpenFeedback }) {
         </div>
       )}
 
-      {/* Print-only QR card — PORTALED TO body so it sits as a direct
+      {/* Print-only QR card, PORTALED TO body so it sits as a direct
           child of <body> for the print stylesheet's
           `body > *:not(#qr-print-card) { display: none }` selector to
           isolate just this card on the printed page. Without the
@@ -1926,7 +2089,7 @@ function SettingsTab({ lang, setLang, t, actions, state, onOpenFeedback }) {
           <p className="font-label font-bold text-sm text-on-surface">Feedback an Marc</p>
         </div>
         <p className="font-body text-xs text-on-surface-variant mb-4 leading-relaxed">
-          Bug, Idee oder was komisch war? Schreib's auf — kommt direkt zu mir.
+          Bug, Idee oder was komisch war? Schreib's auf, es kommt direkt zu mir.
         </p>
         <button onClick={onOpenFeedback}
           className="w-full py-3 rounded-xl font-label font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
@@ -1936,7 +2099,7 @@ function SettingsTab({ lang, setLang, t, actions, state, onOpenFeedback }) {
         </button>
       </div>
 
-      {/* Ronki füttern — restores stamina manually (only shown when < 5) */}
+      {/* Ronki füttern, restores stamina manually (only shown when < 5) */}
       {stamina.current < stamina.max && (
         <div className="rounded-2xl p-5"
              style={{ background: '#ffffff', border: '1.5px solid rgba(0,0,0,0.08)', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
@@ -2041,5 +2204,5 @@ function formatLogDate(ts) {
   return `${day}. ${month} ${hh}:${mm}`;
 }
 
-// FunkelzeitVerlaufCard deleted in cut #6 (25 Apr 2026 — Funkelzeit
+// FunkelzeitVerlaufCard deleted in cut #6 (25 Apr 2026, Funkelzeit
 // removal). The dashboard no longer renders this section.

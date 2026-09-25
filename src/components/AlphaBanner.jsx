@@ -2,23 +2,25 @@ import React, { useEffect, useRef } from 'react';
 import { useTranslation } from '../i18n/LanguageContext';
 
 /**
- * AlphaBanner — small persistent strip at the top of the app that sets
+ * AlphaBanner: small persistent strip at the top of the app that sets
  * expectations for early testers. Parent-focused message; kids ignore it.
- * Includes a feedback mailto link + a DE/EN language toggle (Apr 2026 —
- * Hector feedback: no visible way out of browser-detected English).
+ *
+ * Finch pass (26 Sep 2026): the kid-tappable "DE > EN" switch and the
+ * "Rückmeldung" mail link are gone from here. Both live in the parent
+ * dashboard (Einstellungen: Sprache, Feedback an Marc), behind the PIN.
+ * Only the Alpha label stays.
  *
  * Publishes its own rendered height to the CSS variable `--alpha-banner-h`
  * on the document root so downstream fixed headers (TopBar, Hub's internal
- * header) can offset by exactly the banner's height — including the iOS
+ * header) can offset by exactly the banner's height, including the iOS
  * safe-area-inset-top which the banner absorbs. Without this, `fixed top-0`
  * headers render ON TOP of the sticky banner at scroll=0 and clip avatars.
  *
- * Look (Bilderbuch, 25 Sep 2026): night blue strip, white print, a sun
- * dot and a sun feedback link. Sun on night is a dark ground, so it may
- * carry text here.
+ * Look (Bilderbuch, 25 Sep 2026): night blue strip, white print and a
+ * sun dot.
  */
 export default function AlphaBanner() {
-  const { t, lang, setLang } = useTranslation();
+  const { t } = useTranslation();
   const ref = useRef(null);
   useEffect(() => {
     const node = ref.current;
@@ -49,22 +51,6 @@ export default function AlphaBanner() {
         <span className="font-semibold">{t('alpha.label')}</span>
         <span className="opacity-40" aria-hidden>·</span>
         <span className="opacity-80 truncate font-body text-[11px]">{t('alpha.body')}</span>
-        <button
-          type="button"
-          onClick={() => setLang(lang === 'de' ? 'en' : 'de')}
-          aria-label={t('lang.switchTo')}
-          className="ml-auto shrink-0 font-semibold opacity-90 hover:opacity-100 transition-opacity"
-          style={{ fontSize: 12, letterSpacing: '0.06em', padding: '4px 8px', minHeight: 28 }}
-        >
-          {lang === 'de' ? 'DE ▸ EN' : 'EN ▸ DE'}
-        </button>
-        <span className="opacity-40" aria-hidden>·</span>
-        <a
-          href="mailto:hallo@ronki.de?subject=Ronki%20Alpha%20Feedback"
-          className="shrink-0 font-semibold text-sun hover:text-white transition-colors underline decoration-sun/50 underline-offset-2"
-        >
-          {t('alpha.feedback')}
-        </a>
       </div>
     </div>
   );
