@@ -20,12 +20,8 @@ import {
 } from '../lib/profileToken';
 import { useAnalytics } from '../hooks/useAnalytics';
 // Finch pass (26 Sep 2026): "Ronkis Tag" (routine, evening start,
-// Ferien, Extras). RoutinePicker is shared with the parent step and is
-// built in a parallel lane, so it is picked up through an eager glob:
-// the same static import once the file exists, and no build break while
-// it does not (the section then shows only Ferien and Extras).
-const ROUTINE_PICKER_MODULES = import.meta.glob('./onboarding/RoutinePicker.{jsx,tsx,js}', { eager: true });
-const RoutinePicker = Object.values(ROUTINE_PICKER_MODULES)[0]?.default || null;
+// Ferien, Extras). RoutinePicker is shared with the parent step.
+import RoutinePicker from './onboarding/RoutinePicker';
 import { normalizeRoutine } from '../data/taskKinds';
 import { DEFAULT_EVENING_START } from '../loop/types';
 import { stonesToNext } from '../loop/growth';

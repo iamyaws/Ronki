@@ -17,17 +17,17 @@ import Journal from './components/Journal';
 // Onboarding.jsx (8-step kid flow) deleted Apr 26 2026 in the
 // onboarding-trim. Replaced by MeetRonki + TeachFireStep run in
 // sequence after the parent setup. See OnboardingChain below.
-import TeachFireStep from './components/onboarding/TeachFireStep';
-import CombinedParentSetup from './components/CombinedParentSetup';
+import OnboardingChain from './components/onboarding/OnboardingChain';
+import RonkiPassport from './components/RonkiPassport';
+import useTripClock from './hooks/useTripClock';
+import { FEATURES, extrasOn } from './config/features';
 import BackgroundMusic from './utils/backgroundMusic';
-import { getActiveToken, ensureTokenForExistingProfile, generateToken, setActiveToken, claimLocalProfile } from './lib/profileToken';
-import NoProfileLanding from './components/NoProfileLanding';
+import { getActiveToken, ensureTokenForExistingProfile } from './lib/profileToken';
 import TeachFirePreview from './components/TeachFirePreview';
 import TeachRitualPreview from './components/TeachRitualPreview';
 // ParentOnboarding (5-step) replaced by CombinedParentSetup (1-step).
 // KidIntro (greeting + handoff sub-screens) replaced by MeetRonki's
 // in-cave approach beat. Both deleted Apr 26 2026 in the onboarding-trim.
-import HandoffBackCard from './components/HandoffBackCard';
 import PWAInstallSheet from './components/PWAInstallSheet';
 import { usePWAInstall } from './hooks/usePWAInstall';
 import { usePWAPromptGate } from './hooks/usePWAPromptGate';
@@ -96,7 +96,6 @@ import { useSpecialQuests } from './hooks/useSpecialQuests';
 import { useMicropediaDiscovery } from './hooks/useMicropediaDiscovery';
 import { useQuietAttention } from './hooks/useQuietAttention';
 // EggOverlay deleted Apr 2026 (cut #10h).
-import CreatureDiscoveryToast from './components/CreatureDiscoveryToast';
 import FriendIntroCeremony from './components/drachennest/FriendIntroCeremony';
 import MeetRonki from './components/drachennest/MeetRonki';
 import TonightRitual from './components/drachennest/TonightRitual';
@@ -172,6 +171,21 @@ function AppContent() {
     return 'hub';
   })();
   const [view, setView] = useState(initialView);
+  // Finch pass: one global trip clock (returns Ronki from a trip on any
+  // screen, rolls the day over on a tablet left open overnight).
+  useTripClock();
+  // Views that are switched off fall back to the Nest: the old day strip
+  // (FEATURES.dayStrip) and the parent "Extras" (Tagebuch, Laden, Spielzeug).
+  const EXTRA_VIEWS = ['journal', 'shop', 'games', 'mint-game', 'memory', 'starfall', 'potion', 'clouds', 'starfighter', 'hoehle'];
+  const viewAllowed = (v) => {
+    if (v === 'quests' || v === 'streifen') return FEATURES.dayStrip;
+    if (EXTRA_VIEWS.includes(v)) return extrasOn(state);
+    return true;
+  };
+  useEffect(() => {
+    if (state && !viewAllowed(view)) setView('hub');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view, state?.extrasEnabled]);
   const urlParamsAppliedRef = useRef(false);
   useEffect(() => {
     // Wait for the persisted state to load before patching — firing at
@@ -406,6 +420,8 @@ function AppContent() {
           // companion direction. Hub.jsx + its mission/boss/gear
           // surfaces get deleted entirely in cut #5.
           <RoomHub
+            onOpenTonight={() => setView('tonight')}
+            onOpenParental={() => openPinGate()}
             onNavigate={(target, opts) => {
               // 'aufgaben' from the cave routes to RonkisTag
               // (Streifen, hi-fi Direction A from the 26 Apr 2026
@@ -446,7 +462,9 @@ function AppContent() {
             onOpenTonight={() => setView('tonight')}
           />
         )}
-        {view === 'ronki' && <RonkiProfile onNavigate={setView} />}
+        {view === 'ronki' && (FEATURES.legacyProfile
+          ? <RonkiProfile onNavigate={setView} />
+          : <RonkiPassport onNavigate={setView} onOpenParental={() => openPinGate()} />)}
         {view === 'memories' && <MemoryWall />}
         {view === 'buch' && <Buch onNavigate={setView} />}
         {view === 'gallery' && <ChibiGallery onClose={() => setView('hub')} />}
@@ -642,7 +660,7 @@ function AppContent() {
           redundant. The component file is kept for reference but no longer mounted. */}
       <Celebration />
       {/* <ArcOfferCard /> — paused, see backlog_arc_offer_rework.md */}
-      <FreundCallbackCard />
+      {FEATURES.friends && <FreundCallbackCard />}
       {/* ScreenTimer mount deleted in cut #6 (Funkelzeit removal). */}
       {/* CreatureDiscoveryToast is rendered by CelebrationQueue's
            current-surface slot; it mounts only when the queue pops a
@@ -835,143 +853,14 @@ function OnboardingGate() {
   // logic (so a kid who closes the app mid-flow lands back on the
   // right screen). Pre-rework saves auto-mark these on rehydrate.
   if (!state) return null;
-  if (!state.onboardingDone) {
-    if (!getActiveToken() && !state.parentOnboardingDone) {
-      return <NoProfileLanding />;
-    }
-    return <OnboardingChain />;
-  }
+  // Finch pass (26 Sep 2026): every family starts at the egg. The card
+  // scan is a quiet option inside the chain, no longer a wall.
+  if (!state.onboardingDone) return <OnboardingChain />;
   return <AppContent />;
 }
 
-/**
- * OnboardingChain — the lean 4-screen onboarding flow.
- *
- * Phases:
- *   0 — CombinedParentSetup        sets parentOnboardingDone, parentPin,
- *                                  analyticsEnabled, familyConfig
- *   1 — HandoffBackCard            sets parentHandoffBackSeen
- *   2 — MeetRonki                  collects {companionName, companionVariant};
- *                                  sets kidIntroSeen
- *   3 — TeachFireStep              calls completeOnboarding(...) which
- *                                  sets onboardingDone + taughtSignature
- *
- * Resume logic: phase advances based on which gates are already true,
- * so a kid who closes the app mid-flow returns to the right screen.
- *
- * `previewLoop` (?onboardingPreview=1): after onboardingDone fires,
- * waits ~2s and resets the gates so designers can cycle the chain.
- */
-function OnboardingChain({ previewLoop, onComplete }) {
-  const { state, actions } = useTask();
-  // TeachFireStep at phase 3 expects a translation function. Without
-  // it, TeachBreathBeat throws "t is not a function" the moment the
-  // kid finishes naming Ronki — the most embarrassing possible time
-  // to crash. Pulling it once at the chain level so all phases share it.
-  const { t } = useTranslation();
-  const [meetData, setMeetData] = React.useState({ companionName: '', companionVariant: 'forest' });
-
-  // Compute phase from state gates so resume works.
-  const phase =
-    !state?.parentOnboardingDone ? 0 :
-    !state?.parentHandoffBackSeen ? 1 :
-    !state?.kidIntroSeen ? 2 :
-                          3;
-
-  // Preview loop — when onboardingDone flips, wait 2s then reset
-  // the gates so the cycle replays. Real users skip this branch.
-  React.useEffect(() => {
-    if (!previewLoop || !state?.onboardingDone) return;
-    const t = setTimeout(() => {
-      actions.patchState?.({
-        onboardingDone: false,
-        kidIntroSeen: false,
-        parentOnboardingDone: false,
-        parentHandoffBackSeen: false,
-      });
-    }, 2200);
-    return () => clearTimeout(t);
-  }, [previewLoop, state?.onboardingDone, actions]);
-
-  if (phase === 0) {
-    return (
-      <CombinedParentSetup
-        existingFamilyConfig={state?.familyConfig}
-        onComplete={(payload) => {
-          actions.patchState?.(payload);
-          if (payload.familyConfig) actions.updateFamilyConfig?.(payload.familyConfig);
-          // QR-auth Phase 2: anchor every fresh profile to a cloud
-          // row from the moment parent setup completes. Subsequent
-          // saves go through cloudSaveByToken (TaskContext) so a
-          // device swap mid-onboarding (parent fills setup on phone,
-          // hands tablet to kid) can resume via the shared link.
-          // Skip if a token already exists — this happens when the
-          // parent pasted a code on NoProfileLanding before opting
-          // into "Neues Profil" anyway, or for ensureTokenForExist-
-          // ingProfile tagging on Phase-1-era saves.
-          try {
-            if (!getActiveToken()) {
-              const fresh = generateToken();
-              setActiveToken(fresh);
-              claimLocalProfile(fresh);
-            }
-          } catch { /* private mode / quota — survive silently */ }
-        }}
-      />
-    );
-  }
-  if (phase === 1) {
-    return (
-      <HandoffBackCard
-        onContinue={() => actions.patchState?.({ parentHandoffBackSeen: true })}
-      />
-    );
-  }
-  if (phase === 2) {
-    return (
-      <MeetRonki
-        onComplete={({ companionName, companionVariant }) => {
-          // Persist what the kid picked and named. The name is Ronki's
-          // nickname (companionName). Until 25 Sep 2026 it travelled as
-          // heroName and completeOnboarding copied it into
-          // familyConfig.childName, so the dragon's name replaced the
-          // child's own name from the parent setup ("Hallo Funki!").
-          setMeetData({ companionName: companionName || '', companionVariant: companionVariant || 'forest' });
-          actions.patchState?.({
-            kidIntroSeen: true,
-            companionName: companionName || state?.companionName,
-            companionVariant: companionVariant || state?.companionVariant,
-          });
-        }}
-      />
-    );
-  }
-  // phase === 3 — TeachFireStep is the finisher. completeOnboarding
-  // flips state.onboardingDone, OnboardingGate unmounts the chain,
-  // AppContent takes over.
-  // TeachFireStep contract: { variant, t, ProgressBar, onComplete }.
-  // ProgressBar is a child component the original Onboarding.jsx
-  // rendered above the beat. We pass a no-op so the beat stays
-  // self-contained without the 8-pip onboarding bar.
-  const NoProgressBar = () => null;
-  return (
-    <TeachFireStep
-      variant={state?.companionVariant || meetData.companionVariant}
-      t={t}
-      ProgressBar={NoProgressBar}
-      onComplete={() => {
-        // No name here: the child's name comes only from the parent setup
-        // or the profile card, Ronki's nickname from MeetRonki above.
-        actions.completeOnboarding?.({
-          companionVariant: state?.companionVariant || meetData.companionVariant,
-          heroGender: null,
-          taughtSignature: 'fire',
-        });
-        if (typeof onComplete === 'function') onComplete();
-      }}
-    />
-  );
-}
+// OnboardingChain moved to src/components/onboarding/OnboardingChain.jsx
+// (Finch pass, 26 Sep 2026): egg first, the parent step after the hatch.
 
 // ExperimentAutoPrime deleted Apr 26 2026 in the onboarding-trim.
 // The lean OnboardingChain runs in prod; the auto-bypass it provided
