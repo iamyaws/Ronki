@@ -636,7 +636,7 @@ function AnchorCompleteCard({ onOpenExpedition }) {
       <div className="flex items-center gap-3">
         {/* The still cheer with a short bob; the 4 s cheer clip broke the
             1.5 s rule for celebrations (Astra design review R5). */}
-        <RonkiArt pose="cheer" idle="bb-idle-bob" size={96} />
+        <RonkiArt pose="cheer" idle="bb-hop-once" size={96} />
         <div className="min-w-0 flex-1">
           <div className="bb-hand text-ink uppercase" style={{ fontSize: 18, lineHeight: 1 }}>Morgen ist gemacht</div>
           <div className="font-headline font-semibold text-ink" style={{ fontSize: 18, lineHeight: 1.3, marginTop: 6 }}>

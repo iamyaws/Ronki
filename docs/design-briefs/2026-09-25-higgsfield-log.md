@@ -73,6 +73,29 @@ Start frames for the transparent character loops are the cut-outs composited loc
 
 Processing (local, no credits, script in the session scratchpad `art/clips.py`): loops get the last 0.6 s cross-faded into the first 0.6 s so the seam never jumps (mean frame difference at the seam 0.85 to 2.08 out of 255 afterwards); scenes become H.264 720 wide, CRF 27, faststart, no audio track, with the first frame as poster; the green clips are keyed locally (ffmpeg `colorkey` + `despill`, clean edges on the ink outlines) and saved as animated WebP with alpha at 400 px: idle 12 fps (1.2 MB), cloud 12 fps (1.3 MB), cheer 15 fps and plays once (0.85 MB). Higgsfield's own video background removal was not needed.
 
-**Spend: 292.5 credits of 675 (balance 382.5 after the run), under the 450 cap.**
+**Spend after the first pass: 292.5 credits of 675.**
+
+## Second pass: the picked egg hatches (25 Sep, evening)
+
+Lane B's hatch showed the cream clip under any egg (a kid picking the red egg saw it turn cream). Fixed with one clip per egg, same prompts as #12, #51 and #64 with the shell colour swapped (references: the original frame plus the egg cut-out).
+
+| # | Job | What | File |
+|---|---|---|---|
+| 70 to 72 | 11449ec4, 6e70416c, 6c96dd56 | Hatch start frames with the red, yellow, blue egg | `scenes/hatch-ember`, `-sun`, `-cobalt` |
+| 73 to 75 | b4f1a885, 20ec0ffb, 184b6bd5 | Hatch end frames, Ronki in the matching shell | `scenes/hatch-end-ember`, `-sun`, `-cobalt` |
+| 76 to 78 | a7d47c78, 84791245, 9a1911bd | Hatchling with a red, yellow, blue shell hat | `ronki/baby-ember`, `-sun`, `-cobalt` |
+| 80 to 82 | 003ca73d, 84bcf63c, 632ac60c | Seedance hatch clips per egg, 5 s, 9:16 | `loops/hatch-ember.mp4` (+ poster, end), `-sun`, `-cobalt` |
+
+9 images (24.75 credits) and 3 clips (105 credits). All on model at the first try.
+
+## Third pass: task pictures (Astra design review R2)
+
+| # | Job | What | File |
+|---|---|---|---|
+| 90 | 25cf94f7 | One 4 x 3 sheet of task pictures on transparent ground (refs: master cut-out, morning scene): waking, toothbrush, water, washcloth, plate, book, homework, pyjamas, shirt, school bag, ball, night light | cut locally into `tasks/*.webp` (256 px) |
+
+1 image, 2.75 credits.
+
+**Total spend of the run: 425 credits of 675 (balance 250), under the 450 cap. 41 images and 9 clips.**
 
 Note: the first submission of 60 and 62 to 65 was answered with preset suggestions ("IN THE DARK", "DROWN IN MUSIC") instead of jobs; resubmitted with the presets declined. No credits were spent on the suggestions.

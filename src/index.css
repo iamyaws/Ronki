@@ -413,6 +413,8 @@
 }
 .bb-idle-breathe { animation: bb-idle-breathe 3.6s ease-in-out infinite; transform-origin: 50% 90%; }
 .bb-idle-bob     { animation: bb-idle-bob 2.6s ease-in-out infinite; transform-origin: 50% 90%; }
+/* One bob, then still: for celebrations, which stay under 1.5 s (Astra review round 2). */
+.bb-hop-once     { animation: bb-idle-bob 1.2s ease-in-out 1 both; transform-origin: 50% 90%; }
 .bb-idle-sway    { animation: bb-idle-sway 4.2s ease-in-out infinite; transform-origin: 50% 90%; }
 .bb-idle-slow    { animation: bb-idle-slow 5s ease-in-out infinite; transform-origin: 50% 90%; }
 .bb-idle-fidget  { animation: bb-idle-fidget 3s ease-in-out infinite; transform-origin: 50% 90%; }
