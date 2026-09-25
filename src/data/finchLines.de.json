@@ -8,6 +8,8 @@
     "handoff_back_01": { "text": "Jetzt bist du wieder dran!" },
     "meet_nowiknow_01": { "text": "Hallo {kind}! Jetzt kenn ich dich. Schön!", "spoken": "Jetzt kenn ich dich. Schön!" },
     "scan_camera_sleep_01": { "text": "Die Kamera schläft noch. Hol mal Mama oder Papa." },
+    "scan_open_01": { "text": "Hast du eine Karte? Halt sie vor die Kamera. Oder tipp auf das Ei, dann geht's zurück." },
+    "teach_fire_hold_01": { "text": "Drück ganz lange auf den Knopf. Und dann lass los!" },
     "teach_fire_spark_01": { "text": "Oh, ein Funke! Nochmal. Ganz lange Luft holen." },
     "teach_fire_learned_01": { "text": "Das hast du mir gezeigt. Das vergess ich nie." },
     "fd_fire_half_01": { "text": "Schau, mein Feuer. Vom Pusten ist es schon halb warm." },
