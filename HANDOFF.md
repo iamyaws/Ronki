@@ -15,8 +15,8 @@ Revival check done, nothing built. Full write-up (German): [docs/strategy/2026-0
 
 Full text with the queries: PRD section 12 ([docs/prd/RONKI-V2-PRD.md](docs/prd/RONKI-V2-PRD.md)). Short form:
 
-- **Gate 1, pull, check on 14 Nov 2026:** at least one family we do not know created a card since go-live and used it on three or more distinct days (`profiles` joined with `profile_activity`, subtract our own cards). Plausible cross-check: "Karte erstellt", "CTA Klick" by `cta`.
-- **Gate 2, reach, check on 15 Mar 2027:** at least 500 organic visitors per month on ronki.de (Plausible, Google, average Jan and Feb 2027) and at least 100 distinct addresses across leads and waitlist (`select public.leads_count();`).
+- **Gate 1, pull, check on 15 Dec 2026 (moved from 14 Nov on 25 Sep 2026):** at least one family we do not know created a card since go-live and used it on three or more distinct days (`profiles` joined with `profile_activity`, subtract our own cards). Umami cross-check: "Karte erstellt", "CTA Klick" by `cta`.
+- **Gate 2, reach, check on 15 Mar 2027:** at least 500 unpaid visitors per month on ronki.de (Umami, search plus social, no ads, by source; average Jan and Feb 2027) and at least 100 distinct addresses across leads and waitlist (`select public.leads_count();`).
 - Outcomes: both pass, start v2 Phase 1. Pull only, keep the app alive and work on reach. Reach only, keep the site as content asset, freeze the app, no v2. Neither, Ronki stays a family project. Ticklers for both dates sit in the HQ Fristen register.
 
 ## LIVE since 16 Sep 2026
