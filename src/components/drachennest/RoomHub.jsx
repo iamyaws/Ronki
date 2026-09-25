@@ -209,10 +209,10 @@ export default function RoomHub({ onNavigate }) {
 
   // Bubble anchor: just above Ronki's head, measured from the frame's
   // bottom so the bubble's own height never matters. The egg and the
-  // baby draw smaller inside MoodChibi's square (0.78 and 0.82), the
-  // idle loop a touch taller after its scale-up.
+  // baby draw smaller inside MoodChibi's square (0.78 and 0.82); the idle
+  // loop is cropped like the stills, so both use the same 0.94.
   const artScale = stageIdx <= 0 ? 0.78 : stageIdx === 1 ? 0.82 : 1;
-  const artHeight = RONKI_W * (POSTER_W / POSTER_H) * artScale * (ronkiIsLoop ? 1.0 : 0.94);
+  const artHeight = RONKI_W * (POSTER_W / POSTER_H) * artScale * 0.94;
   const headTopPx = geo.offY + geo.drawnH * (RONKI_BOTTOM - artHeight);
   const bubbleBottom = Math.max(24, Math.round(geo.h - headTopPx + 30));
 
