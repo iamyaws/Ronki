@@ -27,6 +27,8 @@ Marc's ask (25 Sep, late): reduce the features, learn from Finch's onboarding an
 
 **Tests.** 598 app tests green (about 250 before), `check:names` clean, both builds green, tsc unchanged at 23 pre-existing errors.
 
+**LIVE since 26 Sep 2026, 00:35.** PR 23 merged (merge commit a6290bf). Checked on production: the app bundle changed from `index-BL3jwRXK.js` to `index-fGZDv6K6.js` about 30 s after the merge and contains the trip stories, the card line, "Ronkis Tag" and the write freeze; the DEV clock is not in it; `de_trip_story_01.mp3` and the task pictures return 200; app.ronki.de opens on the egg shelf with the quiet card link and no console errors. Not yet done: Marc's walk on his phone and Louis's first real morning.
+
 **Open for Marc.**
 1. Louis loses games, Tagebuch and Laden by default: Eltern-Bereich, Familie, "Extras zeigen" brings them back in one tap.
 2. Every save without a chosen routine now gets the default (5 morning, 4 evening) from the next day, Louis included; change it in "Ronkis Tag".
