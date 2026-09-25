@@ -64,4 +64,11 @@ describe('Morgenroutine Vorlage', () => {
     expect(description).toBeTruthy();
     expect(plugin).toContain(description!);
   });
+
+  it('shares with a picture of the real sheet, in the browser and in the crawler HTML', () => {
+    setup();
+    const image = document.querySelector('meta[property="og:image"]')?.getAttribute('content');
+    expect(image).toBe('https://www.ronki.de/og-vorlage-morgenroutine.jpg');
+    expect(prerenderSource).toContain("ogImage: '/og-vorlage-morgenroutine.jpg'");
+  });
 });

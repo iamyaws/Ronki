@@ -1,6 +1,66 @@
 {
+  "redirects": [
+    {
+      "source": "/morgen",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.ronki.de"
+        }
+      ],
+      "destination": "https://www.ronki.de/vorlagen/morgenroutine?utm_source=whatsapp&utm_medium=message&utm_campaign=morgenroutine-start",
+      "permanent": false
+    },
+    {
+      "source": "/li",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.ronki.de"
+        }
+      ],
+      "destination": "https://www.ronki.de/vorlagen/morgenroutine?utm_source=linkedin&utm_medium=social&utm_campaign=morgenroutine-start",
+      "permanent": false
+    },
+    {
+      "source": "/ig",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.ronki.de"
+        }
+      ],
+      "destination": "https://www.ronki.de/vorlagen/morgenroutine?utm_source=instagram&utm_medium=social&utm_campaign=morgenroutine-start",
+      "permanent": false
+    },
+    {
+      "source": "/tt",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.ronki.de"
+        }
+      ],
+      "destination": "https://www.ronki.de/vorlagen/morgenroutine?utm_source=tiktok&utm_medium=social&utm_campaign=morgenroutine-start",
+      "permanent": false
+    },
+    {
+      "source": "/yt",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.ronki.de"
+        }
+      ],
+      "destination": "https://www.ronki.de/vorlagen/morgenroutine?utm_source=youtube&utm_medium=social&utm_campaign=morgenroutine-start",
+      "permanent": false
+    }
+  ],
   "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
   ],
   "git": {
     "deploymentEnabled": {

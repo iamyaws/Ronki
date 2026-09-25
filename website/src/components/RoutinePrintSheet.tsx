@@ -75,6 +75,7 @@ export function RoutinePrintSheet({
         title={metaTitle ?? `${title} · Vorlage zum Ausdrucken`}
         description={metaDescription ?? description}
         canonicalPath={`/vorlagen/${slug}`}
+        ogImage={`/og-vorlage-${slug}.jpg`}
       />
 
       {/* Screen-only toolbar, hidden when printing */}
