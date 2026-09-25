@@ -1,119 +1,112 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useTask } from '../../context/TaskContext';
 import { getCatStage } from '../../utils/helpers';
-import MoodChibi from '../MoodChibi';
+import MoodChibi, { RonkiArt } from '../MoodChibi';
 import { useQuestEater } from '../QuestEater';
 import { flavorForQuest } from '../FireBreathPuff';
 import ToothbrushTimer from '../ToothbrushTimer';
 import VoiceAudio from '../../utils/voiceAudio';
+import {
+  TopBar,
+  PaperCard,
+  PillButton,
+  DoodleIcon,
+  SceneLoop,
+  StickerBurst,
+  useReducedMotion,
+} from '../bilderbuch';
+import { SunCheck, SunSticker } from './RoomHubBits';
 
 /**
- * RonkisTag — daily surface as a vertical comic strip.
+ * RonkisTag: the day as a strip (morning, afternoon, evening).
  *
- * Direct port of "Geschichten-Streifen" (Item 1 · Direction A) from
- * the Claude Design hi-fi handoff (26 Apr 2026, project hash
- * `qXRWfwWaiAoeAv1yh86HNw`). Reference at
- * `docs/design-incoming/meet-tonight/project/src/hifi-streifen.jsx`.
+ * Bilderbuch cut, 25 Sep 2026. White ground, the shared TopBar with
+ * the read-aloud button, the morning scene (scenes/morgen.webp) in a
+ * drawn frame at the top, block headers in the display face, every
+ * task a paper card with a marker doodle (the eight CSS prop
+ * paintings are gone), the current task inside the cobalt drawn ring
+ * with a "jetzt" sun sticker, done tasks with the sun check sticker.
+ * When a task or a whole block completes, a StickerBurst fires and
+ * Ronki does a happy jump, all within 1.5 s. The end of the day is the
+ * night loop (Ronki asleep, blanket breathing) with one sun pill to
+ * the Tonight ritual.
  *
- * Reads the same quest data the legacy TaskList uses; the action
- * layer (tap → mark done → Ronki eats the quest) is unchanged. What
- * changes is the *visual frame* — each task is a small painted scene
- * with prop art (toothbrush, t-shirt, book, pajamas, nightlight) and
- * Ronki appears inside specific scenes (Aufstehen, Hausaufgaben,
- * Pyjama). Past tasks stay illustrated but desaturate. The kid is
- * reading a comic of their day with Ronki, not ticking a checklist.
- *
- * Day-phase aware: cave-bg shifts gold-cream → umber → deep violet
- * across morning / afternoon / evening. After evening rolls in,
- * morning + afternoon collapse to small grids and evening fills the
- * surface. End-of-day flips to a nightsky scene linking to Tonight.
- *
- * Wired into the cave's "aufgaben" navigate target — replaces the
- * legacy TaskList for the kid-facing entry. TaskList still mounts
- * on `view==='quests'` for questline back-buttons.
+ * Everything that is not paint is unchanged: quest grouping, the tap
+ * to complete (with the QuestEater flight and the toothbrush timer
+ * detour), the voice lines on mount, expedition readiness, routing.
  */
 
-// ── Tokens ────────────────────────────────────────────────────────
-// Type scale (Apr 2026 readability pass — 1st-grader minimums):
-//   Voiced lines = the heart of the surface, must read at arm's length.
-//   German is letter-dense (Hausaufgaben, Schlafanzug) so sizes bias
-//   slightly above WCAG-for-adults floors. Body min = 16px on mobile.
-const T = {
-  cream: '#fff8f2',
-  ink: '#1e1b17',
-  mute: '#6b655b',
-  gold: '#fcd34d',
-  goldSoft: '#fde68a',
-  goldDeep: '#b45309',
-  warm: '#3a2818',
-  inkScript: '#5a4a30',  // deepened from #7a6a4a for 4.5:1 on cream
-  inkSoft: '#5a3a20',
-  fHead: '"Fredoka", system-ui, sans-serif',
-  fBody: '"Nunito", system-ui, sans-serif',
-  fLabel: '"Plus Jakarta Sans", system-ui, sans-serif',
-  fScript: '"Caveat", "Bradley Hand", cursive',
-};
+const ART = `${import.meta.env.BASE_URL}art/bilderbuch/`;
 
-// Honor reduced-motion at module scope. Used to short-circuit the
-// background-gradient transition and the nightsky twinkle loop.
-const REDUCE_MOTION =
-  typeof window !== 'undefined' &&
-  typeof window.matchMedia === 'function' &&
-  window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-// ── Quest IDs that detour through the toothbrush timer ────────────
-// (mirrors TaskList — kept here as a small const to avoid a circular
-// import.)
+// Quest IDs that detour through the toothbrush timer (mirrors TaskList).
 const TEETH_QUEST_IDS = new Set(['s3', 's12', 'v3', 'v10']);
 
 // ── Helpers ───────────────────────────────────────────────────────
 
 // Map a quest's source `anchor` field to one of three strip blocks.
-// `evening` and `hobby` both fold into "afternoon" so the kid sees
-// a 3-block day, not 4.
+// `evening` and `hobby` both fold into "afternoon" so the kid sees a
+// 3-block day, not 4.
 function blockFor(anchor) {
   if (anchor === 'morning') return 'morning';
   if (anchor === 'bedtime') return 'bedtime';
   return 'afternoon';
 }
 
-// Map a quest to a painted prop. The designer shipped a fixed roster
-// of art (Toothbrush, TShirt, Book, Pajama, Nightlight, Plate,
-// Homework, Sun); we route by quest icon family or quest id keyword.
-// Falls back to a soft "moment" badge.
+// Map a quest to a doodle family. Same routing as the old painted
+// props, by quest icon family or id keyword; falls back to a sparkle.
 function artFor(quest) {
   const id = (quest?.id || '').toLowerCase();
   const name = (quest?.name || '').toLowerCase();
   const icon = (quest?.icon || '').toLowerCase();
   const all = `${id} ${name} ${icon}`;
+  if (/aufsteh|wach|wake|morgen-start|bett kommen|aus dem bett/.test(all)) return 'sun';
   if (/zahn|tooth|brush/.test(all))         return 'toothbrush';
-  if (/anzieh|kleid|wäsche|clothes|shirt/.test(all)) return 'shirt';
-  if (/wasser|water|trinken|cup/.test(all))  return 'plate'; // closest substitute
-  if (/essen|food|frühstück|mahlzeit/.test(all)) return 'plate';
-  if (/lese|book|buch/.test(all))            return 'book';
-  if (/hausaufgab|schule|homework/.test(all)) return 'homework';
   if (/pyjama|schlafan/.test(all))           return 'pajama';
+  if (/anzieh|kleid|wäsche|clothes|shirt/.test(all)) return 'shirt';
+  if (/wasser|water|trinken|cup|wasch/.test(all)) return 'water';
+  if (/essen|food|frühstück|mahlzeit|brot/.test(all)) return 'plate';
+  if (/lese|book|buch|vorles/.test(all))     return 'book';
+  if (/hausaufgab|schule|homework/.test(all)) return 'homework';
+  if (/tasche|ranzen/.test(all))             return 'bag';
+  if (/beweg|sport|drauß|spiel|toben/.test(all)) return 'move';
   if (/nacht|licht|lampe|bett|sleep|ruhe/.test(all)) return 'nightlight';
-  if (/aufsteh|wach|wake|morgen-start/.test(all))    return 'sun';
   return 'badge';
 }
 
-// Tasks where Ronki appears WITHIN the scene rather than as a side
-// avatar — designer cited these explicitly.
+// The marker doodle per family: sun for waking, sparkle for shiny
+// teeth, drop for water and washing, egg for meals, book, scribble for
+// homework, cloud for the pyjama, star for getting dressed, bag for
+// the school bag, bolt for moving, moon for the little light.
+const DOODLE = {
+  sun:        { name: 'sun', color: 'var(--color-sun)', filled: true },
+  toothbrush: { name: 'sparkle', color: 'var(--color-sky)', filled: true },
+  water:      { name: 'drop', color: 'var(--color-cobalt)', filled: true },
+  plate:      { name: 'egg', color: 'var(--color-ink)', filled: false },
+  book:       { name: 'book', color: 'var(--color-ink)', filled: false },
+  homework:   { name: 'scribble', color: 'var(--color-cobalt)', filled: false },
+  pajama:     { name: 'cloud', color: 'var(--color-sky)', filled: false },
+  shirt:      { name: 'star', color: 'var(--color-sun)', filled: true },
+  bag:        { name: 'bag', color: 'var(--color-ink)', filled: false },
+  move:       { name: 'bolt', color: 'var(--color-ember)', filled: false },
+  nightlight: { name: 'moon', color: 'var(--color-sun)', filled: true },
+  badge:      { name: 'sparkle', color: 'var(--color-sun)', filled: true },
+};
+
+// Tasks where Ronki appears inside the scene rather than as a side
+// avatar: the designer cited these explicitly.
 function ronkiInScene(quest) {
   const id = (quest?.id || '').toLowerCase();
   const name = (quest?.name || '').toLowerCase();
   return /aufsteh|wach|hausaufgab|pyjama|schule/.test(`${id} ${name}`);
 }
 
-// Phase of day → which block is "now" right now.
+// Phase of day: which block is "now" right now.
 function currentPhaseFromHour(h) {
   if (h < 11) return 'morning';
   if (h < 17) return 'afternoon';
   return 'bedtime';
 }
 
-// Verbal moment label per phase, used in the TopBar.
 function momentLabel(phase) {
   if (phase === 'morning')   return 'früh';
   if (phase === 'afternoon') return 'Mittag';
@@ -126,13 +119,12 @@ function dateLabelDe() {
 }
 
 // Voiced "moment" lines per phase + state. Soft observational, no
-// instructions. Rotation pool — picker picks once per quest mount
-// so it doesn't shimmer.
+// instructions. Picked once per quest so it doesn't shimmer.
 const MOMENT_LINES = {
   morning: {
     now:    ['Er sitzt schon am Fenster und schaut raus.', 'Er hat schon gewartet.', 'Er ist heute früh wach.'],
     past:   ['Sonne war rosa.', 'War schön mit dir.', 'Sind beide aufgewacht.'],
-    future: ['', '', ''], // future = quiet
+    future: ['', '', ''],
   },
   afternoon: {
     now:    ['Er hat sich neben den Tisch gelegt.', 'Er beobachtet leise.', 'Er rückt näher.'],
@@ -177,9 +169,7 @@ export default function RonkisTag({ onClose, onOpenExpedition, onOpenTonight }) 
   // Phase of day = which block is "now."
   const phase = useMemo(() => currentPhaseFromHour(new Date().getHours()), []);
 
-  // Voice on mount — Drachenmutter narrator framing + Ronki warmth.
-  // Once per mount of the strip; gentle 600ms delay so the strip
-  // settles in before audio kicks in. Apr 2026 voice pass.
+  // Voice on mount: Drachenmutter narrator framing + Ronki warmth.
   useEffect(() => {
     VoiceAudio.playNarrator('tag_intro_01', 600);
     const t = setTimeout(() => VoiceAudio.playLocalized('tag_warmth_01', 0), 4200);
@@ -190,10 +180,24 @@ export default function RonkisTag({ onClose, onOpenExpedition, onOpenTonight }) 
   const morningAll = blocks.morning.length > 0 && blocks.morning.every(q => q.done);
   const afternoonAll = blocks.afternoon.length > 0 && blocks.afternoon.every(q => q.done);
   const bedtimeAll = blocks.bedtime.length > 0 && blocks.bedtime.every(q => q.done);
-  const fullDay =
-    morningAll && afternoonAll && bedtimeAll;
+  const fullDay = morningAll && afternoonAll && bedtimeAll;
 
   const expeditionReady = morningAll && state?.expedition?.state === 'home';
+
+  // Celebration: a sticker burst plus Ronki's happy jump. `big` when a
+  // whole block just completed (the guardrail: bigger only when the
+  // routine is done, never longer).
+  const [cheer, setCheer] = useState({ key: 0, big: false });
+  const doneRef = useRef({ morningAll, afternoonAll, bedtimeAll });
+  useEffect(() => {
+    const prev = doneRef.current;
+    const flipped =
+      (!prev.morningAll && morningAll) ||
+      (!prev.afternoonAll && afternoonAll) ||
+      (!prev.bedtimeAll && bedtimeAll);
+    doneRef.current = { morningAll, afternoonAll, bedtimeAll };
+    if (flipped) setCheer(c => ({ key: c.key + 1, big: true }));
+  }, [morningAll, afternoonAll, bedtimeAll]);
 
   // Toothbrush timer detour state
   const [teethTimerQuestId, setTeethTimerQuestId] = useState(null);
@@ -215,52 +219,43 @@ export default function RonkisTag({ onClose, onOpenExpedition, onOpenTonight }) 
       } catch { /* surface-agnostic; never block the tap */ }
     }
     actions.complete(quest.id);
+    setCheer(c => ({ key: c.key + 1, big: false }));
   };
 
-  // Background gradient — shifts gold-cream → umber → deep violet
-  // across the day. End-of-day flips to nightsky.
-  // Bedtime gradient lifted Apr 2026 (Marc: "evening view super dark").
-  // Was #6a5a8a → #4a3a5a → #2a1f3a; the bottom anchor at #2a1f3a was
-  // crushing — the cards visually sank into pitch. Bumped each stop
-  // ~12 lightness points: bedtime sky now reads as deep dusky violet
-  // not midnight. fullDay (when the kid finishes the entire day)
-  // stays its original near-black night palette — that's the
-  // "tonight ritual is now" signal so it should read distinctly
-  // darker than the in-progress bedtime view.
-  const bg =
-    fullDay                ? 'linear-gradient(180deg, #2d1b4e 0%, #1a0f3a 50%, #0a0a2e 100%)' :
-    phase === 'morning'    ? 'linear-gradient(180deg, #fef3c7 0%, #fbe9b6 30%, #f9eed8 100%)' :
-    phase === 'afternoon'  ? 'linear-gradient(180deg, #faecc8 0%, #f5e0b8 30%, #f4d8a8 100%)' :
-                              'linear-gradient(180deg, #8a7aac 0%, #6a5a82 35%, #4a3d62 100%)';
-
-  const inkOnDark = phase === 'bedtime' || fullDay;
+  const readAloud = () => {
+    VoiceAudio.playNarrator('tag_intro_01', 0);
+  };
 
   return (
     <div
       role="dialog"
       aria-modal="true"
       aria-label="Ronkis Tag"
+      className="bg-white text-ink font-body"
       style={{
         position: 'fixed', inset: 0, zIndex: 90,
-        background: bg,
-        transition: REDUCE_MOTION ? 'none' : 'background 1200ms ease',
         overflowY: 'auto', WebkitOverflowScrolling: 'touch',
-        fontFamily: T.fBody,
       }}
     >
-      <BackChrome onClose={onClose} dark={inkOnDark} />
-
-      {/* End-of-day nightsky scene → link to Tonight ritual */}
       {fullDay ? (
-        <EndOfDayScene
-          variant={variant} stageIdx={stageIdx}
-          onOpenTonight={onOpenTonight}
-        />
+        <EndOfDayScene onClose={onClose} onOpenTonight={onOpenTonight} />
       ) : (
         <>
-          <TopBar phase={phase} />
+          <TopBar
+            sticky
+            title="Ronkis Tag"
+            onBack={onClose}
+            backLabel="Zurück zur Höhle"
+            right="sound"
+            onRight={readAloud}
+            rightLabel="Vorlesen"
+            className="bg-white"
+            style={{ top: 0 }}
+          />
 
-          <div style={{ padding: '108px 18px 24px' }}>
+          <div className="w-full max-w-lg mx-auto" style={{ padding: '4px 16px 40px' }}>
+            <MorningHeader phase={phase} />
+
             {/* Morning */}
             {blocks.morning.length > 0 && (
               <BlockStrip
@@ -279,9 +274,7 @@ export default function RonkisTag({ onClose, onOpenExpedition, onOpenTonight }) 
 
             {/* Anchor-complete transition for morning → expedition */}
             {expeditionReady && phase !== 'bedtime' && (
-              <AnchorCompleteCard
-                onOpenExpedition={onOpenExpedition}
-              />
+              <AnchorCompleteCard onOpenExpedition={onOpenExpedition} />
             )}
 
             {/* Afternoon */}
@@ -300,13 +293,7 @@ export default function RonkisTag({ onClose, onOpenExpedition, onOpenTonight }) 
               />
             )}
 
-            {/* Bedtime — always rendered with the dark theme regardless
-                of current time-of-day. The card backgrounds are deep-violet
-                gradients constantly (bedtime is bedtime, day or night), so
-                the text + eyebrow + pill colors must always pair with that.
-                Earlier wiring `onDark={phase === 'bedtime'}` only flipped
-                colors when the current hour was past bedtime, which left
-                a dark-on-dark title state during afternoon viewing. */}
+            {/* Bedtime, never collapsed. */}
             {blocks.bedtime.length > 0 && (
               <BlockStrip
                 title="Abend"
@@ -319,12 +306,14 @@ export default function RonkisTag({ onClose, onOpenExpedition, onOpenTonight }) 
                 variant={variant}
                 stageIdx={stageIdx}
                 onTap={handleTap}
-                onDark={true}
               />
             )}
           </div>
         </>
       )}
+
+      {/* Task or block done: burst plus Ronki's jump, under 1.5 s. */}
+      <CheerMoment cheerKey={cheer.key} big={cheer.big} />
 
       {/* Toothbrush timer */}
       {teethTimerQuestId && (
@@ -333,6 +322,7 @@ export default function RonkisTag({ onClose, onOpenExpedition, onOpenTonight }) 
           onComplete={() => {
             actions.complete(teethTimerQuestId);
             setTeethTimerQuestId(null);
+            setCheer(c => ({ key: c.key + 1, big: false }));
           }}
         />
       )}
@@ -340,87 +330,24 @@ export default function RonkisTag({ onClose, onOpenExpedition, onOpenTonight }) 
   );
 }
 
-// ── Back-chrome ──────────────────────────────────────────────────
+// ── MorningHeader (the morning scene with the day sticker) ──────
 
-function BackChrome({ onClose, dark }) {
+function MorningHeader({ phase }) {
   return (
-    <div style={{
-      position: 'sticky', top: 0, zIndex: 50,
-      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-      padding: '14px 16px',
-      background: dark
-        ? 'linear-gradient(180deg, rgba(20,16,40,0.65), transparent)'
-        : 'linear-gradient(180deg, rgba(255,248,242,0.95), rgba(255,248,242,0.6) 70%, transparent)',
-      backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
-      pointerEvents: 'none',
-    }}>
-      <button
-        type="button"
-        onClick={onClose}
-        aria-label="Zurück zur Höhle"
-        style={{
-          pointerEvents: 'auto',
-          display: 'flex', alignItems: 'center', gap: 8,
-          padding: '11px 18px', borderRadius: 999,
-          background: dark ? 'rgba(255,248,242,0.92)' : '#ffffff',
-          border: dark ? 'none' : '1.5px solid rgba(180,83,9,0.18)',
-          color: '#124346',
-          font: `700 14px/1 ${T.fLabel}`,
-          letterSpacing: '0.04em',
-          boxShadow: '0 4px 10px -4px rgba(18,67,70,0.18)',
-          cursor: 'pointer',
-          touchAction: 'manipulation',
-        }}
-      >
-        <span className="material-symbols-outlined" style={{ fontSize: 20 }}>arrow_back</span>
-        Zurück
-      </button>
-      <div style={{ width: 76 }} aria-hidden="true" />
-    </div>
-  );
-}
-
-// ── TopBar (eyebrow + date + day-phase indicator) ────────────────
-
-function TopBar({ phase }) {
-  const phases = ['früh', 'Mittag', 'Nachm.', 'Abend'];
-  const moment = momentLabel(phase);
-  const date = dateLabelDe();
-  return (
-    <div style={{
-      position: 'absolute', top: 56, left: 0, right: 0, padding: '0 22px',
-      display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between',
-      pointerEvents: 'none',
-    }}>
-      <div>
-        <div style={{
-          font: `700 11px/1 ${T.fLabel}`, letterSpacing: '.22em',
-          textTransform: 'uppercase', color: T.goldDeep, marginBottom: 5,
-        }}>Heute mit Ronki</div>
-        <div style={{
-          font: `700 19px/1.1 ${T.fHead}`, color: T.ink, letterSpacing: '-0.01em',
-        }}>{date}, {moment}</div>
-      </div>
-      <div style={{ display: 'flex', gap: 4, paddingBottom: 5 }}>
-        {phases.map((m, i) => {
-          const active = m.toLowerCase().startsWith(moment.toLowerCase().slice(0, 3));
-          return (
-            <div key={i} style={{
-              width: 5, height: active ? 18 : 11,
-              background: active ? T.goldDeep : 'rgba(180,83,9,.25)',
-              borderRadius: 2,
-              transition: REDUCE_MOTION ? 'none' : 'height 600ms ease, background 600ms ease',
-            }} />
-          );
-        })}
+    <div className="bb-frame relative w-full" style={{ aspectRatio: '16 / 10', overflow: 'hidden' }}>
+      <SceneLoop poster={`${ART}scenes/morgen.webp`} objectPosition="50% 54%" priority />
+      <div className="absolute" style={{ top: 12, left: 12, zIndex: 2 }}>
+        <SunSticker rotate={-3} style={{ fontSize: 20, padding: '8px 14px 7px' }}>
+          {dateLabelDe()}, {momentLabel(phase)}
+        </SunSticker>
       </div>
     </div>
   );
 }
 
-// ── BlockStrip — one anchor section ──────────────────────────────
+// ── BlockStrip: one anchor section ──────────────────────────────
 
-function BlockStrip({ title, phase, blockId, quests, isCurrent, allDone, collapse, variant, stageIdx, onTap, onDark }) {
+function BlockStrip({ title, phase, blockId, quests, isCurrent, allDone, collapse, variant, stageIdx, onTap }) {
   const hint =
     allDone   ? 'vorbei' :
     isCurrent ? 'jetzt' :
@@ -428,16 +355,19 @@ function BlockStrip({ title, phase, blockId, quests, isCurrent, allDone, collaps
                 phase === 'morning' && blockId === 'bedtime'   ? 'später' :
                 blockId === 'morning' && phase !== 'morning'   ? 'vorbei' :
                                                                  `${quests.length} Sachen`;
-  const sectionColor = onDark ? T.gold : (isCurrent ? T.goldDeep : '#a07840');
+  const icon = blockId === 'morning' ? 'sun' : blockId === 'afternoon' ? 'leaf' : 'moon';
+  const iconColor = blockId === 'morning' ? 'var(--color-sun)' : blockId === 'afternoon' ? 'var(--color-leaf)' : 'var(--color-night)';
 
   return (
     <>
-      <StripSection color={sectionColor} hint={hint} onDark={onDark}>{title}</StripSection>
+      <StripSection icon={icon} iconColor={iconColor} hint={hint} current={isCurrent && !allDone} done={allDone}>
+        {title}
+      </StripSection>
       {collapse ? (
-        <CollapsedGrid quests={quests} blockId={blockId} variant={variant} stageIdx={stageIdx} />
+        <CollapsedGrid quests={quests} />
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {quests.map((q, i) => {
+        <div className="flex flex-col" style={{ gap: 14 }}>
+          {quests.map((q) => {
             const sceneState = q.done ? 'past' : (isCurrent && firstUndone(quests)?.id === q.id ? 'now' : 'future');
             return (
               <StripScene
@@ -447,7 +377,6 @@ function BlockStrip({ title, phase, blockId, quests, isCurrent, allDone, collaps
                 phase={blockId}
                 variant={variant}
                 stageIdx={stageIdx}
-                onDark={onDark}
                 onTap={onTap}
               />
             );
@@ -462,43 +391,33 @@ function firstUndone(list) {
   return list.find(q => !q.done);
 }
 
-// ── StripSection (eyebrow + script hint + dotted divider) ────────
+// ── StripSection (display headline, hand hint, drawn dashed line) ─
 
-function StripSection({ children, color, hint, onDark }) {
+function StripSection({ children, icon, iconColor, hint, current, done }) {
   return (
-    <div style={{
-      display: 'flex', alignItems: 'baseline', gap: 10,
-      margin: `24px 4px 12px`,
-    }}>
-      <div style={{
-        font: `800 13px/1.05 ${T.fLabel}`, color, letterSpacing: '.12em',
-        textTransform: 'uppercase',
-      }}>{children}</div>
+    <div className="flex items-center" style={{ gap: 10, margin: '26px 2px 12px' }}>
+      <span className="flex items-center" style={{ color: iconColor }}>
+        <DoodleIcon name={icon} size={26} filled={icon !== 'leaf'} />
+      </span>
+      <h2 className="bb-display" style={{ fontSize: 26, margin: 0 }}>{children}</h2>
       {hint && (
-        <div style={{
-          font: `500 17px/1.05 ${T.fScript}`,
-          color: onDark ? 'rgba(254,243,199,.88)' : T.inkScript,
-        }}>
+        <span
+          className={`bb-hand ${current ? 'text-cobalt' : done ? 'text-leaf-deep' : 'text-ink-soft'}`}
+          style={{ fontSize: 18, lineHeight: 1, paddingTop: 2 }}
+        >
           {hint}
-        </div>
+        </span>
       )}
-      <div style={{
-        flex: 1, height: 1,
-        background: onDark
-          ? 'repeating-linear-gradient(90deg, rgba(252,211,77,.4) 0 3px, transparent 3px 6px)'
-          : 'repeating-linear-gradient(90deg, rgba(184,140,80,.4) 0 3px, transparent 3px 6px)',
-      }} />
+      <svg aria-hidden="true" focusable="false" className="flex-1" height="6" preserveAspectRatio="none" viewBox="0 0 100 6" style={{ minWidth: 24 }}>
+        <path d="M1 3.5 C 25 2 50 5 99 3" fill="none" stroke="var(--color-ink)" strokeWidth="2.5" strokeLinecap="round" strokeDasharray="5 6" vectorEffect="non-scaling-stroke" />
+      </svg>
     </div>
   );
 }
 
-// ── StripScene (one task as a comic panel) ───────────────────────
+// ── StripScene (one task as a paper card) ────────────────────────
 
-function StripScene({ quest, state, phase, variant, stageIdx, onDark, onTap }) {
-  // Past-state fade is applied to the ART FRAME only — text stays at
-  // full opacity so a 6yo can still read the quest name on review.
-  const artOpacity = state === 'past' ? 0.62 : 1;
-  const artSaturate = state === 'past' ? 0.78 : 1;
+function StripScene({ quest, state, phase, variant, stageIdx, onTap }) {
   const seed = useMemo(() => {
     let h = 0;
     for (const c of quest.id) h = (h * 31 + c.charCodeAt(0)) | 0;
@@ -509,178 +428,149 @@ function StripScene({ quest, state, phase, variant, stageIdx, onDark, onTap }) {
     state === 'past' ? ', fertig' :
     state === 'now'  ? ', jetzt dran' :
                        ', später';
-
-  // Card gradient lifted Apr 2026 to match the page-bg lift — was
-  // #4a3a6a → #2a1f3a, crushed against the new #4a3d62 bottom of the
-  // page. Lifted to dusky-velvet so the cards read as a soft layer
-  // floating on the bedtime sky, not sinking into pitch.
-  const baseBg =
-    onDark
-      ? 'linear-gradient(135deg, #6a5a82 0%, #4a3a5a 100%)'
-      : phase === 'morning'   ? 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)'
-      : phase === 'afternoon' ? 'linear-gradient(135deg, #f4e2c8 0%, #ead09a 100%)'
-                              : 'linear-gradient(135deg, #6a5a82 0%, #4a3a5a 100%)';
+  const done = state === 'past';
+  const now = state === 'now';
 
   return (
-    <button
-      type="button"
-      onClick={(e) => onTap(quest, e)}
-      disabled={state === 'past'}
-      aria-label={`${quest.name || quest.id}${stateAria}`}
-      aria-current={state === 'now' ? 'step' : undefined}
-      className="active:scale-[0.96] transition-transform duration-150"
-      style={{
-        position: 'relative',
-        textAlign: 'left',
-        padding: 0, margin: 0,
-        borderRadius: 14, overflow: 'hidden',
-        border: state === 'now'
-          ? `1.5px solid rgba(252,211,77,.6)`
-          : '1px solid rgba(0,0,0,.06)',
-        boxShadow: state === 'now'
-          ? '0 6px 14px -4px rgba(180,83,9,.4), inset 0 0 0 1.5px rgba(252,211,77,.5)'
-          : '0 2px 6px rgba(0,0,0,.10)',
-        cursor: state === 'past' ? 'default' : 'pointer',
-        background: 'transparent',
-        touchAction: 'manipulation',
-      }}
-    >
-      <div style={{
-        background: baseBg,
-        minHeight: 100,
-        display: 'grid', gridTemplateColumns: '76px 1fr',
-        gap: 12, padding: '12px 14px',
-        position: 'relative',
-      }}>
-        {/* Art frame — past-state desaturate happens here only */}
-        <div style={{
-          width: 76, height: 78, borderRadius: 10,
-          background: onDark ? 'rgba(50,40,80,.6)' : 'rgba(255,255,255,.35)',
-          border: onDark ? '1px solid rgba(252,211,77,.2)' : '1px solid rgba(0,0,0,.08)',
-          position: 'relative', overflow: 'hidden',
-          display: 'grid', placeItems: 'center',
-          opacity: artOpacity, filter: `saturate(${artSaturate})`,
-        }}>
-          <SceneArt
-            quest={quest}
-            phase={phase}
-            state={state}
-            variant={variant}
-            stageIdx={stageIdx}
-          />
-        </div>
-
-        {/* Text */}
-        <div style={{
-          display: 'flex', flexDirection: 'column', justifyContent: 'center',
-          minWidth: 0,
-        }}>
-          <div style={{
-            font: `700 17px/1.25 ${T.fHead}`,
-            color: onDark ? '#fef3c7' : T.warm,
-            letterSpacing: '-0.005em', marginBottom: 4,
-            textDecoration: state === 'past' ? 'line-through' : 'none',
-            textDecorationColor: state === 'past' ? 'rgba(58,40,24,0.35)' : undefined,
-            textDecorationThickness: state === 'past' ? '1.5px' : undefined,
-          }}>
+    <div className="relative" style={{ marginTop: now ? 4 : 0 }}>
+      <PaperCard
+        as="button"
+        tone={done ? 'white' : 'paper'}
+        pad="sm"
+        onClick={(e) => onTap(quest, e)}
+        disabled={done}
+        aria-label={`${quest.name || quest.id}${stateAria}`}
+        aria-current={now ? 'step' : undefined}
+        className="w-full grid items-center gap-3"
+        style={{ gridTemplateColumns: '84px 1fr', padding: 12, opacity: done ? 0.92 : 1 }}
+      >
+        <TaskDoodle quest={quest} phase={phase} state={state} variant={variant} stageIdx={stageIdx} />
+        <div className="min-w-0" style={{ paddingRight: now || done ? 40 : 4 }}>
+          <div
+            className={`font-headline font-bold ${done ? 'text-ink-soft' : 'text-ink'}`}
+            style={{ fontSize: 20, lineHeight: 1.2 }}
+          >
             {quest.name || quest.id}
           </div>
           {line && (
-            <div style={{
-              font: `500 15px/1.4 ${T.fBody}`,
-              color: onDark ? 'rgba(254,243,199,.92)' : T.inkSoft,
-              fontStyle: 'italic',
-              overflow: 'hidden', textOverflow: 'ellipsis',
-              display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
-            }}>{line}</div>
+            <div
+              className="font-body text-ink-soft"
+              style={{
+                fontSize: 16, lineHeight: 1.4, marginTop: 3,
+                overflow: 'hidden', textOverflow: 'ellipsis',
+                display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+              }}
+            >
+              {line}
+            </div>
           )}
         </div>
+      </PaperCard>
 
-        {/* State mark */}
-        {state === 'past' && <PastCheck />}
-        {state === 'now'  && <JetztPill onDark={onDark} />}
-      </div>
-    </button>
-  );
-}
+      {/* The cobalt drawn ring around the current task. */}
+      {now && <CobaltRing />}
 
-function PastCheck() {
-  return (
-    <div aria-hidden="true" style={{
-      position: 'absolute', top: 9, right: 10,
-      width: 18, height: 18, borderRadius: '50%',
-      background: '#86c084', display: 'grid', placeItems: 'center',
-      boxShadow: '0 1px 3px rgba(58,90,42,0.3)',
-    }}>
-      <div style={{
-        width: 6, height: 9, marginTop: -1, marginLeft: -0.5,
-        borderRight: '2px solid #fff', borderBottom: '2px solid #fff',
-        transform: 'rotate(45deg)',
-      }} />
+      {/* State stickers sit on the card's corner. */}
+      {done && (
+        <span className="absolute" style={{ top: -8, right: -6, zIndex: 2 }}>
+          <SunCheck size={36} />
+        </span>
+      )}
+      {now && (
+        <span className="absolute" style={{ top: -12, right: 6, zIndex: 2 }}>
+          <SunSticker rotate={-5}>jetzt</SunSticker>
+        </span>
+      )}
     </div>
   );
 }
 
-function JetztPill({ onDark }) {
+// The hand-drawn cobalt ring from ChoiceTile, drawn around a card.
+function CobaltRing() {
   return (
-    <div style={{
-      position: 'absolute', top: 9, right: 10,
-      font: `800 11px/1 ${T.fLabel}`, letterSpacing: '.14em',
-      color: onDark ? '#5a3a18' : T.goldDeep, textTransform: 'uppercase',
-      background: onDark ? T.gold : 'rgba(252,211,77,.55)',
-      padding: '5px 9px',
-      borderRadius: 6,
-      boxShadow: '0 1px 3px rgba(180,83,9,0.18)',
-    }}>jetzt</div>
+    <svg
+      aria-hidden="true"
+      focusable="false"
+      viewBox="0 0 100 100"
+      preserveAspectRatio="none"
+      className="pointer-events-none absolute"
+      style={{ inset: -9, width: 'calc(100% + 18px)', height: 'calc(100% + 18px)', overflow: 'visible', color: 'var(--color-cobalt)', zIndex: 1 }}
+    >
+      <path
+        d="M22 3 C 45 1 70 2 82 4 C 94 6 98 16 97 30 C 96 50 98 68 96 84 C 95 95 88 98 76 98 C 55 99 34 98 20 97 C 8 96 3 90 3 78 C 2 60 1 40 3 22 C 4 9 10 4 22 3 Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        vectorEffect="non-scaling-stroke"
+      />
+    </svg>
+  );
+}
+
+// The task's marker doodle in a white box; Ronki peeks in on the
+// scenes the designer put him in (waking, homework, pyjama).
+function TaskDoodle({ quest, phase, state, variant, stageIdx, compact = false }) {
+  const kind = artFor(quest);
+  const d = DOODLE[kind] || DOODLE.badge;
+  const inScene = ronkiInScene(quest);
+  const sleepy = phase === 'bedtime' && state !== 'past';
+  const box = compact ? 44 : 84;
+  const icon = compact ? 26 : 46;
+  return (
+    <div
+      aria-hidden="true"
+      className="relative flex items-center justify-center rounded-[22px] bg-white shrink-0"
+      style={{
+        width: box,
+        height: box,
+        border: '2.5px solid var(--color-ink)',
+        color: d.color,
+        opacity: state === 'past' ? 0.6 : 1,
+      }}
+    >
+      <DoodleIcon name={d.name} size={icon} filled={d.filled} />
+      {inScene && !compact && (
+        <span className="absolute" style={{ right: -10, bottom: -10 }}>
+          <MoodChibi size={40} variant={variant} stage={stageIdx} mood={sleepy ? 'tired' : 'normal'} face />
+        </span>
+      )}
+    </div>
   );
 }
 
 // ── CollapsedGrid (past anchors when evening rolls in) ───────────
 
-function CollapsedGrid({ quests, blockId, variant, stageIdx }) {
-  const cols = quests.length === 2 ? 2 : 3;
+function CollapsedGrid({ quests }) {
+  // Two columns: wide enough for a whole "Frühstücken" without a
+  // mid-word break, which reads as a typo to a first grader.
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: 8 }}>
-      {quests.map(q => (
-        <div key={q.id} style={{
-          borderRadius: 9, padding: '8px 8px 7px',
-          background: blockId === 'morning' ? 'rgba(254,243,199,.92)' : 'rgba(244,226,200,.92)',
-          border: '1px solid rgba(0,0,0,.06)',
-          // Past-state fade kept on the wrapper for hierarchy, but no
-          // longer aggressive enough to make labels unreadable.
-          opacity: 0.92,
-          position: 'relative', overflow: 'hidden',
-        }}>
-          <div style={{
-            width: '100%', height: 38, borderRadius: 6,
-            background: 'rgba(245,158,11,.18)',
-            marginBottom: 6, display: 'grid', placeItems: 'center',
-            overflow: 'hidden',
-            opacity: 0.78, filter: 'saturate(0.85)',
-          }}>
-            <div style={{ transform: 'scale(0.78)' }}>
-              <SceneArt quest={q} phase={blockId} state="past" variant={variant} stageIdx={stageIdx} compact />
-            </div>
-          </div>
-          <div style={{
-            font: `700 12px/1.15 ${T.fLabel}`, color: '#5a4a30', letterSpacing: '.02em',
-            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-          }}>{q.name || q.id}</div>
-          {q.done && (
-            <div style={{
-              position: 'absolute', top: 5, right: 5,
-              width: 13, height: 13, borderRadius: '50%',
-              background: '#86c084', display: 'grid', placeItems: 'center',
-            }}>
-              <div style={{
-                width: 4, height: 6, marginTop: -1,
-                borderRight: '1.5px solid #fff', borderBottom: '1.5px solid #fff',
-                transform: 'rotate(45deg)',
-              }} />
-            </div>
-          )}
-        </div>
-      ))}
+    <div className="grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+      {quests.map(q => {
+        const d = DOODLE[artFor(q)] || DOODLE.badge;
+        return (
+          <PaperCard key={q.id} tone="white" pad="sm" className="relative flex flex-col items-center gap-1 text-center min-w-0" style={{ opacity: q.done ? 0.85 : 1 }}>
+            <span style={{ color: d.color }}>
+              <DoodleIcon name={d.name} size={30} filled={d.filled} />
+            </span>
+            <span
+              className="font-headline font-semibold text-ink w-full"
+              style={{
+                fontSize: 16, lineHeight: 1.15, overflowWrap: 'normal',
+                overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical',
+              }}
+            >
+              {q.name || q.id}
+            </span>
+            {q.done && (
+              <span className="absolute" style={{ top: -8, right: -6 }}>
+                <SunCheck size={24} />
+              </span>
+            )}
+          </PaperCard>
+        );
+      })}
     </div>
   );
 }
@@ -688,436 +578,107 @@ function CollapsedGrid({ quests, blockId, variant, stageIdx }) {
 // ── AnchorCompleteCard (morning 100% → expedition) ──────────────
 
 function AnchorCompleteCard({ onOpenExpedition }) {
+  const [burst, setBurst] = useState(true);
   return (
-    <button
-      type="button"
-      onClick={onOpenExpedition}
-      aria-label="Reise verfolgen — Morgen ist gemacht"
-      className="active:scale-[0.96] transition-transform duration-150"
-      style={{
-        width: '100%', marginTop: 18,
-        padding: 0, border: 'none', borderRadius: 16, overflow: 'hidden',
-        cursor: 'pointer',
-        boxShadow: '0 8px 22px -8px rgba(180,90,40,.45)',
-        textAlign: 'left',
-        touchAction: 'manipulation',
-      }}
-    >
-      <div style={{
-        position: 'relative',
-        background: 'linear-gradient(180deg, #b8d8c4 0%, #e8e0c4 60%, #fef3c7 100%)',
-        padding: '18px 18px 22px',
-        minHeight: 132,
-      }}>
-        {/* Tiny forest path silhouette */}
-        <ForestPathStrip />
-        <div style={{
-          position: 'relative', zIndex: 2,
-          font: `800 12px/1 ${T.fLabel}`,
-          letterSpacing: '.16em', textTransform: 'uppercase',
-          color: '#5c2a08', marginBottom: 8,
-        }}>Morgen ist gemacht</div>
-        <div style={{
-          position: 'relative', zIndex: 2,
-          font: `600 17px/1.4 ${T.fHead}`, color: T.warm, fontStyle: 'italic',
-        }}>"Ich geh mal kurz raus. Bin zum Mittag wieder da."</div>
-        <div style={{
-          position: 'relative', zIndex: 2,
-          marginTop: 14,
-          display: 'inline-block',
-          font: `800 13px/1 ${T.fLabel}`,
-          letterSpacing: '.10em', textTransform: 'uppercase',
-          color: '#fef3c7',
-          background: 'linear-gradient(180deg, #5a3a20 0%, #3a2818 100%)',
-          padding: '10px 18px', borderRadius: 999,
-        }}>Reise verfolgen →</div>
+    <PaperCard tone="sun" pad="md" lift className="relative overflow-visible" style={{ marginTop: 20 }}>
+      <StickerBurst active={burst} size={300} count={22} onDone={() => setBurst(false)} />
+      <div className="flex items-center gap-3">
+        <RonkiArt pose="cheer" animated size={96} />
+        <div className="min-w-0 flex-1">
+          <div className="bb-hand text-ink uppercase" style={{ fontSize: 18, lineHeight: 1 }}>Morgen ist gemacht</div>
+          <div className="font-headline font-semibold text-ink" style={{ fontSize: 18, lineHeight: 1.3, marginTop: 6 }}>
+            "Ich geh mal kurz raus. Bin zum Mittag wieder da."
+          </div>
+        </div>
       </div>
-    </button>
+      <div style={{ marginTop: 14 }}>
+        <PillButton full arrow onClick={onOpenExpedition} aria-label="Reise verfolgen, Morgen ist gemacht">
+          Reise verfolgen
+        </PillButton>
+      </div>
+    </PaperCard>
   );
 }
 
-function ForestPathStrip() {
+// ── CheerMoment: burst plus Ronki's happy jump (under 1.5 s) ────
+
+const CHEER_MS = 1400;
+
+function CheerMoment({ cheerKey, big }) {
+  const reduced = useReducedMotion();
+  const [shown, setShown] = useState(0);
+  useEffect(() => {
+    if (!cheerKey) return undefined;
+    setShown(cheerKey);
+    const id = setTimeout(() => setShown(0), CHEER_MS);
+    return () => clearTimeout(id);
+  }, [cheerKey]);
+  if (!shown) return null;
   return (
-    <div aria-hidden="true" style={{
-      position: 'absolute', inset: 0,
-      pointerEvents: 'none',
-      opacity: 0.5,
-    }}>
-      {/* far hill */}
-      <div style={{
-        position: 'absolute', bottom: 22, left: -8, right: -8, height: 28,
-        background: 'linear-gradient(180deg, #6a8a5a 0%, #4a6a3a 100%)',
-        borderRadius: '50% 60% 0 0 / 100% 100% 0 0',
-      }} />
-      {/* path triangle */}
-      <div style={{
-        position: 'absolute', bottom: 0, left: '50%', transform: 'translateX(-50%)',
-        width: 0, height: 0,
-        borderLeft: '60px solid transparent', borderRight: '60px solid transparent',
-        borderBottom: '36px solid #d8b878',
-      }} />
-      {/* tiny trees */}
-      {[
-        { l: '8%', s: 16 }, { l: '24%', s: 20 }, { r: '8%', s: 16 }, { r: '22%', s: 22 },
-      ].map((t, i) => (
-        <div key={i} style={{
+    <div aria-hidden="true" className="pointer-events-none" style={{ position: 'fixed', inset: 0, zIndex: 95 }}>
+      <StickerBurst fixed active size={big ? 460 : 340} count={big ? 34 : 22} />
+      <div
+        key={shown}
+        style={{
           position: 'absolute',
-          bottom: 24,
-          [t.l ? 'left' : 'right']: t.l || t.r,
-          width: t.s, height: t.s + 8,
-          background: 'radial-gradient(ellipse at 50% 60%, #3a5a2a, #2a4a1a)',
-          borderRadius: '50% 50% 20% 20%',
-        }} />
-      ))}
-    </div>
-  );
-}
-
-// ── EndOfDayScene (full-day done → link to Tonight) ──────────────
-
-function EndOfDayScene({ variant, stageIdx, onOpenTonight }) {
-  return (
-    <div style={{
-      position: 'relative', minHeight: '100dvh',
-      paddingTop: 110, paddingBottom: 40,
-    }}>
-      <NightSky />
-      <div style={{
-        position: 'relative', zIndex: 2,
-        textAlign: 'center', padding: '0 24px',
-      }}>
-        <div style={{
-          font: `600 12px/1.1 ${T.fLabel}`, letterSpacing: '.16em',
-          textTransform: 'uppercase', color: 'rgba(254,243,199,.85)',
-          marginBottom: 10,
-        }}>{dateLabelDe()} · zu Ende</div>
-        <div style={{
-          font: `600 32px/1.15 ${T.fScript}`, color: '#fef3c7', letterSpacing: '-0.01em',
-        }}>Ein guter Tag.</div>
+          left: '50%',
+          bottom: 'calc(18% + env(safe-area-inset-bottom, 0px))',
+          transform: 'translateX(-50%)',
+          animation: reduced ? 'rt-cheer-still 1.4s ease-out both' : 'rt-cheer-jump 1.4s ease-out both',
+          transformOrigin: '50% 100%',
+        }}
+      >
+        <RonkiArt pose="cheer" size={big ? 190 : 150} />
       </div>
-
-      <div style={{
-        position: 'relative', zIndex: 2,
-        textAlign: 'center', padding: '16px 28px 0',
-      }}>
-        <div style={{
-          font: `500 16px/1.45 ${T.fBody}`, color: 'rgba(254,243,199,.92)',
-          fontStyle: 'italic',
-        }}>"Wir haben heute alles geteilt. Sogar das Brot mit den Krümeln."</div>
-      </div>
-
-      {/* Sleeping Ronki silhouette */}
-      <div style={{
-        position: 'relative', zIndex: 2,
-        margin: '34px auto 0',
-        width: 110, height: 110,
-        display: 'grid', placeItems: 'center',
-        filter: 'drop-shadow(0 0 16px rgba(252,211,77,.45))',
-      }}>
-        <MoodChibi size={100} variant={variant} stage={stageIdx} mood="müde" bare />
-      </div>
-
-      <div style={{
-        position: 'relative', zIndex: 2,
-        textAlign: 'center', padding: '36px 22px 0',
-      }}>
-        <button
-          type="button"
-          onClick={onOpenTonight}
-          aria-label="Ins Lager — Tonight-Ritual öffnen"
-          className="active:scale-[0.96] transition-transform duration-150"
-          style={{
-            display: 'inline-block',
-            borderRadius: 999,
-            background: 'rgba(252,211,77,.22)',
-            border: '1.5px solid rgba(252,211,77,.65)',
-            padding: '14px 26px',
-            font: `700 14px/1 ${T.fLabel}`, letterSpacing: '.10em',
-            textTransform: 'uppercase', color: '#fef3c7',
-            cursor: 'pointer',
-            touchAction: 'manipulation',
-          }}
-        >
-          ins Lager →
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function NightSky() {
-  // 24 stars, deterministic
-  const stars = useMemo(() => {
-    return Array.from({ length: 24 }, (_, i) => ({
-      top: 8 + (i * 13) % 38,
-      left: (i * 37) % 100,
-      size: 1 + (i % 3) * 0.6,
-      delay: (i * 0.4) % 3,
-    }));
-  }, []);
-  return (
-    <div aria-hidden="true" style={{
-      position: 'absolute', inset: 0,
-      background: 'radial-gradient(ellipse 90% 70% at 50% 65%, #2d1b4e 0%, #1a0f3a 50%, #0a0a2e 100%)',
-      pointerEvents: 'none',
-    }}>
-      {stars.map((s, i) => (
-        <div key={i} style={{
-          position: 'absolute',
-          top: `${s.top}%`, left: `${s.left}%`,
-          width: s.size, height: s.size, borderRadius: '50%',
-          background: 'white',
-          boxShadow: `0 0 ${s.size * 2}px rgba(255,255,255,.6)`,
-          opacity: REDUCE_MOTION ? 0.7 : undefined,
-          animation: REDUCE_MOTION
-            ? 'none'
-            : `rt-twinkle ${3 + (i % 4)}s ease-in-out infinite ${s.delay}s`,
-        }} />
-      ))}
-      <div style={{
-        position: 'absolute', top: 60, right: 38, width: 30, height: 30,
-        borderRadius: '50%',
-        background: 'radial-gradient(circle at 35% 30%, #fef3c7 0%, #fde68a 60%, #f5d28a 100%)',
-        boxShadow: '0 0 20px rgba(254,243,199,.5)',
-      }} />
       <style>{`
-        @keyframes rt-twinkle {
-          0%, 100% { opacity: 0.4; transform: scale(1); }
-          50%      { opacity: 0.95; transform: scale(1.15); }
+        @keyframes rt-cheer-jump {
+          0%   { opacity: 0; transform: translateX(-50%) translateY(12%) scale(0.9); }
+          12%  { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+          30%  { transform: translateX(-50%) translateY(4%) scale(1.06, 0.94); }
+          52%  { transform: translateX(-50%) translateY(-38%) scale(0.96, 1.06); }
+          72%  { transform: translateX(-50%) translateY(0) scale(1.04, 0.96); }
+          84%  { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+          100% { opacity: 0; transform: translateX(-50%) translateY(6%) scale(0.98); }
+        }
+        @keyframes rt-cheer-still {
+          0%   { opacity: 0; }
+          15%  { opacity: 1; }
+          85%  { opacity: 1; }
+          100% { opacity: 0; }
         }
       `}</style>
     </div>
   );
 }
 
-// ── SceneArt — picks the right painted prop per quest ────────────
+// ── EndOfDayScene (full day done → the night loop and Tonight) ───
 
-function SceneArt({ quest, phase, state, variant, stageIdx, compact }) {
-  const inScene = ronkiInScene(quest);
-  const kind = artFor(quest);
-  const sleep = phase === 'bedtime' && state !== 'past';
-
-  // Aufstehen + Hausaufgaben + Pyjama get Ronki *inside* the scene.
-  if (inScene) {
-    if (kind === 'pajama') {
-      return (
-        <div style={{ position: 'relative', width: 56, height: 60, display: 'grid', placeItems: 'center' }}>
-          <PajamaArt />
-          <div style={{ position: 'absolute', bottom: -2, right: -4, transform: 'translateZ(0)' }}>
-            <MoodChibi size={compact ? 22 : 30} variant={variant} stage={stageIdx} mood="müde" bare />
+function EndOfDayScene({ onClose, onOpenTonight }) {
+  return (
+    <div className="relative bg-night text-white" style={{ minHeight: '100dvh' }}>
+      <SceneLoop
+        poster={`${ART}loops/nacht-poster.webp`}
+        video={`${ART}loops/nacht.mp4`}
+        objectPosition="50% 60%"
+        priority
+      />
+      <div className="relative flex flex-col" style={{ minHeight: '100dvh', zIndex: 2 }}>
+        <TopBar sticky onDark title="" onBack={onClose} backLabel="Zurück zur Höhle" style={{ top: 0 }} />
+        <div className="text-center" style={{ padding: '6px 24px 0' }}>
+          <div className="bb-hand uppercase" style={{ fontSize: 20, lineHeight: 1, color: 'var(--color-sun)' }}>
+            {dateLabelDe()}, zu Ende
           </div>
+          <h1 className="bb-display text-white" style={{ fontSize: 40, marginTop: 10 }}>Ein guter Tag.</h1>
+          <p className="font-headline font-semibold text-white" style={{ fontSize: 20, lineHeight: 1.35, marginTop: 14, maxWidth: 320, marginLeft: 'auto', marginRight: 'auto' }}>
+            "Wir haben heute alles geteilt. Sogar das Brot mit den Krümeln."
+          </p>
         </div>
-      );
-    }
-    if (kind === 'homework') {
-      return (
-        <div style={{ position: 'relative', width: 56, height: 60, display: 'grid', placeItems: 'center' }}>
-          <HomeworkArt />
-          <div style={{ position: 'absolute', bottom: 0, right: 2 }}>
-            <MoodChibi size={compact ? 16 : 22} variant={variant} stage={stageIdx} mood="müde" bare />
-          </div>
+        <div className="mt-auto flex justify-center" style={{ padding: '24px 24px calc(120px + env(safe-area-inset-bottom, 0px))' }}>
+          <PillButton tone="sun" size="lg" arrow onClick={onOpenTonight} aria-label="Ins Lager, Tonight-Ritual öffnen">
+            Ins Lager
+          </PillButton>
         </div>
-      );
-    }
-    if (kind === 'sun') {
-      return (
-        <div style={{ position: 'relative', width: 56, height: 60, display: 'grid', placeItems: 'center' }}>
-          <SunArt />
-          <div style={{ position: 'absolute', bottom: 2, left: 0, right: 0, height: 5, borderRadius: 2, background: '#3a5a3a' }} />
-          <MoodChibi size={compact ? 24 : 34} variant={variant} stage={stageIdx} mood="normal" bare />
-        </div>
-      );
-    }
-  }
-
-  // Plain prop scenes
-  switch (kind) {
-    case 'toothbrush':  return <ToothbrushArt />;
-    case 'shirt':       return <TShirtArt />;
-    case 'book':        return <BookArt />;
-    case 'pajama':      return <PajamaArt />;
-    case 'nightlight':  return <NightlightArt />;
-    case 'sun':         return <SunArt />;
-    case 'plate':       return <PlateArt />;
-    case 'homework':    return <HomeworkArt />;
-    default:            return <Badge sleep={sleep} variant={variant} stageIdx={stageIdx} compact={compact} />;
-  }
-}
-
-// ── Painted prop primitives (ported from designer) ───────────────
-
-function ToothbrushArt() {
-  return (
-    <div style={{
-      width: 18, height: 36, borderRadius: '4px 4px 2px 2px',
-      background: 'linear-gradient(180deg, #7ec0d4 0%, #5a8aa0 100%)',
-      position: 'relative',
-      boxShadow: 'inset -2px -2px 4px rgba(0,0,0,.15), inset 1px 1px 2px rgba(255,255,255,.3)',
-    }}>
-      <div style={{
-        position: 'absolute', top: -4, left: '50%', transform: 'translateX(-50%)',
-        width: 12, height: 6, borderRadius: 2,
-        background: 'repeating-linear-gradient(0deg, #fff 0 1px, transparent 1px 2px)',
-      }} />
-    </div>
-  );
-}
-
-function TShirtArt() {
-  return (
-    <div style={{
-      width: 40, height: 32, position: 'relative',
-      background: 'linear-gradient(180deg, #6aa0c0 0%, #4a7a98 100%)',
-      borderRadius: '6px 6px 0 0',
-      boxShadow: 'inset -2px -3px 6px rgba(0,0,0,.15), inset 1px 1px 2px rgba(255,255,255,.3)',
-    }}>
-      <div style={{
-        position: 'absolute', top: 0, left: -6, width: 10, height: 12,
-        background: 'linear-gradient(180deg, #6aa0c0 0%, #4a7a98 100%)',
-        borderRadius: '4px 0 0 4px',
-      }} />
-      <div style={{
-        position: 'absolute', top: 0, right: -6, width: 10, height: 12,
-        background: 'linear-gradient(180deg, #6aa0c0 0%, #4a7a98 100%)',
-        borderRadius: '0 4px 4px 0',
-      }} />
-      <div style={{
-        position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)',
-        width: 14, height: 5, background: '#3a6080', borderRadius: '0 0 7px 7px',
-      }} />
-    </div>
-  );
-}
-
-function HomeworkArt() {
-  return (
-    <div style={{
-      width: 40, height: 28, position: 'relative',
-      background: 'linear-gradient(180deg, #f9eed8 0%, #e8d4a8 100%)',
-      borderRadius: 2,
-      boxShadow: '0 2px 4px rgba(60,40,20,.3), inset -1px -2px 3px rgba(0,0,0,.1)',
-      transform: 'rotate(-3deg)',
-    }}>
-      {[0,1,2,3].map(i => (
-        <div key={i} style={{
-          position: 'absolute', top: 5 + i * 5, left: 5, right: 5,
-          height: 1, background: 'rgba(140,100,40,.3)',
-        }} />
-      ))}
-      <div style={{
-        position: 'absolute', top: -4, right: -8,
-        width: 22, height: 4,
-        background: 'linear-gradient(90deg, #d97706 0%, #f5a830 80%, #5a3a20 100%)',
-        borderRadius: 1,
-        transform: 'rotate(-25deg)',
-      }} />
-    </div>
-  );
-}
-
-function BookArt() {
-  return (
-    <div style={{
-      width: 30, height: 36, position: 'relative',
-      background: 'linear-gradient(90deg, #a06840 0%, #7a4818 100%)',
-      borderRadius: '2px 4px 4px 2px',
-      boxShadow: 'inset -2px -2px 5px rgba(0,0,0,.3)',
-    }}>
-      <div style={{
-        position: 'absolute', top: 3, left: 3, right: 3, bottom: 3,
-        background: '#f9eed8', borderRadius: 1,
-      }}>
-        {[0,1,2].map(i => (
-          <div key={i} style={{
-            position: 'absolute', top: 6 + i * 6, left: 4, right: 4,
-            height: 1, background: 'rgba(140,100,40,.5)',
-          }} />
-        ))}
       </div>
     </div>
-  );
-}
-
-function PajamaArt() {
-  return (
-    <div style={{
-      width: 40, height: 32, position: 'relative',
-      background: 'linear-gradient(180deg, #b89ac8 0%, #8a6aa0 100%)',
-      borderRadius: '6px 6px 0 0',
-      boxShadow: 'inset -2px -3px 6px rgba(0,0,0,.2), inset 1px 1px 2px rgba(255,255,255,.3)',
-    }}>
-      {[0,1,2].map(i => (
-        <div key={i} style={{
-          position: 'absolute', top: 6 + i * 7, left: 0, right: 0,
-          height: 2, background: 'rgba(254,243,199,.4)',
-        }} />
-      ))}
-      <div style={{
-        position: 'absolute', top: 0, left: -6, width: 10, height: 14,
-        background: '#9a7ab8', borderRadius: '4px 0 0 4px',
-      }} />
-      <div style={{
-        position: 'absolute', top: 0, right: -6, width: 10, height: 14,
-        background: '#9a7ab8', borderRadius: '0 4px 4px 0',
-      }} />
-    </div>
-  );
-}
-
-function NightlightArt() {
-  return (
-    <div style={{ width: 26, height: 30, position: 'relative' }}>
-      <div style={{
-        position: 'absolute', bottom: 0, left: 4, right: 4, height: 8,
-        background: 'linear-gradient(180deg, #5a4030 0%, #3a2818 100%)',
-        borderRadius: '2px 2px 4px 4px',
-      }} />
-      <div style={{
-        position: 'absolute', top: 0, left: 0, right: 0, height: 22,
-        background: 'radial-gradient(ellipse at 50% 50%, #fde68a 0%, #f5b840 60%, #d97706 100%)',
-        borderRadius: '50% 50% 30% 30%',
-        boxShadow: '0 0 20px rgba(252,211,77,.7)',
-      }} />
-    </div>
-  );
-}
-
-function SunArt() {
-  return (
-    <div style={{ position: 'relative', width: 32, height: 30 }}>
-      <div style={{
-        position: 'absolute', bottom: 0, left: -4, right: -4, height: 12,
-        background: '#3a5a3a', borderRadius: '50% 50% 0 0',
-      }} />
-      <div style={{
-        position: 'absolute', bottom: 4, left: '50%', transform: 'translateX(-50%)',
-        width: 16, height: 16, borderRadius: '50%',
-        background: 'radial-gradient(circle, #fde68a 0%, #f59e0b 100%)',
-        boxShadow: '0 0 10px rgba(252,211,77,.6)',
-      }} />
-    </div>
-  );
-}
-
-function PlateArt() {
-  return (
-    <div style={{
-      width: 36, height: 36, position: 'relative',
-      background: 'radial-gradient(circle at 30% 30%, #fff 0%, #f4e8d4 30%, #d4b890 100%)',
-      borderRadius: '50%',
-      boxShadow: '0 2px 4px rgba(60,40,20,.25), inset -2px -3px 6px rgba(0,0,0,.15)',
-    }}>
-      <div style={{
-        position: 'absolute', top: 8, left: 8, right: 8, bottom: 10,
-        background: 'radial-gradient(circle at 40% 40%, #d97706 0%, #92400e 80%)',
-        borderRadius: '50%',
-      }} />
-    </div>
-  );
-}
-
-function Badge({ variant, stageIdx, sleep, compact }) {
-  return (
-    <MoodChibi size={compact ? 22 : 36} variant={variant} stage={stageIdx} mood={sleep ? 'müde' : 'normal'} bare />
   );
 }
