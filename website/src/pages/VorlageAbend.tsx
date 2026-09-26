@@ -99,9 +99,9 @@ export default function VorlageAbend() {
                   Zeit ein, als du glaubst zu brauchen.
                 </p>
                 <p>
-                  In den ersten zwei Wochen gehst du noch mit und zeigst aufs Blatt, statt zu
-                  erklären. Danach wird es meistens ruhiger, weil die Reihenfolge nicht mehr
-                  jeden Abend neu verhandelt wird.
+                  Am Anfang gehst du noch mit und zeigst aufs Blatt, statt zu erklären. Bleibt
+                  die Reihenfolge jeden Abend gleich, muss sie nicht jeden Abend neu verhandelt
+                  werden.
                 </p>
               </>
             ),

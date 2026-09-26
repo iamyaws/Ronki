@@ -142,7 +142,7 @@ Supersedes the backlog of the morning section below. Reviews and renders (not in
 - PR 20 (Brevo, draft): waits for Marc's Brevo account, DKIM and key.
 
 **Open with Marc:**
-1. R2-01 and Astra MC-03: the morning page's "Nach ein paar Wochen macht dein Kind die Schritte ..." and FAQ "Nach ein paar Morgen erkennt dein Kind die Schritte allein." (the evening twin was fixed in PR 40).
+1. ~~R2-01 / MC-03 promise lines~~ Fixed on Marc's go (27 Sep): the morning guide section is now "Die ersten Morgen mit dem Blatt" (method, no timeline), the morning FAQ explains the drawing box instead of promising recognition, and the evening "zwei Wochen ... danach ruhiger" line says what keeps the evening calm instead.
 2. Packplan intro line "Dein Kind schaut auf die Karte, nicht zu dir." (Astra would soften; Fable keeps).
 
 **Backlog, in order:**
