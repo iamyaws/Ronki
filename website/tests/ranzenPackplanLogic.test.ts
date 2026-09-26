@@ -1,6 +1,4 @@
 import { describe, it, expect } from 'vitest';
-import { existsSync } from 'node:fs';
-import { resolve } from 'node:path';
 import {
   DAILY_ITEMS,
   EXTRA_ITEMS,
@@ -19,7 +17,12 @@ import {
   type PackPlan,
 } from '../src/lib/ranzen-packplan';
 
-const TASK_ART = resolve(__dirname, '../public/art/bilderbuch/tasks');
+// File names of the drawn task pictures that ship with the site.
+const TASK_ART = new Set(
+  Object.keys(import.meta.glob('../public/art/bilderbuch/tasks/*.webp')).map((path) =>
+    path.split('/').pop(),
+  ),
+);
 
 /** Every extra on every day plus a full free item: the heaviest sheet there is. */
 function worstCasePlan(): PackPlan {
@@ -51,7 +54,7 @@ describe('Ranzen-Packplan catalogue', () => {
       'Mitteilungsheft',
     ]);
     for (const item of [...DAILY_ITEMS, ...EXTRA_ITEMS]) {
-      expect(existsSync(resolve(TASK_ART, item.img)), item.img).toBe(true);
+      expect(TASK_ART.has(item.img), item.img).toBe(true);
     }
   });
 

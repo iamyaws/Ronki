@@ -7,7 +7,8 @@ const LONG_TITLE = 24;
 /**
  * Top of a sheet: wordmark, sun sticker label in Gochi Hand, the Fredoka
  * title, an optional line under it and the "Das ist der Plan von" name
- * line. `host` sits to the right (Ronki with his bubble).
+ * line (`nameLine={false}` leaves it out). `host` sits to the right (Ronki
+ * with his bubble).
  */
 export function SheetHead({
   eyebrow,
@@ -15,12 +16,14 @@ export function SheetHead({
   description,
   heading: Heading = 'h1',
   host,
+  nameLine = true,
 }: {
   eyebrow: string;
   title: string;
   description?: string;
   heading?: 'h1' | 'h2';
   host?: ReactNode;
+  nameLine?: boolean;
 }) {
   return (
     <header className="rs-head">
@@ -31,9 +34,11 @@ export function SheetHead({
           {title}
         </Heading>
         {description && <p className="rs-desc">{description}</p>}
-        <p className="rs-name">
-          Das ist der Plan von <span className="rs-name-line" aria-hidden />
-        </p>
+        {nameLine && (
+          <p className="rs-name">
+            Das ist der Plan von <span className="rs-name-line" aria-hidden />
+          </p>
+        )}
       </div>
       {host}
     </header>
