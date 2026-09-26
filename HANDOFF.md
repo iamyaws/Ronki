@@ -125,6 +125,36 @@ Marc's ask: make the new Bilderbuch design live in the real PWA, benchmarked aga
 
 **Follow-ups.** Parent dashboard and legal pages still carry hard-coded teal accents (readable, not restyled). Freunde, micropedia creatures, mini-games, bosses and birthday scenes keep their old painterly art. The first-breath fire puff is still a gradient. `CaveStyleSheet` keeps the old look. Belohnungsbank copy still names Funkelzeit (pre-existing). Material Symbols still loads from Google for screens outside the core loop. The Profile's Pflege and Erinnerungen segments and the Buch are restyled but not reachable from any tab (pre-existing). Animated WebP on an old iPad and a Fire HD is untested on a real device.
 
+## Where things stand (26 September 2026, evening, website session)
+
+Supersedes the backlog of the morning section below. Reviews and renders (not in git): `C:\Users\öööö\ronki\reviews\`. Code for the builders: `website/src/lib/routine-builder/` (kit.ts shared core, plan.ts morning, evening.ts evening) and `website/src/components/routine-builder/`.
+
+**Done and live (all merged on "merge when green and reviewed", live-checked):**
+- PR 32: drink bottle for Trinkflasche; twelve task pictures; typed "Noch etwas?" items get a picture only when the word names exactly that thing (whole words from explicit lists), otherwise the box to draw in. Astra: two rounds, both matcher layers fixed.
+- PR 38: **morning routine builder** on `/vorlagen/morgenroutine`: 1 to 6 steps from 14 pictures plus one own step, up/down order, new steps land in their morning spot, optional times counted back from the leave time (printed rounded to 5 minutes, only where they change), one A4 sheet, plan only in the link, "Kostenlose Ronki-Karte erstellen" carries the app steps to `/profil-erstellen?morgen=...` which seeds `familyConfig.routine.morning`. Untouched page, sheet and PDF unchanged. Plausible now receives only path and utm tags (tools keep plans and typed text in the URL). Reviews: Astra code + visual (2 rounds), two-lens Claude workflow.
+- PR 39 (app, Marc's go): routine tasks follow the family's saved order (buildDay sets `order` from the list; fireSlots sorts by it). Existing families unchanged. Live marker checked on app.ronki.de.
+- PR 40: **evening builder** on `/vorlagen/abendroutine`, same core; times count back from lights out; "Licht aus" as the last step is the lights-out time itself; `?abend=` seeds `familyConfig.routine.evening`; card page shows both. Evening FAQ no longer promises a timeline.
+- PR 41: evening pictures: bath and shower (paper only), clothes on a chair, glasses into their case. `cut-task-sheet.py --solid NAME` keeps enclosed areas as paint.
+- Art passes 6 to 8 on Higgsfield (logged). **Rule from Marc, 26 Sep: still images go through Astra (Codex image gen), not Higgsfield.**
+
+**In flight:**
+- PR 17 (Umami, draft): waits for Marc's Umami id. Before it merges, Umami must also get only path and utm tags (Umami's before-send hook), the same as the Plausible transform in `website/index.html`.
+- PR 20 (Brevo, draft): waits for Marc's Brevo account, DKIM and key.
+
+**Open with Marc:**
+1. R2-01 and Astra MC-03: the morning page's "Nach ein paar Wochen macht dein Kind die Schritte ..." and FAQ "Nach ein paar Morgen erkennt dein Kind die Schritte allein." (the evening twin was fixed in PR 40).
+2. Packplan intro line "Dein Kind schaut auf die Karte, nicht zu dir." (Astra would soften; Fable keeps).
+
+**Backlog, in order:**
+1. Tool 2 Nachmittagsplan and tool 3 Abend mit zwei Kindern, each with an article (`C:\Users\öööö\ronki\launch\research\2026-09-26-tools-lineup.md`).
+2. App: the parent dashboard's RoutinePicker saves in catalogue order, so a parent who toggles a tile loses a website-seeded order (small app change: keep the saved order when toggling).
+3. Refresh the launch kit's share picture and carousel sheet to the option A sheets.
+4. Marc: Search Console indexing for the Zeitumstellung and Ranzen articles; accounts and first posts; six families for tool tests.
+5. No-email print route above the email form (R2-02).
+6. Watch Gmail for a Supabase pause warning until 16 Oct 2026. Telemetry anon-insert policy. Umami monthly numbers here once live.
+
+**Budget note:** morning builder task: build agent 361k + two-lens review workflow 444k = 805k Claude subagent tokens, 5k over the 800k cap (the workflow ran 144k over its estimate). Evening builder, app order fix and all fix passes done in the main session without subagents. Astra passes on the Codex quota. Higgsfield: 11 credits tonight.
+
 ## Where things stand (26 September 2026, morning)
 
 Supersedes the "Printables redesign" and "Next three tools" paragraphs in the 25 Sep section below. Reviews and renders (not in git): `C:\Users\öööö\ronki\reviews\`.
