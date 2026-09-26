@@ -104,6 +104,17 @@ for i, name in enumerate(names):
             bg |= region
     # swallow the thin anti-aliased seam between background and outline
     bg = ndimage.binary_dilation(bg, iterations=1) & (mn >= 205) & ((mx - mn) <= 18) | bg
+    # A neighbour that reaches over the cell line leaves a small fragment on
+    # the cell edge (the lantern's tassel tip above the scissors). Drop pieces
+    # that touch the edge and are tiny next to the object; loose details
+    # inside the cell, like light rays, never touch the edge and stay.
+    parts, count = ndimage.label(~bg, structure=np.ones((3, 3)))
+    if count > 1:
+        sizes = ndimage.sum(np.ones_like(parts), parts, range(1, count + 1))
+        edge = set(np.unique(np.concatenate([parts[0], parts[-1], parts[:, 0], parts[:, -1]]))) - {0}
+        for lab in edge:
+            if sizes[lab - 1] < 0.05 * sizes.max():
+                bg |= parts == lab
     alpha = np.where(bg, 0, 255).astype(np.uint8)
     rgba = np.dstack([cell.astype(np.uint8), alpha])
     ys, xs = np.nonzero(alpha)

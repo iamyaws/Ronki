@@ -76,7 +76,7 @@ describe('Packplan sheet', () => {
 
   const DAILY_PICTURES = [
     '/art/bilderbuch/tasks/lunchbox.webp',
-    '/art/bilderbuch/tasks/water.webp',
+    '/art/bilderbuch/tasks/bottle.webp',
     '/art/bilderbuch/tasks/pencil-case.webp',
     '/art/bilderbuch/tasks/homework.webp',
   ];
@@ -96,11 +96,19 @@ describe('Packplan sheet', () => {
     expect(plain(donnerstag)).toContain('Wechselsachen');
     expect(plain(donnerstag)).not.toContain('Turnbeutel');
 
-    // The free item gets an empty box to draw in, never a stand-in picture.
+    // A free item the tool knows by name gets its picture.
     const fr = card(container, 'fr');
     expect(plain(fr)).toContain('Kuscheltier');
-    expect(pictures(fr.querySelector('[data-extras]')!)).toEqual([]);
-    expect(fr.querySelectorAll('[data-draw]')).toHaveLength(1);
+    expect(pictures(fr.querySelector('[data-extras]')!)).toEqual(['/art/bilderbuch/tasks/teddy.webp']);
+    expect(fr.querySelectorAll('[data-draw]')).toHaveLength(0);
+  });
+
+  it('gives an unknown free item an empty box to draw in, never a stand-in picture', () => {
+    const { container } = render(<PackplanSheet plan={setFree(defaultPlan(), 'mi', 'Muffins')} />);
+    const mi = card(container, 'mi');
+    expect(plain(mi)).toContain('Muffins');
+    expect(pictures(mi.querySelector('[data-extras]')!)).toEqual([]);
+    expect(mi.querySelectorAll('[data-draw]')).toHaveLength(1);
   });
 
   it('shows the daily items as the main pictures on a day with nothing on top', () => {
@@ -166,8 +174,10 @@ describe('Packplan sheet', () => {
     for (const c of all) {
       const extras = c.querySelector<HTMLElement>('[data-extras]')!;
       expect(extras.dataset.size).toBe('small');
-      expect(pictures(extras)).toHaveLength(EXTRA_ITEMS.length);
-      expect(extras.querySelectorAll('[data-draw]')).toHaveLength(1);
+      // "Geld für den Ausflug mit" is a known word: the purse, not a box.
+      expect(pictures(extras)).toHaveLength(EXTRA_ITEMS.length + 1);
+      expect(pictures(extras)).toContain('/art/bilderbuch/tasks/coin-purse.webp');
+      expect(extras.querySelectorAll('[data-draw]')).toHaveLength(0);
       expect(plain(extras)).toContain('Geld für den Ausflug mit');
     }
   });

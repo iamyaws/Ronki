@@ -119,3 +119,13 @@ Marc's go: "yes, do the light-switch pictures batch" (26 Sep 2026), after Astra 
 | 92 | d650a115 | One 2 x 2 sheet: hand switching a ceiling lamp on; switch plus glowing bulb; hand switching the lamp off with moon and stars; switch plus dark bulb with moon | cut with `scripts/cut-task-sheet.py --grid 2x2`; the two bulb versions composed locally (bulb large, switch small in the lower left corner) into `website/public/art/bilderbuch/tasks/light-on.webp` and `light-off.webp`, so they read at the same size as the other steps |
 
 1 image, 2.75 credits. The cutter now measures the checkerboard grid on the known background and only removes a closed region when its greys follow that grid (the switch rocker's grey shading was being cut before).
+
+## Sixth pass: drink bottle and free-item pictures (26 Sep 2026, website session)
+
+Marc's go: "yes, run the art batch" (26 Sep 2026), after Astra rep 6 found the packing plan's Trinkflasche was a water glass. Prompt shown to Marc before the run. Same model and settings; references: the task sheets 25cf94f7 and 715bff1f.
+
+| # | Job | What | File |
+|---|---|---|---|
+| 93 | 329d8fe5 | One 4 x 3 sheet: kids' drink bottle, paper lantern on a stick, open coin purse with coins, apple, glue stick, child's safety scissors, sneakers, rubber boots, woolly hat with gloves, chestnuts, sun hat, small day backpack | cut with `scripts/cut-task-sheet.py` into `website/public/art/bilderbuch/tasks/` as `bottle`, `lantern`, `coin-purse`, `apple`, `glue-stick`, `scissors`, `sneakers`, `rubber-boots`, `hat-gloves`, `chestnuts`, `sun-hat`, `backpack` (.webp, 256 px) |
+
+1 image, 2.75 credits, on model at the first try. The cutter now also drops small fragments that touch a cell edge (the lantern's tassel tip reached into the scissors cell); loose details inside a cell, like the lantern's light rays, stay.
