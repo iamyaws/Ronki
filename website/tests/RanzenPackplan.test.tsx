@@ -317,7 +317,7 @@ describe('Ranzen-Packplan page', () => {
     const description = document.querySelector('meta[name="description"]')?.getAttribute('content');
     expect(description).toBeTruthy();
     expect(description!.length).toBeLessThan(160);
-    expect(description).not.toContain('—');
+    expect(description).not.toContain(String.fromCharCode(0x2014));
     expect(prerenderSource).toContain(`path: '${PAGE_PATH}'`);
     expect(prerenderSource).toContain(`title: '${TOOL_TITLE}'`);
     expect(prerenderSource).toContain(description!);

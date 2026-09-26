@@ -70,9 +70,15 @@ export const WEEKDAYS: ReadonlyArray<{ id: WeekdayId; label: string }> = [
 
 export const DAILY_ITEMS: ReadonlyArray<PackItem<DailyItemId>> = [
   { id: 'brotdose', code: 'b', label: 'Brotdose', img: 'lunchbox.webp' },
-  { id: 'trinkflasche', code: 't', label: 'Trinkflasche', img: 'water.webp' },
+  { id: 'trinkflasche', code: 't', label: 'Trinkflasche', printLabel: `Trink${SHY}flasche`, img: 'water.webp' },
   { id: 'maeppchen', code: 'm', label: 'Mäppchen', img: 'pencil-case.webp' },
-  { id: 'hausaufgabenheft', code: 'h', label: 'Hausaufgabenheft', img: 'homework.webp' },
+  {
+    id: 'hausaufgabenheft',
+    code: 'h',
+    label: 'Hausaufgabenheft',
+    printLabel: `Haus${SHY}aufgaben${SHY}heft`,
+    img: 'homework.webp',
+  },
 ];
 
 export const EXTRA_ITEMS: ReadonlyArray<PackItem<ExtraItemId>> = [
@@ -84,7 +90,7 @@ export const EXTRA_ITEMS: ReadonlyArray<PackItem<ExtraItemId>> = [
   { id: 'hausschuhe', code: 'p', label: 'Hausschuhe', printLabel: `Haus${SHY}schuhe`, img: 'slippers.webp' },
   { id: 'wechselsachen', code: 'w', label: 'Wechselsachen', printLabel: `Wechsel${SHY}sachen`, img: 'spare-clothes.webp' },
   { id: 'regenjacke', code: 'r', label: 'Regenjacke', printLabel: `Regen${SHY}jacke`, img: 'rain-jacket.webp' },
-  { id: 'mitteilungsheft', code: 'z', label: 'Mitteilungsheft', printLabel: `Mitteilungs${SHY}heft`, img: 'school-letter.webp' },
+  { id: 'mitteilungsheft', code: 'z', label: 'Mitteilungsheft', printLabel: `Mit${SHY}tei${SHY}lungs${SHY}heft`, img: 'school-letter.webp' },
 ];
 
 /** Picture for the free item: the Ranzen itself. */

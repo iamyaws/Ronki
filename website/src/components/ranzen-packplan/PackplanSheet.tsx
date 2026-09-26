@@ -115,6 +115,7 @@ function DayCard({ plan, day, label }: { plan: PackPlan; day: WeekdayId; label: 
             className="pp-extras"
             data-extras
             data-size={size}
+            data-count={count}
             aria-label="Heute dazu"
             style={{ '--pp-cols': cols } as CSSProperties}
           >

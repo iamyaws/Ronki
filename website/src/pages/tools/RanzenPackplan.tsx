@@ -171,12 +171,13 @@ export default function RanzenPackplan() {
                 <p className="text-sm text-ink/70 leading-relaxed">
                   Das kommt jeden Tag mit. Tipp an, was bei euch nicht dazugehört.
                 </p>
-                <div className="mt-4 flex flex-wrap gap-2.5">
+                <div className="mt-4 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
                   {DAILY_ITEMS.map((item) => (
-                    <Chip
+                    <Tile
                       key={item.id}
                       img={item.img}
                       label={item.label}
+                      shown={item.printLabel}
                       pressed={plan.daily.includes(item.id)}
                       onClick={() => setPlan((prev) => toggleDaily(prev, item.id))}
                       large
@@ -195,7 +196,7 @@ export default function RanzenPackplan() {
                     <fieldset
                       key={day.id}
                       aria-labelledby={`pp-day-${day.id}`}
-                      className="rounded-[22px] border-[2.5px] border-ink/15 p-4 sm:p-5"
+                      className="rounded-[22px] border-[2.5px] border-ink/15 p-3 sm:p-5"
                     >
                       <h3
                         id={`pp-day-${day.id}`}
@@ -203,12 +204,13 @@ export default function RanzenPackplan() {
                       >
                         {day.label}
                       </h3>
-                      <div className="mt-3 flex flex-wrap gap-2">
+                      <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-5">
                         {EXTRA_ITEMS.map((item) => (
-                          <Chip
+                          <Tile
                             key={item.id}
                             img={item.img}
                             label={item.label}
+                            shown={item.printLabel}
                             pressed={plan.days[day.id].extras.includes(item.id)}
                             onClick={() => setPlan((prev) => toggleExtra(prev, day.id, item.id))}
                           />
@@ -375,16 +377,22 @@ function Step({
   );
 }
 
-/** A picture you tap on and off. */
-function Chip({
+/**
+ * A picture you tap on and off, the same drawing the card prints. `shown`
+ * is the label with soft hyphens for narrow tiles; the button is named by
+ * the plain label.
+ */
+function Tile({
   img,
   label,
+  shown,
   pressed,
   onClick,
   large = false,
 }: {
   img: string;
   label: string;
+  shown?: string;
   pressed: boolean;
   onClick: () => void;
   large?: boolean;
@@ -393,10 +401,11 @@ function Chip({
     <button
       type="button"
       aria-pressed={pressed}
+      aria-label={label}
       onClick={onClick}
-      className={`inline-flex items-center gap-2 rounded-2xl border-[2.5px] py-1 pl-1.5 pr-3 font-display font-semibold text-ink transition-colors ${
-        large ? 'text-base' : 'text-sm'
-      } ${pressed ? 'border-ink bg-sky-wash' : 'border-ink/15 bg-white text-ink/70 hover:border-ink/50'}`}
+      className={`relative flex min-w-0 flex-col items-center gap-1 rounded-2xl border-[2.5px] px-1.5 pb-2 pt-2.5 text-center font-display font-semibold leading-tight [hyphens:manual] [overflow-wrap:normal] transition-colors ${
+        large ? 'text-sm sm:text-base' : 'text-xs sm:text-sm'
+      } ${pressed ? 'border-ink bg-sky-wash text-ink' : 'border-ink/15 bg-white text-ink/65 hover:border-ink/50'}`}
     >
       <img
         src={`${TASK_ART_PATH}${img}`}
@@ -404,13 +413,15 @@ function Chip({
         width={64}
         height={64}
         draggable={false}
-        className={`${large ? 'h-11 w-11' : 'h-8 w-8'} object-contain transition-opacity ${
+        className={`${large ? 'h-12 w-12' : 'h-10 w-10'} object-contain transition-opacity ${
           pressed ? '' : 'opacity-45'
         }`}
       />
-      {label}
+      <span aria-hidden className="block max-w-full">
+        {shown ?? label}
+      </span>
       {pressed && (
-        <svg aria-hidden viewBox="0 0 64 64" className="h-4 w-4 text-cobalt">
+        <svg aria-hidden viewBox="0 0 64 64" className="absolute right-1.5 top-1.5 h-4 w-4 text-cobalt">
           <use href="#bb-check" />
         </svg>
       )}
@@ -444,7 +455,7 @@ function ScaledPreview({ children }: { children: ReactNode }) {
     <div
       ref={frame}
       data-testid="pp-preview"
-      className="relative overflow-hidden rounded-[22px] border-[3px] border-ink bg-white"
+      className="relative overflow-hidden rounded-xl border-[3px] border-ink bg-white"
       style={{ height: Math.round(A4_HEIGHT_PX * scale) }}
     >
       <div

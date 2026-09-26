@@ -139,6 +139,9 @@
   color: #040812;
   hyphens: manual;
   -webkit-hyphens: manual;
+  /* Break only at the soft hyphens in the catalogue, never mid-syllable.
+   * scripts/og-ranzen-packplan.mjs --check fails if a label is too wide. */
+  overflow-wrap: normal;
 }
 /* Typed by the parent: may be one long word, so it may break anywhere. */
 .pp-extra--free .pp-extra-label {
@@ -151,6 +154,16 @@
 }
 .pp-extras[data-size='big'] .pp-extra-label {
   font-size: 17px;
+}
+/* One or two things on top: the ones the child must not miss, so bigger. */
+.pp-extras[data-count='1'] .rs-pic,
+.pp-extras[data-count='2'] .rs-pic {
+  width: 112px;
+  height: 112px;
+}
+.pp-extras[data-count='1'] .pp-extra-label,
+.pp-extras[data-count='2'] .pp-extra-label {
+  font-size: 19px;
 }
 .pp-extras[data-size='mid'] {
   gap: 6px 4px;

@@ -75,7 +75,7 @@ describe('Ranzen-Packplan catalogue', () => {
       expect(mode.note.length).toBeGreaterThan(0);
       for (const text of [mode.label, mode.description, mode.note]) {
         expect(text).not.toMatch(/bis wann|Frist|Woche|Tage lang|geschafft/i);
-        expect(text).not.toContain('—');
+        expect(text).not.toContain(String.fromCharCode(0x2014));
       }
     }
   });
