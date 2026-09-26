@@ -8,8 +8,9 @@ not exactly regular). This script removes it:
   3. the checker grid (square size and phase, per axis) is measured on that
      known background; a closed region (a bag handle loop, a gap between
      objects) is background only if its light and dark pixels sit where the
-     grid predicts. Drawn white or grey shading (socks, a switch rocker, a
-     toilet) does not follow the grid and stays.
+     grid predicts and it holds both greys in real shares. Drawn white or grey
+     shading (socks, a switch rocker, a toilet) does not follow the grid, and a
+     single-tone detail inside one square lacks the second grey, so both stay.
 Each object is then trimmed, fitted into 232 px and centred on a 256 px canvas,
 like the existing tasks/*.webp.
 
@@ -92,8 +93,14 @@ for i, name in enumerate(names):
         region = labels == lab
         if bg[region].any() or region.sum() < 80:
             continue
+        # Background only when the region follows the checker grid AND holds both
+        # checker greys in real shares. Grid agreement alone would erase a small
+        # single-tone white detail that happens to sit inside a light square
+        # (Astra code review, PR 26); two tones alone would erase drawn grey
+        # shading such as a switch rocker.
+        dark_share = np.mean(dark_all[sl][region])
         agree = np.mean(dark_all[sl][region] == parity[sl][region])
-        if agree >= 0.85:  # the region follows the checker grid: a patch seen through a gap
+        if agree >= 0.85 and 0.1 <= dark_share <= 0.9:
             bg |= region
     # swallow the thin anti-aliased seam between background and outline
     bg = ndimage.binary_dilation(bg, iterations=1) & (mn >= 205) & ((mx - mn) <= 18) | bg
