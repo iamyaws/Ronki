@@ -27,7 +27,7 @@
 import { useState, useRef, useEffect, FormEvent } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'motion/react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import QRCode from 'qrcode';
 import { PageMeta } from '../components/PageMeta';
 import { PainterlyShell } from '../components/PainterlyShell';
@@ -45,6 +45,13 @@ import {
   buildShareUrl,
   tokenDisplayFragment,
 } from '../lib/profileSetup';
+import {
+  APP_KIND_LABELS,
+  appKindPicture,
+  cleanAppKinds,
+  type AppMorningKind,
+} from '../lib/routine-builder';
+import { TASK_ART_PATH } from '../components/sheet';
 
 type Phase =
   | { kind: 'form' }
@@ -53,6 +60,9 @@ type Phase =
   | { kind: 'error'; message: string };
 
 export default function ProfilErstellen() {
+  // Morning steps carried over from the Morgenroutine page (?morgen=teeth_am,dress).
+  const { search } = useLocation();
+  const morning = cleanAppKinds(new URLSearchParams(search).get('morgen') ?? '');
   const [phase, setPhase] = useState<Phase>({ kind: 'form' });
   const [childName, setChildName] = useState('');
   const [pin, setPin] = useState('');
@@ -97,6 +107,7 @@ export default function ProfilErstellen() {
     const res = await createProfileOnSite({
       childName: trimmedName,
       pin: pin || null,
+      ...(morning.length ? { morning } : {}),
     });
     if (res.ok) {
       trackEvent('ProfilErstellen Success');
@@ -119,7 +130,7 @@ export default function ProfilErstellen() {
     const url = buildShareUrl(phase.token);
     try {
       if (typeof navigator !== 'undefined' && navigator.share) {
-        await navigator.share({ title: 'Ronki — Profil-Karte', url });
+        await navigator.share({ title: 'Ronki: Profil-Karte', url });
         return;
       }
       if (typeof navigator !== 'undefined' && navigator.clipboard) {
@@ -144,8 +155,8 @@ export default function ProfilErstellen() {
   return (
     <PainterlyShell>
       <PageMeta
-        title="Profil-Karte erstellen — Ronki"
-        description="Erstellt eine QR-Karte für euer Kind. Druckt sie aus, klebt sie an den Kühlschrank oder ins Kinderzimmer — ein Scan und Ronki ist da."
+        title="Profil-Karte erstellen · Ronki"
+        description="Erstellt eine QR-Karte für euer Kind. Druckt sie aus, klebt sie an den Kühlschrank oder ins Kinderzimmer. Ein Scan und Ronki ist da."
         canonicalPath="/profil-erstellen"
         noindex
       />
@@ -178,7 +189,7 @@ export default function ProfilErstellen() {
                 Ein kurzes Formular, dann generieren wir eine Karte mit
                 QR-Code. Druckt sie aus, klebt sie an den Kühlschrank
                 oder ins Kinderzimmer. Euer Kind scannt sie auf dem
-                Tablet — und Ronki ist da.
+                Tablet, und Ronki ist da.
               </p>
             )}
           </motion.div>
@@ -188,6 +199,7 @@ export default function ProfilErstellen() {
       {(phase.kind === 'form' || phase.kind === 'submitting' || phase.kind === 'error') && (
         <section className="px-6 pb-16">
           <div className="max-w-md mx-auto">
+            {morning.length > 0 && <CarriedSteps kinds={morning} />}
             <form
               onSubmit={handleSubmit}
               className="rounded-3xl bg-cream/60 border border-teal-dark/10 p-6 sm:p-8 shadow-sm"
@@ -203,7 +215,7 @@ export default function ProfilErstellen() {
                   value={childName}
                   onChange={(e) => setChildName(e.target.value)}
                   className="w-full rounded-xl px-4 py-3 bg-white border border-teal-dark/15 text-base text-ink focus:outline-none focus:border-teal focus:ring-2 focus:ring-teal/20"
-                  placeholder="z. B. Louis"
+                  placeholder="Vorname oder Spitzname"
                   maxLength={40}
                 />
               </label>
@@ -253,7 +265,7 @@ export default function ProfilErstellen() {
 
               <p className="text-xs text-ink/55 mt-5 leading-relaxed">
                 Keine E-Mail nötig. Keine Werbung. Der QR-Code ist
-                der einzige Weg in das Profil — bewahrt die Karte gut
+                der einzige Weg in das Profil. Bewahrt die Karte gut
                 auf. Verloren? Auf dieser Seite eine neue erstellen.
               </p>
             </form>
@@ -362,5 +374,43 @@ export default function ProfilErstellen() {
 
       <style>{profileCardCss + profileCardPreviewCss + profileCardPrintCss}</style>
     </PainterlyShell>
+  );
+}
+
+/**
+ * The morning steps a parent picked on /vorlagen/morgenroutine, shown above
+ * the form so it is clear what the new card starts with.
+ */
+function CarriedSteps({ kinds }: { kinds: AppMorningKind[] }) {
+  return (
+    <section
+      aria-labelledby="carried-steps"
+      className="mb-6 rounded-3xl border border-teal-dark/10 bg-white/70 p-5 sm:p-6"
+    >
+      <h2 id="carried-steps" className="font-display font-semibold text-lg text-ink">
+        Diese Schritte übernimmt Ronki
+      </h2>
+      <ul className="mt-3 flex flex-wrap gap-2">
+        {kinds.map((kind) => (
+          <li
+            key={kind}
+            className="flex items-center gap-2 rounded-2xl border border-teal-dark/10 bg-white py-1.5 pl-1.5 pr-3 text-sm font-display font-semibold text-ink"
+          >
+            <img
+              src={`${TASK_ART_PATH}${appKindPicture(kind)}`}
+              alt=""
+              width={64}
+              height={64}
+              className="h-9 w-9 object-contain"
+            />
+            {APP_KIND_LABELS[kind]}
+          </li>
+        ))}
+      </ul>
+      <p className="mt-3 text-xs text-ink/60 leading-relaxed">
+        Diese Schritte kommen von eurem Blatt, in eurer Reihenfolge. Uhrzeiten, Minuten und
+        eigene Schritte bleiben auf dem Blatt. Im Eltern-Bereich der App könnt ihr sie jederzeit ändern.
+      </p>
+    </section>
   );
 }

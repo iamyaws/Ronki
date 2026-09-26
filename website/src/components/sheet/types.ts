@@ -8,6 +8,10 @@ export interface SheetStep {
   label: string;
   /** Optional hint under the label. */
   hint?: string;
+  /** Clock time the step starts, e.g. "7:05". Printed where the blank "___ Uhr" line would be. */
+  time?: string;
+  /** No picture: an empty dashed box the child draws the step into. */
+  draw?: boolean;
 }
 
 /** Ronki poses in /art/bilderbuch/ronki/. */

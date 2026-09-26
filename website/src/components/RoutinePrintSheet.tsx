@@ -1,7 +1,14 @@
-import { useState } from 'react';
+import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { PageMeta } from './PageMeta';
 import { RoutineSheet, SheetPageStyle, type SheetHost, type SheetStep } from './sheet';
+import {
+  RoutineBuilderControls,
+  RoutineBuilderShare,
+  useRoutinePlan,
+  JumpToBuilder,
+} from './routine-builder';
+import { leaveNote, sheetDescription, sheetSteps } from '../lib/routine-builder';
 
 /* ------------------------------------------------------------------ */
 /* Types                                                               */
@@ -10,7 +17,7 @@ import { RoutineSheet, SheetPageStyle, type SheetHost, type SheetStep } from './
 /** One step: drawn picture (`img` in /art/bilderbuch/tasks/), emoji fallback, label, hint. */
 export type PrintStep = SheetStep;
 
-interface Props {
+interface BaseProps {
   /** Route slug, used for canonical path (e.g. "morgenroutine"). */
   slug: string;
   /** SEO title + on-sheet heading. */
@@ -22,13 +29,6 @@ interface Props {
   /** Legacy per-sheet accent hex. Bilderbuch draws every sheet in ink and
    *  cobalt, so this is kept for the page props but no longer painted. */
   accent?: string;
-  /** Steps (4 to 6, fit one portrait A4). */
-  steps: PrintStep[];
-  /** Optional steps that a switch above the preview puts in front of
-   *  `steps`. The print button prints what the preview shows.
-   *  `description` replaces the sheet line while the switch is on, for a
-   *  line that counts the steps. */
-  extraSteps?: { switchLabel: string; steps: PrintStep[]; description?: string };
   /** Ronki at the top right of the sheet, with an optional bubble. */
   ronki?: SheetHost;
   /** "Geschafft!" band under the list. */
@@ -54,6 +54,33 @@ interface Props {
   children?: React.ReactNode;
 }
 
+type Props = BaseProps &
+  (
+    | {
+        /** Fixed steps (4 to 6, fit one portrait A4). */
+        steps: PrintStep[];
+        builder?: undefined;
+      }
+    | {
+        /** Parents put the steps together themselves: the builder sits
+         *  above the preview, the link and the Ronki card under it. The
+         *  plan lives in the address bar. Morning only for now. */
+        builder: 'morning';
+        steps?: undefined;
+      }
+  );
+
+/** What the page layout needs besides the page props. */
+interface LayoutProps extends BaseProps {
+  steps: PrintStep[];
+  /** Line under the sheet title; `description` stays the meta fallback. */
+  sheetDescription?: string;
+  doneNote?: string;
+  /** Screen-only blocks above and below the preview. */
+  controls?: ReactNode;
+  afterSheet?: ReactNode;
+}
+
 /* ------------------------------------------------------------------ */
 /* Component                                                           */
 /* ------------------------------------------------------------------ */
@@ -64,13 +91,36 @@ interface Props {
  * print everything else is hidden and the sheet becomes one A4 page, the
  * same layout as the PDF (both use components/sheet).
  */
-export function RoutinePrintSheet({
+export function RoutinePrintSheet(props: Props) {
+  if (props.builder) return <BuilderPage {...props} />;
+  return <TemplateLayout {...props} steps={props.steps} />;
+}
+
+/** The morning page with the builder: the sheet follows the plan in the address bar. */
+function BuilderPage(props: BaseProps) {
+  const builder = useRoutinePlan(`/vorlagen/${props.slug}`);
+  return (
+    <TemplateLayout
+      {...props}
+      steps={sheetSteps(builder.plan)}
+      sheetDescription={sheetDescription(builder.plan)}
+      doneNote={leaveNote(builder.plan)}
+      controls={<RoutineBuilderControls builder={builder} />}
+      afterSheet={<RoutineBuilderShare builder={builder} />}
+    />
+  );
+}
+
+function TemplateLayout({
   slug,
   title,
   eyebrow,
   description,
   steps,
-  extraSteps,
+  sheetDescription: shownDescription = description,
+  doneNote,
+  controls,
+  afterSheet,
   ronki,
   done = false,
   clipLane = false,
@@ -82,12 +132,8 @@ export function RoutinePrintSheet({
   metaTitle,
   metaDescription,
   children,
-}: Props) {
-  const [withExtras, setWithExtras] = useState(false);
+}: LayoutProps) {
   const handlePrint = () => window.print();
-  const extrasOn = Boolean(extraSteps && withExtras);
-  const shownSteps = extraSteps && extrasOn ? [...extraSteps.steps, ...steps] : steps;
-  const shownDescription = (extrasOn && extraSteps?.description) || description;
 
   return (
     <>
@@ -134,6 +180,11 @@ export function RoutinePrintSheet({
                 {pageIntro}
               </p>
             )}
+            {controls && (
+              <JumpToBuilder className="mt-5 inline-flex items-center gap-2 font-display font-semibold text-base text-cobalt underline decoration-2 underline-offset-4 hover:text-ink">
+                Eigene Schritte zusammenstellen
+              </JumpToBuilder>
+            )}
           </header>
         )}
 
@@ -141,30 +192,18 @@ export function RoutinePrintSheet({
           <div className="print:hidden max-w-3xl mx-auto px-6 pb-10">{downloadSlot}</div>
         )}
 
+        {controls && <div className="print:hidden max-w-3xl mx-auto px-6 pb-10">{controls}</div>}
+
         <div className="max-w-3xl mx-auto px-6 pb-16 print:max-w-none print:m-0 print:p-0">
-          <div className="print:hidden mb-6">
+          <div id="vorschau" className="print:hidden mb-6 scroll-mt-24">
             <p className="bb-hand text-2xl uppercase text-cobalt leading-none mb-2">
               Vorschau
             </p>
             <p className="text-sm text-ink/70 leading-relaxed">
-              So wird deine Vorlage aussehen. Tipp auf „Drucken" oben rechts. Dein Browser zeigt dir dann die Druckvorschau, wo du auch auf „Als PDF speichern" umschalten kannst.
+              {controls
+                ? 'So wird dein Blatt aussehen. Tipp unter dem Blatt auf „Drucken". Dein Browser zeigt dir dann die Druckvorschau, wo du auch auf „Als PDF speichern" umschalten kannst.'
+                : 'So wird deine Vorlage aussehen. Tipp auf „Drucken" oben rechts. Dein Browser zeigt dir dann die Druckvorschau, wo du auch auf „Als PDF speichern" umschalten kannst.'}
             </p>
-            {extraSteps && (
-              <label className="mt-5 inline-flex cursor-pointer items-center gap-3 font-display font-semibold text-base text-ink">
-                <input
-                  type="checkbox"
-                  role="switch"
-                  className="peer sr-only"
-                  checked={withExtras}
-                  onChange={(event) => setWithExtras(event.target.checked)}
-                />
-                <span
-                  aria-hidden
-                  className="relative h-7 w-12 shrink-0 rounded-full border-[2.5px] border-ink bg-white transition-colors peer-checked:bg-cobalt peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-cobalt after:absolute after:left-0.5 after:top-1/2 after:h-4.5 after:w-4.5 after:-translate-y-1/2 after:rounded-full after:bg-ink after:transition-transform after:content-[''] peer-checked:after:translate-x-5 peer-checked:after:bg-white"
-                />
-                {extraSteps.switchLabel}
-              </label>
-            )}
           </div>
           <div className="bg-white rounded-[28px] overflow-hidden border-[3px] border-ink print:rounded-none print:border-0 print:overflow-visible">
             <RoutineSheet
@@ -172,14 +211,16 @@ export function RoutinePrintSheet({
               title={title}
               description={shownDescription}
               heading={pageTitle ? 'h2' : 'h1'}
-              steps={shownSteps}
+              steps={steps}
               host={ronki}
               done={done}
+              doneNote={doneNote}
               big={bigIcons}
               clipLane={clipLane}
               footerUrl={footerLine}
             />
           </div>
+          {afterSheet}
         </div>
 
         <div className="print:hidden">{children}</div>

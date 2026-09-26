@@ -259,6 +259,21 @@
   height: 12px;
   border-bottom: 2px dotted rgba(4, 8, 18, 0.5);
 }
+/* A filled time from the builder: same place as the blank line, in cobalt. */
+.rs-time--set {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0544b0;
+}
+/* No picture for the family's own step: a dashed box to draw into. The
+ * dashed line matches the packplan's .pp-draw, so it reads as "fill me in". */
+.rs-draw {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 2px dashed rgba(4, 8, 18, 0.45);
+  border-radius: 14px;
+}
 .rs-ring {
   flex: none;
   margin-left: auto;
@@ -297,6 +312,16 @@
 .rs-page--compact .rs-ring {
   width: 46px;
   height: 46px;
+}
+/* Five or six steps with filled clock times: measured in print, six rows
+ * with a time each would push the footer into the bottom margin. */
+.rs-page--compact.rs-page--timed .rs-steps {
+  gap: 8px;
+}
+.rs-page--compact .rs-time--set {
+  margin-top: 1px;
+  font-size: 18px;
+  line-height: 1.1;
 }
 
 /* Toddler: pictures only, bigger everything */

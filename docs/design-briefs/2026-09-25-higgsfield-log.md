@@ -126,7 +126,7 @@ Marc's go: "yes, run the art batch" (26 Sep 2026), after Astra rep 6 found the p
 
 | # | Job | What | File |
 |---|---|---|---|
-| 93 | 329d8fe5 | One 4 x 3 sheet: kids' drink bottle, paper lantern on a stick, open coin purse with coins, apple, glue stick, child's safety scissors, sneakers, rubber boots, woolly hat with gloves, chestnuts, sun hat, small day backpack | cut with `scripts/cut-task-sheet.py` into `website/public/art/bilderbuch/tasks/` as `bottle`, `lantern`, `coin-purse`, `apple`, `glue-stick`, `scissors`, `sneakers`, `rubber-boots`, `hat-gloves`, `chestnuts`, `sun-hat`, `backpack` (.webp, 256 px) |
+| 99 | 329d8fe5 | One 4 x 3 sheet: kids' drink bottle, paper lantern on a stick, open coin purse with coins, apple, glue stick, child's safety scissors, sneakers, rubber boots, woolly hat with gloves, chestnuts, sun hat, small day backpack | cut with `scripts/cut-task-sheet.py` into `website/public/art/bilderbuch/tasks/` as `bottle`, `lantern`, `coin-purse`, `apple`, `glue-stick`, `scissors`, `sneakers`, `rubber-boots`, `hat-gloves`, `chestnuts`, `sun-hat`, `backpack` (.webp, 256 px) |
 
 1 image, 2.75 credits, on model at the first try. The cutter now also drops small fragments that touch a cell edge (the lantern's tassel tip reached into the scissors cell); loose details inside a cell, like the lantern's light rays, stay.
 
@@ -145,3 +145,13 @@ Marc's go: "Yes, run it" (26 Sep 2026), prompt shown to him before the run. Same
 | 98 | 8eac75a8 | Mühlbach, Mondsee, Berggipfel, Rund ums Nest (the Nest window seen from outside) | `t25..t28` |
 
 7 images, 19.25 credits, all on model at the first try (balance 211.5 after). Cut locally: each quarter trimmed of the cream paper, shaved 4 % inside the rounded corners (the app draws its own), 480 px WebP, about 80 KB each.
+
+## Seventh pass: morning step pictures for the routine builder (26 Sep 2026, website session)
+
+Marc's go: plan "morning routine configurator" (26 Sep 2026), prompt in the plan. Same model and settings; references: the task sheets 25cf94f7 and 715bff1f.
+
+| # | Job | What | File |
+|---|---|---|---|
+| 100 | 9ec0f1ca | One 2 x 2 sheet: hairbrush with a comb, a made child's bed, a pet food bowl with a paw print, children's glasses with round frames | cut with `scripts/cut-task-sheet.py --grid 2x2` into `website/public/art/bilderbuch/tasks/hairbrush`, `bed`, `pet-bowl`, `glasses` (.webp, 256 px) |
+
+1 image, 2.75 credits, on model at the first try.

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import {
   VorlagePrint,
@@ -9,9 +9,8 @@ import {
   VORLAGE_PRINT_MORGEN,
   type VorlagePrintTemplate,
 } from '../src/pages/print/VorlagePrint';
-import { TaskPicture } from '../src/components/sheet';
+import { RoutineSheet, TaskPicture } from '../src/components/sheet';
 import VorlageMorgen from '../src/pages/VorlageMorgen';
-import VorlageAbend from '../src/pages/VorlageAbend';
 
 const FOOTER_LINE = 'Ronki hilft beim Dranbleiben. Streaks gibt es hier nicht.';
 
@@ -70,6 +69,32 @@ describe('Print sheets in the Bilderbuch look', () => {
       ['Zähne', 'toothbrush.webp'],
       ['Ranzen', 'bag.webp'],
     ]);
+  });
+
+  it('prints a filled time where the blank line would be, and a box to draw in without a picture', () => {
+    render(
+      <RoutineSheet
+        eyebrow="Morgen"
+        title="Die Morgenroutine"
+        showTimes
+        done
+        doneNote="Für heute fertig. Los um 7:40 Uhr."
+        steps={[
+          { img: 'toothbrush.webp', label: 'Zähne putzen', time: '7:05' },
+          { draw: true, label: 'Medizin nehmen' },
+        ]}
+      />,
+    );
+    const [teeth, own] = sheetSteps();
+    expect(teeth).toHaveTextContent('7:05 Uhr');
+    expect(teeth.querySelector('.rs-time-line')).toBeNull();
+    // No time of its own: the blank line stays.
+    expect(own.querySelector('.rs-time-line')).not.toBeNull();
+    expect(own.querySelectorAll('[data-draw]')).toHaveLength(1);
+    expect(taskPictures(own)).toHaveLength(0);
+    expect(own).toHaveTextContent('Medizin nehmen');
+    expect(screen.getByText('Für heute fertig. Los um 7:40 Uhr.')).toBeInTheDocument();
+    expect(screen.queryByText('Für heute fertig. Ronki jubelt mit.')).toBeNull();
   });
 
   it('falls back to the emoji when a step has no picture', () => {
@@ -166,44 +191,5 @@ describe('On-screen sheet on the template pages', () => {
     ]);
     expect(screen.getByText(FOOTER_LINE)).toBeInTheDocument();
     expect(screen.getByText('Was ist als Nächstes dran?')).toBeInTheDocument();
-  });
-
-  it('adds Aufstehen and Waschen in front when the switch is on', () => {
-    renderMorgen();
-    expect(sheetSteps()).toHaveLength(4);
-    expect(screen.getByText(/^Vier Schritte bis zur Tasche\./)).toBeInTheDocument();
-
-    const toggle = screen.getByRole('switch', { name: 'Aufstehen und Waschen dazunehmen' });
-    expect(toggle).not.toBeChecked();
-    fireEvent.click(toggle);
-    expect(toggle).toBeChecked();
-
-    // The line under the sheet title counts the steps, so it follows the switch.
-    expect(screen.queryByText(/^Vier Schritte bis zur Tasche\./)).toBeNull();
-    expect(screen.getByText(/^Sechs Schritte bis zur Tasche\./)).toBeInTheDocument();
-
-    const rows = sheetSteps();
-    expect(rows).toHaveLength(6);
-    expect(rows[0]).toHaveTextContent('Aufstehen');
-    expect(rows[0]).toHaveTextContent('Licht an, Vorhang auf.');
-    expect(taskPictures(rows[0])[0]).toHaveAttribute('src', '/art/bilderbuch/tasks/wake.webp');
-    expect(rows[1]).toHaveTextContent('Waschen');
-    expect(rows[1]).toHaveTextContent('Gesicht und Hände.');
-    expect(taskPictures(rows[1])[0]).toHaveAttribute('src', '/art/bilderbuch/tasks/wash.webp');
-    expect(rows[2]).toHaveTextContent('Zähne putzen');
-    expect(rows[5]).toHaveTextContent('Tasche packen');
-
-    fireEvent.click(toggle);
-    expect(sheetSteps()).toHaveLength(4);
-  });
-
-  it('offers the switch on the morning page only', () => {
-    render(
-      <MemoryRouter>
-        <VorlageAbend />
-      </MemoryRouter>,
-    );
-    expect(screen.queryByRole('switch')).toBeNull();
-    expect(sheetSteps()).toHaveLength(4);
   });
 });

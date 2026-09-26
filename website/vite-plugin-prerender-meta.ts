@@ -102,7 +102,7 @@ const ROUTES: RouteMeta[] = [
     ogImage: '/og-vorlage-morgenroutine.jpg',
     title: 'Morgenroutine Vorlage für Kinder zum Ausdrucken · Ronki',
     description:
-      'Kostenlose Morgenroutine Vorlage für Kinder zum Ausdrucken. Vier Schritte mit Bildern zum Abhaken, dazu Tipps zum Aufhängen und für Morgen, die schiefgehen.',
+      'Kostenlose Morgenroutine Vorlage für Kinder zum Ausdrucken. Wähl eure Schritte mit Bildern, dein Kind malt die Kreise aus. Dazu Tipps für schwere Morgen.',
   },
   {
     path: '/vorlagen/abendroutine',

@@ -40,7 +40,20 @@
     <script>
       window.plausible = window.plausible || function () { (plausible.q = plausible.q || []).push(arguments) };
       plausible.init = plausible.init || function (i) { plausible.o = i || {} };
-      plausible.init();
+      // Only the path and campaign tags leave the browser: the tools keep
+      // their whole plan (and the family's own words) in the address.
+      plausible.init({
+        transformRequest: function (p) {
+          try {
+            var u = new URL(p.u);
+            Array.from(u.searchParams.keys()).forEach(function (k) {
+              if (!/^utm_|^ref$|^source$/.test(k)) u.searchParams.delete(k);
+            });
+            p.u = u.toString();
+          } catch (e) {}
+          return p;
+        },
+      });
     </script>
   </head>
   <body class="bg-parchment text-ink antialiased">

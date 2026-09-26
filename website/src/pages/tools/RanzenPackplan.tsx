@@ -26,6 +26,7 @@ import { Footer } from '../../components/Footer';
 import { SheetPageStyle, TASK_ART_PATH } from '../../components/sheet';
 import { PackplanSheet } from '../../components/ranzen-packplan/PackplanSheet';
 import { trackEvent } from '../../lib/analytics';
+import { copyText } from '../../lib/clipboard';
 import {
   DAILY_ITEMS,
   EXTRA_ITEMS,
@@ -485,32 +486,6 @@ function ScaledPreview({ children }: { children: ReactNode }) {
       </div>
     </div>
   );
-}
-
-/** Clipboard with a fallback for browsers that block the async API. */
-async function copyText(text: string): Promise<boolean> {
-  try {
-    if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(text);
-      return true;
-    }
-  } catch {
-    // Fall through to the old way.
-  }
-  try {
-    const area = document.createElement('textarea');
-    area.value = text;
-    area.setAttribute('readonly', '');
-    area.style.position = 'fixed';
-    area.style.opacity = '0';
-    document.body.appendChild(area);
-    area.select();
-    const ok = typeof document.execCommand === 'function' && document.execCommand('copy');
-    area.remove();
-    return ok;
-  } catch {
-    return false;
-  }
 }
 
 /*

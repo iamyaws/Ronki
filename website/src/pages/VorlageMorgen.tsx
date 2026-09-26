@@ -1,4 +1,5 @@
 import { RoutinePrintSheet } from '../components/RoutinePrintSheet';
+import { JumpToBuilder } from '../components/routine-builder';
 import { VorlageDownload } from '../components/VorlageDownload';
 import { GuideFaq, GuideLink, VorlageGuide } from '../components/VorlageGuide';
 import { VORLAGE_PRINT_MORGEN } from './print/VorlagePrint';
@@ -6,7 +7,7 @@ import { VORLAGE_PRINT_MORGEN } from './print/VorlagePrint';
 // Keep title and description in sync with website/vite-plugin-prerender-meta.ts.
 const META_TITLE = 'Morgenroutine Vorlage für Kinder zum Ausdrucken · Ronki';
 const META_DESCRIPTION =
-  'Kostenlose Morgenroutine Vorlage für Kinder zum Ausdrucken. Vier Schritte mit Bildern zum Abhaken, dazu Tipps zum Aufhängen und für Morgen, die schiefgehen.';
+  'Kostenlose Morgenroutine Vorlage für Kinder zum Ausdrucken. Wähl eure Schritte mit Bildern, dein Kind malt die Kreise aus. Dazu Tipps für schwere Morgen.';
 
 const FAQ: GuideFaq[] = [
   {
@@ -22,12 +23,12 @@ const FAQ: GuideFaq[] = [
   {
     question: 'Mit oder ohne Belohnung?',
     answer:
-      'Ohne. Der Haken, den dein Kind selbst setzt, ist Rückmeldung genug. Wer für jeden Schritt einen Sticker verspricht, muss die Belohnung meistens bald größer machen, damit sie noch wirkt.',
+      'Ohne. Der Kreis, den dein Kind selbst ausmalt, ist Rückmeldung genug. Wer für jeden Schritt einen Sticker verspricht, muss die Belohnung meistens bald größer machen, damit sie noch wirkt.',
   },
   {
     question: 'Reicht die Seite oder brauche ich das PDF?',
     answer:
-      'Die Seite reicht. Tipp oben auf Drucken, dann druckt dein Browser nur das Blatt. Das PDF ist die fertige Datei mit Feldern für eure Uhrzeiten, die du speichern und immer wieder drucken kannst.',
+      'Die Seite reicht. Tipp unter dem Blatt auf Drucken, dann druckt dein Browser nur das Blatt, mit euren Schritten und Uhrzeiten. Das PDF hat unsere vier Schritte mit leeren Feldern für die Uhrzeit, zum Speichern und immer wieder Drucken.',
   },
 ];
 
@@ -40,7 +41,7 @@ export default function VorlageMorgen() {
       description="Vier Schritte bis zur Tasche. Dein Kind malt den Kreis aus, wenn ein Schritt geschafft ist."
       accent="#0544B0"
       pageTitle="Morgenroutine Vorlage für Kinder zum Ausdrucken"
-      pageIntro="Vier Schritte vom Zähneputzen bis zur fertigen Tasche, mit Bildern, die dein Kind auch ohne Lesen versteht. Druck diese Seite direkt aus, ohne Anmeldung, oder hol dir das fertige PDF."
+      pageIntro="Stell eure eigenen Schritte aus Bildern zusammen oder nimm unsere vier, vom Zähneputzen bis zur fertigen Tasche. Die Bilder versteht dein Kind auch ohne Lesen. Druck das Blatt direkt aus, ohne Anmeldung, oder hol dir unsere vier Schritte als fertiges PDF."
       metaTitle={META_TITLE}
       metaDescription={META_DESCRIPTION}
       downloadSlot={
@@ -49,26 +50,15 @@ export default function VorlageMorgen() {
           title="Die Morgenroutine"
           pdfHref="/vorlagen/morgenroutine.pdf"
           printHref="/print/vorlage-morgen"
+          sheetOnPage
         />
       }
       ronki={VORLAGE_PRINT_MORGEN.ronki}
       done
-      steps={[
-        { img: 'toothbrush.webp', icon: '🪥', label: 'Zähne putzen', hint: 'Oben, unten, außen, innen.' },
-        { img: 'shirt.webp', icon: '👕', label: 'Anziehen', hint: 'Wetter angucken, dann Sachen raussuchen.' },
-        { img: 'plate.webp', icon: '🥣', label: 'Frühstücken', hint: 'Am Tisch, in Ruhe.' },
-        { img: 'bag.webp', icon: '🎒', label: 'Tasche packen', hint: 'Brotdose, Trinken, Hausaufgaben.' },
-      ]}
-      // Off by default: start with four steps, add these once the four sit.
-      extraSteps={{
-        switchLabel: 'Aufstehen und Waschen dazunehmen',
-        description:
-          'Sechs Schritte bis zur Tasche. Dein Kind malt den Kreis aus, wenn ein Schritt geschafft ist.',
-        steps: [
-          { img: 'wake.webp', icon: '☀️', label: 'Aufstehen', hint: 'Licht an, Vorhang auf.' },
-          { img: 'wash.webp', icon: '🧼', label: 'Waschen', hint: 'Gesicht und Hände.' },
-        ],
-      }}
+      // Parents pick their own steps above the preview. Untouched, the sheet
+      // shows the four steps the page always had: Zähne putzen, Anziehen,
+      // Frühstücken, Tasche packen.
+      builder="morning"
     >
       <VorlageGuide
         previewSrc="/vorlagen/previews/morgenroutine.png"
@@ -116,15 +106,19 @@ export default function VorlageMorgen() {
             body: (
               <>
                 <p>
-                  Die vier Schritte sind ein Vorschlag. Kommt bei euch das Frühstück vor dem
-                  Anziehen, dreh die Reihenfolge um. Wichtig ist nur, dass sie jeden Tag gleich
-                  bleibt. Was jeden Tag anders ist, wird jeden Tag neu verhandelt.
+                  Die vier Schritte sind ein Vorschlag. Oben unter{' '}
+                  <JumpToBuilder className="text-cobalt underline decoration-2 underline-offset-4">
+                    Eure Schritte
+                  </JumpToBuilder>{' '}
+                  stellst du euren Morgen selbst zusammen: Schritte dazunehmen, rausnehmen oder
+                  verschieben. Kommt bei euch das Frühstück vor dem Anziehen, schieb es nach oben.
+                  Wichtig ist nur, dass die Reihenfolge jeden Tag gleich bleibt. Was jeden Tag
+                  anders ist, wird jeden Tag neu verhandelt.
                 </p>
                 <p>
-                  Nimm für den Anfang vier Schritte. Wenn die sitzen, nimm Aufstehen und
-                  Waschen dazu. Klo, Hände
-                  waschen oder Schuhe passen meistens in einen Schritt, den es schon gibt. Wenn
-                  dein Kind schon beim Anfangen hängen bleibt, probier die{' '}
+                  Nimm für den Anfang lieber wenige Schritte. Wenn die sitzen, nimm oben einen
+                  dazu, etwa Aufstehen oder Waschen. Mehr als sechs passen nicht auf das Blatt.
+                  Wenn dein Kind schon beim Anfangen hängen bleibt, probier die{' '}
                   <GuideLink to="/vorlagen/adhs">Vorlage bei ADHS</GuideLink>. Sie hat sechs
                   kleine Schritte und eine Wäscheklammer, die zeigt, was gerade dran ist.
                 </p>

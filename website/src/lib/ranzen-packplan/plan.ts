@@ -158,7 +158,13 @@ export function defaultPlan(): PackPlan {
  */
 export function cleanFreeText(raw: string): string {
   // eslint-disable-next-line no-control-regex
-  const folded = raw.replace(/[\u0000-\u001F\u007F-\u009F]/g, ' ').replace(/\s+/g, ' ').trim();
+  const folded = raw
+    // Invisible format characters (zero-width, bidi overrides) would print
+    // mirrored or hidden text; the zero-width joiner stays for emoji.
+    .replace(/[\u200B\u200C\u200E\u200F\u202A-\u202E\u2060-\u2069\uFEFF]/g, '')
+    .replace(/[\u0000-\u001F\u007F-\u009F]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
   return Array.from(folded).slice(0, FREE_TEXT_MAX).join('').trim();
 }
 
