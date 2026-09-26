@@ -45,7 +45,7 @@ body { background: #ffffff; font-family: 'Jakarta', sans-serif; color: #040812; 
   border-radius: 46% 54% 58% 42% / 52% 44% 56% 48%; transform: rotate(-8deg); }
 .sheet { position: absolute; left: 110px; top: 44px; height: 540px; transform: rotate(-3deg);
   border: 3px solid #040812; border-radius: 14px; background: #fff; }
-.tape { position: absolute; left: 240px; top: 26px; width: 130px; height: 38px; background: #fdd134; opacity: .9;
+.tape { position: absolute; left: 172px; top: 26px; width: 130px; height: 38px; background: #fdd134; opacity: .9;
   transform: rotate(4deg); border-radius: 4px; }
 .text { position: absolute; left: 600px; right: 60px; top: 0; bottom: 0; display: flex; flex-direction: column; justify-content: center; }
 .sticker { align-self: flex-start; font-family: 'Gochi'; font-size: 30px; text-transform: uppercase; background: #fdd134; color: #040812;
