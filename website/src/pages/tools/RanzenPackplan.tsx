@@ -248,7 +248,7 @@ export default function RanzenPackplan() {
                 </div>
                 <p className="mt-4 text-sm text-ink/70 leading-relaxed">
                   Für alles bei „Noch etwas?“ bleibt auf der Karte ein leeres Feld. Da malt dein
-                  Kind selbst hinein, was es ist. Trag dort nur Sachen ein, keine Namen, Klassen
+                  Kind vor dem ersten Packen selbst hinein, was es ist. Trag dort nur Sachen ein, keine Namen, Klassen
                   oder Schulen: Der Text steht auch im Link.
                 </p>
               </Step>

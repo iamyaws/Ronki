@@ -119,6 +119,14 @@ describe('Packplan sheet', () => {
     }
   });
 
+  it('gives the daily items their own bigger row when the extras fit in one row', () => {
+    const { container } = render(<PackplanSheet plan={examplePlan()} />);
+    expect(card(container, 'di').querySelector('[data-daily-row]')).not.toBeNull();
+    expect(card(container, 'do').querySelector('[data-daily-row]')).not.toBeNull();
+    const heavy = render(<PackplanSheet plan={worstCasePlan()} />).container;
+    for (const c of cards(heavy)) expect(c.querySelector('[data-daily-row]')).toBeNull();
+  });
+
   it('says "Heute nichts dazu" only on a day that carries nothing at all', () => {
     let plan = defaultPlan();
     for (const id of plan.daily) plan = toggleDaily(plan, id);

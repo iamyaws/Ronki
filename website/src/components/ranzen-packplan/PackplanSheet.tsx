@@ -92,11 +92,16 @@ function DayCard({ plan, day, label }: { plan: PackPlan; day: WeekdayId; label: 
   const onlyDaily = count === 0 && daily.length > 0;
   const main = onlyDaily ? daily : extras;
   const { size, cols } = layoutFor(onlyDaily ? daily.length : count);
+  // With one row of extras there is room to give the daily items their own,
+  // bigger row under the weekday, so one big Turnbeutel does not outrank
+  // four things that are just as needed (Astra PP-02, round 2). Heavier days
+  // keep the compact strip beside the weekday so everything still fits.
+  const dailyRow = !onlyDaily && count <= 4;
 
   return (
     <li className="pp-card" data-day={day}>
       <div className="pp-card-in">
-        <div className="pp-card-top">
+        <div className="pp-card-top" data-daily-row={dailyRow ? '' : undefined}>
           <h3 className="pp-day">{label}</h3>
           {daily.length > 0 && !onlyDaily && (
             <ul className="pp-daily" data-daily aria-label="Jeden Tag dabei">

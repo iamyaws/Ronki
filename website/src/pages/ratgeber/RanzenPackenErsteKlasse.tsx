@@ -76,7 +76,7 @@ export default function RatgeberRanzenPackenErsteKlasse() {
           <p>
             Der Ranzen steht jeden Abend am selben Ort, zum Beispiel im Flur
             neben der Tür. Turnbeutel und Schwimmtasche hängen gleich daneben.
-            Dann wird morgens weniger gesucht und mehr eingepackt.
+            Dann liegt morgens alles an einem Ort.
           </p>
         </StepCard>
         <StepCard n={2} title="Eine Karte pro Schultag">
@@ -91,7 +91,7 @@ export default function RatgeberRanzenPackenErsteKlasse() {
           <p>
             Welche Karte dran ist, entscheidest du. Leg abends die Karte für
             morgen an den Startplatz. Packt ihr erst morgens, nimm die Karte
-            für heute. Dann schaut dein Kind auf die Bilder statt zu dir.
+            für heute. So kann dein Kind auf die Bilder schauen statt zu dir.
           </p>
         </StepCard>
         <StepCard n={4} title="Ein fester Nachfüll-Tag">
@@ -164,7 +164,7 @@ export default function RatgeberRanzenPackenErsteKlasse() {
         ist am Abend die Frage „Was ergänzen wir auf der Karte?“. Vielleicht
         fehlt dort einfach ein Bild. Was nicht in der Auswahl steht, trägst du
         bei „Noch etwas?“ ein. Dafür bekommt die Karte ein leeres Feld, in das
-        dein Kind selbst malt, was mit muss.
+        dein Kind vor dem ersten Packen selbst malt, was mit muss.
       </p>
 
       <h2>Was du heute tun kannst</h2>
