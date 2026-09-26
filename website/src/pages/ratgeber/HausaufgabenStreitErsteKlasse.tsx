@@ -46,7 +46,7 @@ export default function RatgeberHausaufgabenStreitErsteKlasse() {
         Die Tür geht auf, der Ranzen landet in der Ecke. Du fragst nach den
         Hausaufgaben, und die Antwort ist ein Schrei. Am nächsten Tag das
         Gleiche, nur lauter. Hier ist ein Weg, den Nachmittag so zu bauen, dass
-        die Hausaufgaben nicht jeden Tag neu verhandelt werden.
+        die Hausaufgaben einen festen Platz haben.
       </p>
 
       <h2>So klingt das in Elternforen</h2>
@@ -109,7 +109,7 @@ export default function RatgeberHausaufgabenStreitErsteKlasse() {
       <p>
         An manchen Tagen passieren die Hausaufgaben gar nicht zu Hause, sondern
         in der OGS, im Hort oder bei Oma und Opa. Dann gehört genau das auf den
-        Plan: „in der OGS erledigt“ oder „bei Oma, Opa“. So weiß jeder, was an
+        Plan: „in der OGS“ oder „bei Oma, Opa“. So weiß jeder, was an
         welchem Tag dran ist, und der Nachmittag zu Hause holt nicht nach, was
         schon erledigt ist. Den Wochenplan kannst du auch allein ausdrucken und
         weitergeben, ohne die Karten für dein Kind.
@@ -125,26 +125,27 @@ export default function RatgeberHausaufgabenStreitErsteKlasse() {
       <p>
         Der kostenlose{' '}
         <Link to="/tools/nachmittagsplan">Nachmittagsplan</Link> zeigt dir, wenn
-        sich an einem Tag etwas überschneidet oder das Ankommen keinen Platz
-        mehr hat. Gedruckt wird erst, wenn der Plan passt. Was du verschiebst,
-        entscheidest du.
+        sich eingetragene Zeiten an einem Tag überschneiden oder die
+        Hausaufgaben ins Ankommen rutschen. Gedruckt wird erst, wenn die
+        eingetragenen Zeiten zusammenpassen. Was du verschiebst, entscheidest
+        du.
       </p>
 
       <h2>Wenn es knallt: ein Satz statt einer Diskussion</h2>
       <p>
-        Wenn dein Kind schon beim Wort „Hausaufgaben“ laut wird, hilft kein
-        Argument. Such dir einen Satz, den du jeden Tag gleich sagst, zum
-        Beispiel „Jetzt ist Hausaufgabenzeit.“ Kein Warum, kein Wenn. Der Satz
-        steht auch auf der Knackpunkt-Karte des Nachmittagsplans, zusammen mit
-        Ronki.
+        Wenn dein Kind schon beim Wort „Hausaufgaben“ laut wird, unser
+        Vorschlag: Halte die Erklärung kurz und biete eine Pause an. Such dir
+        einen Satz, den du jeden Tag gleich sagst, zum Beispiel „Jetzt ist
+        Hausaufgabenzeit.“ Der Satz steht auch auf der Karte „Bei den
+        Hausaufgaben“ im Nachmittagsplan, zusammen mit Ronki.
       </p>
 
       <h2>Fehler, Lesen üben, Dauer: was du nicht jeden Tag lösen musst</h2>
       <p>
         Die Kinder- und Jugendärzte raten Eltern, ihrem Kind keine Lösungen
         vorzugeben, sondern mögliche Wege aufzuzeigen. Ob du Fehler korrigieren
-        sollst, fragst du am besten die Lehrkraft. Und beim Lesen üben reicht
-        oft ein Satz: „Du liest, ich höre zu.“
+        sollst, fragst du am besten die Lehrkraft. Beim Lesen üben kannst du
+        sagen: „Du liest, ich höre zu.“
       </p>
 
       <Callout type="ausprobieren" label="Für dich">

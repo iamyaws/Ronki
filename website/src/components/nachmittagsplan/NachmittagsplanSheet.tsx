@@ -1,6 +1,7 @@
 import { RONKI_ART_PATH, RonkiHost, SheetFooter, SheetHead, TaskPicture } from '../sheet';
 import {
   dinnerLine,
+  knackPicture,
   knackSentence,
   sheetWeek,
   FREE_DAY,
@@ -14,18 +15,28 @@ import './nachmittagsplan-sheet.css';
 
 export const NACHMITTAG_TITLE = 'Nachmittagsplan';
 export const NACHMITTAG_EYEBROW = 'Unsere Woche';
-export const NACHMITTAG_DESC = 'Erst ankommen: essen, trinken, bewegen. Dann die Hausaufgaben.';
-export const ARRIVE_BUBBLE = 'Erst ankommen.';
+export const NACHMITTAG_DESC = 'Erst ankommen, dann die Hausaufgaben.';
+export const ARRIVE_TITLE = 'Erst ankommen';
+export const ARRIVE_BUBBLE = 'Was brauchst du gerade?';
 export const FOR_YOU = 'Du musst jetzt nichts erklären. Du musst das nicht gewinnen.';
 export const KNACK_TITLE = 'Bei den Hausaufgaben';
 export const UNFIT_NOTE = 'passt noch nicht';
 const FOOTER_URL = 'ronki.de/tools/nachmittagsplan';
 
-/** The three things of arriving, on the strip (small) and on the child's card. */
+/** Small pictures for Ankommen on the week strip. */
 export const ARRIVE_STEPS: ReadonlyArray<{ img: string; label: string }> = [
   { img: 'plate.webp', label: 'Essen' },
   { img: 'water.webp', label: 'Trinken' },
   { img: 'move.webp', label: 'Bewegen' },
+];
+
+/**
+ * What the child can pick on the Ankommen card. Choices, not a list to work
+ * through, so no rings (Astra NP-05); resting is one of them.
+ */
+export const ARRIVE_CHOICES: ReadonlyArray<{ img: string; label: string }> = [
+  ...ARRIVE_STEPS,
+  { img: 'cushion.webp', label: 'Ausruhen' },
 ];
 
 export type SheetVariant = 'blatt' | 'wochenplan';
@@ -38,10 +49,10 @@ export type SheetVariant = 'blatt' | 'wochenplan';
  * a small note for the parent. "wochenplan": the week strip alone, for
  * Oma and Opa or the Hort.
  *
- * Built from the routine-sheet parts (components/sheet). The strip has no
- * rings, no boxes to tick and no sums over the week; the only rings are on
- * the Ankommen card, to colour in for this afternoon. `unfit` marks days
- * whose times do not fit, for the preview on the page only.
+ * Built from the routine-sheet parts (components/sheet). No rings, no boxes
+ * to tick and no sums over the week: the Ankommen card offers choices, the
+ * homework card one sentence with a picture. `unfit` marks days whose times
+ * do not fit, for the preview on the page only.
  */
 export function NachmittagsplanSheet({
   plan,
@@ -57,6 +68,7 @@ export function NachmittagsplanSheet({
   const week = sheetWeek(plan);
   const dinner = dinnerLine(plan);
   const sentence = knackSentence(plan);
+  const knackImg = knackPicture(plan);
   const full = variant === 'blatt';
 
   return (
@@ -103,7 +115,7 @@ export function NachmittagsplanSheet({
             </div>
             <div className="np-cards" data-cards={sentence ? 'two' : 'one'}>
               <ArriveCard />
-              {sentence && <KnackCard sentence={sentence} />}
+              {sentence && <KnackCard sentence={sentence} img={knackImg} />}
             </div>
           </>
         )}
@@ -115,6 +127,11 @@ export function NachmittagsplanSheet({
 }
 
 function DayColumn({ day, unfit }: { day: SheetDay; unfit: boolean }) {
+  // Homework done in the OGS happens before pickup; an appointment the child
+  // goes to straight from school comes before Ankommen.
+  const ogs = day.items.find((item) => item.type === 'homework' && item.where === 'ogs') ?? null;
+  const first = day.appointmentFirst ? (day.items.find((item) => item.type === 'appointment') ?? null) : null;
+  const rest = day.items.filter((item) => item !== ogs && item !== first);
   return (
     <li className="np-day" data-day={day.id} {...(day.free ? { 'data-free': '' } : {})} {...(unfit ? { 'data-unfit': '' } : {})}>
       <h3 className="np-day-name">{day.label}</h3>
@@ -123,6 +140,7 @@ function DayColumn({ day, unfit }: { day: SheetDay; unfit: boolean }) {
         <p className="np-free">{FREE_DAY}</p>
       ) : (
         <>
+          {ogs && <Item item={ogs} />}
           {day.end && (
             <div className="np-block" data-block="end">
               <TaskPicture img="school.webp" />
@@ -130,6 +148,7 @@ function DayColumn({ day, unfit }: { day: SheetDay; unfit: boolean }) {
               <span className="np-time">{day.end}</span>
             </div>
           )}
+          {first && <Item item={first} />}
           {day.arrive && (
             <div className="np-block" data-block="arrive">
               <span className="np-trio" aria-hidden>
@@ -141,7 +160,7 @@ function DayColumn({ day, unfit }: { day: SheetDay; unfit: boolean }) {
               {day.arrive.duration && <span className="np-time">{day.arrive.duration}</span>}
             </div>
           )}
-          {day.items.map((item) => (
+          {rest.map((item) => (
             <Item key={item.type} item={item} />
           ))}
         </>
@@ -189,17 +208,16 @@ function AppointmentTime({ time }: { time: string }) {
   );
 }
 
-/** The child's card: three things to colour in, then Ronki says it once. */
+/** The child's card: what helps to arrive, as choices, and Ronki asks. */
 function ArriveCard() {
   return (
     <div className="np-card np-card--arrive" data-card="ankommen">
-      <h3 className="np-card-title">Ankommen</h3>
+      <h3 className="np-card-title">{ARRIVE_TITLE}</h3>
       <ul className="np-arrive" aria-label="Ankommen">
-        {ARRIVE_STEPS.map((step) => (
+        {ARRIVE_CHOICES.map((step) => (
           <li key={step.img}>
             <TaskPicture img={step.img} />
             <span className="np-arrive-label">{step.label}</span>
-            <span className="rs-ring" aria-hidden />
           </li>
         ))}
       </ul>
@@ -211,10 +229,13 @@ function ArriveCard() {
   );
 }
 
-function KnackCard({ sentence }: { sentence: string }) {
+function KnackCard({ sentence, img }: { sentence: string; img: string | null }) {
   return (
     <div className="np-card np-card--knack" data-card="knackpunkt">
-      <h3 className="np-card-title">{KNACK_TITLE}</h3>
+      <h3 className="np-card-title np-card-title--pic">
+        {img && <TaskPicture img={img} />}
+        <span>{KNACK_TITLE}</span>
+      </h3>
       <div className="np-card-host np-card-host--big">
         <img src={`${RONKI_ART_PATH}happy.webp`} alt="" width={512} height={512} draggable={false} />
         <p className="np-card-bubble" data-knack>

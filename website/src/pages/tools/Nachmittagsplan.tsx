@@ -48,6 +48,7 @@ import {
   WEEKDAYS,
   appointmentEndTimes,
   checkFit,
+  fitNotes,
   decodePlan,
   encodePlan,
   setAppointmentFrom,
@@ -76,7 +77,7 @@ const META_DESCRIPTION =
   'Schule aus, ankommen, Termine, Hausaufgaben: Leg euren Nachmittag auf ein A4-Blatt und sieh, was nicht zusammenpasst. Kostenlos, ohne Anmeldung.';
 
 const LINK_NOTE =
-  'Im Link stehen eure Zeiten, Termine und was ihr bei eigenen Terminen eintragt. Alle mit dem Link können das lesen.';
+  'Im Link stehen eure Zeiten, Termine und was ihr bei eigenen Terminen eintragt. Alle mit dem Link können das lesen. Schick ihn nur an Menschen, die euren Nachmittag kennen dürfen, etwa Oma, Opa oder den Hort.';
 const OWN_NOTE = 'Trag nur einen Termin ein, keine Namen: Der Text steht auch im Link.';
 const PRINT_BLOCKED = 'Drucken geht, sobald alles zusammenpasst. Ändere dafür oben die Zeiten.';
 
@@ -112,6 +113,7 @@ export default function Nachmittagsplan() {
   const query = encodePlan(plan);
   const shareUrl = `${typeof window === 'undefined' ? 'https://www.ronki.de' : window.location.origin}${PAGE_PATH}${query ? `?${query}` : ''}`;
   const problems = checkFit(plan);
+  const notes = fitNotes(plan);
   const fits = problems.length === 0;
   const unfitDays = WEEKDAYS.map((d) => d.id).filter((id) => problems.some((p) => p.day === id));
 
@@ -229,7 +231,7 @@ export default function Nachmittagsplan() {
 
           <div className="mt-12 grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)] lg:items-start">
             <div className="space-y-12 min-w-0">
-              <Step n={1} id="np-step-1" title="Wann ist Schule aus?">
+              <Step n={1} id="np-step-1" title="Wann ist Schule aus, und wie lange dauert das Ankommen?">
                 <p className="text-sm text-ink/70 leading-relaxed">
                   Wann holst du dein Kind ab, oder wann ist es zu Hause? Geht es in die OGS, nimm das
                   Ende der OGS. Einen Tag ohne Zeit lässt du einfach offen.
@@ -260,6 +262,31 @@ export default function Nachmittagsplan() {
                     {firstEnd} Uhr für alle Tage übernehmen
                   </button>
                 )}
+                <div className="mt-8">
+                  <div role="group" aria-labelledby="np-arrive-title">
+                    <h3 id="np-arrive-title" className="font-display font-bold text-xl text-ink">
+                      Wie lange braucht dein Kind zum Ankommen?
+                    </h3>
+                    <p className="mt-1 text-sm text-ink/70 leading-relaxed">
+                      Essen, trinken, bewegen oder ausruhen, bevor die Hausaufgaben kommen. Du kennst
+                      dein Kind: Nimm die Zeit, die bei euch passt. Geht es an einem Tag direkt zu einem
+                      Termin, kommt ihr danach an.
+                    </p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {ARRIVE_MINUTES.map((minutes) => (
+                        <Pill
+                          key={minutes}
+                          pressed={plan.arrive === minutes}
+                          onClick={() =>
+                            update((prev) => setArrive(prev, prev.arrive === minutes ? null : minutes))
+                          }
+                        >
+                          {minutes} Minuten
+                        </Pill>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </Step>
 
               <Step n={2} id="np-step-2" title="Hausaufgaben und Termine">
@@ -286,29 +313,6 @@ export default function Nachmittagsplan() {
 
               <Step n={3} id="np-step-3" title="Für euch alle">
                 <div className="space-y-8">
-                  <div role="group" aria-labelledby="np-arrive-title">
-                    <h3 id="np-arrive-title" className="font-display font-bold text-xl text-ink">
-                      Wie lange braucht dein Kind zum Ankommen?
-                    </h3>
-                    <p className="mt-1 text-sm text-ink/70 leading-relaxed">
-                      Essen, trinken, bewegen, bevor die Hausaufgaben kommen. Du kennst dein Kind:
-                      Nimm die Zeit, die bei euch passt.
-                    </p>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {ARRIVE_MINUTES.map((minutes) => (
-                        <Pill
-                          key={minutes}
-                          pressed={plan.arrive === minutes}
-                          onClick={() =>
-                            update((prev) => setArrive(prev, prev.arrive === minutes ? null : minutes))
-                          }
-                        >
-                          {minutes} Minuten
-                        </Pill>
-                      ))}
-                    </div>
-                  </div>
-
                   <div>
                     <label htmlFor="np-dinner" className="font-display font-bold text-xl text-ink">
                       Wann gibt es Abendessen?
@@ -392,6 +396,16 @@ export default function Nachmittagsplan() {
                     </ul>
                   </div>
                 )}
+                {notes.length > 0 && (
+                  <div className="mt-3 rounded-[22px] border-[2.5px] border-ink/15 bg-white p-4" data-fit-notes>
+                    <p className="font-display font-bold text-base text-ink">Zum Prüfen:</p>
+                    <ul className="mt-2 space-y-1.5 text-sm text-ink/80 leading-relaxed">
+                      {notes.map((note) => (
+                        <li key={`${note.day}-${note.message}`}>{note.message}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
 
               <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -452,7 +466,7 @@ export default function Nachmittagsplan() {
                 </span>
               </div>
               <p className="mt-4 text-sm text-ink/65 leading-relaxed">
-                Der Link ist euer Plan, zum Weiterschicken oder für später. {LINK_NOTE}
+                Der Link ist euer Plan, für später oder zum Weitergeben. {LINK_NOTE}
               </p>
             </aside>
           </div>

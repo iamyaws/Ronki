@@ -37,6 +37,8 @@ import {
   type AfternoonPlan,
   type AppointmentKindId,
   type WeekdayId,
+  knackPicture,
+  fitNotes,
 } from '../src/lib/nachmittagsplan';
 
 // File names of the drawn task pictures that ship with the site.
@@ -112,18 +114,19 @@ describe('Nachmittagsplan catalogue', () => {
   it('has the four places for homework with the words for the sheet', () => {
     expect(HOMEWORK_OPTIONS.map((o) => [o.where, o.label, o.note])).toEqual([
       ['home', 'zu Hause', ''],
-      ['ogs', 'in der OGS', 'in der OGS erledigt'],
+      ['ogs', 'in der OGS', 'in der OGS'],
       ['grandparents', 'bei Oma, Opa', 'bei Oma, Opa'],
       ['none', 'heute keine', 'heute keine'],
     ]);
   });
 
-  it('has the four Knackpunkte with their sentences', () => {
-    expect(KNACKS.map((k) => [k.label, k.sentence])).toEqual([
-      ['Anfangen', 'Jetzt ist Hausaufgabenzeit.'],
-      ['Fehler', 'Fehler dürfen sein. Wir schauen danach zusammen.'],
-      ['Dauer', 'Erst diese Aufgabe, dann eine kurze Pause.'],
-      ['Lesen üben', 'Du liest, ich höre zu.'],
+  it('has the four Knackpunkte with their sentences and a picture each', () => {
+    expect(KNACKS.map((k) => [k.label, k.sentence, k.img])).toEqual([
+      ['Anfangen', 'Jetzt ist Hausaufgabenzeit.', 'homework.webp'],
+      ['Fehler', 'Fehler dürfen sein. Wir schauen danach zusammen.', 'eraser.webp'],
+      // The pause does not wait until the task is done (Astra NP-06).
+      ['Dauer', 'Wir machen eine Pause. Danach schauen wir zusammen weiter.', 'hourglass.webp'],
+      ['Lesen üben', 'Du liest, ich höre zu.', 'book.webp'],
     ]);
   });
 
@@ -143,9 +146,8 @@ describe('Nachmittagsplan catalogue', () => {
   });
 
   it('keeps the share text and uses no em-dash anywhere', () => {
-    expect(SHARE_TEXT).toBe(
-      'Hier könnt ihr Abholen, Pause, Termine und Hausaufgaben auf einem Blatt für euren Nachmittag zusammenstellen.',
-    );
+    // The link carries this family's week: the line is for Oma, Opa or the Hort, not a class chat.
+    expect(SHARE_TEXT).toBe('Unser Nachmittagsplan für die Woche: wann Schule aus ist, Termine und Hausaufgaben.');
     const words = [
       SHARE_TEXT,
       ...KNACKS.flatMap((k) => [k.label, k.description, k.sentence]),
@@ -367,7 +369,7 @@ describe('Nachmittagsplan fit check', () => {
           day: 'mo',
           rule: 'arrive',
           message:
-            'Am Montag beginnen die Hausaufgaben um 12:30, aber ihr seid erst um 12:45 angekommen. Verschieb die Hausaufgaben oder nimm weniger Zeit zum Ankommen.',
+            'Am Montag beginnen die Hausaufgaben um 12:30, aber ihr seid erst um 12:45 angekommen. Verschieb die Hausaufgaben.',
         },
       ]);
     });
@@ -377,10 +379,39 @@ describe('Nachmittagsplan fit check', () => {
       expect(checkFit(plan)).toEqual([]);
     });
 
-    it('uses no arrive time while the parent has not chosen one', () => {
-      const plan = day(defaultPlan(), 'mo', { end: '12:15', at: '12:15' });
+    it('uses no arrive time while the parent has not chosen one, but not the very minute school ends', () => {
+      const plan = day(defaultPlan(), 'mo', { end: '12:15', at: '12:30' });
       expect(plan.arrive).toBeNull();
       expect(checkFit(plan)).toEqual([]);
+      // Claude F3: homework the minute school ends does not fit "erst ankommen".
+      const same = day(defaultPlan(), 'mo', { end: '12:15', at: '12:15' });
+      expect(checkFit(same)).toEqual([
+        {
+          day: 'mo',
+          rule: 'arrive',
+          message:
+            'Am Montag beginnen die Hausaufgaben um 12:15, genau wenn die Schule endet. Wähl oben, wie lange ihr ankommt, oder verschieb die Hausaufgaben.',
+        },
+      ]);
+    });
+
+    it('lets the child go straight from school to an appointment and arrive after it', () => {
+      // School 13:00, Ankommen 60, Sport 13:15 to 14:00: Ankommen after sport, homework from 15:00.
+      let plan = day(defaultPlan(), 'mo', { end: '13:00', kind: 'sport', from: '13:15', to: '14:00', at: '15:00' });
+      plan = setArrive(plan, 60);
+      expect(checkFit(plan)).toEqual([]);
+      expect(sheetDay(plan, 'mo').appointmentFirst).toBe(true);
+      const early = setHomeworkAt(plan, 'mo', '14:30');
+      expect(checkFit(early)).toEqual([
+        {
+          day: 'mo',
+          rule: 'arrive',
+          message: 'Am Montag beginnen die Hausaufgaben um 14:30, aber nach Sport seid ihr erst um 15:00 angekommen. Verschieb die Hausaufgaben.',
+        },
+      ]);
+      // An appointment after Ankommen keeps the usual order.
+      const later = setArrive(day(defaultPlan(), 'mo', { end: '13:00', kind: 'sport', from: '14:00', to: '15:00' }), 60);
+      expect(sheetDay(later, 'mo').appointmentFirst).toBe(false);
     });
 
     it('still reports homework that starts before school ends, arrive set or not', () => {
@@ -456,31 +487,37 @@ describe('Nachmittagsplan fit check', () => {
   });
 
   describe('(d) dinner', () => {
-    it('fails when homework starts at dinner or later', () => {
+    it('fails when homework starts exactly at dinner', () => {
       const plan = setDinner(day(defaultPlan(), 'mo', { at: '18:30' }), '18:30');
       expect(checkFit(plan)).toEqual([
         {
           day: 'mo',
           rule: 'dinner',
-          message: 'Am Montag beginnen die Hausaufgaben um 18:30, aber um 18:30 gibt es Abendessen. Verschieb die Hausaufgaben.',
+          message: 'Am Montag beginnen die Hausaufgaben um 18:30, genau zum Abendessen. Verschieb die Hausaufgaben.',
         },
       ]);
     });
 
-    it('fails when homework runs past dinner', () => {
+    it('fails when homework runs across dinner', () => {
       const plan = setDinner(day(defaultPlan(), 'mo', { at: '18:00', minutes: 45 }), '18:30');
       expect(checkFit(plan)[0].message).toBe(
-        'Am Montag gehen die Hausaufgaben bis 18:45, aber um 18:30 gibt es Abendessen. Verschieb die Hausaufgaben oder nimm weniger Minuten.',
+        'Am Montag überschneiden sich die Hausaufgaben (18:00 bis 18:45) und das Abendessen um 18:30. Verschieb eins davon.',
       );
     });
 
-    it('fails when an appointment runs past dinner', () => {
+    it('fails when an appointment runs across dinner', () => {
       const plan = setDinner(day(defaultPlan(), 'mi', { kind: 'sport', from: '17:30', to: '18:45' }), '18:30');
       expect(checkFit(plan)[0].message).toBe(
-        'Am Mittwoch geht Sport bis 18:45, aber um 18:30 gibt es Abendessen. Verschieb den Termin oder das Abendessen.',
+        'Am Mittwoch überschneiden sich Sport (17:30 bis 18:45) und das Abendessen um 18:30. Verschieb den Termin oder das Abendessen.',
       );
       const late = setDinner(day(defaultPlan(), 'mi', { kind: 'sport', from: '18:30' }), '18:30');
       expect(checkFit(late)[0].rule).toBe('dinner');
+    });
+
+    it('allows homework and appointments after dinner (dinner is a moment, Astra NP-01)', () => {
+      let plan = day(defaultPlan(), 'mo', { at: '18:00', minutes: 30, kind: 'sport', from: '18:45', to: '19:30' });
+      plan = setDinner(plan, '17:00');
+      expect(checkFit(plan)).toEqual([]);
     });
 
     it('passes when everything ends by dinner', () => {
@@ -543,7 +580,7 @@ describe('Nachmittagsplan sheet helpers', () => {
       { type: 'homework', where: 'home', time: '15:30 Uhr', duration: null, note: null },
     ]);
     expect(sheetDay(setHomeworkMinutes(plan, 'mo', 20), 'mo').items[0]).toMatchObject({ duration: '20 Min.' });
-    expect(sheetDay(setHomeworkWhere(plan, 'mo', 'ogs'), 'mo').items[0]).toMatchObject({ note: 'in der OGS erledigt', time: null });
+    expect(sheetDay(setHomeworkWhere(plan, 'mo', 'ogs'), 'mo').items[0]).toMatchObject({ note: 'in der OGS', time: null });
     expect(sheetDay(setHomeworkWhere(plan, 'mo', 'grandparents'), 'mo').items[0]).toMatchObject({ note: 'bei Oma, Opa' });
     expect(sheetDay(setHomeworkWhere(plan, 'mo', 'none'), 'mo').items[0]).toMatchObject({ note: 'heute keine' });
   });
@@ -570,8 +607,21 @@ describe('Nachmittagsplan sheet helpers', () => {
 
   it('gives the Knackpunkt sentence and the dinner line only when chosen', () => {
     expect(knackSentence(defaultPlan())).toBeNull();
-    expect(knackSentence(setKnack(defaultPlan(), 'length'))).toBe('Erst diese Aufgabe, dann eine kurze Pause.');
+    expect(knackSentence(setKnack(defaultPlan(), 'length'))).toBe('Wir machen eine Pause. Danach schauen wir zusammen weiter.');
+    expect(knackPicture(setKnack(defaultPlan(), 'length'))).toBe('hourglass.webp');
+    expect(knackPicture(defaultPlan())).toBeNull();
     expect(dinnerLine(defaultPlan())).toBeNull();
     expect(dinnerLine(setDinner(defaultPlan(), '18:30'))).toBe('Abendessen um 18:30 Uhr');
+  });
+});
+
+describe('fit notes', () => {
+  it('asks the parent to check homework without minutes before an appointment, without blocking', () => {
+    const plan = day(defaultPlan(), 'mo', { end: '13:00', at: '14:00', kind: 'sport', from: '14:05', to: '15:00' });
+    expect(checkFit(plan)).toEqual([]);
+    expect(fitNotes(plan)).toEqual([
+      { day: 'mo', message: 'Für Montag fehlt die Dauer der Hausaufgaben. Prüf selbst, ob bis Sport um 14:05 genug Zeit bleibt.' },
+    ]);
+    expect(fitNotes(setHomeworkMinutes(plan, 'mo', 30))).toEqual([]);
   });
 });

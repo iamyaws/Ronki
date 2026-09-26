@@ -124,7 +124,7 @@ export const HOMEWORK_OPTIONS: ReadonlyArray<{
   note: string;
 }> = [
   { where: 'home', code: 'h', label: 'zu Hause', note: '' },
-  { where: 'ogs', code: 'o', label: 'in der OGS', note: 'in der OGS erledigt' },
+  { where: 'ogs', code: 'o', label: 'in der OGS', note: 'in der OGS' },
   { where: 'grandparents', code: 'g', label: 'bei Oma, Opa', note: 'bei Oma, Opa' },
   { where: 'none', code: 'n', label: 'heute keine', note: 'heute keine' },
 ];
@@ -152,6 +152,8 @@ export const KNACKS: ReadonlyArray<{
   description: string;
   /** The sentence on the card, said to the child. */
   sentence: string;
+  /** Picture on the card, so a child who cannot read knows which moment it is. */
+  img: string;
 }> = [
   {
     id: 'start',
@@ -159,6 +161,7 @@ export const KNACKS: ReadonlyArray<{
     label: 'Anfangen',
     description: 'Schon beim Wort Hausaufgaben geht es los.',
     sentence: 'Jetzt ist Hausaufgabenzeit.',
+    img: 'homework.webp',
   },
   {
     id: 'mistakes',
@@ -166,13 +169,15 @@ export const KNACKS: ReadonlyArray<{
     label: 'Fehler',
     description: 'Ein Fehler, und der Nachmittag kippt.',
     sentence: 'Fehler dürfen sein. Wir schauen danach zusammen.',
+    img: 'eraser.webp',
   },
   {
     id: 'length',
     code: 'd',
     label: 'Dauer',
     description: 'Es zieht sich, und alle werden müde.',
-    sentence: 'Erst diese Aufgabe, dann eine kurze Pause.',
+    sentence: 'Wir machen eine Pause. Danach schauen wir zusammen weiter.',
+    img: 'hourglass.webp',
   },
   {
     id: 'reading',
@@ -180,12 +185,15 @@ export const KNACKS: ReadonlyArray<{
     label: 'Lesen üben',
     description: 'Beim Lesen üben wird es schnell laut.',
     sentence: 'Du liest, ich höre zu.',
+    img: 'book.webp',
   },
 ];
 
-/** The line for the class chat, sent together with the link. */
-export const SHARE_TEXT =
-  'Hier könnt ihr Abholen, Pause, Termine und Hausaufgaben auf einem Blatt für euren Nachmittag zusammenstellen.';
+/**
+ * The line sent with the link. The link carries this family's own week, so
+ * it is written for Oma, Opa or the Hort, not as a tip for a class chat.
+ */
+export const SHARE_TEXT = 'Unser Nachmittagsplan für die Woche: wann Schule aus ist, Termine und Hausaufgaben.';
 
 /* ------------------------------------------------------------------ */
 /* Clock                                                               */
@@ -397,23 +405,42 @@ export interface FitProblem {
 }
 
 /**
+ * True when the child goes from school straight to the appointment: it
+ * starts after school but before Ankommen would be over. Ankommen then
+ * happens after the appointment, on the sheet and in the fit check (no
+ * second time field, no shorter Ankommen; Astra NP-02, Claude F4).
+ */
+export function arrivesAfterAppointment(plan: AfternoonPlan, day: DayPlan): boolean {
+  const { end, appointment } = day;
+  if (!end || !appointment?.from || !plan.arrive) return false;
+  const from = toMinutes(appointment.from);
+  return from >= toMinutes(end) && from < toMinutes(end) + plan.arrive;
+}
+
+/**
  * Everything on the plan that does not fit, per day, in weekday order.
- * Pure: it never changes the plan. An empty list means the plan fits.
+ * Pure: it never changes the plan. An empty list means the plan fits, as
+ * far as the times the parent entered go (see fitNotes for what it cannot
+ * check).
  *
- * (a) Homework at home starts before the child has arrived: school end
- *     plus Ankommen. With Ankommen unset, only the school end counts.
- * (b) An appointment starts before school ends. Homework before school
- *     ends is reported the same way.
+ * (a) Homework at home starts before the child has arrived: Ankommen
+ *     begins when school ends, or after an appointment the child goes to
+ *     straight from school. With Ankommen unset, homework may not start
+ *     at the very minute school ends.
+ * (b) An appointment or homework starts before school ends.
  * (c) Homework and the appointment overlap. Homework with minutes is a
  *     span, without minutes the moment it starts; the same for an
  *     appointment without an end.
- * (d) With dinner set: homework starts at or after dinner or runs past it,
- *     or the appointment runs past it.
+ * (d) Dinner is a moment, not the end of the day: only something that
+ *     runs across it, or starts exactly then, clashes. Homework or an
+ *     appointment after dinner is fine (Astra NP-01).
+ * Messages never ask for a shorter Ankommen.
  */
 export function checkFit(plan: AfternoonPlan): FitProblem[] {
   const problems: FitProblem[] = [];
   for (const { id, label } of WEEKDAYS) {
-    const { end, homework, appointment } = plan.days[id];
+    const day = plan.days[id];
+    const { end, homework, appointment } = day;
     const add = (rule: FitRule, message: string) => problems.push({ day: id, rule, message });
     const home = homework?.where === 'home' && homework.at ? homework : null;
     const at = home?.at ?? null;
@@ -421,15 +448,27 @@ export function checkFit(plan: AfternoonPlan): FitProblem[] {
     const from = appointment?.from ?? null;
     const to = from ? (appointment?.to ?? null) : null;
     const name = appointment ? nameInSentence(appointment) : '';
+    const afterAppointment = arrivesAfterAppointment(plan, day);
 
     // (a) and (b): homework before school ends or before the child has arrived.
     if (at && end) {
       if (toMinutes(at) < toMinutes(end)) {
         add('school', `Am ${label} beginnen die Hausaufgaben um ${at}, die Schule endet erst um ${end}. Verschieb die Hausaufgaben.`);
-      } else if (plan.arrive && toMinutes(at) < toMinutes(end) + plan.arrive) {
+      } else if (plan.arrive) {
+        const arriveFrom = afterAppointment ? (to ?? from!) : end;
+        const arrived = addMinutes(arriveFrom, plan.arrive);
+        if (toMinutes(at) < toMinutes(arrived)) {
+          add(
+            'arrive',
+            afterAppointment
+              ? `Am ${label} beginnen die Hausaufgaben um ${at}, aber nach ${name} seid ihr erst um ${arrived} angekommen. Verschieb die Hausaufgaben.`
+              : `Am ${label} beginnen die Hausaufgaben um ${at}, aber ihr seid erst um ${arrived} angekommen. Verschieb die Hausaufgaben.`,
+          );
+        }
+      } else if (toMinutes(at) === toMinutes(end)) {
         add(
           'arrive',
-          `Am ${label} beginnen die Hausaufgaben um ${at}, aber ihr seid erst um ${addMinutes(end, plan.arrive)} angekommen. Verschieb die Hausaufgaben oder nimm weniger Zeit zum Ankommen.`,
+          `Am ${label} beginnen die Hausaufgaben um ${at}, genau wenn die Schule endet. Wähl oben, wie lange ihr ankommt, oder verschieb die Hausaufgaben.`,
         );
       }
     }
@@ -450,25 +489,56 @@ export function checkFit(plan: AfternoonPlan): FitProblem[] {
       }
     }
 
-    // (d) Dinner.
+    // (d) Dinner, as a moment.
     if (plan.dinner) {
       const dinner = toMinutes(plan.dinner);
-      if (at && toMinutes(at) >= dinner) {
-        add('dinner', `Am ${label} beginnen die Hausaufgaben um ${at}, aber um ${plan.dinner} gibt es Abendessen. Verschieb die Hausaufgaben.`);
-      } else if (hwEnd && toMinutes(hwEnd) > dinner) {
+      const moment: [number, number] = [dinner, dinner];
+      if (at && overlaps([toMinutes(at), hwEnd ? toMinutes(hwEnd) : toMinutes(at)], moment)) {
         add(
           'dinner',
-          `Am ${label} gehen die Hausaufgaben bis ${hwEnd}, aber um ${plan.dinner} gibt es Abendessen. Verschieb die Hausaufgaben oder nimm weniger Minuten.`,
+          hwEnd
+            ? `Am ${label} überschneiden sich die Hausaufgaben (${at} bis ${hwEnd}) und das Abendessen um ${plan.dinner}. Verschieb eins davon.`
+            : `Am ${label} beginnen die Hausaufgaben um ${at}, genau zum Abendessen. Verschieb die Hausaufgaben.`,
         );
       }
-      if (to && toMinutes(to) > dinner) {
-        add('dinner', `Am ${label} geht ${name} bis ${to}, aber um ${plan.dinner} gibt es Abendessen. Verschieb den Termin oder das Abendessen.`);
-      } else if (from && !to && toMinutes(from) >= dinner) {
-        add('dinner', `Am ${label} beginnt ${name} um ${from}, aber um ${plan.dinner} gibt es Abendessen. Verschieb den Termin oder das Abendessen.`);
+      if (from && overlaps([toMinutes(from), to ? toMinutes(to) : toMinutes(from)], moment)) {
+        add(
+          'dinner',
+          to
+            ? `Am ${label} überschneiden sich ${name} (${from} bis ${to}) und das Abendessen um ${plan.dinner}. Verschieb den Termin oder das Abendessen.`
+            : `Am ${label} beginnt ${name} um ${from}, genau zum Abendessen. Verschieb den Termin oder das Abendessen.`,
+        );
       }
     }
   }
   return problems;
+}
+
+export interface FitNote {
+  day: WeekdayId;
+  message: string;
+}
+
+/**
+ * What the check cannot know, as a hint that never blocks printing: homework
+ * without minutes before an appointment the same day (Astra NP-03). The tool
+ * invents no minutes, so the parent checks this one.
+ */
+export function fitNotes(plan: AfternoonPlan): FitNote[] {
+  const notes: FitNote[] = [];
+  for (const { id, label } of WEEKDAYS) {
+    const { homework, appointment } = plan.days[id];
+    const home = homework?.where === 'home' ? homework : null;
+    const at = home?.at ?? null;
+    const from = appointment?.from ?? null;
+    if (home && at && !home.minutes && from && toMinutes(from) > toMinutes(at)) {
+      notes.push({
+        day: id,
+        message: `Für ${label} fehlt die Dauer der Hausaufgaben. Prüf selbst, ob bis ${nameInSentence(appointment!)} um ${from} genug Zeit bleibt.`,
+      });
+    }
+  }
+  return notes;
 }
 
 /**
@@ -500,7 +570,7 @@ export type SheetItem =
       time: string | null;
       /** "20 Min." when the parent set minutes. */
       duration: string | null;
-      /** "in der OGS erledigt", "bei Oma, Opa", "heute keine", or null at home. */
+      /** "in der OGS", "bei Oma, Opa", "heute keine", or null at home. */
       note: string | null;
     }
   | {
@@ -520,6 +590,8 @@ export interface SheetDay {
   end: string | null;
   /** Ankommen, on every day that is not free. `duration` is "30 Min." once the parent chose it. */
   arrive: { duration: string | null } | null;
+  /** The child goes straight from school to the appointment: it comes before Ankommen. */
+  appointmentFirst: boolean;
   /** Homework and the appointment, in the order of the afternoon. */
   items: SheetItem[];
 }
@@ -567,6 +639,7 @@ export function sheetDay(plan: AfternoonPlan, id: WeekdayId): SheetDay {
     free,
     end: day.end ? `${day.end} Uhr` : null,
     arrive: free ? null : { duration: plan.arrive ? `${plan.arrive} Min.` : null },
+    appointmentFirst: arrivesAfterAppointment(plan, day),
     items,
   };
 }
@@ -578,6 +651,11 @@ export function sheetWeek(plan: AfternoonPlan): SheetDay[] {
 /** The Knackpunkt sentence for the card, or null when the parent chose none. */
 export function knackSentence(plan: AfternoonPlan): string | null {
   return KNACKS.find((k) => k.id === plan.knack)?.sentence ?? null;
+}
+
+/** The Knackpunkt picture for the card, or null when the parent chose none. */
+export function knackPicture(plan: AfternoonPlan): string | null {
+  return KNACKS.find((k) => k.id === plan.knack)?.img ?? null;
 }
 
 /** "Abendessen um 18:30 Uhr" or null. */

@@ -285,23 +285,28 @@
   list-style: none;
   margin: 10px 0 0;
   padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  /* Four choices in two rows, so the card stays as low as with three. */
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 10px;
 }
 .np-arrive li {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 4px;
+  min-width: 0;
+  text-align: center;
 }
 .np-arrive .rs-pic {
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
+  flex: none;
 }
 .np-arrive-label {
   font-family: 'Fredoka', system-ui, sans-serif;
   font-weight: 700;
-  font-size: 20px;
+  font-size: 16px;
   line-height: 1;
   color: #040812;
 }
@@ -326,8 +331,8 @@
 }
 /* The Ankommen card alone: the three things side by side, Ronki bigger. */
 .np-cards[data-cards='one'] .np-arrive {
-  flex-direction: row;
-  justify-content: space-around;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  justify-items: center;
   align-items: center;
   margin-top: 6px;
 }
@@ -420,4 +425,16 @@
 .np-sheet[data-variant='wochenplan'] .np-dinner .rs-pic {
   width: 46px;
   height: 46px;
+}
+
+/* The homework card names its moment with a picture next to the title. */
+.np-card-title--pic {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.np-card-title--pic .rs-pic {
+  width: 44px;
+  height: 44px;
+  flex: none;
 }

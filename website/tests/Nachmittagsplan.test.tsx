@@ -101,7 +101,10 @@ describe('Nachmittagsplan sheet', () => {
     ]);
 
     const di = column(container, 'di');
-    expect(di.textContent).toContain('in der OGS erledigt');
+    // OGS homework happens before pickup, so it comes first (Astra NP-04).
+    expect(blocks(di)[0]).toBe('homework');
+    expect(di.textContent).toContain('in der OGS');
+    expect(di.textContent).not.toContain('erledigt');
     expect(di.textContent).toContain('ab 16:30');
     expect(pictures(di)).toContain('/art/bilderbuch/tasks/swim-bag.webp');
 
@@ -131,21 +134,41 @@ describe('Nachmittagsplan sheet', () => {
     expect(arrive.textContent).toBe('Ankommen');
   });
 
-  it('has no rings, boxes to tick or week sums on the strip, and three rings on the Ankommen card', () => {
+  it('has no rings, boxes to tick or week sums anywhere; the Ankommen card offers choices', () => {
     const { container } = render(<NachmittagsplanSheet plan={examplePlan()} />);
     const week = container.querySelector('[data-week]')!;
     expect(week.querySelectorAll('.rs-ring, input, [role="checkbox"]')).toHaveLength(0);
     expect(week.textContent).not.toMatch(/Summe|gesamt|Woche:/i);
     const card = container.querySelector('[data-card="ankommen"]')!;
-    expect(card.querySelectorAll('.rs-ring')).toHaveLength(3);
-    for (const label of ['Essen', 'Trinken', 'Bewegen']) expect(card.textContent).toContain(label);
+    // Choices, not a list to work through (Astra NP-05): no rings, resting included.
+    expect(card.querySelectorAll('.rs-ring')).toHaveLength(0);
+    for (const label of ['Essen', 'Trinken', 'Bewegen', 'Ausruhen']) expect(card.textContent).toContain(label);
     expect(pictures(card)).toEqual([
       '/art/bilderbuch/tasks/plate.webp',
       '/art/bilderbuch/tasks/water.webp',
       '/art/bilderbuch/tasks/move.webp',
+      '/art/bilderbuch/tasks/cushion.webp',
       '/art/bilderbuch/ronki/512/calm.webp',
     ]);
-    expect(card.textContent).toContain('Erst ankommen.');
+    expect(card.textContent).toContain('Erst ankommen');
+    expect(card.textContent).toContain('Was brauchst du gerade?');
+  });
+
+  it('puts an appointment the child goes to straight from school before Ankommen', () => {
+    let plan = setEnd(defaultPlan(), 'mo', '13:00');
+    plan = setAppointmentKind(plan, 'mo', 'sport');
+    plan = setAppointmentFrom(plan, 'mo', '13:15');
+    plan = setAppointmentTo(plan, 'mo', '14:00');
+    plan = setArrive(plan, 60);
+    const { container } = render(<NachmittagsplanSheet plan={plan} />);
+    expect(blocks(column(container, 'mo'))).toEqual(['end', 'appointment', 'arrive']);
+  });
+
+  it('names the homework moment with a picture on its card', () => {
+    const { container } = render(<NachmittagsplanSheet plan={setKnack(examplePlan(), 'reading')} />);
+    const card = container.querySelector('[data-card="knackpunkt"]')!;
+    expect(pictures(card)[0]).toBe('/art/bilderbuch/tasks/book.webp');
+    expect(card.textContent).toContain('Du liest, ich höre zu.');
   });
 
   it('carries the head, the note for the parent and the footer, but no name line', () => {
@@ -351,12 +374,26 @@ describe('Nachmittagsplan page', () => {
     expect(column(preview(), 'fr').textContent).toContain('Reiten');
   });
 
+  it('jumps with the skip link without a history entry, so Back never wipes the plan (Claude F2)', () => {
+    renderPage(UNFIT);
+    const before = window.history.length;
+    fireEvent.click(screen.getByRole('link', { name: 'Zum Hauptinhalt springen' }));
+    expect(window.history.length).toBe(before);
+    expect(window.location.hash).toBe('');
+    expect(window.location.search).toBe(UNFIT);
+  });
+
+  it('shares the family week with a line for the people who help, not a class-chat tip (Claude F1)', () => {
+    renderPage();
+    expect(document.body.textContent).toContain('Schick ihn nur an Menschen, die euren Nachmittag kennen dürfen');
+  });
+
   it('shows a plan that does not fit next to the day and above the print buttons, and blocks printing', () => {
     const print = vi.fn();
     window.print = print;
     renderPage(UNFIT);
     const message =
-      'Am Montag beginnen die Hausaufgaben um 13:30, aber ihr seid erst um 13:45 angekommen. Verschieb die Hausaufgaben oder nimm weniger Zeit zum Ankommen.';
+      'Am Montag beginnen die Hausaufgaben um 13:30, aber ihr seid erst um 13:45 angekommen. Verschieb die Hausaufgaben.';
     const dayMessages = document.querySelector('[data-fit-day="mo"]')!;
     expect(dayMessages.textContent).toBe(message);
     const summary = document.querySelector('[data-fit-summary]')!;
