@@ -41,10 +41,21 @@ export function buildDay(vac: boolean, routine?: unknown): Quest[] {
     if (!kind) return true;
     return q.anchor === 'morning' ? morningKinds.has(kind) : eveningKinds.has(kind);
   };
+  // The family's order: a routine task takes its place in the saved list,
+  // so every view that sorts by `order` shows it in that order. The parent
+  // dashboard saves in the catalogue order, which is the old fixed order, so
+  // nothing moves there; a card made on the website carries the parent's.
+  const inOrder = (q: Quest): Quest => {
+    if (q.anchor !== 'morning' && q.anchor !== 'bedtime') return q;
+    const kind = taskKind(q.id);
+    if (!kind) return q;
+    const i = (q.anchor === 'morning' ? r.morning : r.evening).indexOf(kind);
+    return i >= 0 ? { ...q, order: i + 1 } : q;
+  };
   const b: Quest[] = source
     .filter(q => !(isWeekend && !vac && WEEKEND_SKIP_IDS.has(q.id)))
     .filter(inRoutine)
-    .map(q => ({ ...q, done: false, streak: 0, completions: 0 }));
+    .map(q => inOrder({ ...q, done: false, streak: 0, completions: 0 }));
   if ((d === 1 || d === 3) && !vac) b.push({ ...FOOTBALL, done: false, streak: 0, completions: 0 });
   // Pick 2 random side-quests for the day
   const shuffled = [...SIDE_QUESTS].sort(() => Math.random() - 0.5);

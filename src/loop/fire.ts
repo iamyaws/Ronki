@@ -30,18 +30,21 @@ export interface FireInput {
 
 const EMPTY: FireState = { block: null, slots: [], lit: 0, total: 0, bonus: 0, full: false, next: null };
 
-/** The fire slots of one block: main quests of that anchor that are in the routine, in order. */
+/**
+ * The fire slots of one block: main quests of that anchor that are in the
+ * routine, in the family's order (the saved routine list; a card made on the
+ * website carries the parent's order). The quests' fixed `order` only breaks
+ * ties, so quests saved before the family's order existed still line up.
+ */
 export function fireSlots(input: FireInput, block: 'morning' | 'evening'): Quest[] {
   const anchor = block === 'morning' ? 'morning' : 'bedtime';
   const routine = normalizeRoutine(input.familyConfig?.routine);
-  const kinds = new Set<string>(routine[block]);
+  const list: string[] = routine[block];
+  const place = (q: Quest): number => list.indexOf(taskKind(q.id) as string);
   return (input.quests || [])
     .filter(q => !q.sideQuest && q.anchor === anchor)
-    .filter(q => {
-      const k = taskKind(q.id);
-      return k !== null && kinds.has(k);
-    })
-    .sort((a, b) => (a.order || 0) - (b.order || 0));
+    .filter(q => place(q) >= 0)
+    .sort((a, b) => place(a) - place(b) || (a.order || 0) - (b.order || 0));
 }
 
 /** True on the child's first day, before the first adventure. */

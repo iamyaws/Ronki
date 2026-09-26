@@ -297,3 +297,41 @@ describe('getDayName', () => {
     vi.useRealTimers();
   });
 });
+
+describe('buildDay follows the family order', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 8, 29)); // Tuesday, a school day without football
+  });
+  afterEach(() => vi.useRealTimers());
+
+  const mainIds = (quests, anchor) =>
+    quests
+      .filter((q) => q.anchor === anchor && !q.sideQuest)
+      .sort((a, b) => (a.order || 0) - (b.order || 0))
+      .map((q) => q.id);
+
+  it('puts routine tasks in the order of the saved list', () => {
+    const quests = buildDay(false, {
+      morning: ['teeth_am', 'dress', 'breakfast', 'packcheck'],
+      evening: ['pyjama', 'teeth_pm'],
+    });
+    expect(mainIds(quests, 'morning')).toEqual(['s_teeth_am', 's_dress', 's_breakfast', 's_packcheck']);
+    expect(mainIds(quests, 'bedtime')).toEqual(['s_pyjama', 's_teeth_pm']);
+  });
+
+  it('keeps the old order for the default routine and the catalogue order', () => {
+    expect(mainIds(buildDay(false), 'morning')).toEqual(['s_wake', 's_breakfast', 's_teeth_am', 's_dress', 's_packcheck']);
+    const all = buildDay(false, {
+      morning: ['wake', 'water', 'wash', 'breakfast', 'teeth_am', 'dress', 'packcheck'],
+      evening: ['dinner', 'teeth_pm', 'wash_pm', 'pyjama', 'cuddle'],
+    });
+    expect(mainIds(all, 'morning')).toEqual(['s_wake', 's_water', 's_wash', 's_breakfast', 's_teeth_am', 's_dress', 's_packcheck']);
+  });
+
+  it('leaves side quests behind the routine', () => {
+    const quests = buildDay(false, { morning: ['dress', 'wake'] });
+    const sides = quests.filter((q) => q.sideQuest);
+    for (const side of sides) expect(side.order).toBeGreaterThan(2);
+  });
+});
