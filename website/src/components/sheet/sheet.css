@@ -313,6 +313,16 @@
   width: 46px;
   height: 46px;
 }
+/* Five or six steps with filled clock times: measured in print, six rows
+ * with a time each would push the footer into the bottom margin. */
+.rs-page--compact.rs-page--timed .rs-steps {
+  gap: 8px;
+}
+.rs-page--compact .rs-time--set {
+  margin-top: 1px;
+  font-size: 15px;
+  line-height: 1.1;
+}
 
 /* Toddler: pictures only, bigger everything */
 .rs-page--big .rs-steps {

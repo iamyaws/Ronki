@@ -60,10 +60,12 @@ export function RoutineSheet({
   page = false,
 }: RoutineSheetProps) {
   const density = big ? 'big' : compact || steps.length > 4 ? 'compact' : 'roomy';
+  // Filled clock times add a line to every row; a timed sheet packs a little tighter.
+  const timed = steps.some((step) => step.time);
 
   return (
     <section className={`rs-sheet${page ? ' rs-sheet--a4' : ''}`}>
-      <div className={`rs-page rs-page--${density}`}>
+      <div className={`rs-page rs-page--${density}${timed ? ' rs-page--timed' : ''}`}>
         <SheetHead
           eyebrow={eyebrow}
           title={title}
