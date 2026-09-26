@@ -60,8 +60,8 @@ export default function RatgeberRanzenPackenErsteKlasse() {
       </p>
 
       <p>
-        Das ist keine Frage von Faulheit oder Vergesslichkeit. Es fehlt eine
-        Information, die dein Kind sehen kann, ohne dich zu fragen.
+        Oft liegt es also nicht an Faulheit oder Vergesslichkeit. Dein Kind
+        kann nirgends nachsehen, was heute dazugehört, außer bei dir.
       </p>
 
       <PullQuote>
@@ -76,7 +76,7 @@ export default function RatgeberRanzenPackenErsteKlasse() {
           <p>
             Der Ranzen steht jeden Abend am selben Ort, zum Beispiel im Flur
             neben der Tür. Turnbeutel und Schwimmtasche hängen gleich daneben.
-            Dann muss morgens niemand suchen, nur noch einpacken.
+            Dann wird morgens weniger gesucht und mehr eingepackt.
           </p>
         </StepCard>
         <StepCard n={2} title="Eine Karte pro Schultag">
@@ -87,10 +87,11 @@ export default function RatgeberRanzenPackenErsteKlasse() {
             Bilder funktionieren auch, wenn dein Kind noch nicht sicher liest.
           </p>
         </StepCard>
-        <StepCard n={3} title="Die Karte des nächsten Tages hängt oben">
+        <StepCard n={3} title="Die richtige Karte liegt bereit">
           <p>
-            Die Karte für morgen hängt am Startplatz, abends oder direkt nach
-            dem Frühstück. Dein Kind schaut auf die Bilder, nicht zu dir.
+            Welche Karte dran ist, entscheidest du. Leg abends die Karte für
+            morgen an den Startplatz. Packt ihr erst morgens, nimm die Karte
+            für heute. Dann schaut dein Kind auf die Bilder statt zu dir.
           </p>
         </StepCard>
         <StepCard n={4} title="Ein fester Nachfüll-Tag">
@@ -130,16 +131,16 @@ export default function RatgeberRanzenPackenErsteKlasse() {
         </li>
         <li>
           <strong>Selbst prüfen.</strong> Dein Kind packt und vergleicht selbst
-          mit der Karte. Du fragst nicht mehr „Hast du alles?“, die Karte
-          beantwortet das.
+          mit der Karte. Statt „Hast du alles?“ zu fragen, kannst du auf die
+          Karte zeigen.
         </li>
       </ul>
 
       <Callout type="ausprobieren" label="Ein Satz statt einer Liste">
         <p>
-          Statt alles aufzuzählen, reicht morgens ein Satz: „Schau mal auf
-          deine Karte.“ Das klingt klein, aber es verschiebt die Frage von
-          dir zu dem Blatt.
+          Statt alles aufzuzählen, probier morgens einen Satz: „Schau mal auf
+          deine Karte.“ Das klingt klein, aber so geht die Frage von dir an
+          das Blatt.
         </p>
       </Callout>
 
@@ -149,8 +150,9 @@ export default function RatgeberRanzenPackenErsteKlasse() {
         Die Sporttage und der Schwimmtag gelten meistens für die ganze Klasse.
         Wenn eine Mutter oder ein Vater den Packplan einmal ausfüllt, kann der
         Link in die Klassen-WhatsApp. Jede Familie öffnet ihn, passt ihn an
-        und druckt ihre eigenen Karten. Im Link stehen nur Wochentage und
-        Sachen, keine Namen und keine Schule.
+        und druckt ihre eigenen Karten. Im Link stehen die Tage, die Sachen
+        und was ihr bei „Noch etwas?“ eintragt. Alle mit dem Link können das
+        lesen, also schreib dort keine Namen hinein.
       </p>
 
       <h2>Wenn doch mal etwas fehlt</h2>
@@ -160,7 +162,9 @@ export default function RatgeberRanzenPackenErsteKlasse() {
         ihn hinterherbringst oder nicht, ist eure Entscheidung, darauf gibt es
         keine richtige Antwort. Hilfreicher als die Frage „Wer ist schuld?“
         ist am Abend die Frage „Was ergänzen wir auf der Karte?“. Vielleicht
-        fehlt dort einfach ein Bild.
+        fehlt dort einfach ein Bild. Was nicht in der Auswahl steht, trägst du
+        bei „Noch etwas?“ ein. Dafür bekommt die Karte ein leeres Feld, in das
+        dein Kind selbst malt, was mit muss.
       </p>
 
       <h2>Was du heute tun kannst</h2>

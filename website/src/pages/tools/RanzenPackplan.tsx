@@ -90,6 +90,18 @@ export default function RanzenPackplan() {
     }
   }, [query]);
 
+  // Back and forward change the address bar without remounting the page, so
+  // read the plan from it again; otherwise the preview and the link differ.
+  useEffect(() => {
+    function restore() {
+      const next = decodePlan(window.location.search);
+      setPlan(next);
+      setDrafts(draftsFrom(next));
+    }
+    window.addEventListener('popstate', restore);
+    return () => window.removeEventListener('popstate', restore);
+  }, []);
+
   useEffect(() => () => window.clearTimeout(copiedTimer.current), []);
 
   function changeFree(day: WeekdayId, text: string) {
@@ -235,8 +247,9 @@ export default function RanzenPackplan() {
                   ))}
                 </div>
                 <p className="mt-4 text-sm text-ink/70 leading-relaxed">
-                  Der Link zu eurem Plan lässt sich teilen. Trag bei „Noch etwas?“ darum
-                  keine Namen ein.
+                  Für alles bei „Noch etwas?“ bleibt auf der Karte ein leeres Feld. Da malt dein
+                  Kind selbst hinein, was es ist. Trag dort nur Sachen ein, keine Namen, Klassen
+                  oder Schulen: Der Text steht auch im Link.
                 </p>
               </Step>
 
@@ -284,8 +297,8 @@ export default function RanzenPackplan() {
                 <PackplanSheet plan={plan} />
               </ScaledPreview>
               <p className="mt-3 text-sm text-ink/65 leading-relaxed">
-                Eine Seite A4 mit fünf Karten zum Ausschneiden. Die Karte für morgen kommt dahin, wo
-                der Ranzen steht.
+                Eine Seite A4 mit fünf Karten zum Ausschneiden. Leg abends die Karte für morgen zum
+                Ranzen. Packt ihr erst morgens, nimm die Karte für heute.
               </p>
 
               <div className="mt-5 flex flex-wrap items-center gap-3">
@@ -328,7 +341,8 @@ export default function RanzenPackplan() {
               </div>
               <p className="mt-4 text-sm text-ink/65 leading-relaxed">
                 Der Link ist euer Plan. Schick ihn in den Klassenchat, dann kann jede Familie ihn
-                anpassen und selbst drucken. Im Link stehen nur Wochentage und Sachen, keine Namen.
+                anpassen und selbst drucken. Im Link stehen eure Sachen, die Tage, wie ihr packt
+                und alles aus „Noch etwas?“. Alle mit dem Link können das lesen.
               </p>
             </aside>
           </div>

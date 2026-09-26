@@ -93,9 +93,6 @@ export const EXTRA_ITEMS: ReadonlyArray<PackItem<ExtraItemId>> = [
   { id: 'mitteilungsheft', code: 'z', label: 'Mitteilungsheft', printLabel: `Mit${SHY}tei${SHY}lungs${SHY}heft`, img: 'school-letter.webp' },
 ];
 
-/** Picture for the free item: the Ranzen itself. */
-export const FREE_ITEM_IMG = 'bag.webp';
-
 export const FREE_TEXT_MAX = 24;
 
 export const SUPPORT_MODES: ReadonlyArray<{

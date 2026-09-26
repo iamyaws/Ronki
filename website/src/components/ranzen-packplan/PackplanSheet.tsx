@@ -3,7 +3,6 @@ import { RonkiHost, SheetFooter, SheetHead, TaskPicture } from '../sheet';
 import {
   DAILY_ITEMS,
   EXTRA_ITEMS,
-  FREE_ITEM_IMG,
   SUPPORT_MODES,
   WEEKDAYS,
   cleanFreeText,
@@ -16,6 +15,7 @@ import './packplan-sheet.css';
 export const PACKPLAN_TITLE = 'Was kommt heute in den Ranzen?';
 export const PACKPLAN_BUBBLE = 'Schau auf deine Karte!';
 export const PACKPLAN_HINT = 'In eine Klarsichthülle stecken, dann ist die Karte abwischbar.';
+/** Only when a day carries nothing at all, not even the daily items. */
 export const PACKPLAN_EMPTY_DAY = 'Heute nichts dazu';
 const FOOTER_URL = 'ronki.de/tools/ranzen-packplan';
 
@@ -86,14 +86,19 @@ function DayCard({ plan, day, label }: { plan: PackPlan; day: WeekdayId; label: 
   const extras = EXTRA_ITEMS.filter((item) => plan.days[day].extras.includes(item.id));
   const free = cleanFreeText(plan.days[day].free);
   const count = extras.length + (free ? 1 : 0);
-  const { size, cols } = layoutFor(count);
+  // A day with nothing on top shows the daily items as its main pictures, so
+  // the card never shows an empty middle or a thing that is not packed
+  // (Astra PP-02, 26 Sep 2026).
+  const onlyDaily = count === 0 && daily.length > 0;
+  const main = onlyDaily ? daily : extras;
+  const { size, cols } = layoutFor(onlyDaily ? daily.length : count);
 
   return (
     <li className="pp-card" data-day={day}>
       <div className="pp-card-in">
         <div className="pp-card-top">
           <h3 className="pp-day">{label}</h3>
-          {daily.length > 0 && (
+          {daily.length > 0 && !onlyDaily && (
             <ul className="pp-daily" data-daily aria-label="Jeden Tag dabei">
               {daily.map((item) => (
                 <li key={item.id}>
@@ -105,9 +110,8 @@ function DayCard({ plan, day, label }: { plan: PackPlan; day: WeekdayId; label: 
           )}
         </div>
 
-        {count === 0 ? (
+        {count === 0 && daily.length === 0 ? (
           <div className="pp-extras pp-extras--none" data-extras data-size="none">
-            <TaskPicture img={FREE_ITEM_IMG} />
             <p className="pp-empty">{PACKPLAN_EMPTY_DAY}</p>
           </div>
         ) : (
@@ -115,11 +119,12 @@ function DayCard({ plan, day, label }: { plan: PackPlan; day: WeekdayId; label: 
             className="pp-extras"
             data-extras
             data-size={size}
-            data-count={count}
-            aria-label="Heute dazu"
+            data-count={onlyDaily ? daily.length : count}
+            {...(onlyDaily ? { 'data-only-daily': '' } : {})}
+            aria-label={onlyDaily ? 'Jeden Tag dabei' : 'Heute dazu'}
             style={{ '--pp-cols': cols } as CSSProperties}
           >
-            {extras.map((item) => (
+            {main.map((item) => (
               <li key={item.id} className="pp-extra">
                 <TaskPicture img={item.img} />
                 <span className="pp-extra-label">{item.printLabel ?? item.label}</span>
@@ -127,7 +132,9 @@ function DayCard({ plan, day, label }: { plan: PackPlan; day: WeekdayId; label: 
             ))}
             {free && (
               <li className="pp-extra pp-extra--free">
-                <TaskPicture img={FREE_ITEM_IMG} />
+                {/* An empty box instead of a stand-in picture: the child draws
+                    the thing in, so the card never shows the wrong object. */}
+                <span className="pp-draw" data-draw aria-hidden />
                 <span className="pp-extra-label">{free}</span>
               </li>
             )}

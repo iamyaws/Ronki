@@ -148,7 +148,7 @@
   overflow-wrap: anywhere;
 }
 
-.pp-extras[data-size='big'] .rs-pic {
+.pp-extras[data-size='big'] :is(.rs-pic, .pp-draw) {
   width: 92px;
   height: 92px;
 }
@@ -156,8 +156,8 @@
   font-size: 17px;
 }
 /* One or two things on top: the ones the child must not miss, so bigger. */
-.pp-extras[data-count='1'] .rs-pic,
-.pp-extras[data-count='2'] .rs-pic {
+.pp-extras[data-count='1'] :is(.rs-pic, .pp-draw),
+.pp-extras[data-count='2'] :is(.rs-pic, .pp-draw) {
   width: 112px;
   height: 112px;
 }
@@ -168,7 +168,7 @@
 .pp-extras[data-size='mid'] {
   gap: 6px 4px;
 }
-.pp-extras[data-size='mid'] .rs-pic {
+.pp-extras[data-size='mid'] :is(.rs-pic, .pp-draw) {
   width: 60px;
   height: 60px;
 }
@@ -178,7 +178,7 @@
 .pp-extras[data-size='small'] {
   gap: 5px 3px;
 }
-.pp-extras[data-size='small'] .rs-pic {
+.pp-extras[data-size='small'] :is(.rs-pic, .pp-draw) {
   width: 44px;
   height: 44px;
 }
@@ -187,18 +187,23 @@
   font-size: 11px;
 }
 
-/* A day with nothing on top: the bag and a hand note. */
+/* A free item: an empty box the child draws the thing into. The dashed
+ * line matches the cut lines, so it reads as "fill me in", not as a picture. */
+.pp-draw {
+  display: block;
+  box-sizing: border-box;
+  border: 2px dashed rgba(4, 8, 18, 0.45);
+  border-radius: 14px;
+}
+.pp-extras[data-size='small'] .pp-draw {
+  border-radius: 10px;
+}
+
+/* A day with nothing at all, not even daily items: only a hand note. */
 .pp-extras--none {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
-}
-.pp-extras--none .rs-pic {
-  width: 64px;
-  height: 64px;
-  opacity: 0.55;
 }
 .pp-empty {
   margin: 0;

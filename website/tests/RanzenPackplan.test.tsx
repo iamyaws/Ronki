@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { PackplanSheet } from '../src/components/ranzen-packplan/PackplanSheet';
 import RanzenPackplan from '../src/pages/tools/RanzenPackplan';
@@ -13,6 +13,7 @@ import {
   defaultPlan,
   setFree,
   setMode,
+  toggleDaily,
   toggleExtra,
   type PackPlan,
 } from '../src/lib/ranzen-packplan';
@@ -73,16 +74,18 @@ describe('Packplan sheet', () => {
     ]);
   });
 
+  const DAILY_PICTURES = [
+    '/art/bilderbuch/tasks/lunchbox.webp',
+    '/art/bilderbuch/tasks/water.webp',
+    '/art/bilderbuch/tasks/pencil-case.webp',
+    '/art/bilderbuch/tasks/homework.webp',
+  ];
+
   it('puts the daily items on every card and the extras on their day', () => {
     const { container } = render(<PackplanSheet plan={examplePlan()} />);
-    for (const c of cards(container)) {
-      const daily = c.querySelector('[data-daily]');
-      expect(pictures(daily!)).toEqual([
-        '/art/bilderbuch/tasks/lunchbox.webp',
-        '/art/bilderbuch/tasks/water.webp',
-        '/art/bilderbuch/tasks/pencil-case.webp',
-        '/art/bilderbuch/tasks/homework.webp',
-      ]);
+    // Days with extras: the daily items ride along in the small strip.
+    for (const day of ['di', 'do', 'fr']) {
+      expect(pictures(card(container, day).querySelector('[data-daily]')!)).toEqual(DAILY_PICTURES);
     }
     const di = card(container, 'di');
     expect(plain(di)).toContain('Turnbeutel');
@@ -93,12 +96,37 @@ describe('Packplan sheet', () => {
     expect(plain(donnerstag)).toContain('Wechselsachen');
     expect(plain(donnerstag)).not.toContain('Turnbeutel');
 
-    // The free item comes with the bag picture.
+    // The free item gets an empty box to draw in, never a stand-in picture.
     const fr = card(container, 'fr');
     expect(plain(fr)).toContain('Kuscheltier');
-    expect(pictures(fr.querySelector('[data-extras]')!)).toEqual(['/art/bilderbuch/tasks/bag.webp']);
+    expect(pictures(fr.querySelector('[data-extras]')!)).toEqual([]);
+    expect(fr.querySelectorAll('[data-draw]')).toHaveLength(1);
+  });
 
+  it('shows the daily items as the main pictures on a day with nothing on top', () => {
+    const { container } = render(<PackplanSheet plan={examplePlan()} />);
+    for (const day of ['mo', 'mi']) {
+      const c = card(container, day);
+      const main = c.querySelector<HTMLElement>('[data-extras]')!;
+      expect(main).toHaveAttribute('data-only-daily');
+      expect(pictures(main)).toEqual(DAILY_PICTURES);
+      for (const label of ['Brotdose', 'Trinkflasche', 'Mäppchen', 'Hausaufgabenheft']) {
+        expect(plain(main)).toContain(label);
+      }
+      expect(c.querySelector('[data-daily]')).toBeNull();
+      expect(plain(c)).not.toContain('Heute nichts dazu');
+      expect(pictures(c)).not.toContain('/art/bilderbuch/tasks/bag.webp');
+    }
+  });
+
+  it('says "Heute nichts dazu" only on a day that carries nothing at all', () => {
+    let plan = defaultPlan();
+    for (const id of plan.daily) plan = toggleDaily(plan, id);
+    plan = toggleExtra(plan, 'di', 'turnbeutel');
+    const { container } = render(<PackplanSheet plan={plan} />);
     expect(plain(card(container, 'mo'))).toContain('Heute nichts dazu');
+    expect(pictures(card(container, 'mo'))).toEqual([]);
+    expect(plain(card(container, 'di'))).not.toContain('Heute nichts dazu');
   });
 
   it('carries the head, Ronki, the mode note and the sleeve hint, but no name line and no circles', () => {
@@ -130,7 +158,8 @@ describe('Packplan sheet', () => {
     for (const c of all) {
       const extras = c.querySelector<HTMLElement>('[data-extras]')!;
       expect(extras.dataset.size).toBe('small');
-      expect(pictures(extras)).toHaveLength(EXTRA_ITEMS.length + 1);
+      expect(pictures(extras)).toHaveLength(EXTRA_ITEMS.length);
+      expect(extras.querySelectorAll('[data-draw]')).toHaveLength(1);
       expect(plain(extras)).toContain('Geld für den Ausflug mit');
     }
   });
@@ -253,6 +282,35 @@ describe('Ranzen-Packplan page', () => {
     expect(within(dayGroup('Freitag')).getByRole('textbox')).toHaveValue('Kuscheltier');
     expect(screen.getByRole('radio', { name: /Selbst prüfen/ })).toBeChecked();
     expect(within(preview()).getByText('Du packst und prüfst mit der Karte.')).toBeInTheDocument();
+  });
+
+  it('follows the address bar when the parent goes back in the browser', () => {
+    renderPage();
+    window.history.pushState(null, '', `${PAGE_PATH}#main`);
+    fireEvent.click(within(dayGroup('Dienstag')).getByRole('button', { name: 'Turnbeutel' }));
+    fireEvent.change(within(dayGroup('Freitag')).getByRole('textbox'), { target: { value: 'Laterne' } });
+    expect(window.location.search).toBe('?di=g&fr=.Laterne');
+
+    // Back: the address bar shows the plan from before; the page must follow.
+    act(() => {
+      window.history.replaceState(null, '', PAGE_PATH);
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    });
+    expect(within(dayGroup('Dienstag')).getByRole('button', { name: 'Turnbeutel' })).toHaveAttribute(
+      'aria-pressed',
+      'false',
+    );
+    expect(within(dayGroup('Freitag')).getByRole('textbox')).toHaveValue('');
+    expect(plain(card(preview(), 'di'))).not.toContain('Turnbeutel');
+    expect(window.location.search).toBe('');
+  });
+
+  it('says honestly what the link carries', () => {
+    const { container } = renderPage();
+    const text = plain(container);
+    expect(text).toContain('alles aus „Noch etwas?“. Alle mit dem Link können das lesen.');
+    expect(text).toContain('keine Namen, Klassen oder Schulen');
+    expect(text).not.toContain('Im Link stehen nur Wochentage und Sachen');
   });
 
   it('switches the note on the sheet with the way of packing', () => {
