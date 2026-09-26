@@ -125,6 +125,16 @@ Marc's ask: make the new Bilderbuch design live in the real PWA, benchmarked aga
 
 **Follow-ups.** Parent dashboard and legal pages still carry hard-coded teal accents (readable, not restyled). Freunde, micropedia creatures, mini-games, bosses and birthday scenes keep their old painterly art. The first-breath fire puff is still a gradient. `CaveStyleSheet` keeps the old look. Belohnungsbank copy still names Funkelzeit (pre-existing). Material Symbols still loads from Google for screens outside the core loop. The Profile's Pflege and Erinnerungen segments and the Buch are restyled but not reachable from any tab (pre-existing). Animated WebP on an old iPad and a Fire HD is untested on a real device.
 
+## Nachmittagsplan and its article (27 September 2026, LIVE)
+
+- PR 44 merged and live-checked: `/tools/nachmittagsplan` (tool 2 of the lineup) and `/ratgeber/hausaufgaben-streit-erste-klasse`. Per weekday: school or OGS end, homework (zu Hause at a time with optional minutes, in der OGS, bei Oma/Opa, heute keine), one appointment; family-wide Ankommen minutes (asked in step 1, no preselection), dinner, Knackpunkt. One A4 sheet (week strip, "Erst ankommen" card with choices Essen, Trinken, Bewegen, Ausruhen, "Bei den Hausaufgaben" card with a picture) or the week strip alone for Oma, Opa or the Hort. A plan that does not fit is shown per day and cannot be printed; what the check cannot know (missing minutes or end) gets a non-blocking hint. An appointment right after school means the child goes straight there and arrives after it; the day says so. Plan only in the link; the share line is for Oma, Opa or the Hort.
+- The skip link on every page now jumps without a history entry (Back never restores an older plan on the tools).
+- Article sources: BVKJ (kinderaerzte-im-netz.de, 2006) and BZgA "Tut Kindern gut!" (2010), both opened; no homework time norms.
+- First pictures through Astra (Codex image generation, no credits): school, eraser, hourglass, cushion; house, armchair, slide and headphones kept in `C:\Users\öööö\ronki\launch\astra-art\`.
+- Reviews: Astra code (no findings), Astra visual (2 rounds), Claude two-lens review; record in `C:\Users\öööö\ronki\reviews\2026-09-27-rep10-*`. Budget: 646k Claude subagent tokens (build 371k, review 275k).
+- Open with Marc: Astra would prefer an explicit per-day choice "Direkt nach Schule/OGS zum Termin" over the visible inference; hourglass and eraser show the topic, not the action.
+- Backlog: shorter phone form (collapse finished days, copy homework settings to other days); keep the home time when a parent mis-taps another homework place; Marc: Search Console indexing for the new article; tool 3 "Abend mit zwei Kindern".
+
 ## Where things stand (26 September 2026, evening, website session)
 
 Supersedes the backlog of the morning section below. Reviews and renders (not in git): `C:\Users\öööö\ronki\reviews\`. Code for the builders: `website/src/lib/routine-builder/` (kit.ts shared core, plan.ts morning, evening.ts evening) and `website/src/components/routine-builder/`.
