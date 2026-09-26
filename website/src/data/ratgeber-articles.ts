@@ -112,6 +112,15 @@ export const ARTICLES: Article[] = [
     image: '/art/routines/getting-ready.webp',
   },
   {
+    slug: 'hausaufgaben-streit-erste-klasse',
+    title: 'Hausaufgaben-Streit in der 1. Klasse: erst ankommen, dann ein fester Rahmen',
+    description:
+      'Wut nach der Schule, Streit um die Hausaufgaben? Erst ankommen, dann eine feste Zeit. Mit kostenlosem Nachmittagsplan für zu Hause, OGS und Oma.',
+    category: 'Einschulung',
+    readMinutes: 7,
+    image: '/art/bioms/Sonnenglast_sun-highlands.webp',
+  },
+  {
     slug: 'eltern-bereich',
     title: 'Der Eltern-Bereich in Ronki: was drin ist und wie du hinkommst',
     description:
