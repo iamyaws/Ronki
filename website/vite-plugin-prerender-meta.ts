@@ -161,11 +161,25 @@ const ROUTES: RouteMeta[] = [
     ogImage: '/og-tool-ranzen-packplan.jpg',
   },
   {
+    path: '/ratgeber/hausaufgaben-streit-erste-klasse',
+    title: 'Hausaufgaben-Streit in der 1. Klasse: erst ankommen, dann ein fester Rahmen · Ratgeber · Ronki',
+    description:
+      'Wut nach der Schule, Streit um die Hausaufgaben? Erst ankommen, dann eine feste Zeit. Mit kostenlosem Nachmittagsplan für zu Hause, OGS und Oma.',
+    ogImage: '/og-tool-nachmittagsplan.jpg',
+  },
+  {
     path: '/tools/ranzen-packplan',
     title: 'Ranzen-Packplan: Bildkarten für jeden Schultag · Ronki',
     description:
       'Was muss heute in den Ranzen? Tipp an, was an welchem Schultag mit muss, und druck für jeden Tag eine Bildkarte aus. Kostenlos, ohne Anmeldung.',
     ogImage: '/og-tool-ranzen-packplan.jpg',
+  },
+  {
+    path: '/tools/nachmittagsplan',
+    title: 'Nachmittagsplan für Grundschulkinder: erst ankommen, dann Hausaufgaben · Ronki',
+    description:
+      'Schule aus, ankommen, Termine, Hausaufgaben: Leg euren Nachmittag auf ein A4-Blatt und sieh, was nicht zusammenpasst. Kostenlos, ohne Anmeldung.',
+    ogImage: '/og-tool-nachmittagsplan.jpg',
   },
   {
     path: '/impressum',

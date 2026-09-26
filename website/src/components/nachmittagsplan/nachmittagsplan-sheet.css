@@ -1,0 +1,440 @@
+/*
+ * Nachmittagsplan sheet, on top of the routine sheet (../sheet/sheet.css).
+ *
+ * One A4 page (fixed by .rs-sheet--a4). "blatt": head with Ronki, the week
+ * strip as five columns (Montag to Freitag, read top to bottom like the
+ * afternoon), a line for dinner and a note for the parent, then a dashed
+ * cut line and the child's cards. "wochenplan": the same strip alone,
+ * with bigger pictures and type.
+ *
+ * Same print rules as sheet.css: white ground, ink outlines, no shadows.
+ * The only fills are the sun stickers. The strip has no rings on purpose;
+ * the rings live on the Ankommen card only.
+ */
+
+.np-sheet .np-page {
+  padding: 26px 36px 18px;
+}
+.np-sheet .rs-host {
+  width: 140px;
+  margin: -6px -6px 0 0;
+}
+.np-sheet .rs-desc {
+  max-width: 470px;
+}
+
+/* Week strip ----------------------------------------------------------- */
+.np-week {
+  flex: 1 1 auto;
+  min-height: 0;
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  /* One row as tall as the strip: a column that holds too much is clipped
+   * inside itself, where scripts/og-nachmittagsplan.mjs --check sees it. */
+  grid-template-rows: minmax(0, 1fr);
+  gap: 8px;
+}
+.np-day {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 6px 10px;
+  border: 2.5px solid #040812;
+  border-radius: 18px;
+  text-align: center;
+  overflow: hidden;
+  break-inside: avoid;
+}
+.np-day-name {
+  margin: 0;
+  font-family: 'Fredoka', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 19px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: #040812;
+  white-space: nowrap;
+}
+.np-block {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding-top: 7px;
+  border-top: 2px dotted rgba(4, 8, 18, 0.28);
+}
+.np-block .rs-pic {
+  width: 52px;
+  height: 52px;
+}
+.np-block .rs-draw {
+  border-radius: 10px;
+}
+.np-trio {
+  display: flex;
+  justify-content: center;
+  gap: 1px;
+}
+.np-trio .rs-pic {
+  width: 31px;
+  height: 31px;
+}
+.np-label {
+  display: block;
+  max-width: 100%;
+  margin-top: 2px;
+  font-family: 'Fredoka', system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.1;
+  color: #040812;
+}
+/* Typed by the parent: may be one long word, so it may break anywhere. */
+.np-label--own {
+  overflow-wrap: anywhere;
+}
+.np-time {
+  font-family: 'Fredoka', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.15;
+  color: #0544b0;
+}
+.np-time {
+  white-space: nowrap;
+}
+/* "16:00 bis 17:00": may break before "bis", never inside a time. */
+.np-time--span {
+  white-space: normal;
+}
+.np-time--span > span {
+  white-space: nowrap;
+}
+.np-dur {
+  font-family: 'Fredoka', system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 13.5px;
+  line-height: 1.15;
+  color: #40444d;
+}
+.np-note {
+  font-family: 'Gochi Hand', 'Comic Sans MS', cursive;
+  font-size: 17px;
+  line-height: 1.05;
+  color: #040812;
+}
+/* A day with nothing on it: one calm word in the middle. */
+.np-free {
+  margin: auto 0;
+  font-family: 'Gochi Hand', 'Comic Sans MS', cursive;
+  font-size: 24px;
+  line-height: 1;
+  color: #40444d;
+}
+/* Preview on the page only: this day's times do not fit yet. */
+.np-day[data-unfit] {
+  border-style: dashed;
+  border-color: #0544b0;
+}
+.np-unfit {
+  margin: -2px 0 0;
+  padding: 2px 8px 1px;
+  background: #fdd134;
+  border-radius: 6px;
+  font-family: 'Gochi Hand', 'Comic Sans MS', cursive;
+  font-size: 15px;
+  line-height: 1.1;
+  color: #040812;
+}
+
+/* Dinner and the parent's note ------------------------------------------ */
+.np-under {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 12px;
+}
+.np-dinner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-family: 'Fredoka', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  line-height: 1.1;
+  color: #040812;
+  white-space: nowrap;
+}
+.np-dinner .rs-pic {
+  width: 38px;
+  height: 38px;
+}
+.np-foryou {
+  flex: 0 1 380px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 14px 8px 10px;
+  border: 2px solid #040812;
+  border-radius: 14px;
+}
+.np-foryou-tag {
+  flex: none;
+  padding: 4px 9px 2px;
+  background: #fdd134;
+  border-radius: 6px;
+  font-family: 'Gochi Hand', 'Comic Sans MS', cursive;
+  font-size: 16px;
+  line-height: 1;
+  text-transform: uppercase;
+  transform: rotate(-3deg);
+}
+.np-foryou p {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.35;
+  color: #20242d;
+}
+
+/* Cut line and the child's cards ------------------------------------------ */
+.np-cut {
+  position: relative;
+  flex: none;
+  height: 0;
+  margin: 16px -36px 0;
+  border-top: 2px dashed rgba(4, 8, 18, 0.5);
+}
+.np-scissors {
+  position: absolute;
+  top: -12px;
+  left: 30px;
+  width: 22px;
+  height: 22px;
+  padding: 0 2px;
+  background: #ffffff;
+}
+.np-cards {
+  flex: none;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 20px;
+}
+.np-cards[data-cards='one'] {
+  grid-template-columns: minmax(0, 1fr);
+}
+.np-card {
+  min-width: 0;
+  padding: 14px 16px 12px 18px;
+  border: 2.5px solid #040812;
+  border-radius: 22px;
+  break-inside: avoid;
+}
+.np-card-title {
+  margin: 0;
+  font-family: 'Fredoka', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: #040812;
+}
+.np-card-bubble {
+  margin: 0;
+  padding: 7px 12px;
+  background: #ffffff;
+  border: 2.5px solid #040812;
+  border-radius: 18px;
+  font-family: 'Fredoka', system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 17px;
+  line-height: 1.15;
+  text-align: center;
+  text-wrap: balance;
+  color: #040812;
+}
+.np-card-host img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Ankommen: three things with a ring each, Ronki on the right. */
+.np-card--arrive {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto 1fr;
+  column-gap: 10px;
+}
+.np-card--arrive .np-card-title {
+  grid-column: 1;
+}
+.np-arrive {
+  grid-column: 1;
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  /* Four choices in two rows, so the card stays as low as with three. */
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 10px;
+}
+.np-arrive li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  text-align: center;
+}
+.np-arrive .rs-pic {
+  width: 44px;
+  height: 44px;
+  flex: none;
+}
+.np-arrive-label {
+  font-family: 'Fredoka', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1;
+  color: #040812;
+}
+.np-arrive .rs-ring {
+  width: 34px;
+  height: 34px;
+  border-width: 3.5px;
+}
+.np-card--arrive .np-card-host {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: end;
+  width: 112px;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  gap: 4px;
+}
+.np-card--arrive .np-card-bubble {
+  font-size: 16px;
+  padding: 6px 10px;
+}
+/* The Ankommen card alone: the three things side by side, Ronki bigger. */
+.np-cards[data-cards='one'] .np-arrive {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  justify-items: center;
+  align-items: center;
+  margin-top: 6px;
+}
+.np-cards[data-cards='one'] .np-arrive li {
+  flex-direction: column;
+  gap: 6px;
+}
+.np-cards[data-cards='one'] .np-arrive .rs-pic {
+  width: 72px;
+  height: 72px;
+}
+.np-cards[data-cards='one'] .np-arrive .rs-ring {
+  margin-left: 0;
+  width: 42px;
+  height: 42px;
+}
+.np-cards[data-cards='one'] .np-card--arrive .np-card-host {
+  width: 150px;
+}
+
+/* Knackpunkt: the one sentence in Ronki's bubble. */
+.np-card--knack {
+  display: flex;
+  flex-direction: column;
+}
+.np-card-host--big {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+.np-card-host--big img {
+  flex: none;
+  width: 100px;
+}
+/* Wide enough that the longest word, "Hausaufgabenzeit.", stays on one line. */
+.np-card-host--big .np-card-bubble {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 19px;
+  padding: 10px 10px;
+}
+
+/* Wochenplan: the strip alone, bigger ---------------------------------------- */
+.np-sheet[data-variant='wochenplan'] .np-week {
+  margin-top: 20px;
+  gap: 10px;
+}
+.np-sheet[data-variant='wochenplan'] .np-day {
+  gap: 16px;
+  padding: 14px 7px 12px;
+}
+.np-sheet[data-variant='wochenplan'] .np-day-name {
+  font-size: 21px;
+}
+.np-sheet[data-variant='wochenplan'] .np-block {
+  padding-top: 14px;
+}
+.np-sheet[data-variant='wochenplan'] .np-block .rs-pic {
+  width: 80px;
+  height: 80px;
+}
+.np-sheet[data-variant='wochenplan'] .np-trio .rs-pic {
+  width: 38px;
+  height: 38px;
+}
+.np-sheet[data-variant='wochenplan'] .np-label {
+  font-size: 17px;
+}
+.np-sheet[data-variant='wochenplan'] .np-time {
+  font-size: 20px;
+}
+.np-sheet[data-variant='wochenplan'] .np-dur {
+  font-size: 16px;
+}
+.np-sheet[data-variant='wochenplan'] .np-note {
+  font-size: 21px;
+}
+.np-sheet[data-variant='wochenplan'] .np-free {
+  font-size: 28px;
+}
+.np-sheet[data-variant='wochenplan'] .np-under {
+  margin-top: 16px;
+}
+.np-sheet[data-variant='wochenplan'] .np-dinner {
+  font-size: 20px;
+}
+.np-sheet[data-variant='wochenplan'] .np-dinner .rs-pic {
+  width: 46px;
+  height: 46px;
+}
+
+/* The homework card names its moment with a picture next to the title. */
+.np-card-title--pic {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.np-card-title--pic .rs-pic {
+  width: 44px;
+  height: 44px;
+  flex: none;
+}

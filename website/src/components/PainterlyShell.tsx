@@ -27,6 +27,14 @@ export function PainterlyShell({ children, readingProgress = false }: Props) {
     <div className="relative min-h-screen bg-white text-ink selection:bg-sky-wash selection:text-ink">
       <a
         href="#main-content"
+        onClick={(event) => {
+          // Jump without a history entry: on the tools the plan lives in the
+          // address bar, and Back must never land on an older plan.
+          event.preventDefault();
+          const main = document.getElementById('main-content');
+          main?.focus?.();
+          main?.scrollIntoView?.({ block: 'start' });
+        }}
         className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:rounded-full focus:bg-cobalt focus:text-white focus:font-display focus:font-semibold focus:text-sm"
       >
         Zum Hauptinhalt springen
@@ -54,7 +62,7 @@ export function PainterlyShell({ children, readingProgress = false }: Props) {
 
       <SiteHeader />
 
-      <div id="main-content" className="relative z-10">{children}</div>
+      <div id="main-content" tabIndex={-1} className="relative z-10 outline-none">{children}</div>
     </div>
   );
 }

@@ -168,3 +168,7 @@ Marc's go: "yes, run the art batch for bath and shower" (26 Sep 2026), after Ast
 
 Marc, the same evening: still images go through Astra (Codex image generation on the ChatGPT plan) from now on, not Higgsfield. This is the last Higgsfield pass for task pictures.
 
+
+## Astra pass 1: afternoon pictures through Codex image generation (27 Sep 2026, website session)
+
+First still image through Astra instead of Higgsfield (Marc, 26 Sep: "why do we use higgsfield for image gen if we can use astra directly?"). Brief and log: `C:\Users\öööö\ronki\launch\astra-art\brief-2026-09-27-afternoon.md`; references: two earlier task sheets as local PNGs. One 2 x 2 sheet on white (school building with a bell, family house, armchair with a knitted blanket, playground slide), 1254 px square, on style at the first try, no credits. Cut with `scripts/cut-task-sheet.py --grid 2x2`. Used now: `school.webp` for "Schule aus" on the Nachmittagsplan; house, armchair and slide kept in `launch/astra-art/` for later.
