@@ -32,6 +32,9 @@
   padding: 0;
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
+  /* One row as tall as the strip: a column that holds too much is clipped
+   * inside itself, where scripts/og-nachmittagsplan.mjs --check sees it. */
+  grid-template-rows: minmax(0, 1fr);
   gap: 8px;
 }
 .np-day {
@@ -40,7 +43,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 7px;
+  gap: 9px;
   padding: 10px 6px 10px;
   border: 2.5px solid #040812;
   border-radius: 18px;
@@ -52,7 +55,7 @@
   margin: 0;
   font-family: 'Fredoka', system-ui, sans-serif;
   font-weight: 700;
-  font-size: 18px;
+  font-size: 19px;
   line-height: 1;
   letter-spacing: -0.01em;
   color: #040812;
@@ -69,8 +72,8 @@
   border-top: 2px dotted rgba(4, 8, 18, 0.28);
 }
 .np-block .rs-pic {
-  width: 44px;
-  height: 44px;
+  width: 52px;
+  height: 52px;
 }
 .np-block .rs-draw {
   border-radius: 10px;
@@ -81,8 +84,8 @@
   gap: 1px;
 }
 .np-trio .rs-pic {
-  width: 28px;
-  height: 28px;
+  width: 31px;
+  height: 31px;
 }
 .np-label {
   display: block;
@@ -90,7 +93,7 @@
   margin-top: 2px;
   font-family: 'Fredoka', system-ui, sans-serif;
   font-weight: 600;
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.1;
   color: #040812;
 }
@@ -101,7 +104,7 @@
 .np-time {
   font-family: 'Fredoka', system-ui, sans-serif;
   font-weight: 700;
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.15;
   color: #0544b0;
 }
@@ -118,13 +121,13 @@
 .np-dur {
   font-family: 'Fredoka', system-ui, sans-serif;
   font-weight: 600;
-  font-size: 13px;
+  font-size: 13.5px;
   line-height: 1.15;
   color: #40444d;
 }
 .np-note {
   font-family: 'Gochi Hand', 'Comic Sans MS', cursive;
-  font-size: 16px;
+  font-size: 17px;
   line-height: 1.05;
   color: #040812;
 }
@@ -313,7 +316,7 @@
   align-self: end;
   width: 112px;
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
   align-items: center;
   gap: 4px;
 }
@@ -360,13 +363,14 @@
 }
 .np-card-host--big img {
   flex: none;
-  width: 118px;
+  width: 100px;
 }
+/* Wide enough that the longest word, "Hausaufgabenzeit.", stays on one line. */
 .np-card-host--big .np-card-bubble {
   flex: 1 1 auto;
   min-width: 0;
   font-size: 19px;
-  padding: 10px 14px;
+  padding: 10px 10px;
 }
 
 /* Wochenplan: the strip alone, bigger ---------------------------------------- */
@@ -375,34 +379,34 @@
   gap: 10px;
 }
 .np-sheet[data-variant='wochenplan'] .np-day {
-  gap: 12px;
+  gap: 16px;
   padding: 14px 7px 12px;
 }
 .np-sheet[data-variant='wochenplan'] .np-day-name {
   font-size: 21px;
 }
 .np-sheet[data-variant='wochenplan'] .np-block {
-  padding-top: 11px;
+  padding-top: 14px;
 }
 .np-sheet[data-variant='wochenplan'] .np-block .rs-pic {
-  width: 64px;
-  height: 64px;
+  width: 80px;
+  height: 80px;
 }
 .np-sheet[data-variant='wochenplan'] .np-trio .rs-pic {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
 }
 .np-sheet[data-variant='wochenplan'] .np-label {
-  font-size: 16px;
+  font-size: 17px;
 }
 .np-sheet[data-variant='wochenplan'] .np-time {
-  font-size: 18px;
+  font-size: 20px;
 }
 .np-sheet[data-variant='wochenplan'] .np-dur {
-  font-size: 15px;
+  font-size: 16px;
 }
 .np-sheet[data-variant='wochenplan'] .np-note {
-  font-size: 19px;
+  font-size: 21px;
 }
 .np-sheet[data-variant='wochenplan'] .np-free {
   font-size: 28px;
