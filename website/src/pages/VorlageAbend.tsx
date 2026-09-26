@@ -2,11 +2,12 @@ import { RoutinePrintSheet } from '../components/RoutinePrintSheet';
 import { VorlageDownload } from '../components/VorlageDownload';
 import { GuideFaq, GuideLink, VorlageGuide } from '../components/VorlageGuide';
 import { VORLAGE_PRINT_ABEND } from './print/VorlagePrint';
+import { JumpToBuilder } from '../components/routine-builder';
 
 // Keep title and description in sync with website/vite-plugin-prerender-meta.ts.
 const META_TITLE = 'Abendroutine Vorlage für Kinder zum Ausdrucken · Ronki';
 const META_DESCRIPTION =
-  'Kostenlose Abendroutine Vorlage für Kinder zum Ausdrucken. Vier Schritte bis ins Bett, zum Abhaken. Dazu: wann ihr anfangt und was hilft, wenn es hakt.';
+  'Kostenlose Abendroutine Vorlage für Kinder zum Ausdrucken. Wähl eure Schritte mit Bildern, dein Kind malt die Kreise aus. Dazu: wann ihr anfangt, was hilft.';
 
 const FAQ: GuideFaq[] = [
   {
@@ -22,12 +23,12 @@ const FAQ: GuideFaq[] = [
   {
     question: 'Mit oder ohne Belohnung?',
     answer:
-      'Ohne. Der Haken, den dein Kind selbst setzt, ist Rückmeldung genug. Und Vorlesen sollte keine Belohnung sein, die nach einem schwierigen Abend wegfällt. Es ist der ruhige Schluss jedes Tages.',
+      'Ohne. Der Kreis, den dein Kind selbst ausmalt, ist Rückmeldung genug. Und Vorlesen sollte keine Belohnung sein, die nach einem schwierigen Abend wegfällt. Es ist der ruhige Schluss jedes Tages.',
   },
   {
     question: 'Bekommen Geschwister dasselbe Blatt?',
     answer:
-      'Besser nicht. Jedes Kind hakt auf seinem eigenen Blatt ab, mit seinem Namen oben drauf. Für jüngere Geschwister passt die Vorlage für Kleinkinder mit weniger Text und größeren Bildern.',
+      'Besser nicht. Jedes Kind malt auf seinem eigenen Blatt aus, mit seinem Namen oben drauf. Für jüngere Geschwister passt die Vorlage für Kleinkinder mit weniger Text und größeren Bildern.',
   },
 ];
 
@@ -40,7 +41,7 @@ export default function VorlageAbend() {
       description="Vier Schritte bis ins Bett. Dein Kind malt den Kreis aus, wenn ein Schritt geschafft ist."
       accent="#0544B0"
       pageTitle="Abendroutine Vorlage für Kinder zum Ausdrucken"
-      pageIntro="Vier Schritte vom Zähneputzen bis Licht aus, mit Bildern, die dein Kind auch ohne Lesen versteht. Druck diese Seite direkt aus, ohne Anmeldung, oder hol dir das fertige PDF."
+      pageIntro="Stell eure eigenen Schritte aus Bildern zusammen oder nimm unsere vier, vom Zähneputzen bis Licht aus. Die Bilder versteht dein Kind auch ohne Lesen. Druck das Blatt direkt aus, ohne Anmeldung, oder hol dir unsere vier Schritte als fertiges PDF."
       metaTitle={META_TITLE}
       metaDescription={META_DESCRIPTION}
       downloadSlot={
@@ -49,16 +50,13 @@ export default function VorlageAbend() {
           title="Die Abendroutine"
           pdfHref="/vorlagen/abendroutine.pdf"
           printHref="/print/vorlage-abend"
+          sheetOnPage
         />
       }
       ronki={VORLAGE_PRINT_ABEND.ronki}
       done
-      steps={[
-        { img: 'toothbrush.webp', icon: '🪥', label: 'Zähne putzen', hint: 'Auch die hinten im Mund.' },
-        { img: 'wash.webp', icon: '🧼', label: 'Gesicht waschen', hint: 'Mit Wasser, ganz sanft.' },
-        { img: 'pajama.webp', icon: '🌙', label: 'Pyjama an', hint: 'Die Sachen von heute in den Korb.' },
-        { img: 'light-off.webp', icon: '📖', label: 'Licht aus', hint: 'Eine Geschichte, dann schlafen.' },
-      ]}
+      // Parents build their own evening; the untouched plan is the four steps above the fold as before.
+      builder="evening"
     >
       <VorlageGuide
         previewSrc="/vorlagen/previews/abendroutine.png"
@@ -76,15 +74,16 @@ export default function VorlageAbend() {
                   was noch dran ist. Dein Kind sieht es selbst.
                 </p>
                 <p>
-                  Jeden Schritt hakt dein Kind selbst ab und malt den Kreis daneben aus. Steckst
+                  Nach jedem Schritt malt dein Kind selbst den Kreis daneben aus. Steckst
                   du das Blatt in eine Klarsichthülle oder
                   laminierst es, reicht ein abwischbarer Stift, und am nächsten Abend ist es
                   wieder leer.
                 </p>
                 <p>
-                  Die Felder für die Uhrzeit im PDF sind freiwillig. Abends helfen sie eher dir
-                  als deinem Kind. Wenn du von Licht aus rückwärts rechnest, siehst du, wann ihr
-                  mit Zähneputzen anfangen müsst.
+                  Uhrzeiten sind freiwillig. Abends helfen sie eher dir als deinem Kind. Oben
+                  unter <JumpToBuilder className="text-cobalt underline decoration-2 underline-offset-4">Eure Schritte</JumpToBuilder>{' '}
+                  rechnet die Seite von Licht aus rückwärts: Dann steht bei jedem Schritt, wann
+                  er dran ist, und du siehst, wann ihr anfangen müsst.
                 </p>
               </>
             ),
@@ -112,7 +111,9 @@ export default function VorlageAbend() {
             body: (
               <>
                 <p>
-                  Badet ihr abends, gehört das Bad vor den Pyjama. Lest ihr vor, bleibt die
+                  Die vier Schritte sind ein Vorschlag. Oben stellst du euren Abend selbst
+                  zusammen: Schritte dazunehmen, rausnehmen oder verschieben. Badet ihr abends,
+                  gehört das Bad vor den Pyjama. Lest ihr vor, bleibt die
                   Geschichte der letzte Schritt. Stell die Reihenfolge so um, wie euer Abend
                   wirklich läuft, und halt sie dann jeden Tag gleich.
                 </p>

@@ -55,6 +55,20 @@ describe('Profil-Karte with steps from the Morgenroutine page', () => {
     });
   });
 
+  it('shows and passes evening steps from the Abendroutine page too', async () => {
+    renderPage('?abend=cuddle,teeth_am,pyjama&morgen=wake');
+    const evening = screen.getByRole('region', { name: 'Diese Abendschritte übernimmt Ronki' });
+    expect(within(evening).getAllByRole('listitem').map((item) => item.textContent)).toEqual(['Vorlesen', 'Pyjama']);
+    expect(screen.getByRole('region', { name: 'Diese Schritte übernimmt Ronki' })).toBeInTheDocument();
+    await submit();
+    expect(createProfileOnSite).toHaveBeenCalledWith({
+      childName: 'Louis',
+      pin: null,
+      morning: ['wake'],
+      evening: ['cuddle', 'pyjama'],
+    });
+  });
+
   it('works exactly as before without the parameter', async () => {
     renderPage();
     expect(screen.queryByText('Diese Schritte übernimmt Ronki')).toBeNull();

@@ -8,7 +8,7 @@ import {
   useRoutinePlan,
   JumpToBuilder,
 } from './routine-builder';
-import { leaveNote, sheetDescription, sheetSteps } from '../lib/routine-builder';
+import { EVENING, MORNING, kitLeaveNote, kitSheetDescription, kitSheetSteps } from '../lib/routine-builder';
 
 /* ------------------------------------------------------------------ */
 /* Types                                                               */
@@ -64,8 +64,8 @@ type Props = BaseProps &
     | {
         /** Parents put the steps together themselves: the builder sits
          *  above the preview, the link and the Ronki card under it. The
-         *  plan lives in the address bar. Morning only for now. */
-        builder: 'morning';
+         *  plan lives in the address bar. */
+        builder: 'morning' | 'evening';
         steps?: undefined;
       }
   );
@@ -92,19 +92,20 @@ interface LayoutProps extends BaseProps {
  * same layout as the PDF (both use components/sheet).
  */
 export function RoutinePrintSheet(props: Props) {
-  if (props.builder) return <BuilderPage {...props} />;
+  if (props.builder) return <BuilderPage {...props} builder={props.builder} />;
   return <TemplateLayout {...props} steps={props.steps} />;
 }
 
-/** The morning page with the builder: the sheet follows the plan in the address bar. */
-function BuilderPage(props: BaseProps) {
-  const builder = useRoutinePlan(`/vorlagen/${props.slug}`);
+/** A page with the builder: the sheet follows the plan in the address bar. */
+function BuilderPage({ builder: which, ...props }: BaseProps & { builder: 'morning' | 'evening' }) {
+  const kit = which === 'evening' ? EVENING : MORNING;
+  const builder = useRoutinePlan(`/vorlagen/${props.slug}`, kit);
   return (
     <TemplateLayout
       {...props}
-      steps={sheetSteps(builder.plan)}
-      sheetDescription={sheetDescription(builder.plan)}
-      doneNote={leaveNote(builder.plan)}
+      steps={kitSheetSteps(kit, builder.plan)}
+      sheetDescription={kitSheetDescription(kit, builder.plan)}
+      doneNote={kitLeaveNote(kit, builder.plan)}
       controls={<RoutineBuilderControls builder={builder} />}
       afterSheet={<RoutineBuilderShare builder={builder} />}
     />

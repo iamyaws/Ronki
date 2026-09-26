@@ -64,6 +64,22 @@ describe('createProfileOnSite', () => {
     expect(Object.keys(state.familyConfig.routine as object)).toEqual(['morning']);
   });
 
+  it('seeds the evening routine from the Abendroutine page, alone or with the morning', async () => {
+    vi.mocked(supabase.rpc).mockResolvedValue({ data: {}, error: null } as never);
+
+    await createProfileOnSite({ childName: 'Louis', evening: ['cuddle', 'teeth_am', 'pyjama', 'cuddle', 'nope'] });
+    let [, args] = vi.mocked(supabase.rpc).mock.calls[0] as [string, Record<string, unknown>];
+    let config = (args.p_state as { familyConfig: Record<string, unknown> }).familyConfig;
+    // Only evening kinds, once each, in the family's order; no morning key.
+    expect(config.routine).toEqual({ evening: ['cuddle', 'pyjama'] });
+
+    vi.mocked(supabase.rpc).mockClear();
+    await createProfileOnSite({ childName: 'Louis', morning: ['wake'], evening: ['teeth_pm'] });
+    [, args] = vi.mocked(supabase.rpc).mock.calls[0] as [string, Record<string, unknown>];
+    config = (args.p_state as { familyConfig: Record<string, unknown> }).familyConfig;
+    expect(config.routine).toEqual({ morning: ['wake'], evening: ['teeth_pm'] });
+  });
+
   it('seeds no routine when no app-known step comes along', async () => {
     vi.mocked(supabase.rpc).mockResolvedValue({ data: {}, error: null } as never);
 

@@ -1,15 +1,9 @@
 /**
- * Morgenroutine builder: the data behind the builder on /vorlagen/morgenroutine.
+ * Morgenroutine builder: the morning kit and the names the morning page uses.
  *
- * A plan is the steps of a morning in their order (one to six, one letter
- * each), at most one own step in the family's words, and optional clock
- * times counted back from the time the family leaves. There is no field for
- * a name, a class or a school, so the share link can never carry one.
- *
- * The whole plan lives in the link, the same way as the Ranzen-Packplan:
- * `encodePlan` writes a short query string, `decodePlan` reads it back and
- * quietly drops anything it does not know. The untouched plan encodes to an
- * empty string.
+ * The plan logic lives in `kit.ts` and is shared with the evening page
+ * (`evening.ts`). This file holds the morning catalogue and binds the kit
+ * functions to it, so the morning page and its tests keep their names.
  *
  * Link format (keys only when they differ from the default):
  *   s=akzdfp          step codes in order; the default is zdfp
@@ -19,8 +13,52 @@
  *                     and they differ from the defaults
  */
 
-import { cleanFreeText, pictureForFree } from '../ranzen-packplan';
-import type { SheetStep } from '../../components/sheet/types';
+import {
+  clockRange,
+  kitAddOwnStep,
+  kitAddStep,
+  kitAppKindPicture,
+  kitAppKindsFor,
+  kitCardLink,
+  kitCleanAppKinds,
+  kitDecodePlan,
+  kitDefaultPlan,
+  kitEncodePlan,
+  kitLeaveNote,
+  kitSetLeave,
+  kitSheetDescription,
+  kitSheetSteps,
+  kitStepLabel,
+  kitStepPicture,
+  isStepCode,
+  minutesOf,
+  stepOf,
+  type RoutineKit,
+  type RoutinePlan,
+  type RoutineStep,
+} from './kit';
+
+export {
+  MAX_MINUTES,
+  MAX_STEPS,
+  MIN_MINUTES,
+  MIN_STEPS,
+  OWN_STEP_CODE,
+  OWN_STEP_LABEL,
+  OWN_STEP_MAX,
+  OWN_STEP_MINUTES,
+  canAdd,
+  cleanOwnText,
+  clockLabel,
+  moveStep,
+  printedTimes,
+  removeStep,
+  setMinutes,
+  setOwnText,
+  setTimes,
+  startTimes,
+} from './kit';
+export type { RoutinePlan } from './kit';
 
 /** Steps the app knows. Must match ROUTINE_CHOICES.morning in src/data/taskKinds.ts (drift test). */
 export const APP_MORNING_KINDS = [
@@ -52,17 +90,8 @@ export type StepCode =
 /** A catalogue step or the own step. */
 export type PlanStepCode = StepCode | 'x';
 
-export interface MorningStep {
-  /** One letter in the share link. Unique. */
+export interface MorningStep extends RoutineStep {
   code: StepCode;
-  label: string;
-  /** One short line under the label on the sheet. */
-  hint: string;
-  /** Drawn picture, a file in /art/bilderbuch/tasks/. */
-  img: string;
-  /** Minutes the step takes when clock times are on. */
-  minutes: number;
-  /** The same step in the app, when the app has it. */
   app?: AppMorningKind;
 }
 
@@ -83,370 +112,64 @@ export const MORNING_STEPS: ReadonlyArray<MorningStep> = [
   { code: 'p', label: 'Tasche packen', hint: 'Brotdose, Trinken, Hausaufgaben.', img: 'bag.webp', minutes: 5, app: 'packcheck' },
 ];
 
-export const OWN_STEP_CODE = 'x';
-/** Name of the own step where it has no text yet. */
-export const OWN_STEP_LABEL = 'Eigener Schritt';
-export const OWN_STEP_MAX = 24;
-export const OWN_STEP_MINUTES = 5;
-
-export const MIN_STEPS = 1;
-export const MAX_STEPS = 6;
-export const MIN_MINUTES = 1;
-export const MAX_MINUTES = 30;
-
 /** The four steps the page has always shown, in that order. */
 export const DEFAULT_STEPS: readonly PlanStepCode[] = ['z', 'd', 'f', 'p'];
 export const DEFAULT_LEAVE = '07:30';
 
 /** Leave times a parent can pick: 6:30 to 8:30 in 5-minute steps, as "HH:MM". */
-export const LEAVE_TIMES: readonly string[] = (() => {
-  const times: string[] = [];
-  for (let t = 6 * 60 + 30; t <= 8 * 60 + 30; t += 5) times.push(fromMinutes(t));
-  return times;
-})();
+export const LEAVE_TIMES: readonly string[] = clockRange('06:30', '08:30');
 
 /** The line that goes with a shared link. */
 export const SHARE_TEXT =
   'Unsere Morgenroutine mit Bildern zum Ausdrucken. Du kannst die Schritte für euren Morgen ändern.';
 
-export interface RoutinePlan {
-  /** Step codes in sheet order, 1 to 6, no doubles. */
-  steps: PlanStepCode[];
-  /** The own step, cleaned. Empty unless the own step is in `steps`. */
-  own: string;
-  /** Clock times on the sheet. */
-  times: boolean;
-  /** Leave time, one of LEAVE_TIMES. */
-  leave: string;
-  /** Minutes per step, in step order, 1 to 30 each. */
-  minutes: number[];
-}
+export const MORNING: RoutineKit = {
+  id: 'morgen',
+  steps: MORNING_STEPS,
+  defaultSteps: DEFAULT_STEPS,
+  ownBefore: 'p',
+  lastWords: { code: 'p', words: 'bis zur Tasche' },
+  timeKey: 'los',
+  defaultTime: DEFAULT_LEAVE,
+  times: LEAVE_TIMES,
+  timeNote: (clock) => `Für heute fertig. Los um ${clock} Uhr.`,
+  appKinds: APP_MORNING_KINDS,
+  appLabels: APP_KIND_LABELS,
+  cardParam: 'morgen',
+  // The app drops the school bag on weekends and in the holidays.
+  notAloneInApp: ['packcheck'],
+  shareTitle: 'Morgenroutine',
+  shareText: SHARE_TEXT,
+};
 
 /* ------------------------------------------------------------------ */
-/* Plan helpers (pure)                                                 */
+/* The kit functions, bound to the morning                             */
 /* ------------------------------------------------------------------ */
-
-const BY_CODE = new Map<string, MorningStep>(MORNING_STEPS.map((step) => [step.code, step]));
 
 export function isPlanStepCode(code: string): code is PlanStepCode {
-  return code === OWN_STEP_CODE || BY_CODE.has(code);
+  return isStepCode(MORNING, code);
 }
 
-export function catalogueStep(code: PlanStepCode): MorningStep | undefined {
-  return BY_CODE.get(code);
+export function catalogueStep(code: string): MorningStep | undefined {
+  return stepOf(MORNING, code) as MorningStep | undefined;
 }
 
-export function defaultMinutes(code: PlanStepCode): number {
-  return BY_CODE.get(code)?.minutes ?? OWN_STEP_MINUTES;
+export function defaultMinutes(code: string): number {
+  return minutesOf(MORNING, code);
 }
 
-export function defaultPlan(): RoutinePlan {
-  return {
-    steps: [...DEFAULT_STEPS],
-    own: '',
-    times: false,
-    leave: DEFAULT_LEAVE,
-    minutes: DEFAULT_STEPS.map(defaultMinutes),
-  };
-}
-
-/**
- * Own step as it goes on the sheet and into the link: cleaned the same way
- * as a free item on the Ranzen-Packplan, at most OWN_STEP_MAX characters.
- */
-export function cleanOwnText(raw: string): string {
-  return Array.from(cleanFreeText(raw)).slice(0, OWN_STEP_MAX).join('').trim();
-}
-
-/** Label of a step in the plan. The own step shows its text. */
-export function stepLabel(plan: RoutinePlan, code: PlanStepCode): string {
-  if (code === OWN_STEP_CODE) return plan.own || OWN_STEP_LABEL;
-  return BY_CODE.get(code)?.label ?? '';
-}
-
-/** Picture of a step in the plan, or null when the sheet shows a box to draw in. */
-export function stepPicture(plan: RoutinePlan, code: PlanStepCode): string | null {
-  if (code === OWN_STEP_CODE) return plan.own ? pictureForFree(plan.own) : null;
-  return BY_CODE.get(code)?.img ?? null;
-}
-
-export function canAdd(plan: RoutinePlan): boolean {
-  return plan.steps.length < MAX_STEPS;
-}
-
-/**
- * Where a new step goes: before the first chosen step that comes later in a
- * usual morning (catalogue order), so "Aufstehen" lands on top and not
- * after "Tasche packen". The own step goes in before the school bag, or at
- * the end when there is none. Parents move it with the arrows from there.
- */
-function insertAt(plan: RoutinePlan, code: PlanStepCode): number {
-  if (code === OWN_STEP_CODE) {
-    const bag = plan.steps.indexOf('p' as PlanStepCode);
-    return bag >= 0 ? bag : plan.steps.length;
-  }
-  const rank = (c: PlanStepCode) => MORNING_STEPS.findIndex((step) => step.code === c);
-  const mine = rank(code);
-  const later = plan.steps.findIndex((c) => c !== OWN_STEP_CODE && rank(c) > mine);
-  return later >= 0 ? later : plan.steps.length;
-}
-
-function insert<T>(list: readonly T[], at: number, item: T): T[] {
-  return [...list.slice(0, at), item, ...list.slice(at)];
-}
-
-export function addStep(plan: RoutinePlan, code: StepCode): RoutinePlan {
-  if (!BY_CODE.has(code) || plan.steps.includes(code) || !canAdd(plan)) return plan;
-  const at = insertAt(plan, code);
-  return { ...plan, steps: insert(plan.steps, at, code), minutes: insert(plan.minutes, at, defaultMinutes(code)) };
-}
-
-/** Adds the own step before the school bag. Nothing happens without text, at six steps or when it is there already. */
-export function addOwnStep(plan: RoutinePlan, text: string): RoutinePlan {
-  const own = cleanOwnText(text);
-  if (!own || plan.steps.includes(OWN_STEP_CODE) || !canAdd(plan)) return plan;
-  return {
-    ...plan,
-    steps: insert(plan.steps, insertAt(plan, OWN_STEP_CODE), OWN_STEP_CODE),
-    own,
-    minutes: insert(plan.minutes, insertAt(plan, OWN_STEP_CODE), OWN_STEP_MINUTES),
-  };
-}
-
-/** New text for the own step. Only kept while the own step is in the plan. */
-export function setOwnText(plan: RoutinePlan, text: string): RoutinePlan {
-  if (!plan.steps.includes(OWN_STEP_CODE)) return plan;
-  return { ...plan, own: cleanOwnText(text) };
-}
-
-/** Removes a step. The last one stays: a sheet always has a step. */
-export function removeStep(plan: RoutinePlan, index: number): RoutinePlan {
-  if (plan.steps.length <= MIN_STEPS || index < 0 || index >= plan.steps.length) return plan;
-  const code = plan.steps[index];
-  return {
-    ...plan,
-    steps: plan.steps.filter((_, i) => i !== index),
-    minutes: plan.minutes.filter((_, i) => i !== index),
-    own: code === OWN_STEP_CODE ? '' : plan.own,
-  };
-}
-
-/** Moves a step one place up (-1) or down (+1). Its minutes move with it. */
-export function moveStep(plan: RoutinePlan, index: number, by: -1 | 1): RoutinePlan {
-  const to = index + by;
-  if (index < 0 || index >= plan.steps.length || to < 0 || to >= plan.steps.length) return plan;
-  const steps = [...plan.steps];
-  const minutes = [...plan.minutes];
-  [steps[index], steps[to]] = [steps[to], steps[index]];
-  [minutes[index], minutes[to]] = [minutes[to], minutes[index]];
-  return { ...plan, steps, minutes };
-}
-
-export function setTimes(plan: RoutinePlan, on: boolean): RoutinePlan {
-  return { ...plan, times: on };
-}
-
-export function setLeave(plan: RoutinePlan, leave: string): RoutinePlan {
-  return LEAVE_TIMES.includes(leave) ? { ...plan, leave } : plan;
-}
-
-export function setMinutes(plan: RoutinePlan, index: number, minutes: number): RoutinePlan {
-  if (index < 0 || index >= plan.steps.length || !Number.isFinite(minutes)) return plan;
-  const clamped = Math.min(MAX_MINUTES, Math.max(MIN_MINUTES, Math.round(minutes)));
-  return { ...plan, minutes: plan.minutes.map((m, i) => (i === index ? clamped : m)) };
-}
-
-/* ------------------------------------------------------------------ */
-/* Times                                                               */
-/* ------------------------------------------------------------------ */
-
-function toMinutes(hhmm: string): number {
-  const [h, m] = hhmm.split(':').map(Number);
-  return h * 60 + m;
-}
-
-function fromMinutes(total: number): string {
-  const day = 24 * 60;
-  const t = ((total % day) + day) % day;
-  return `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`;
-}
-
-/**
- * Start time of every step, counted back from the leave time: the last step
- * ends when the family leaves. Leave 07:40 and minutes 3, 10, 15, 5 give
- * 07:07, 07:10, 07:20, 07:35.
- */
-export function startTimes(leave: string, minutes: readonly number[]): string[] {
-  let t = toMinutes(leave) - minutes.reduce((sum, m) => sum + m, 0);
-  return minutes.map((m) => {
-    const start = fromMinutes(t);
-    t += m;
-    return start;
-  });
-}
-
-/** "07:05" as it is written on the sheet: "7:05". */
-export function clockLabel(hhmm: string): string {
-  return hhmm.replace(/^0(\d)/, '$1');
-}
-
-/* ------------------------------------------------------------------ */
-/* Sheet                                                               */
-/* ------------------------------------------------------------------ */
-
-const COUNT_WORDS = ['Ein', 'Zwei', 'Drei', 'Vier', 'Fünf', 'Sechs'];
-
-/** Plan positions that go on the sheet: an own step without text stays off, it would print an empty row. */
-function sheetIndices(plan: RoutinePlan): number[] {
-  return plan.steps.flatMap((code, i) => (code === OWN_STEP_CODE && !plan.own ? [] : [i]));
-}
-
-/**
- * Clock times as the sheet prints them, one per plan position (undefined
- * where no time is printed). Each start is rounded down to five minutes,
- * which a child finds on a kitchen clock, and printed only where it changes
- * from the row above, so the sheet never reads like a stopwatch. The leave
- * time in the done band stays exact.
- */
-export function printedTimes(plan: RoutinePlan): (string | undefined)[] {
-  const out: (string | undefined)[] = plan.steps.map(() => undefined);
-  if (!plan.times) return out;
-  const keep = sheetIndices(plan);
-  const starts = startTimes(plan.leave, keep.map((i) => plan.minutes[i]));
-  let last = '';
-  keep.forEach((i, n) => {
-    const rounded = fromMinutes(Math.floor(toMinutes(starts[n]) / 5) * 5);
-    if (rounded !== last) out[i] = clockLabel(rounded);
-    last = rounded;
-  });
-  return out;
-}
-
-/** Steps as the sheet draws them, with the clock time when times are on. */
-export function sheetSteps(plan: RoutinePlan): SheetStep[] {
-  const times = printedTimes(plan);
-  return sheetIndices(plan).map((i) => {
-    const code = plan.steps[i];
-    const time = times[i];
-    if (code === OWN_STEP_CODE) {
-      const img = stepPicture(plan, code);
-      return img ? { img, label: plan.own, time } : { draw: true, label: plan.own, time };
-    }
-    const step = BY_CODE.get(code)!;
-    return { img: step.img, label: step.label, hint: step.hint, time };
-  });
-}
-
-/** The line under the sheet title. For the four default steps it is the line the page always had. */
-export function sheetDescription(plan: RoutinePlan): string {
-  const shown = sheetIndices(plan).map((i) => plan.steps[i]);
-  const n = shown.length;
-  const count = `${COUNT_WORDS[n - 1] ?? String(n)} ${n === 1 ? 'Schritt' : 'Schritte'}`;
-  const toBag = shown[n - 1] === 'p' ? ' bis zur Tasche' : '';
-  return `${count}${toBag}. Dein Kind malt den Kreis aus, wenn ein Schritt geschafft ist.`;
-}
-
-/** Note in the done band when times are on, otherwise undefined (the band keeps its own line). */
-export function leaveNote(plan: RoutinePlan): string | undefined {
-  return plan.times ? `Für heute fertig. Los um ${clockLabel(plan.leave)} Uhr.` : undefined;
-}
-
-/* ------------------------------------------------------------------ */
-/* Ronki app                                                           */
-/* ------------------------------------------------------------------ */
-
-const APP_KINDS = new Set<string>(APP_MORNING_KINDS);
-
-/** App kinds of the chosen steps, in sheet order. */
-export function appKindsFor(plan: RoutinePlan): AppMorningKind[] {
-  const kinds: AppMorningKind[] = [];
-  for (const code of plan.steps) {
-    const kind = BY_CODE.get(code)?.app;
-    if (kind && !kinds.includes(kind)) kinds.push(kind);
-  }
-  return kinds;
-}
-
-/** Keeps only kinds the app knows, once each, in the order given. */
-export function cleanAppKinds(input: unknown): AppMorningKind[] {
-  const list = typeof input === 'string' ? input.split(',') : Array.isArray(input) ? input : [];
-  const kinds: AppMorningKind[] = [];
-  for (const raw of list) {
-    if (typeof raw !== 'string') continue;
-    const kind = raw.trim();
-    if (APP_KINDS.has(kind) && !kinds.includes(kind as AppMorningKind)) kinds.push(kind as AppMorningKind);
-  }
-  return kinds;
-}
-
-/** Picture of an app kind, the same drawing the sheet uses. */
-export function appKindPicture(kind: AppMorningKind): string {
-  return MORNING_STEPS.find((step) => step.app === kind)!.img;
-}
-
-/**
- * Link to the card page carrying the app kinds, or null when no chosen step
- * is in the app. Never the own step. Only the school bag is not enough: the
- * app drops it on weekends and in the holidays, which would leave the child
- * a morning without a task.
- */
-export function cardLink(plan: RoutinePlan): string | null {
-  const kinds = appKindsFor(plan);
-  if (!kinds.length || (kinds.length === 1 && kinds[0] === 'packcheck')) return null;
-  return `/profil-erstellen?morgen=${kinds.join(',')}`;
-}
-
-/* ------------------------------------------------------------------ */
-/* Link                                                                */
-/* ------------------------------------------------------------------ */
-
-function sameList<T>(a: readonly T[], b: readonly T[]): boolean {
-  return a.length === b.length && a.every((v, i) => v === b[i]);
-}
-
-/** The plan as a query string without the leading "?". Empty for the default plan. */
-export function encodePlan(plan: RoutinePlan): string {
-  const params = new URLSearchParams();
-  if (!sameList(plan.steps, DEFAULT_STEPS)) params.set('s', plan.steps.join(''));
-  const own = cleanOwnText(plan.own);
-  if (own && plan.steps.includes(OWN_STEP_CODE)) params.set('e', own);
-  if (plan.times) {
-    params.set('los', plan.leave.replace(':', ''));
-    if (!sameList(plan.minutes, plan.steps.map(defaultMinutes))) params.set('m', plan.minutes.join('.'));
-  }
-  return params.toString();
-}
-
-function decodeSteps(value: string | null): PlanStepCode[] {
-  if (value === null) return [...DEFAULT_STEPS];
-  const steps: PlanStepCode[] = [];
-  for (const ch of Array.from(value)) {
-    if (isPlanStepCode(ch) && !steps.includes(ch)) steps.push(ch);
-  }
-  return steps.length ? steps.slice(0, MAX_STEPS) : [...DEFAULT_STEPS];
-}
-
-function decodeLeave(value: string | null): string | null {
-  if (value === null || !/^\d{4}$/.test(value)) return null;
-  const hhmm = `${value.slice(0, 2)}:${value.slice(2)}`;
-  return LEAVE_TIMES.includes(hhmm) ? hhmm : null;
-}
-
-function decodeMinutes(value: string | null, count: number): number[] | null {
-  if (value === null) return null;
-  const parts = value.split('.');
-  if (parts.length !== count) return null;
-  const minutes = parts.map((part) => (/^\d{1,2}$/.test(part) ? Number(part) : NaN));
-  return minutes.every((m) => m >= MIN_MINUTES && m <= MAX_MINUTES) ? minutes : null;
-}
-
-/** Reads a plan back from a query string (with or without "?"). Unknown or bad values are ignored. */
-export function decodePlan(search: string): RoutinePlan {
-  const params = new URLSearchParams(search.startsWith('?') ? search.slice(1) : search);
-  const steps = decodeSteps(params.get('s'));
-  const own = steps.includes(OWN_STEP_CODE) ? cleanOwnText(params.get('e') ?? '') : '';
-  const leave = decodeLeave(params.get('los'));
-  const times = leave !== null;
-  const minutes = (times && decodeMinutes(params.get('m'), steps.length)) || steps.map(defaultMinutes);
-  return { steps, own, times, leave: leave ?? DEFAULT_LEAVE, minutes };
-}
+export const defaultPlan = (): RoutinePlan => kitDefaultPlan(MORNING);
+export const stepLabel = (plan: RoutinePlan, code: string) => kitStepLabel(MORNING, plan, code);
+export const stepPicture = (plan: RoutinePlan, code: string) => kitStepPicture(MORNING, plan, code);
+export const addStep = (plan: RoutinePlan, code: string) => kitAddStep(MORNING, plan, code);
+export const addOwnStep = (plan: RoutinePlan, text: string) => kitAddOwnStep(MORNING, plan, text);
+export const setLeave = (plan: RoutinePlan, leave: string) => kitSetLeave(MORNING, plan, leave);
+export const sheetSteps = (plan: RoutinePlan) => kitSheetSteps(MORNING, plan);
+export const sheetDescription = (plan: RoutinePlan) => kitSheetDescription(MORNING, plan);
+export const leaveNote = (plan: RoutinePlan) => kitLeaveNote(MORNING, plan);
+export const appKindsFor = (plan: RoutinePlan) => kitAppKindsFor(MORNING, plan) as AppMorningKind[];
+export const cleanAppKinds = (input: unknown) => kitCleanAppKinds(MORNING, input) as AppMorningKind[];
+export const appKindPicture = (kind: AppMorningKind) => kitAppKindPicture(MORNING, kind);
+export const cardLink = (plan: RoutinePlan) => kitCardLink(MORNING, plan);
+export const encodePlan = (plan: RoutinePlan) => kitEncodePlan(MORNING, plan);
+export const decodePlan = (search: string) => kitDecodePlan(MORNING, search);
