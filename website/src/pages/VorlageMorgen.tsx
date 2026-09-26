@@ -1,6 +1,7 @@
 import { RoutinePrintSheet } from '../components/RoutinePrintSheet';
 import { VorlageDownload } from '../components/VorlageDownload';
 import { GuideFaq, GuideLink, VorlageGuide } from '../components/VorlageGuide';
+import { VORLAGE_PRINT_MORGEN } from './print/VorlagePrint';
 
 // Keep title and description in sync with website/vite-plugin-prerender-meta.ts.
 const META_TITLE = 'Morgenroutine Vorlage für Kinder zum Ausdrucken · Ronki';
@@ -50,12 +51,24 @@ export default function VorlageMorgen() {
           printHref="/print/vorlage-morgen"
         />
       }
+      ronki={VORLAGE_PRINT_MORGEN.ronki}
+      done
       steps={[
-        { icon: '🪥', label: 'Zähne putzen', hint: 'Oben, unten, außen, innen.' },
-        { icon: '👕', label: 'Anziehen', hint: 'Wetter angucken, dann Sachen raussuchen.' },
-        { icon: '🥣', label: 'Frühstücken', hint: 'Am Tisch, in Ruhe.' },
-        { icon: '🎒', label: 'Tasche packen', hint: 'Brotdose, Trinken, Hausaufgaben.' },
+        { img: 'toothbrush.webp', icon: '🪥', label: 'Zähne putzen', hint: 'Oben, unten, außen, innen.' },
+        { img: 'shirt.webp', icon: '👕', label: 'Anziehen', hint: 'Wetter angucken, dann Sachen raussuchen.' },
+        { img: 'plate.webp', icon: '🥣', label: 'Frühstücken', hint: 'Am Tisch, in Ruhe.' },
+        { img: 'bag.webp', icon: '🎒', label: 'Tasche packen', hint: 'Brotdose, Trinken, Hausaufgaben.' },
       ]}
+      // Off by default: start with four steps, add these once the four sit.
+      extraSteps={{
+        switchLabel: 'Aufstehen und Waschen dazunehmen',
+        description:
+          'Sechs Schritte bis zur Tasche. Dein Kind malt den Kreis aus, wenn ein Schritt geschafft ist.',
+        steps: [
+          { img: 'wake.webp', icon: '☀️', label: 'Aufstehen', hint: 'Licht an, Vorhang auf.' },
+          { img: 'wash.webp', icon: '🧼', label: 'Waschen', hint: 'Gesicht und Hände.' },
+        ],
+      }}
     >
       <VorlageGuide
         previewSrc="/vorlagen/previews/morgenroutine.png"
@@ -109,7 +122,8 @@ export default function VorlageMorgen() {
                   bleibt. Was jeden Tag anders ist, wird jeden Tag neu verhandelt.
                 </p>
                 <p>
-                  Nimm für den Anfang nicht mehr als vier oder fünf Schritte. Klo, Hände
+                  Nimm für den Anfang vier Schritte. Wenn die sitzen, nimm Aufstehen und
+                  Waschen dazu. Klo, Hände
                   waschen oder Schuhe passen meistens in einen Schritt, den es schon gibt. Wenn
                   dein Kind schon beim Anfangen hängen bleibt, probier die{' '}
                   <GuideLink to="/vorlagen/adhs">Vorlage bei ADHS</GuideLink>. Sie hat sechs

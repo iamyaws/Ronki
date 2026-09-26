@@ -1,6 +1,7 @@
 import { RoutinePrintSheet } from '../components/RoutinePrintSheet';
 import { VorlageDownload } from '../components/VorlageDownload';
 import { GuideFaq, GuideLink, VorlageGuide } from '../components/VorlageGuide';
+import { VORLAGE_PRINT_KLEINE_GESCHWISTER } from './print/VorlagePrint';
 
 // Keep title and description in sync with website/vite-plugin-prerender-meta.ts.
 const META_TITLE = 'Routine-Vorlage für Kleinkinder zum Ausdrucken · Ronki';
@@ -51,11 +52,12 @@ export default function VorlageKleineGeschwister() {
           printHref="/print/vorlage-kleine-geschwister"
         />
       }
+      ronki={VORLAGE_PRINT_KLEINE_GESCHWISTER.ronki}
       steps={[
-        { icon: '🪥', label: '' },
-        { icon: '👕', label: '' },
-        { icon: '🥣', label: '' },
-        { icon: '🧸', label: '' },
+        { img: 'toothbrush.webp', icon: '🪥', label: '' },
+        { img: 'shirt.webp', icon: '👕', label: '' },
+        { img: 'plate.webp', icon: '🥣', label: '' },
+        { img: 'teddy.webp', icon: '🧸', label: '' },
       ]}
       footerLine="ronki.de · für kleine Geschwister"
     >

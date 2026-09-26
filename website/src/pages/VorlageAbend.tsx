@@ -1,6 +1,7 @@
 import { RoutinePrintSheet } from '../components/RoutinePrintSheet';
 import { VorlageDownload } from '../components/VorlageDownload';
 import { GuideFaq, GuideLink, VorlageGuide } from '../components/VorlageGuide';
+import { VORLAGE_PRINT_ABEND } from './print/VorlagePrint';
 
 // Keep title and description in sync with website/vite-plugin-prerender-meta.ts.
 const META_TITLE = 'Abendroutine Vorlage für Kinder zum Ausdrucken · Ronki';
@@ -50,11 +51,13 @@ export default function VorlageAbend() {
           printHref="/print/vorlage-abend"
         />
       }
+      ronki={VORLAGE_PRINT_ABEND.ronki}
+      done
       steps={[
-        { icon: '🪥', label: 'Zähne putzen', hint: 'Auch die hinten im Mund.' },
-        { icon: '🧼', label: 'Gesicht waschen', hint: 'Mit Wasser, ganz sanft.' },
-        { icon: '🌙', label: 'Pyjama an', hint: 'Die Sachen von heute in den Korb.' },
-        { icon: '📖', label: 'Licht aus', hint: 'Eine Geschichte, dann schlafen.' },
+        { img: 'toothbrush.webp', icon: '🪥', label: 'Zähne putzen', hint: 'Auch die hinten im Mund.' },
+        { img: 'wash.webp', icon: '🧼', label: 'Gesicht waschen', hint: 'Mit Wasser, ganz sanft.' },
+        { img: 'pajama.webp', icon: '🌙', label: 'Pyjama an', hint: 'Die Sachen von heute in den Korb.' },
+        { img: 'nightlight.webp', icon: '📖', label: 'Licht aus', hint: 'Eine Geschichte, dann schlafen.' },
       ]}
     >
       <VorlageGuide
