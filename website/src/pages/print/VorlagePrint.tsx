@@ -64,7 +64,7 @@ export const VORLAGE_PRINT_MORGEN: VorlagePrintTemplate = {
   eyebrow: 'Morgen',
   title: 'Die Morgenroutine',
   description:
-    'Vier Schritte bis zur Tasche. Trag eure Zeiten ein und hak ab, was geschafft ist.',
+    'Vier Schritte bis zur Tasche. Trag eure Zeiten ein und mal den Kreis aus, wenn ein Schritt geschafft ist.',
   accent: '#0544B0',
   showTimes: true,
   ronki: { pose: 'wave', bubble: 'Was ist als Nächstes dran?' },
@@ -77,14 +77,14 @@ export const VORLAGE_PRINT_MORGEN: VorlagePrintTemplate = {
   ],
   metaTitle: 'Morgenroutine Vorlage zum Ausdrucken (A4)',
   metaDescription:
-    'Druckfertige A4-Vorlage für die Morgenroutine: vier Schritte, große Kästchen zum Abhaken.',
+    'Druckfertige A4-Vorlage für die Morgenroutine: vier Schritte mit Bildern, große Kreise zum Ausmalen.',
 };
 
 export const VORLAGE_PRINT_ABEND: VorlagePrintTemplate = {
   eyebrow: 'Abend',
   title: 'Die Abendroutine',
   description:
-    'Vier Schritte bis ins Bett. Trag eure Zeiten ein und hak ab, was geschafft ist.',
+    'Vier Schritte bis ins Bett. Trag eure Zeiten ein und mal den Kreis aus, wenn ein Schritt geschafft ist.',
   accent: '#0544B0',
   showTimes: true,
   ronki: { pose: 'calm', bubble: 'Gleich wird es gemütlich.' },
@@ -97,13 +97,13 @@ export const VORLAGE_PRINT_ABEND: VorlagePrintTemplate = {
   ],
   metaTitle: 'Abendroutine Vorlage zum Ausdrucken (A4)',
   metaDescription:
-    'Druckfertige A4-Vorlage für die Abendroutine: vier Schritte, große Kästchen zum Abhaken.',
+    'Druckfertige A4-Vorlage für die Abendroutine: vier Schritte mit Bildern, große Kreise zum Ausmalen.',
 };
 
 export const VORLAGE_PRINT_KLEINE_GESCHWISTER: VorlagePrintTemplate = {
   eyebrow: 'Für die Kleinen',
   title: 'Mein Tag',
-  description: 'Ganz einfach, nur mit Bildern. Ein Bild geschafft, ein Haken gesetzt.',
+  description: 'Ganz einfach, nur mit Bildern. Ein Bild geschafft, ein Kreis ausgemalt.',
   accent: '#0544B0',
   bigIcons: true,
   // No bubble: this sheet has no words for the child.

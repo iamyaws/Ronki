@@ -72,7 +72,7 @@ export default function VorlageMorgen() {
     >
       <VorlageGuide
         previewSrc="/vorlagen/previews/morgenroutine.png"
-        previewAlt="Das PDF der Morgenroutine-Vorlage: vier Schritte mit Bildern (Zähne putzen, Anziehen, Frühstücken, Tasche packen), daneben je ein Feld für die Uhrzeit und ein Kästchen zum Abhaken."
+        previewAlt="Das PDF der Morgenroutine-Vorlage: vier Schritte mit Bildern (Zähne putzen, Anziehen, Frühstücken, Tasche packen), daneben je ein Feld für die Uhrzeit und ein Kreis zum Ausmalen, oben Ronki mit einer Sprechblase."
         previewCaption="So sieht das PDF aus. Eine Seite A4."
         faq={FAQ}
         sections={[
@@ -86,9 +86,8 @@ export default function VorlageMorgen() {
                   oder der Kühlschrank. Wichtig ist nur: Dein Kind sieht es, ohne zu suchen.
                 </p>
                 <p>
-                  Den Haken setzt dein Kind selbst, nicht du. Hier in der Vorschau sind es
-                  Kreise zum Ausmalen, im PDF Kästchen zum Abhaken. Beides funktioniert. Wer
-                  selbst abhakt, sieht am Ende, was er geschafft hat.
+                  Den Kreis malt dein Kind selbst aus, nicht du. Wer selbst ausmalt, sieht am
+                  Ende, was er geschafft hat.
                 </p>
                 <p>
                   Du willst nicht jeden Tag neu drucken? Steck das Blatt in eine Klarsichthülle
@@ -140,7 +139,7 @@ export default function VorlageMorgen() {
                   Es wird Morgen geben, an denen gar nichts geht. Dein Kind hat schlecht
                   geschlafen, die Hose kratzt, alle sind spät dran. Dann hilfst du eben mit und
                   bringst alle aus dem Haus. Mach am Nachmittag kein Thema daraus, welche
-                  Kästchen leer geblieben sind. Am nächsten Morgen fängt das Blatt wieder oben
+                  Kreise leer geblieben sind. Am nächsten Morgen fängt das Blatt wieder oben
                   an.
                 </p>
                 <p>

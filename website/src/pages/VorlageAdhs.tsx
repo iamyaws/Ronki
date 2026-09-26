@@ -72,7 +72,7 @@ export default function VorlageAdhs() {
     >
       <VorlageGuide
         previewSrc="/vorlagen/previews/adhs.png"
-        previewAlt="Das PDF der ADHS-Vorlage Mein Morgen: sechs Schritte mit je einem Bild und einem Wort (Licht, Klo, Anziehen, Frühstück, Zähne, Ranzen), ein Rand für die Wäscheklammer, Kästchen zum Abhaken und ein Zeitbalken ohne Uhrzeit."
+        previewAlt="Das PDF der ADHS-Vorlage Mein Morgen: sechs Schritte mit je einem Bild und einem Wort (Licht, Klo, Anziehen, Frühstück, Zähne, Ranzen), ein Rand für die Wäscheklammer, Kreise zum Ausmalen, oben Ronki, und ein Zeitbalken ohne Uhrzeit."
         previewCaption="So sieht das PDF aus. Eine Seite A4, mit Rand für die Klammer."
         faq={FAQ}
       />

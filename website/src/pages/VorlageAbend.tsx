@@ -62,7 +62,7 @@ export default function VorlageAbend() {
     >
       <VorlageGuide
         previewSrc="/vorlagen/previews/abendroutine.png"
-        previewAlt="Das PDF der Abendroutine-Vorlage: vier Schritte mit Bildern (Zähne putzen, Gesicht waschen, Pyjama an, Licht aus), daneben je ein Feld für die Uhrzeit und ein Kästchen zum Abhaken."
+        previewAlt="Das PDF der Abendroutine-Vorlage: vier Schritte mit Bildern (Zähne putzen, Gesicht waschen, Pyjama an, Licht aus), daneben je ein Feld für die Uhrzeit und ein Kreis zum Ausmalen, oben Ronki mit einer Sprechblase."
         previewCaption="So sieht das PDF aus. Eine Seite A4."
         faq={FAQ}
         sections={[
@@ -76,8 +76,8 @@ export default function VorlageAbend() {
                   was noch dran ist. Dein Kind sieht es selbst.
                 </p>
                 <p>
-                  Jeden Schritt hakt dein Kind selbst ab. Im PDF sind es Kästchen, hier in der
-                  Vorschau Kreise zum Ausmalen. Steckst du das Blatt in eine Klarsichthülle oder
+                  Jeden Schritt hakt dein Kind selbst ab und malt den Kreis daneben aus. Steckst
+                  du das Blatt in eine Klarsichthülle oder
                   laminierst es, reicht ein abwischbarer Stift, und am nächsten Abend ist es
                   wieder leer.
                 </p>
@@ -134,7 +134,7 @@ export default function VorlageAbend() {
                   an. Schwierig wird es erst, wenn fast jeder Abend so läuft.
                 </p>
                 <p>
-                  Mach aus leeren Kästchen kein Thema, am nächsten Abend fängt das Blatt wieder
+                  Mach aus leeren Kreisen kein Thema, am nächsten Abend fängt das Blatt wieder
                   oben an. Hakt es länger, schau auf die Uhrzeit, das Licht im Zimmer und den
                   Bildschirm vor dem Schlafen. Das alles steht ausführlicher in unserem Ratgeber
                   zur{' '}

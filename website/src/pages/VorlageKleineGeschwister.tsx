@@ -63,7 +63,7 @@ export default function VorlageKleineGeschwister() {
     >
       <VorlageGuide
         previewSrc="/vorlagen/previews/kleine-geschwister.png"
-        previewAlt="Das PDF der Kleinkind-Vorlage Mein Tag: vier große Bilder ohne Text (Zahnbürste, T-Shirt, Müslischale, Teddy), daneben je ein großes Kästchen zum Abhaken."
+        previewAlt="Das PDF der Kleinkind-Vorlage Mein Tag: vier große Bilder ohne Text (Zahnbürste, T-Shirt, Müslischale, Teddy), daneben je ein großer Kreis zum Ausmalen, oben Ronki."
         previewCaption="So sieht das PDF aus. Eine Seite A4."
         faq={FAQ}
         sections={[
@@ -73,7 +73,7 @@ export default function VorlageKleineGeschwister() {
               <>
                 <p>
                   Kleine Kinder schauen sich viel bei den Großen ab. Wenn das Schulkind morgens
-                  seine Kästchen abhakt, will das kleine Geschwisterkind oft auch ein Blatt.
+                  seine Kreise ausmalt, will das kleine Geschwisterkind oft auch ein Blatt.
                   Genau dafür ist diese Vorlage da. Sie hat vier Bilder: Zahnbürste, T-Shirt,
                   Frühstücksschale und einen Teddy, der bei euch fürs Spielen oder fürs Bett
                   stehen kann.
@@ -125,7 +125,7 @@ export default function VorlageKleineGeschwister() {
               <>
                 <p>
                   Ein Kleinkind, das heute nicht will, will heute nicht. Lass das Blatt hängen
-                  und macht ohne weiter. Kein Schimpfen über leere Kästchen und kein Vergleich
+                  und macht ohne weiter. Kein Schimpfen über leere Kreise und kein Vergleich
                   mit dem großen Geschwisterkind. Das Blatt soll Lust aufs Mitmachen machen,
                   sonst wird es zum nächsten Streitpunkt.
                 </p>
