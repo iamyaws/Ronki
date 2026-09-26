@@ -333,7 +333,7 @@ describe('Morgenroutine builder', () => {
     expect(link.getAttribute('href')).not.toMatch(/Medizin|los|e=/);
     expect(
       screen.getByText(
-        'Ronki ist unsere kostenlose App für Kinder, ohne E-Mail und ohne Werbung. Du bekommst eine Karte mit QR-Code, die dein Kind auf dem Tablet scannt. Dann fragt Ronki in eurer Reihenfolge nach: Zähne putzen, Aufstehen, Schultasche. Die Uhrzeiten und die anderen Schritte bleiben auf eurem Blatt.',
+        'Ronki ist unsere kostenlose App für Kinder, ohne E-Mail und ohne Werbung. Du bekommst eine Karte mit QR-Code, die dein Kind auf dem Tablet scannt. Dann fragt Ronki in eurer Reihenfolge nach: Zähne putzen, Aufstehen, Schultasche. Die Uhrzeiten, die Minuten pro Schritt und die anderen Schritte bleiben auf eurem Blatt.',
       ),
     ).toBeInTheDocument();
   });

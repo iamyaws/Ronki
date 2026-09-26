@@ -69,11 +69,14 @@ export function JumpToBuilder({ className, children }: { className?: string; chi
 export const LINK_NOTE =
   'Im Link stehen eure Schritte, die Uhrzeiten und euer eigener Schritt. Alle mit dem Link können das lesen.';
 
-/** "Die Uhrzeiten und die anderen Schritte bleiben auf eurem Blatt." or nothing. */
+/** "Die Uhrzeiten, die Minuten pro Schritt und die anderen Schritte bleiben auf eurem Blatt." or nothing. */
 function paperOnly(times: boolean, rest: boolean): string {
-  const parts = [times && 'die Uhrzeiten', rest && 'die anderen Schritte'].filter(Boolean) as string[];
+  const parts = [
+    ...(times ? ['die Uhrzeiten', 'die Minuten pro Schritt'] : []),
+    ...(rest ? ['die anderen Schritte'] : []),
+  ];
   if (!parts.length) return '';
-  const joined = parts.join(' und ');
+  const joined = parts.length > 1 ? `${parts.slice(0, -1).join(', ')} und ${parts[parts.length - 1]}` : parts[0];
   return ` ${joined[0].toUpperCase()}${joined.slice(1)} bleiben auf eurem Blatt.`;
 }
 

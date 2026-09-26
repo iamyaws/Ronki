@@ -408,8 +408,8 @@ function CarriedSteps({ kinds }: { kinds: AppMorningKind[] }) {
         ))}
       </ul>
       <p className="mt-3 text-xs text-ink/60 leading-relaxed">
-        Diese Schritte kommen von eurem Blatt, in eurer Reihenfolge. Uhrzeiten und eigene
-        Schritte bleiben auf dem Blatt. Im Eltern-Bereich der App könnt ihr sie jederzeit ändern.
+        Diese Schritte kommen von eurem Blatt, in eurer Reihenfolge. Uhrzeiten, Minuten und
+        eigene Schritte bleiben auf dem Blatt. Im Eltern-Bereich der App könnt ihr sie jederzeit ändern.
       </p>
     </section>
   );
