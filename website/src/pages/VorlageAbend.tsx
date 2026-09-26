@@ -40,7 +40,7 @@ export default function VorlageAbend() {
       description="Vier Schritte bis ins Bett. Dein Kind malt den Kreis aus, wenn ein Schritt geschafft ist."
       accent="#0544B0"
       pageTitle="Abendroutine Vorlage für Kinder zum Ausdrucken"
-      pageIntro="Vier Schritte vom Zähneputzen bis zur Schlafenszeit, mit Bildern, die dein Kind auch ohne Lesen versteht. Druck diese Seite direkt aus, ohne Anmeldung, oder hol dir das fertige PDF."
+      pageIntro="Vier Schritte vom Zähneputzen bis Licht aus, mit Bildern, die dein Kind auch ohne Lesen versteht. Druck diese Seite direkt aus, ohne Anmeldung, oder hol dir das fertige PDF."
       metaTitle={META_TITLE}
       metaDescription={META_DESCRIPTION}
       downloadSlot={
@@ -57,12 +57,12 @@ export default function VorlageAbend() {
         { img: 'toothbrush.webp', icon: '🪥', label: 'Zähne putzen', hint: 'Auch die hinten im Mund.' },
         { img: 'wash.webp', icon: '🧼', label: 'Gesicht waschen', hint: 'Mit Wasser, ganz sanft.' },
         { img: 'pajama.webp', icon: '🌙', label: 'Pyjama an', hint: 'Die Sachen von heute in den Korb.' },
-        { img: 'nightlight.webp', icon: '📖', label: 'Schlafenszeit', hint: 'Eine Geschichte, dann schlafen.' },
+        { img: 'light-off.webp', icon: '📖', label: 'Licht aus', hint: 'Eine Geschichte, dann schlafen.' },
       ]}
     >
       <VorlageGuide
         previewSrc="/vorlagen/previews/abendroutine.png"
-        previewAlt="Das PDF der Abendroutine-Vorlage: vier Schritte mit Bildern (Zähne putzen, Gesicht waschen, Pyjama an, Schlafenszeit), daneben je ein Feld für die Uhrzeit und ein Kreis zum Ausmalen, oben Ronki mit einer Sprechblase."
+        previewAlt="Das PDF der Abendroutine-Vorlage: vier Schritte mit Bildern (Zähne putzen, Gesicht waschen, Pyjama an, Licht aus), daneben je ein Feld für die Uhrzeit und ein Kreis zum Ausmalen, oben Ronki mit einer Sprechblase."
         previewCaption="So sieht das PDF aus. Eine Seite A4."
         faq={FAQ}
         sections={[

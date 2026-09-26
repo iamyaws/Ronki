@@ -12,7 +12,7 @@ describe('Vorlage für Kinder mit ADHS', () => {
       </MemoryRouter>,
     );
 
-    for (const label of ['Aufwachen', 'Klo', 'Anziehen', 'Frühstück', 'Zähne', 'Ranzen']) {
+    for (const label of ['Licht an', 'Klo', 'Anziehen', 'Frühstück', 'Zähne', 'Ranzen']) {
       expect(screen.getAllByText(label).length).toBeGreaterThan(0);
     }
   });

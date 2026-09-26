@@ -1,16 +1,20 @@
-"""Cut a 4 x 3 Higgsfield task-picture sheet into 256 px transparent webp files.
+"""Cut a Higgsfield task-picture sheet into 256 px transparent webp files.
 
 The model paints "transparent background" as a baked-in grey checkerboard
-(two near-greys, about 253 and 234). This script removes it:
+(two near-greys, about 253 and 234, squares of roughly 18 to 22 px that are
+not exactly regular). This script removes it:
   1. candidate background = near-neutral pixels in the checker's brightness range;
-  2. connected regions of candidates are background if they touch the cell edge
-     (the outside) or if they contain both checker tones (a checker patch seen
-     through a closed gap, such as a bag handle loop);
-  3. single-tone white regions inside an outline (socks, drawstrings) stay.
+  2. regions of candidates that touch the cell edge are background (the outside);
+  3. the checker grid (square size and phase, per axis) is measured on that
+     known background; a closed region (a bag handle loop, a gap between
+     objects) is background only if its light and dark pixels sit where the
+     grid predicts. Drawn white or grey shading (socks, a switch rocker, a
+     toilet) does not follow the grid and stays.
 Each object is then trimmed, fitted into 232 px and centred on a 256 px canvas,
 like the existing tasks/*.webp.
 
-Run: python scripts/cut-task-sheet.py <sheet.png> <out_dir> name1 name2 ... name12
+Run: python scripts/cut-task-sheet.py <sheet.png> <out_dir> [--grid 4x3] name1 name2 ...
+(names row by row; the default grid is 4 columns by 3 rows)
 """
 import sys
 from pathlib import Path
@@ -19,38 +23,77 @@ import numpy as np
 from PIL import Image
 from scipy import ndimage
 
-sheet_path, out_dir, *names = sys.argv[1:]
-if len(names) != 12:
-    sys.exit('need exactly 12 names, row by row')
+sheet_path, out_dir, *rest = sys.argv[1:]
+cols, rows = 4, 3
+if rest[:1] == ['--grid']:
+    cols, rows = (int(v) for v in rest[1].lower().split('x'))
+    rest = rest[2:]
+names = rest
+if len(names) != cols * rows:
+    sys.exit(f'need exactly {cols * rows} names, row by row')
 out = Path(out_dir)
 out.mkdir(parents=True, exist_ok=True)
 
 img = np.asarray(Image.open(sheet_path).convert('RGB')).astype(np.int16)
 H, W, _ = img.shape
-cw, ch = W // 4, H // 3
+mx_all, mn_all = img.max(axis=2), img.min(axis=2)
+candidate_all = ((mx_all - mn_all) <= 12) & (mn_all >= 222)
+dark_all = mx_all < 244
+
+# Known background: candidate regions touching any cell edge.
+cw, ch = W // cols, H // rows
+known_bg = np.zeros((H, W), bool)
+for i in range(cols * rows):
+    r, c = divmod(i, cols)
+    sl = (slice(r * ch, (r + 1) * ch), slice(c * cw, (c + 1) * cw))
+    lab, n = ndimage.label(candidate_all[sl])
+    edge = set(np.unique(np.concatenate([lab[0], lab[-1], lab[:, 0], lab[:, -1]]))) - {0}
+    known_bg[sl] |= np.isin(lab, list(edge))
+
+
+def fit_axis(profile):
+    """Square size and phase of a 1-D checker profile (mean darkness per column or row)."""
+    x = np.arange(profile.size)
+    valid = ~np.isnan(profile)
+    x, p = x[valid], profile[valid] - np.nanmean(profile)
+    best = (-1.0, 20.0, 0.0)
+    for s in np.arange(12.0, 32.0, 0.05):
+        for ph in np.arange(0.0, 2 * s, 0.5):
+            wave = np.where(np.floor((x + ph) / s) % 2 == 0, 1.0, -1.0)
+            score = abs(float(np.dot(wave, p)))
+            if score > best[0]:
+                best = (score, s, ph)
+    return best[1], best[2]
+
+
+# Profiles need one row or column of squares at a time, so fit on a band.
+band = slice(0, max(8, int(H * 0.02)))
+colprof = np.array([dark_all[band, x][known_bg[band, x]].mean() if known_bg[band, x].any() else np.nan for x in range(W)])
+sx, px = fit_axis(colprof)
+bandx = slice(0, max(8, int(W * 0.02)))
+rowprof = np.array([dark_all[y, bandx][known_bg[y, bandx]].mean() if known_bg[y, bandx].any() else np.nan for y in range(H)])
+sy, py = fit_axis(rowprof)
+yy, xx = np.mgrid[0:H, 0:W]
+parity = ((np.floor((xx + px) / sx) + np.floor((yy + py) / sy)) % 2).astype(bool)
+# Which parity is the dark tone: decide on the known background.
+if np.mean(dark_all[known_bg] == parity[known_bg]) < 0.5:
+    parity = ~parity
+fit_quality = np.mean(dark_all[known_bg] == parity[known_bg])
+print(f'checker grid: {sx:.2f} x {sy:.2f} px, fit on known background {fit_quality:.2%}')
 
 for i, name in enumerate(names):
-    r, c = divmod(i, 4)
-    cell = img[r * ch:(r + 1) * ch, c * cw:(c + 1) * cw]
-    mx, mn = cell.max(axis=2), cell.min(axis=2)
-    neutral = (mx - mn) <= 12
-    candidate = neutral & (mn >= 222)
-    labels, n = ndimage.label(candidate)
-    bg = np.zeros_like(candidate)
-    edge_labels = set(np.unique(np.concatenate([labels[0], labels[-1], labels[:, 0], labels[:, -1]]))) - {0}
+    r, c = divmod(i, cols)
+    sl = (slice(r * ch, (r + 1) * ch), slice(c * cw, (c + 1) * cw))
+    cell = img[sl]
+    mx, mn = mx_all[sl], mn_all[sl]
+    labels, n = ndimage.label(candidate_all[sl])
+    bg = known_bg[sl].copy()
     for lab in range(1, n + 1):
         region = labels == lab
-        if lab in edge_labels:
-            bg |= region
+        if bg[region].any() or region.sum() < 80:
             continue
-        # A checker patch seen through a closed gap holds both checker greys in
-        # large shares. Measured on the 26 Sep sheet: the gym bag's handle loop is
-        # 22% dark tone and 40% light tone; every white paint area with crayon grain
-        # (socks, slipper trim, toilet, paint palette) has under 3% dark tone.
-        tones = mx[region]
-        on_light = np.count_nonzero(np.abs(tones - 253) <= 2)
-        on_dark = np.count_nonzero(np.abs(tones - 234) <= 2)
-        if on_light >= 0.1 * tones.size and on_dark >= 0.1 * tones.size:
+        agree = np.mean(dark_all[sl][region] == parity[sl][region])
+        if agree >= 0.85:  # the region follows the checker grid: a patch seen through a gap
             bg |= region
     # swallow the thin anti-aliased seam between background and outline
     bg = ndimage.binary_dilation(bg, iterations=1) & (mn >= 205) & ((mx - mn) <= 18) | bg
@@ -62,4 +105,4 @@ for i, name in enumerate(names):
     canvas = Image.new('RGBA', (256, 256), (0, 0, 0, 0))
     canvas.paste(crop, ((256 - crop.width) // 2, (256 - crop.height) // 2), crop)
     canvas.save(out / f'{name}.webp', 'WEBP', quality=90, method=6)
-    print(f'{name}: {crop.width}x{crop.height}, background regions {int(bg.sum())} px')
+    print(f'{name}: {crop.width}x{crop.height}')
