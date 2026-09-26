@@ -163,8 +163,9 @@ export default function RatgeberRanzenPackenErsteKlasse() {
         keine richtige Antwort. Hilfreicher als die Frage „Wer ist schuld?“
         ist am Abend die Frage „Was ergänzen wir auf der Karte?“. Vielleicht
         fehlt dort einfach ein Bild. Was nicht in der Auswahl steht, trägst du
-        bei „Noch etwas?“ ein. Dafür bekommt die Karte ein leeres Feld, in das
-        dein Kind vor dem ersten Packen selbst malt, was mit muss.
+        bei „Noch etwas?“ ein. Für bekannte Sachen wie Laterne oder Geld kommt ein
+        Bild auf die Karte, sonst ein leeres Feld, in das dein Kind vor dem ersten
+        Packen selbst malt, was mit muss.
       </p>
 
       <h2>Was du heute tun kannst</h2>

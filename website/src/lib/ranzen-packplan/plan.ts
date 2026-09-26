@@ -70,7 +70,7 @@ export const WEEKDAYS: ReadonlyArray<{ id: WeekdayId; label: string }> = [
 
 export const DAILY_ITEMS: ReadonlyArray<PackItem<DailyItemId>> = [
   { id: 'brotdose', code: 'b', label: 'Brotdose', img: 'lunchbox.webp' },
-  { id: 'trinkflasche', code: 't', label: 'Trinkflasche', printLabel: `Trink${SHY}flasche`, img: 'water.webp' },
+  { id: 'trinkflasche', code: 't', label: 'Trinkflasche', printLabel: `Trink${SHY}flasche`, img: 'bottle.webp' },
   { id: 'maeppchen', code: 'm', label: 'Mäppchen', img: 'pencil-case.webp' },
   {
     id: 'hausaufgabenheft',
@@ -160,6 +160,73 @@ export function cleanFreeText(raw: string): string {
   // eslint-disable-next-line no-control-regex
   const folded = raw.replace(/[\u0000-\u001F\u007F-\u009F]/g, ' ').replace(/\s+/g, ' ').trim();
   return Array.from(folded).slice(0, FREE_TEXT_MAX).join('').trim();
+}
+
+/**
+ * Pictures for free items the tool knows by name. Only whole words from
+ * these lists count, plurals and common compounds written out, so a word
+ * that merely contains one ("Schuhkarton", "Aufkleber") never gets a
+ * picture of something else (Astra code review, PR 32). A word is only
+ * listed when the picture shows that very thing: no sun hat for
+ * "Sonnencreme", no apple for "Banane", no backpack for "Ausflug" (round 2).
+ * Anything else gets an empty box on the card to draw in.
+ */
+const FREE_PICTURES: ReadonlyArray<{ img: string; words: readonly string[] }> = [
+  { img: 'slippers.webp', words: ['hausschuh', 'hausschuhe', 'puschen', 'pantoffeln'] },
+  { img: 'rubber-boots.webp', words: ['gummistiefel', 'regenstiefel'] },
+  {
+    img: 'coin-purse.webp',
+    words: ['geld', 'taschengeld', 'ausflugsgeld', 'klassengeld', 'kopiergeld', 'bastelgeld', 'milchgeld',
+      'münze', 'münzen', 'euro', 'portemonnaie', 'geldbeutel', 'geldbörse'],
+  },
+  {
+    img: 'lantern.webp',
+    words: ['laterne', 'laternen', 'laternenumzug', 'laternenlauf', 'laternenfest', 'martinslaterne',
+      'martinsumzug', 'lampion', 'lampions'],
+  },
+  { img: 'apple.webp', words: ['obst', 'obsttag', 'obstdose', 'apfel', 'äpfel'] },
+  { img: 'glue-stick.webp', words: ['kleber', 'klebestift', 'kleberstift', 'klebstoff'] },
+  { img: 'scissors.webp', words: ['schere', 'bastelschere', 'kinderschere'] },
+  { img: 'sun-hat.webp', words: ['sonnenhut', 'sonnenmütze', 'hut'] },
+  { img: 'hat-gloves.webp', words: ['mütze', 'mützen', 'wollmütze', 'handschuh', 'handschuhe'] },
+  {
+    img: 'sneakers.webp',
+    words: ['schuh', 'schuhe', 'turnschuh', 'turnschuhe', 'sportschuh', 'sportschuhe', 'hallenschuh',
+      'hallenschuhe', 'sneaker', 'sneakers'],
+  },
+  { img: 'chestnuts.webp', words: ['kastanie', 'kastanien'] },
+  { img: 'bottle.webp', words: ['trinkflasche', 'wasserflasche', 'flasche', 'trinken'] },
+  { img: 'lunchbox.webp', words: ['brotdose', 'brotbox', 'frühstücksdose', 'frühstück', 'pausenbrot'] },
+  { img: 'teddy.webp', words: ['kuscheltier', 'kuscheltiere', 'stofftier', 'teddy', 'teddybär'] },
+  {
+    img: 'school-letter.webp',
+    words: ['mitteilungsheft', 'elternbrief', 'brief', 'zettel', 'unterschrift', 'formular',
+      'einverständniserklärung'],
+  },
+  { img: 'book.webp', words: ['buch', 'bücher', 'lesebuch', 'büchereibuch', 'bibliotheksbuch', 'bilderbuch'] },
+  {
+    img: 'homework.webp',
+    words: ['hausaufgaben', 'hausaufgabenheft', 'heft', 'hefte', 'matheheft', 'schreibheft'],
+  },
+  { img: 'rain-jacket.webp', words: ['jacke', 'regenjacke', 'matschjacke', 'winterjacke'] },
+  { img: 'backpack.webp', words: ['rucksack'] },
+];
+
+/** Every picture a free item can get, for the check that the files ship. */
+export const FREE_PICTURE_FILES: readonly string[] = [...new Set(FREE_PICTURES.map((entry) => entry.img))];
+
+/** Picture file for a free item, or null when the card should show a box to draw in. */
+export function pictureForFree(text: string): string | null {
+  const words = new Set(
+    cleanFreeText(text)
+      .toLocaleLowerCase('de-DE')
+      .split(/[^a-zäöüß]+/)
+      .filter(Boolean),
+  );
+  for (const entry of FREE_PICTURES) {
+    if (entry.words.some((word) => words.has(word))) return entry.img;
+  }
+  return null;
 }
 
 function inOrder<Id extends string>(catalogue: ReadonlyArray<PackItem<Id>>, ids: Iterable<Id>): Id[] {
