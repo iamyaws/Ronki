@@ -21,6 +21,17 @@ Marc's ask: close the security advisor findings that predate `profiles_cas`, kee
 
 ---
 
+## Fair levers: tomorrow as a picture, shelf favourite (26 September 2026, LIVE)
+
+Marc picked two levers from the concept page (https://claude.ai/artifact/FpZkKEuURtfFaPJtADtDi6): "build tomorrow as a picture and the shelf favourite".
+
+- **Tomorrow as a picture.** The good-night hook ("Als Nächstes flieg ich ...") shows a small drawing of that place; a dream-trip night shows the place Ronki dreams of. 28 place pictures in `public/art/bilderbuch/places/t01..t28.webp` (Higgsfield pass 6, 19.25 credits, prompt shown to Marc first, logged in `docs/design-briefs/2026-09-25-higgsfield-log.md`). A new trip wave needs its place pictures too (the test `src/data/trips.pictures.test.js` fails without them).
+- **The shelf favourite.** In the passport the child opens a treasure and taps the heart; it stands first on the passport shelf and the Nest shelf with a heart; the same heart clears it; Ronki says so, and names it when he shelves the next treasure. State `favoriteTreasure` (a shelf key; only trips and keepsakes with an id or time qualify), action `setFavoriteTreasure`.
+- **Review.** Astra one round, three findings applied (stable favourite keys, one cursor rule for the hook preview and opening via `nextTripCursor`, the Nest shelf by newest find). The browser check found the new field was dropped on load (the loader maps fields one by one: every new state field needs a line there).
+- **LIVE since 26 Sep 2026** (PR 36, merge 61488b3): live bundle `index-BTchD0TL.js` carries the favourite and the hook picture; `art/bilderbuch/places/t01..t28.webp` and the two new voice lines are served; app.ronki.de opens with no console errors.
+
+---
+
 ## Compare-and-swap sync (26 September 2026, LIVE)
 
 Marc's ask: "build the compare-and-swap RPC on Supabase" (point 4 of "Open for Marc" below).
