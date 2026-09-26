@@ -168,6 +168,13 @@ const ROUTES: RouteMeta[] = [
     ogImage: '/og-tool-ranzen-packplan.jpg',
   },
   {
+    path: '/tools/nachmittagsplan',
+    title: 'Nachmittagsplan für Grundschulkinder: erst ankommen, dann Hausaufgaben · Ronki',
+    description:
+      'Schule aus, ankommen, Termine, Hausaufgaben: Leg euren Nachmittag auf ein A4-Blatt und sieh, was nicht zusammenpasst. Kostenlos, ohne Anmeldung.',
+    ogImage: '/og-tool-nachmittagsplan.jpg',
+  },
+  {
     path: '/impressum',
     title: 'Impressum: Ronki',
     description: 'Anbieterkennzeichnung nach § 5 DDG und § 18 MStV.',

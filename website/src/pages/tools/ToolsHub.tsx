@@ -26,7 +26,7 @@ export default function ToolsHub() {
     <PainterlyShell>
       <PageMeta
         title="Werkzeuge für Eltern: Ronki"
-        description="Kleine Werkzeuge die Eltern helfen, digitale Entscheidungen für ihr Kind selbst zu treffen. Aktuell: der App-Check für Kinder-Apps."
+        description="Kostenlose Werkzeuge für Eltern: App-Check, Schlafens-Rechner, Familien-Medien-Charter, Konsolen-Check, Ranzen-Packplan und Nachmittagsplan."
         canonicalPath="/tools"
       />
 
@@ -108,6 +108,16 @@ export default function ToolsHub() {
               title="Was muss heute in den Ranzen?"
               description="Tipp an, was jeden Tag mit muss und was nur an bestimmten Tagen. Dann druckst du für jeden Schultag eine Bildkarte, die dein Kind auch ohne Lesen versteht."
               meta="3 Min · fünf Tageskarten + Link für die Klasse"
+            />
+            <ToolCard
+              index={5}
+              reduced={reduced}
+              tone="sage"
+              eyebrow="Nachmittagsplan"
+              to="/tools/nachmittagsplan"
+              title="Erst ankommen, dann Hausaufgaben."
+              description="Schule aus, Termine, Hausaufgaben: Du legst euren echten Nachmittag auf ein Blatt. Was nicht zusammenpasst, siehst du, bevor du druckst."
+              meta="5 Min · ein A4-Blatt + Wochenplan für Oma, Opa oder den Hort"
             />
           </ul>
         </div>
@@ -271,7 +281,7 @@ function ClosingBlock({ reduced }: { reduced: boolean | null }) {
         Vermisst du was?
       </p>
       <p className="font-display font-semibold text-base sm:text-lg text-cream leading-relaxed max-w-prose">
-        Diese fünf sind der Anfang. Wenn dir ein Werkzeug fehlt, das eine
+        Diese sechs sind der Anfang. Wenn dir ein Werkzeug fehlt, das eine
         Eltern-Entscheidung leichter macht, schreib mir kurz. Ich bau die
         Werkzeuge selbst, eins nach dem anderen.
       </p>
