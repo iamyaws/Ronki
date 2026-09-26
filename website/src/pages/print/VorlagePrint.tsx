@@ -93,7 +93,7 @@ export const VORLAGE_PRINT_ABEND: VorlagePrintTemplate = {
     { img: 'toothbrush.webp', icon: '🪥', label: 'Zähne putzen', hint: 'Auch die hinten im Mund.' },
     { img: 'wash.webp', icon: '🧼', label: 'Gesicht waschen', hint: 'Mit Wasser, ganz sanft.' },
     { img: 'pajama.webp', icon: '🌙', label: 'Pyjama an', hint: 'Die Sachen von heute in den Korb.' },
-    { img: 'nightlight.webp', icon: '📖', label: 'Licht aus', hint: 'Eine Geschichte, dann schlafen.' },
+    { img: 'nightlight.webp', icon: '📖', label: 'Schlafenszeit', hint: 'Eine Geschichte, dann schlafen.' },
   ],
   metaTitle: 'Abendroutine Vorlage zum Ausdrucken (A4)',
   metaDescription:
@@ -145,7 +145,7 @@ export const VORLAGE_PRINT_ADHS: VorlagePrintTemplate = {
     note: 'So lang ist euer Morgen ungefähr. Ohne Uhrzeit, damit nichts gegen die Zeit läuft.',
   },
   steps: [
-    { img: 'wake.webp', icon: '💡', label: 'Licht' },
+    { img: 'wake.webp', icon: '💡', label: 'Aufwachen' },
     { img: 'toilet.webp', icon: '🚽', label: 'Klo' },
     { img: 'shirt.webp', icon: '👕', label: 'Anziehen' },
     { img: 'plate.webp', icon: '🥣', label: 'Frühstück' },
