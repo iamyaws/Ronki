@@ -4,6 +4,23 @@ _Single source of truth: done, in flight, backlog. Update before any /compact an
 
 ---
 
+## Supabase security advisor clean-up (26 September 2026, LIVE)
+
+Marc's ask: close the security advisor findings that predate `profiles_cas`, keep everything the site, the keep-alive job and the card need.
+
+**LIVE since 26 Sep 2026, 21:01 CEST (Marc's go).** Migration `advisor_grants` applied to jdpxfvqaoxmnyvlxikce (recorded as version 20260926190102; repo file `supabase/migrations/20260926000200_advisor_grants.sql`).
+- `app_eval_counts` now runs with the caller's rights (`security_invoker`), public key trimmed to select. Anon already reads every `app_evals` row by policy, so the count is the same (checked: YouTube Kids 1 as owner and as anon). Live App-Check on ronki.de: request 200, page shows "Eine andere Person hat YouTube Kids bisher geprüft."
+- EXECUTE revoked from public, anon and authenticated on `notify_feedback_email()` and `rls_auto_enable()` (trigger helpers; both triggers still enabled) and on `profiles_count()`, `profiles_active_count()` (the gate queries run in the SQL editor as owner, unaffected).
+- Kept for the public key on purpose: `waitlist_count` and `update_waitlist_screener` (website waitlist form; not rendered while `LAUNCH_STATE` is `public-alpha`), `leads_count` (daily keep-alive job), the four card functions.
+- Advisors after: the ERROR is gone. Left by design: 7 anon + 7 authenticated WARNs for the kept functions, 2 INFO (`profiles`, `profile_activity` have RLS and no policies), leaked password protection.
+- `scripts/supabase-smoke.mjs` now expects the public key to be refused on the two profile counters (401). PASS against live.
+
+**Not proven end to end: the feedback email trigger.** A rolled-back test insert into `feedback` as a signed-in user was blocked by the session's auto-mode permission check. Evidence instead: the trigger is enabled, and Postgres 17 checks EXECUTE only when a trigger is created (`trigger.c` line 694; `ExecCallTriggerFunc` has no check; event triggers likewise). Live proof is the next real feedback: the feedback-notify function log or the mail.
+
+**Open for Marc.** Leaked password protection needs the Pro plan. 6 of the 11 old prototype sign-in accounts have passwords; the login screen is bypassed (`src/App.jsx:817`) but Auth still accepts email and password with the public key. Options: turn off email sign-ups (Auth, Providers, Email), or switch the protection on if the keep-alive decision moves the project to Pro anyway.
+
+---
+
 ## Compare-and-swap sync (26 September 2026, LIVE)
 
 Marc's ask: "build the compare-and-swap RPC on Supabase" (point 4 of "Open for Marc" below).

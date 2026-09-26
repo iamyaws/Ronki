@@ -60,6 +60,8 @@ so the pasted SQL and the repo cannot drift.
   cards created, and cards that came back on at least `p_min_days` separate days
   since `p_since` (defaults: 3 days, last 60 days). These are the two numbers the
   30 day decision in `docs/strategy/2026-09-14-wiederbelebungs-check.md` needs.
+  Owner only since 26 Sep 2026 (`migrations/20260926000200_advisor_grants.sql`):
+  read them in the SQL editor; the public key is refused.
 - `public.profile_get(p_token)`, `public.profile_upsert(p_token, p_state)`,
   `public.profile_delete(p_token)`: the only way into `profiles` from now on.
 

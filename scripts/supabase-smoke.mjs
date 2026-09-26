@@ -83,14 +83,20 @@ const RELATIONS = [
 
 const FAKE_TOKEN = '0'.repeat(32);
 
-// Every RPC the code calls, plus the counters the funnel gates need.
+// Every RPC the code calls with the public key.
 const RPCS = [
   ['waitlist_count', {}, 'total waitlist signups'],
   ['update_waitlist_screener', { p_email: 'smoke-probe@example.invalid', p_child_age: '', p_challenge: '', p_willing_to_test: 'später' }, 'waitlist screener (no-op for unknown email)'],
-  ['leads_count', {}, 'unique parent emails, leads plus waitlist'],
-  ['profiles_count', {}, 'cards created'],
-  ['profiles_active_count', {}, 'cards used on 3+ days in 60 days'],
+  ['leads_count', {}, 'unique parent emails, leads plus waitlist (keep-alive job)'],
   ['profile_get', { p_token: FAKE_TOKEN }, 'expects null for an unknown token'],
+];
+
+// The counters the decision gates need. Owner only since 26 Sep 2026
+// (migrations/20260926000200_advisor_grants.sql): read them in the SQL editor.
+// The public key must be refused.
+const OWNER_ONLY_RPCS = [
+  ['profiles_count', 'cards created'],
+  ['profiles_active_count', 'cards used on 3+ days in 60 days'],
 ];
 
 const rows = [];
@@ -148,6 +154,30 @@ async function probeRpc(name, body, note) {
     return;
   }
   record(`${name}()`, 'OK', `${note}: ${shorten(value)}`);
+}
+
+async function probeOwnerOnlyRpc(name, note) {
+  let res;
+  try {
+    res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${name}`, {
+      method: 'POST',
+      headers: HEADERS,
+      body: '{}',
+    });
+    await res.text();
+  } catch (err) {
+    record(`${name}()`, 'ERROR', `request failed: ${err.message}`);
+    return;
+  }
+  if (res.status === 404) {
+    record(`${name}()`, 'MISSING', note);
+    return;
+  }
+  if (res.status === 401 || res.status === 403) {
+    record(`${name}()`, 'OK', `${note} (exists, public key refused)`);
+    return;
+  }
+  record(`${name}()`, 'ERROR', `the public key should be refused, got http ${res.status}`);
 }
 
 function shorten(text) {
@@ -224,6 +254,9 @@ async function main() {
   }
   for (const [name, body, note] of RPCS) {
     await probeRpc(name, body, note);
+  }
+  for (const [name, note] of OWNER_ONLY_RPCS) {
+    await probeOwnerOnlyRpc(name, note);
   }
   if (WRITE) {
     await writeRoundTrip();
