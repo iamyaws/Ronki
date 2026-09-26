@@ -4,7 +4,7 @@ _Single source of truth: done, in flight, backlog. Update before any /compact an
 
 ---
 
-## Compare-and-swap sync (26 September 2026, branch `finch/cas-sync`)
+## Compare-and-swap sync (26 September 2026, LIVE)
 
 Marc's ask: "build the compare-and-swap RPC on Supabase" (point 4 of "Open for Marc" below).
 
@@ -16,6 +16,8 @@ Marc's ask: "build the compare-and-swap RPC on Supabase" (point 4 of "Open for M
 **LIVE on Supabase since 26 Sep 2026, 10:06 (Marc's go).** Migration `profiles_cas` applied to jdpxfvqaoxmnyvlxikce (recorded as version 20260926080610). Checked: the 3 existing cards got rev 0; the three functions are security definer with a fixed search_path; the app key can call them but cannot touch the table; PUBLIC has no grant. Live contract through the public API with a throwaway card (prefix ca5ca5): insert rev 1, insert-only refused with the row, rev 1 to 2, stale rev refused with the row, profile_get shows rev 2, the old profile_upsert bumps to 3 and a later CAS notices, invalid token rejected; the test card and its activity rows deleted, nothing left. Advisors: only the expected "anon can call a security-definer function" for profile_upsert_if (by design, token as credential); older findings (app_eval_counts view, notify_feedback_email and rls_auto_enable callable by anon) spun off as a separate task. The live app bundle still uses the old calls and keeps working.
 
 **Client (branch `finch/cas-sync`, shipping 26 Sep).** Two Astra rounds and seven rounds of a Claude verifier (real supabase-js client, every finding with a test that fails before its fix; `docs/reviews/2026-09-26-cas-sync/verifier-rounds.md`) shaped the design: every write is compare-and-swap and carries only this page's own changes onto the card; the sync bookkeeping (base, writes without an answer, their expected revision and send time) travels inside the local copy, so a cold start applies the local copy's own changes onto the card (IndexedDB or mirror, one tab or two); after a write without an answer the next save reads the card and settles it by id (offline nothing new goes out); requests abort at 15 s; no reload after a merge. Round 7: CLEAN. 652 app tests and 130 website tests green, tsc 23, check:names clean, both builds green; a fresh browser tab on the merged tree renders with no console errors and a tick lands on the card.
+
+**LIVE since 26 Sep 2026, 10:52 (PR 30, merge commit 0594425).** Checked on production: the app bundle changed from `index-BWjcoMhs.js` to `index-Dbk45vCA.js` about 30 s after the merge and contains `profile_upsert_if`, the `syncWrites` ids, the `__sync` bookkeeping and the request abort; app.ronki.de opens on the egg shelf with no console errors. Not yet done: a real two-device morning (Marc's phone plus Louis's tablet).
 
 **Known limits (documented).** After 20 or more writes by other devices following a lost answer, this device's gains merge without a base (larger balance, nothing counted twice). Saves paused while offline wait for the next change, the pagehide flush or the next start. Old app bundles still write unconditionally until they update.
 
