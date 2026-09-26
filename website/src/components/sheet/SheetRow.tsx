@@ -3,7 +3,8 @@ import type { SheetStep } from './types';
 
 /**
  * One step: number, drawn picture, label with an optional hint and an
- * optional "___ Uhr" line, and a cobalt ring the child colours in.
+ * optional "___ Uhr" line, and a cobalt ring the child colours in. A step
+ * with its own `time` prints that time ("7:05 Uhr") in place of the line.
  *
  * `clipLane` adds a strip on the left where a clothespin marks the step
  * that is running right now (ADHS sheet).
@@ -19,22 +20,29 @@ export function SheetRow({
   showTime?: boolean;
   clipLane?: boolean;
 }) {
-  const hasBody = Boolean(step.label || step.hint || showTime);
+  const hasTime = Boolean(step.time || showTime);
+  const hasBody = Boolean(step.label || step.hint || hasTime);
   return (
     <li className="rs-row">
       {clipLane && <span className="rs-clip" data-clip-lane aria-hidden />}
       <span className="rs-num" aria-hidden>
         {index + 1}
       </span>
-      <TaskPicture img={step.img} icon={step.icon} />
+      <TaskPicture img={step.img} icon={step.icon} draw={step.draw} />
       {hasBody && (
         <span className="rs-body">
           {step.label && <span className="rs-label">{step.label}</span>}
           {step.hint && <span className="rs-hint">{step.hint}</span>}
-          {showTime && (
-            <span className="rs-time">
-              <span className="rs-time-line" aria-hidden /> Uhr
+          {step.time ? (
+            <span className="rs-time rs-time--set" data-time>
+              {step.time} Uhr
             </span>
+          ) : (
+            showTime && (
+              <span className="rs-time">
+                <span className="rs-time-line" aria-hidden /> Uhr
+              </span>
+            )
           )}
         </span>
       )}

@@ -259,6 +259,21 @@
   height: 12px;
   border-bottom: 2px dotted rgba(4, 8, 18, 0.5);
 }
+/* A filled time from the builder: same place as the blank line, in cobalt. */
+.rs-time--set {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0544b0;
+}
+/* No picture for the family's own step: a dashed box to draw into. The
+ * dashed line matches the packplan's .pp-draw, so it reads as "fill me in". */
+.rs-draw {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 2px dashed rgba(4, 8, 18, 0.45);
+  border-radius: 14px;
+}
 .rs-ring {
   flex: none;
   margin-left: auto;

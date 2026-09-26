@@ -9,7 +9,7 @@ import {
   VORLAGE_PRINT_MORGEN,
   type VorlagePrintTemplate,
 } from '../src/pages/print/VorlagePrint';
-import { TaskPicture } from '../src/components/sheet';
+import { RoutineSheet, TaskPicture } from '../src/components/sheet';
 import VorlageMorgen from '../src/pages/VorlageMorgen';
 import VorlageAbend from '../src/pages/VorlageAbend';
 
@@ -70,6 +70,32 @@ describe('Print sheets in the Bilderbuch look', () => {
       ['Zähne', 'toothbrush.webp'],
       ['Ranzen', 'bag.webp'],
     ]);
+  });
+
+  it('prints a filled time where the blank line would be, and a box to draw in without a picture', () => {
+    render(
+      <RoutineSheet
+        eyebrow="Morgen"
+        title="Die Morgenroutine"
+        showTimes
+        done
+        doneNote="Für heute fertig. Los um 7:40 Uhr."
+        steps={[
+          { img: 'toothbrush.webp', label: 'Zähne putzen', time: '7:05' },
+          { draw: true, label: 'Medizin nehmen' },
+        ]}
+      />,
+    );
+    const [teeth, own] = sheetSteps();
+    expect(teeth).toHaveTextContent('7:05 Uhr');
+    expect(teeth.querySelector('.rs-time-line')).toBeNull();
+    // No time of its own: the blank line stays.
+    expect(own.querySelector('.rs-time-line')).not.toBeNull();
+    expect(own.querySelectorAll('[data-draw]')).toHaveLength(1);
+    expect(taskPictures(own)).toHaveLength(0);
+    expect(own).toHaveTextContent('Medizin nehmen');
+    expect(screen.getByText('Für heute fertig. Los um 7:40 Uhr.')).toBeInTheDocument();
+    expect(screen.queryByText('Für heute fertig. Ronki jubelt mit.')).toBeNull();
   });
 
   it('falls back to the emoji when a step has no picture', () => {
