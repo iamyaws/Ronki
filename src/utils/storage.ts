@@ -51,7 +51,8 @@ let writesFrozen = false;
  * start finds, its content grew from the base stored with it, so the next
  * load can apply that copy's own changes onto the card.
  */
-type Inflight = { id: string; submitted: GameState };
+/** A write whose answer never came, the state it carried, and the revision it expected. */
+type Inflight = { id: string; submitted: GameState; expectedRev: number | null };
 type SyncInfo = { rev: number | null; server: GameState | null; base: GameState | null; inflights: Inflight[] };
 /** The sync bookkeeping saved inside the local copy. */
 type LocalSync = { token: string; base: GameState | null; inflights: Inflight[]; savedAt: number };
@@ -159,10 +160,23 @@ function compose(base: GameState | null, state: GameState, server: GameState | n
  * card's id list is full and none is found, nobody can tell: merge without
  * a base (never counts anything twice).
  */
-function resolveBase(s: SyncInfo, base: GameState | null, card: GameState | null): GameState | null {
+function resolveBase(s: SyncInfo, base: GameState | null, card: GameState | null, cardRev: number | null): GameState | null {
+  return baseAfter(s.inflights, base, card, cardRev);
+}
+
+/**
+ * Given this device's unanswered writes and the card as it is now: the base
+ * for this device's changes. A write on the card landed: its state is the
+ * base. A write not on the card did not land if the card is at most
+ * WRITE_IDS_KEPT writes past the revision it expected (had it landed, its id
+ * would still be in the card's list); otherwise nobody can tell and the
+ * merge runs without a base (verifier R3-1).
+ */
+function baseAfter(inflights: Inflight[], base: GameState | null, card: GameState | null, cardRev: number | null): GameState | null {
   const ids = writeIdsOf(card);
-  for (let i = s.inflights.length - 1; i >= 0; i--) if (ids.includes(s.inflights[i].id)) return s.inflights[i].submitted;
-  if (s.inflights.length && ids.length >= WRITE_IDS_KEPT) return null;
+  for (let i = inflights.length - 1; i >= 0; i--) if (ids.includes(inflights[i].id)) return inflights[i].submitted;
+  const rev = cardRev ?? 0;
+  if (inflights.some(f => rev - (f.expectedRev ?? 0) > WRITE_IDS_KEPT)) return null;
   return base;
 }
 
@@ -234,7 +248,7 @@ async function writeCard(token: string, sent: { state: GameState; seq: number })
     let toWrite = compose(base, state, s.server, id);
     let missing = false;
     for (let attempt = 0; attempt < 3; attempt++) {
-      s.inflights = [...s.inflights.filter(f => f.id !== id), { id, submitted: state }].slice(-INFLIGHTS_KEPT);
+      s.inflights = [...s.inflights.filter(f => f.id !== id), { id, submitted: state, expectedRev: s.rev }].slice(-INFLIGHTS_KEPT);
       resaveSync(token, sent);
       let res: { data?: unknown; error?: unknown };
       try {
@@ -269,9 +283,11 @@ async function writeCard(token: string, sent: { state: GameState; seq: number })
       // landed without its answer (verifier F4). Apply our changes onto it.
       s.inflights = s.inflights.filter(f => f.id !== id);
       const remote = (d.state as GameState) || null;
-      base = resolveBase(s, base, remote);
+      const remoteRev = remote && typeof d.rev === 'number' ? d.rev : null;
+      base = resolveBase(s, base, remote, remoteRev);
+      // The card moved past the revision they expected: none of them can land any more.
       s.inflights = [];
-      s.rev = remote && typeof d.rev === 'number' ? d.rev : null;
+      s.rev = remoteRev;
       s.server = remote;
       s.base = base;
       resaveSync(token, sent);
@@ -570,6 +586,14 @@ const storage = {
     // A cache without a recorded owner is treated as this card's own, which
     // keeps every existing device working after the update.
     let local = localRaw;
+    // This device's bookkeeping for the card goes back into memory first, so
+    // saves keep carrying it even when the read fails (verifier R3-2).
+    const mine = bookkeeping && bookkeeping.token === token && bookkeeping.base ? bookkeeping : null;
+    if (mine) {
+      const sy = getSync(token);
+      sy.base = mine.base;
+      sy.inflights = mine.inflights.map(f => ({ ...f, expectedRev: typeof f.expectedRev === 'number' ? f.expectedRev : null }));
+    }
     const owner = getLocalProfileOwner();
     if (local && owner && owner !== token) {
       local = null;
@@ -605,16 +629,16 @@ const storage = {
       // card, for the next write to recognise.
       let base: GameState | null = null;
       let stillOut: Inflight[] = [];
-      const mine = bookkeeping && bookkeeping.token === token && bookkeeping.base ? bookkeeping : null;
       if (mine) {
+        const cardRev = getSync(token).rev;
+        const inflights = getSync(token).inflights;
+        base = baseAfter(inflights, mine.base, cloud, cardRev);
         const ids = writeIdsOf(cloud);
-        let landed = -1;
-        mine.inflights.forEach((f, i) => { if (ids.includes(f.id)) landed = i; });
-        if (landed >= 0) base = mine.inflights[landed].submitted;
-        else if (mine.inflights.length && ids.length >= WRITE_IDS_KEPT) base = null;
-        else {
-          base = mine.base;
-          stillOut = mine.inflights.map(f => ({ id: f.id, submitted: merge3(mine.base, f.submitted, cloud) }));
+        // A write still out can land only while the card is at the revision it expected.
+        if (base === mine.base && !inflights.some(f => ids.includes(f.id))) {
+          stillOut = inflights
+            .filter(f => f.expectedRev !== null && f.expectedRev === cardRev)
+            .map(f => ({ id: f.id, submitted: merge3(mine.base, f.submitted, cloud), expectedRev: f.expectedRev }));
         }
       }
       // Without a base (the first start after this update, or no way to

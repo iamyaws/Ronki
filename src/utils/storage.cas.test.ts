@@ -262,6 +262,49 @@ describe('compare-and-swap: answers that never come (review round 2)', () => {
   });
 });
 
+describe('compare-and-swap: a card whose id list is full (verifier R3-1)', () => {
+  const full = () => Array.from({ length: 20 }, (_, i) => `old${i}`);
+  it('an offline write that never reached the card keeps the base at the next start (M1)', async () => {
+    const T = 'cd'.repeat(16);
+    server.rows.set(T, { state: { ...S0(), syncWrites: full() }, rev: 30 });
+    const A = await device();
+    const S = await A.syncLoadByToken(T);
+    const online = tick(S, 's_wake');
+    await A.save(online);
+    await A.cloudSaveByToken(T, online); // lands
+    hook = async (fn, _a, run) => (fn === 'profile_upsert_if'
+      ? { data: null, error: { message: 'TypeError: Failed to fetch', code: '' }, status: 0 } // never reached the card
+      : run());
+    const offline = tick(online, 's_breakfast');
+    await A.save(offline);
+    await A.cloudSaveByToken(T, offline);
+    hook = null;
+    const A2 = await device();
+    const got = await A2.syncLoadByToken(T);
+    expect(got.hp).toBe(10 + 10 + 5);
+    expect(card(T).hp).toBe(25);
+    expect(card(T).totalTasksDone).toBe(7);
+  });
+
+  it('an offline write, then another device, then this device again: nothing lost (M2)', async () => {
+    const T = 'ef'.repeat(16);
+    server.rows.set(T, { state: { ...S0(), hp: 50, syncWrites: full() }, rev: 30 });
+    const A = await device();
+    const S = await A.syncLoadByToken(T);
+    hook = async (fn, _a, run) => (fn === 'profile_upsert_if'
+      ? { data: null, error: { message: 'TypeError: Failed to fetch', code: '' }, status: 0 }
+      : run());
+    const W1 = reward(S, 15);
+    await A.cloudSaveByToken(T, W1); // never reached the card
+    hook = null;
+    const B = await device();
+    await load(B, T); // a separate device: no local copy of its own yet
+    await B.cloudSaveByToken(T, pet({ ...S0(), hp: 50, syncWrites: full() })); // the other device: +1
+    await A.cloudSaveByToken(T, W1);
+    expect(card(T).hp).toBe(50 + 15 + 1);
+  });
+});
+
 describe('compare-and-swap: two tabs and failed local saves (review round 2)', () => {
   it('two tabs on one device behave like two devices (Astra CAS-08)', async () => {
     const T = '7'.repeat(32);
@@ -283,21 +326,41 @@ describe('compare-and-swap: two tabs and failed local saves (review round 2)', (
     expect(got.catPetted).toBe(true);
   });
 
-  it('a tab whose read failed never refunds a spend another tab wrote (verifier N7)', async () => {
+  it("a tab whose read failed keeps its bookkeeping: its pet and the other tab's spend both count (verifier N7, R3-2)", async () => {
     const T = '9'.repeat(32);
     server.rows.set(T, { state: { ...S0(), hp: 50 }, rev: 1 });
     const tab1 = await device();
-    await load(tab1, T);
-    await tab1.cloudSaveByToken(T, { ...S0(), hp: 30 }); // a parent redeems 20
+    await load(tab1, T); // the local copy now carries this device's bookkeeping
     hook = async (fn, _a, run) => (fn === 'profile_get' ? { data: null, error: { message: 'network down' } } : run());
     const tab2 = await device();
-    await tab2.syncLoadByToken(T); // read failed: this tab has no base for the card
+    const held = await tab2.syncLoadByToken(T); // read failed: it goes on from the local copy
     hook = null;
-    await tab2.save(pet({ ...S0(), hp: 50 })); // it goes on from its old copy
+    expect(held.hp).toBe(50);
+    await tab1.cloudSaveByToken(T, { ...S0(), hp: 30 }); // a parent redeems 20 in the other tab
+    await tab2.save(pet(held)); // the child pets Ronki in the tab whose read failed
     const again = await device();
     const got = await again.syncLoadByToken(T);
-    expect(got.hp).toBe(30); // no base to count the pet from: the card's balance stands, never 51
+    expect(got.hp).toBe(31);
+    expect(card(T).hp).toBe(31);
     expect(got.catPetted).toBe(true);
+  });
+
+  it('a start whose read fails keeps the bookkeeping, so the next online start is exact (verifier R3-2, M3)', async () => {
+    const T = 'ab'.repeat(16);
+    server.rows.set(T, { state: { ...S0(), hp: 50 }, rev: 1 });
+    const tablet = await device();
+    await load(tablet, T);
+    // The phone earns 20 Sterne on the card.
+    server.rows.set(T, { state: { ...S0(), hp: 70 }, rev: 2 });
+    hook = async (fn, _a, run) => (fn === 'profile_get' ? { data: null, error: { message: 'network down' } } : run());
+    const offline = await device();
+    const held = await offline.syncLoadByToken(T); // the tablet starts offline
+    await offline.save(tick(tick(held, 's_wake'), 's_breakfast')); // +10 +5
+    hook = null;
+    const online = await device();
+    const got = await online.syncLoadByToken(T);
+    expect(got.hp).toBe(70 + 10 + 5);
+    expect(card(T).hp).toBe(85);
   });
 
   it('a reward written to the card before the local copy saved it is not undone (Astra CAS-05-R2)', async () => {

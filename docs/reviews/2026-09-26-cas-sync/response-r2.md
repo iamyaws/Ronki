@@ -16,3 +16,5 @@ Every claim checked against the source; the Claude verifier's round 2 found the 
 Also changed: no reload after a merge. The page keeps writing its changes onto the card; the other device's progress shows at the next load. That removes CAS-02's reload window altogether.
 
 **Still open, for Marc (Astra rated SHOULD, "acceptable only as an explicit product tradeoff"):** rewards that fire on both devices from the same event outside task ticks can be counted twice in a race: a legacy weekly mission finishing at a day change both devices run from the same card, the cat care flags (feed, pet, play), water sips. Worst case extra Sterne; these features are legacy or behind Extras. Also: old app bundles still write unconditionally until they update, so the migration must go first and old bundles stay last-writer-wins for their short remaining life.
+
+**Marc's ruling (26 Sep 2026):** the double-reward limit above is accepted. The client ships once the Claude verifier's round 3 on the reworked code is clean.

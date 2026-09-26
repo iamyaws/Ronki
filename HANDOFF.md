@@ -17,7 +17,7 @@ Marc's ask: "build the compare-and-swap RPC on Supabase" (point 4 of "Open for M
 
 **Client (branch `finch/cas-sync`, not on main yet).** Two review rounds with Astra and a Claude verifier changed the design: the sync bookkeeping (base, unanswered writes) now travels inside the local copy, every write carries the page's changes onto the card, one write per card at a time, network failures count as "may have landed", 15 s timeout, no reload after a merge; merge rules fixed (see `docs/reviews/2026-09-26-cas-sync/response-r1.md`, `response-r2.md`). 644 tests green, tsc 23, check:names clean, build green; two real browser tabs against the mock agree on every number. Astra round 2 said NOT YET before these fixes; a verifier round 3 on the reworked code is running.
 
-**Open for Marc.** Rewards that fire on both devices from the same event outside task ticks (a legacy weekly mission at a day change both devices run, cat care flags, water sips) can still be counted twice in a race: extra Sterne only, features are legacy or behind Extras. Accept, or ask for a fix before the client ships.
+**Decided by Marc (26 Sep).** Accepted as a known limit: rewards that fire on both devices from the same event outside task ticks (a legacy weekly mission at a day change both devices run, cat care flags, water sips) can be counted twice in a race; extra Sterne only, features are legacy or behind Extras. Ship the client once the verifier's round 3 is clean.
 
 ---
 

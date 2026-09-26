@@ -140,10 +140,10 @@ describe('mergeStates', () => {
     expect(m.newField).toBe(1);
   });
 
-  it('without a base, Sterne are never added twice: the side that played the later day stands, else the card', () => {
+  it('without a base, Sterne take the larger balance: earned Sterne are never taken back, nothing is added twice (verifier R3-3)', () => {
     const card = { ...base(), hp: 40 };
-    expect(mergeStates(null, { ...base(), hp: 45 }, card).hp).toBe(40); // same day: the card (a stale copy never refunds)
-    expect(mergeStates(null, { ...base(), hp: 45, lastDate: '2026-09-29' }, card).hp).toBe(45); // local played later
+    expect(mergeStates(null, { ...base(), hp: 45 }, card).hp).toBe(45);
+    expect(mergeStates(null, { ...base(), hp: 35, lastDate: '2026-09-29' }, card).hp).toBe(40); // a stale copy on a later day takes nothing back
   });
 
   it('flags that only turn on stay on; the first day stays first', () => {

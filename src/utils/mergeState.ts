@@ -96,10 +96,11 @@ function newerSide(ctx: Ctx | undefined, l: Json, r: Json): Json {
   return str(ctx.local.lastDate) > str(ctx.remote.lastDate) ? l : (r ?? l);
 }
 
-/** Sterne: both devices' changes add up. Without a common ancestor the newer
- *  side's balance stands (a stale local copy must never refund a spend). */
-function spendNum(b: Json, l: Json, r: Json, ctx?: Ctx): Json {
-  if (b === undefined || b === null) return newerSide(ctx, l, r);
+/** Sterne: both devices' changes add up. Without a common ancestor (only the
+ *  first start after this update, or a write nobody can place) the larger
+ *  balance: earned Sterne are never taken back; the worst case is a spend
+ *  refunded (verifier R3-3). */
+function spendNum(b: Json, l: Json, r: Json): Json {
   return deltaNum(b, l, r);
 }
 
@@ -118,8 +119,7 @@ function deltaMap(b: Json, l: Json, r: Json): Json {
 }
 
 /** A spendable map (crystals per family): per id like spendNum. */
-function spendMap(b: Json, l: Json, r: Json, ctx?: Ctx): Json {
-  if (b === undefined || b === null) return newerSide(ctx, l, r);
+function spendMap(b: Json, l: Json, r: Json): Json {
   return deltaMap(b, l, r);
 }
 
@@ -168,9 +168,10 @@ function keepsakeLog(b: Json, l: Json, r: Json): Json {
   });
 }
 
-/** This client's recent write ids (compare-and-swap sync): a short union. */
-function recentIds(b: Json, l: Json, r: Json): Json {
-  return (unionStrings(b, l, r) as string[]).slice(-20);
+/** This client's recent write ids (compare-and-swap sync): the card's list is
+ *  the record; a device's copy is only an older snapshot of it. */
+function recentIds(_b: Json, l: Json, r: Json): Json {
+  return Array.isArray(r) ? r : l;
 }
 
 /** Shallow three-way merge of a nested object (familyConfig, maps of counts). */
