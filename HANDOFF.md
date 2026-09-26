@@ -4,6 +4,27 @@ _Single source of truth: done, in flight, backlog. Update before any /compact an
 
 ---
 
+## Wesen: the Louis test (26 September 2026, branch `feat/wesen-louis-test`, NOT merged)
+
+Marc's ask: mix Pokémon into Ronki (concept page https://claude.ai/artifact/1pRUyWuUJJEZbxgMHUvEEV, source `docs/concepts/2026-09-26-ronki-sammler/`). His calls: befriend (never "fangen"), the task leaves the Nest when the creature moves out, no 12+ band; build a test for Louis, new art, Astra reviews the plan.
+
+**What it is.** One habit = one creature. The parent links one daily self-care task (teeth, dressing, washing, pyjama, water; each with a written meaning of "allein"). Louis picks one of three small creatures (Glutfunke, Moosmops, Tropfi; Ronki hosts). The creature is a friendly visitor on the Nest floor from day one; each day with the task done it comes one step closer (paw prints, Ronki's line "hat dir zugeguckt"). On the 5th day Louis rests a finger, the creature walks over, Ronki shifts to make room, and it sits beside him on the cushion. 7 days later the parent area asks "Macht Louis das inzwischen allein?" (private, no date shown ahead). "Ja" grows it. After 4, 8 or 12 weeks (parent's choice, default 8) the parent is asked whether Ronki may stop reminding; after "Ja" the creature says goodbye at the next day start, the task leaves the routine, and it appears in the passport under "In die Welt gezogen". "Wieder zurückholen" puts the task back where it was.
+
+**Gate.** Nothing shows for any family until the parent area is opened once on that device with `app.ronki.de/?wesen=1` (card gets `wesen.offered`), then the switch "Wesen ausprobieren" in Eltern-Bereich, Familie, under "Ronkis Tag". Off stops everything (no steps, no move-out), progress kept.
+
+**Where.** Rules `src/loop/wesen.ts` (+ 23 tests), data `src/data/wesen.ts`, UI `src/components/wesen/` (+ 5 tests), hooks in `TaskContext` (complete, applyDayTransition, setRoutine, 9 actions, load path), `mergeState` (per-instance merge + reconcile after every merge), RoomHub, ParentalDashboard (Familie), RonkiPassport, `main.jsx` (?wesen=1). Art `public/art/bilderbuch/wesen/` (log `docs/design-briefs/2026-09-26-wesen-art-log.md`, ~8 Higgsfield credits). 19 voice lines (`wesen_*` in `finchLines.de.json`, Harry, Whisper 19/19). Plan with observation sheet: `docs/plans/2026-09-26-wesen-louis-test.md`. Reviews: `docs/reviews/2026-09-26-wesen-plan/`.
+
+**Checks.** 680 tests green, tsc unchanged at 23, check:names clean, app and website builds green. Browser walk (DEV clock, seeded save, port 5197): pick, steps with line and paw prints, meeting (hold walks, release pauses), "allein", growth, review, move-out at next day start (routine and today's quests without the task, position kept), goodbye, passport row, restore. No console errors.
+
+**PAUSED 26 Sep 2026, late.** Marc pivoted the idea into a standalone creature game (no Ronki). Astra's code round 1 is NOT YET with six findings, all verified and not yet fixed (`docs/reviews/2026-09-26-wesen-plan/astra-code-round1.md`): WC-01 a restore can be lost across devices (high), WC-02 review weeks lost in a merge, WC-03 pausing keeps an old move-out approval, WC-04 the "allein" delay starts before the meeting is seen, WC-05 the step line can cut off the next task ask, WC-06 partial completion shows a step that did not count. Also: origin/main moved on since the branch was cut; merge main before any further work. Do not merge as is.
+
+**Open for Marc.**
+1. Go to merge (it ships to every family but stays invisible without `?wesen=1`).
+2. After merge: on Louis's tablet open `app.ronki.de/?wesen=1`, Eltern-Bereich, Familie, switch on, pick the task. Fill the observation sheet from day 1 (baseline first).
+3. The meeting waits until Ronki is home: if the 5th tick fills the morning fire, Louis sees it in the evening.
+
+---
+
 ## Supabase security advisor clean-up (26 September 2026, LIVE)
 
 Marc's ask: close the security advisor findings that predate `profiles_cas`, keep everything the site, the keep-alive job and the card need.
