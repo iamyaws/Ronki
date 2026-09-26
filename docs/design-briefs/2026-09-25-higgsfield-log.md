@@ -129,3 +129,19 @@ Marc's go: "yes, run the art batch" (26 Sep 2026), after Astra rep 6 found the p
 | 93 | 329d8fe5 | One 4 x 3 sheet: kids' drink bottle, paper lantern on a stick, open coin purse with coins, apple, glue stick, child's safety scissors, sneakers, rubber boots, woolly hat with gloves, chestnuts, sun hat, small day backpack | cut with `scripts/cut-task-sheet.py` into `website/public/art/bilderbuch/tasks/` as `bottle`, `lantern`, `coin-purse`, `apple`, `glue-stick`, `scissors`, `sneakers`, `rubber-boots`, `hat-gloves`, `chestnuts`, `sun-hat`, `backpack` (.webp, 256 px) |
 
 1 image, 2.75 credits, on model at the first try. The cutter now also drops small fragments that touch a cell edge (the lantern's tassel tip reached into the scissors cell); loose details inside a cell, like the lantern's light rays, stay.
+
+## Sixth pass: trip places for "tomorrow as a picture" (26 Sep 2026, app session)
+
+Marc's go: "Yes, run it" (26 Sep 2026), prompt shown to him before the run. Same model and settings as the earlier passes (gpt_image_2_5, high, 2k, 1:1); references: the morning scene d5685b24 and the first task sheet 25cf94f7. Each sheet is a 2x2 grid of place vignettes on cream paper, no dragon, no people, no text.
+
+| # | Job | Places (top left, top right, bottom left, bottom right) | Files |
+|---|---|---|---|
+| 92 | a202c20a | Birkenpfad, Lichtung, Bach, Dicke Eiche | `public/art/bilderbuch/places/t01..t04.webp` |
+| 93 | cadbfba4 | Sonnenstein, Wurzelhang, Tannenkreis, Hohe Tanne | `t05..t08` |
+| 94 | d4303d1e | Wiese, Waldsee, Wegesrand, Windhügel | `t09..t12` |
+| 95 | 78595a7a | Wolken, Sternenhügel, Nebelwiese, Igelhecke | `t13..t16` |
+| 96 | 081100a1 | Apfelbaum, Wasserfall, Löwenzahnwiese, Kleine Höhle | `t17..t20` |
+| 97 | f4e77e06 | Pfützenweg, Vogelbaum, Sonnenblumenfeld, Echofelsen | `t21..t24` |
+| 98 | 8eac75a8 | Mühlbach, Mondsee, Berggipfel, Rund ums Nest (the Nest window seen from outside) | `t25..t28` |
+
+7 images, 19.25 credits, all on model at the first try (balance 211.5 after). Cut locally: each quarter trimmed of the cream paper, shaved 4 % inside the rounded corners (the app draws its own), 480 px WebP, about 80 KB each.

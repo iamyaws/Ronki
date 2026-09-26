@@ -746,7 +746,7 @@ export default function RoomHub({ onNavigate, onOpenParental, onOpenTonight }) {
 
       {/* The last treasures he brought home. */}
       <section style={{ padding: '18px 16px 0' }}>
-        <TreasureShelf log={state?.expeditionLog} />
+        <TreasureShelf log={state?.expeditionLog} favorite={state?.favoriteTreasure} />
       </section>
 
       <style>{`
