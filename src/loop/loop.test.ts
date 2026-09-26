@@ -201,3 +201,11 @@ describe('content', () => {
     for (const t of (data as any).trips) expect(t.hook).not.toMatch(/\bMorgen\b/);
   });
 });
+
+describe('fire follows the family order', () => {
+  it('lines the slots up in the saved routine order, even on quests saved with the old order', () => {
+    const familyConfig = { routine: { morning: ['teeth_am', 'dress', 'breakfast'], evening: ['pyjama', 'teeth_pm'] } };
+    expect(fireSlots({ quests: DAY, familyConfig }, 'morning').map(s => s.id)).toEqual(['s_teeth_am', 's_dress', 's_breakfast']);
+    expect(fireSlots({ quests: DAY, familyConfig }, 'evening').map(s => s.id)).toEqual(['s_pyjama', 's_teeth_pm']);
+  });
+});
