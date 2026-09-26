@@ -23,6 +23,8 @@
 
 type Json = unknown;
 type Obj = Record<string, Json>;
+type Ctx = { base: Obj | null; local: Obj; remote: Obj };
+type Rule = (b: Json, l: Json, r: Json, ctx: Ctx) => Json;
 
 /** Deep equality for JSON-shaped values (key order does not matter). */
 export function jsonEqual(a: Json, b: Json): boolean {
@@ -86,6 +88,21 @@ function deltaNum(b: Json, l: Json, r: Json): Json {
   return Math.max(0, num(b) + (num(l) - num(b)) + (num(r) - num(b)));
 }
 
+/** Without a common ancestor, which side's value stands in a conflict: the
+ *  side that played the later day (its settings and balance are the newer
+ *  ones; a stale copy is never on a later day); on the same day, the card. */
+function newerSide(ctx: Ctx | undefined, l: Json, r: Json): Json {
+  if (!ctx) return r ?? l;
+  return str(ctx.local.lastDate) > str(ctx.remote.lastDate) ? l : (r ?? l);
+}
+
+/** Sterne: both devices' changes add up. Without a common ancestor the newer
+ *  side's balance stands (a stale local copy must never refund a spend). */
+function spendNum(b: Json, l: Json, r: Json, ctx?: Ctx): Json {
+  if (b === undefined || b === null) return newerSide(ctx, l, r);
+  return deltaNum(b, l, r);
+}
+
 /** A map of counts per id (totalQuestCompletions): each id adds up both devices' changes. */
 function deltaMap(b: Json, l: Json, r: Json): Json {
   const isMap = (v: Json) => !!v && typeof v === 'object' && !Array.isArray(v);
@@ -98,6 +115,12 @@ function deltaMap(b: Json, l: Json, r: Json): Json {
     out[k] = bo ? deltaNum(bo[k] ?? 0, lo[k] ?? 0, ro[k] ?? 0) : Math.max(num(lo[k]), num(ro[k]));
   }
   return out;
+}
+
+/** A spendable map (crystals per family): per id like spendNum. */
+function spendMap(b: Json, l: Json, r: Json, ctx?: Ctx): Json {
+  if (b === undefined || b === null) return newerSide(ctx, l, r);
+  return deltaMap(b, l, r);
 }
 
 /** Union of two string lists, keeping first-seen order (remote first). */
@@ -151,7 +174,7 @@ function recentIds(b: Json, l: Json, r: Json): Json {
 }
 
 /** Shallow three-way merge of a nested object (familyConfig, maps of counts). */
-function nested3(b: Json, l: Json, r: Json): Json {
+function nested3(b: Json, l: Json, r: Json, ctx?: Ctx): Json {
   const bo = (b && typeof b === 'object' && !Array.isArray(b) ? b : {}) as Obj;
   const lo = (l && typeof l === 'object' && !Array.isArray(l) ? l : {}) as Obj;
   const ro = (r && typeof r === 'object' && !Array.isArray(r) ? r : {}) as Obj;
@@ -162,13 +185,26 @@ function nested3(b: Json, l: Json, r: Json): Json {
     const rChanged = !jsonEqual(ro[k], bo[k]);
     if (lChanged && !rChanged) out[k] = lo[k];
     else if (!lChanged && rChanged) out[k] = ro[k];
-    else out[k] = lo[k];
+    // Both changed: this device's value; without a base, the newer side's.
+    else out[k] = b === undefined || b === null ? (ro[k] === undefined ? lo[k] : newerSide(ctx, lo[k], ro[k])) : lo[k];
   }
   return out;
 }
 
-type Ctx = { base: Obj | null; local: Obj; remote: Obj };
-type Rule = (b: Json, l: Json, r: Json, ctx: Ctx) => Json;
+/** Ronki's garden (Extras): plants and decor from both devices, owned decor united. */
+function gardenRule(b: Json, l: Json, r: Json, ctx?: Ctx): Json {
+  const bo = (b && typeof b === 'object' ? b : {}) as Obj;
+  const lo = (l && typeof l === 'object' ? l : {}) as Obj;
+  const ro = (r && typeof r === 'object' ? r : {}) as Obj;
+  return {
+    ...(nested3(b, l, r, ctx) as Obj),
+    plants: unionById('id')(bo.plants, lo.plants, ro.plants),
+    decor: unionById('id')(bo.decor, lo.decor, ro.decor),
+    ownedDecor: unionStrings(bo.ownedDecor, lo.ownedDecor, ro.ownedDecor),
+    lastWeeklyPlanting: maxStr(bo.lastWeeklyPlanting, lo.lastWeeklyPlanting, ro.lastWeeklyPlanting),
+  };
+}
+
 
 /** Today's tasks: on the same day, a task done on either device is done. */
 const questsRule: Rule = (_b, l, r, ctx) => {
@@ -207,11 +243,18 @@ const expeditionRule: Rule = (_b, l, r, ctx) => {
     const s = e && typeof e === 'object' ? str((e as Obj).state) : 'home';
     return s === 'waiting' ? 2 : s === 'away' || s === 'leaving' ? 1 : 0;
   };
-  return rank(l) >= rank(r) ? l : r;
+  if (rank(l) !== rank(r)) return rank(l) > rank(r) ? l : r;
+  // Same trip, same step (a parent moved the evening start on one device):
+  // the side that changed it wins; both changed, this device's.
+  if (ctx.base && jsonEqual(l, _b)) return r;
+  return l;
 };
 
 /** The dragon's identity: an onboarded card keeps its own dragon. */
-const identityRule: Rule = (_b, l, r, ctx) => (ctx.remote.onboardingDone === true && ctx.local.onboardingDone !== true ? r : l);
+const identityRule: Rule = (_b, l, r, ctx) => {
+  if (ctx.remote.onboardingDone === true && ctx.local.onboardingDone !== true) return r;
+  return ctx.base ? l : newerSide(ctx, l, r);
+};
 
 const RULES: Record<string, Rule> = {
   // Progress that only grows.
@@ -235,7 +278,10 @@ const RULES: Record<string, Rule> = {
   dailyHabits: nested3,
   syncWrites: recentIds,
   // Spendable.
-  hp: deltaNum,
+  hp: spendNum,
+  crystalInventory: spendMap,
+  gearInventory: unionStrings,
+  garden: gardenRule,
   // Dates.
   lastDate: maxStr,
   lastTripDate: maxStr,
@@ -268,7 +314,7 @@ const RULES: Record<string, Rule> = {
  * given the card as this device last knew it (base, or null).
  */
 /** Numbers where both devices' changes add up, even when they land on the same value. */
-const DELTA_KEYS = new Set(['hp', 'totalTasksDone', 'totalQuestCompletions', 'xp']);
+const DELTA_KEYS = new Set(['hp', 'totalTasksDone', 'totalQuestCompletions', 'xp', 'crystalInventory']);
 /** Fields tied to others (the trip state follows adventureCount): always decided by
  *  their rule, never by "only one side changed" (Astra CAS-03). */
 const ALWAYS_RULE = new Set(['expedition']);
@@ -294,7 +340,9 @@ export function mergeStates<T extends Obj>(base: T | null, local: T, remote: T):
   for (const key of new Set([...Object.keys(l), ...Object.keys(r)])) {
     // Both devices added to a balance or a task counter: add both changes up,
     // even when they happen to land on the same number.
-    if (b && DELTA_KEYS.has(key) && !jsonEqual(l[key], b[key]) && !jsonEqual(r[key], b[key])) {
+    // Always with a base (review round 2, CAS-04): a task ticked on both is
+    // taken out once below, even when one side's net balance equals the base.
+    if (b && DELTA_KEYS.has(key)) {
       out[key] = (RULES[key] || deltaNum)(b[key], l[key], r[key], ctx);
       deltaMerged.add(key);
       continue;
@@ -312,7 +360,7 @@ export function mergeStates<T extends Obj>(base: T | null, local: T, remote: T):
     const rule = RULES[key];
     // Both changed (or no common ancestor): the field rule, else this device's value
     // when there is a base, else the card's value (never overwrite what we never saw).
-    out[key] = rule ? rule(b ? b[key] : undefined, l[key], r[key], ctx) : (b ? l[key] : r[key]);
+    out[key] = rule ? rule(b ? b[key] : undefined, l[key], r[key], ctx) : (b ? l[key] : newerSide(ctx, l[key], r[key]));
   }
   // A task ticked on both devices was counted by both: take it out once.
   if (b && deltaMerged.size) {

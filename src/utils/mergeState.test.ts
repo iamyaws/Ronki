@@ -140,10 +140,10 @@ describe('mergeStates', () => {
     expect(m.newField).toBe(1);
   });
 
-  it('without a base, Sterne are not added twice', () => {
+  it('without a base, Sterne are never added twice: the side that played the later day stands, else the card', () => {
     const card = { ...base(), hp: 40 };
-    const local = { ...base(), hp: 45 };
-    expect(mergeStates(null, local, card).hp).toBe(45);
+    expect(mergeStates(null, { ...base(), hp: 45 }, card).hp).toBe(40); // same day: the card (a stale copy never refunds)
+    expect(mergeStates(null, { ...base(), hp: 45, lastDate: '2026-09-29' }, card).hp).toBe(45); // local played later
   });
 
   it('flags that only turn on stay on; the first day stays first', () => {
@@ -200,6 +200,34 @@ describe('mergeStates', () => {
     const m = mergeStates(b, a, c) as any;
     expect(m.dailyHabits).toEqual({ vitamin: true, liam: true });
     expect([...m.gamesPlayedEver].sort()).toEqual(['memory', 'puzzle', 'sort']);
+  });
+
+  it('a task ticked on both counts once even when one side also spent the reward (Astra CAS-04-R2)', () => {
+    const b = { ...base(), hp: 100, totalTasksDone: 0, quests: [q('s_wake', false, { xp: 10 })] };
+    const local = { ...b, hp: 110, totalTasksDone: 1, quests: [q('s_wake', true, { xp: 10 })] };
+    const remote = { ...b, hp: 100, totalTasksDone: 1, quests: [q('s_wake', true, { xp: 10 })] }; // +10 task, -10 spent
+    const m = mergeStates(b, local, remote) as any;
+    expect(m.hp).toBe(100);
+    expect(m.totalTasksDone).toBe(1);
+  });
+
+  it('a trip moved on one device (new evening start) is not undone by the other device (verifier R2-6)', () => {
+    const away = (returnAt: string) => ({ state: 'away', biome: 'morgenwald', tripId: 't03', returnAt });
+    const b = { ...base(), expedition: away('2026-09-28T16:30:00.000Z') };
+    const phone = { ...b, expedition: away('2026-09-28T15:00:00.000Z') };
+    const tablet = { ...b, totalTasksDone: 11 };
+    expect((mergeStates(b, tablet, phone) as any).expedition.returnAt).toBe('2026-09-28T15:00:00.000Z');
+    expect((mergeStates(b, phone, tablet) as any).expedition.returnAt).toBe('2026-09-28T15:00:00.000Z');
+  });
+
+  it('garden purchases on both devices all stay, with both costs paid (Astra CAS-07-R2)', () => {
+    const g = (plants: string[]) => ({ plants: plants.map(id => ({ id, species: 'oak', plantedAt: '2026-09-28', position: { x: 1, y: 1 } })), decor: [], ownedDecor: ['stone'], lastWeeklyPlanting: null });
+    const b = { ...base(), hp: 100, garden: g([]) };
+    const a = { ...b, hp: 90, garden: g(['p1']) };
+    const c = { ...b, hp: 80, garden: g(['p2']) };
+    const m = mergeStates(b, a, c) as any;
+    expect(m.garden.plants.map((p: any) => p.id).sort()).toEqual(['p1', 'p2']);
+    expect(m.hp).toBe(70);
   });
 
   it('is a no-op when nothing differs', () => {

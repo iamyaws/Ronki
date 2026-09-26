@@ -177,6 +177,157 @@ describe('compare-and-swap: a page never has to take on a merge to stay safe', (
   });
 });
 
+describe('compare-and-swap: answers that never come (review round 2)', () => {
+  it('a network failure as supabase-js reports it (an error with an empty code) may have landed (verifier R2-1, Astra CAS-09)', async () => {
+    const T = '3'.repeat(32);
+    server.rows.set(T, { state: S0(), rev: 1 });
+    const A = await device();
+    await load(A, T);
+    hook = async (fn, _a, run) => {
+      if (fn === 'profile_upsert_if') { hook = null; run(); return { data: null, error: { message: 'TypeError: Failed to fetch', code: '' }, status: 0 }; }
+      return run();
+    };
+    const W1 = reward(S0(), 10);
+    expect((await A.cloudSaveByToken(T, W1)).status).toBe('offline');
+    await A.cloudSaveByToken(T, pet(W1));
+    expect(card(T).hp).toBe(21);
+  });
+
+  it('a second unanswered write does not make the first one forgotten (verifier R2-5)', async () => {
+    const T = '4'.repeat(32);
+    server.rows.set(T, { state: S0(), rev: 1 });
+    const A = await device();
+    await load(A, T);
+    let n = 0;
+    hook = async (fn, _a, run) => {
+      if (fn !== 'profile_upsert_if') return run();
+      n++;
+      if (n === 1) { run(); throw new Error('landed, answer lost'); }
+      if (n === 2) throw new Error('never sent');
+      return run();
+    };
+    const W1 = reward(S0(), 10);
+    const W2 = pet(W1);
+    await A.cloudSaveByToken(T, W1);
+    await A.cloudSaveByToken(T, W2);
+    await A.cloudSaveByToken(T, feed(W2));
+    expect(card(T).hp).toBe(22);
+  });
+
+  it('a request that never answers frees the queue after the timeout (verifier R2-4)', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    try {
+      const T = '5'.repeat(32);
+      server.rows.set(T, { state: S0(), rev: 1 });
+      const A = await device();
+      await load(A, T);
+      let first = true;
+      hook = async (fn, _a, run) => {
+        if (fn === 'profile_upsert_if' && first) { first = false; return new Promise(() => {}); }
+        return run();
+      };
+      const W1 = reward(S0(), 10);
+      const p1 = A.cloudSaveByToken(T, W1);
+      const p2 = A.cloudSaveByToken(T, pet(W1));
+      await vi.advanceTimersByTimeAsync(15_000);
+      expect((await p1).status).toBe('offline');
+      expect((await p2).status).toBe('saved');
+      expect(card(T).hp).toBe(21);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('a write of the previous page that lands after the restart is not counted twice (verifier R2-3)', async () => {
+    const T = '6'.repeat(32);
+    server.rows.set(T, { state: S0(), rev: 1 });
+    const A = await device();
+    await load(A, T);
+    let held: null | (() => void) = null;
+    let firstWrite = true;
+    hook = async (fn, _a, run) => {
+      if (fn !== 'profile_upsert_if') return run();
+      if (firstWrite) { firstWrite = false; return new Promise(res => { held = () => res(run()); }); }
+      if (held) { held(); held = null; } // the old page's write reaches the server first
+      return run();
+    };
+    const W1 = reward(S0(), 10);
+    await A.save(W1);
+    void A.cloudSaveByToken(T, W1); // still out when the page closes
+    await Promise.resolve();
+    const A2 = await device(); // the app starts again
+    const got = await A2.syncLoadByToken(T);
+    expect(got.hp).toBe(20);
+    expect(card(T).hp).toBe(20);
+  });
+});
+
+describe('compare-and-swap: two tabs and failed local saves (review round 2)', () => {
+  it('two tabs on one device behave like two devices (Astra CAS-08)', async () => {
+    const T = '7'.repeat(32);
+    server.rows.set(T, { state: { ...S0(), hp: 50 }, rev: 1 });
+    const tab1 = await device();
+    await load(tab1, T);
+    const tab2 = await device();
+    await tab2.syncLoadByToken(T); // same localStorage, same card
+    await tab1.cloudSaveByToken(T, { ...S0(), hp: 30 }); // a parent redeems 20
+    hook = async fn => { if (fn === 'profile_upsert_if') throw new Error('offline'); return { data: null, error: null }; };
+    const petted = pet({ ...S0(), hp: 50 });
+    await tab2.save(petted); // the child pets Ronki in the other tab, offline
+    await tab2.cloudSaveByToken(T, petted);
+    hook = null;
+    const again = await device();
+    const got = await again.syncLoadByToken(T);
+    expect(got.hp).toBe(31);
+    expect(card(T).hp).toBe(31);
+    expect(got.catPetted).toBe(true);
+  });
+
+  it('a tab whose read failed never refunds a spend another tab wrote (verifier N7)', async () => {
+    const T = '9'.repeat(32);
+    server.rows.set(T, { state: { ...S0(), hp: 50 }, rev: 1 });
+    const tab1 = await device();
+    await load(tab1, T);
+    await tab1.cloudSaveByToken(T, { ...S0(), hp: 30 }); // a parent redeems 20
+    hook = async (fn, _a, run) => (fn === 'profile_get' ? { data: null, error: { message: 'network down' } } : run());
+    const tab2 = await device();
+    await tab2.syncLoadByToken(T); // read failed: this tab has no base for the card
+    hook = null;
+    await tab2.save(pet({ ...S0(), hp: 50 })); // it goes on from its old copy
+    const again = await device();
+    const got = await again.syncLoadByToken(T);
+    expect(got.hp).toBe(30); // no base to count the pet from: the card's balance stands, never 51
+    expect(got.catPetted).toBe(true);
+  });
+
+  it('a reward written to the card before the local copy saved it is not undone (Astra CAS-05-R2)', async () => {
+    const T = '8'.repeat(32);
+    server.rows.set(T, { state: { ...S0(), hp: 100 }, rev: 1 });
+    const A = await device();
+    await load(A, T); // the local copy holds hp 100
+    await A.cloudSaveByToken(T, { ...S0(), hp: 110, rewardSeen: true }); // no local save of it happened
+    const A2 = await device();
+    const got = await A2.syncLoadByToken(T);
+    expect(got.hp).toBe(110);
+    expect(got.rewardSeen).toBe(true);
+    expect(card(T).hp).toBe(110);
+  });
+
+  it('when the local copy cannot be saved at all, the copy on disk and its base stay a matching pair', async () => {
+    const T = '0'.repeat(32);
+    server.rows.set(T, { state: { ...S0(), hp: 100 }, rev: 1 });
+    const A = await device();
+    await load(A, T);
+    const setItem = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new Error('quota'); });
+    await A.cloudSaveByToken(T, { ...S0(), hp: 110, rewardSeen: true });
+    setItem.mockRestore();
+    const A2 = await device();
+    const got = await A2.syncLoadByToken(T);
+    expect(got.hp).toBe(110);
+    expect(got.rewardSeen).toBe(true);
+  });
+});
+
 describe('compare-and-swap: cold start (Astra CAS-05)', () => {
   it("applies this device's unsent changes onto a card another device changed meanwhile", async () => {
     const T = 'e'.repeat(32);

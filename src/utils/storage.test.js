@@ -26,7 +26,11 @@ const mockDB = {
   createObjectStore: vi.fn(),
 };
 
-beforeEach(() => {
+beforeEach(async () => {
+  // Let the previous test's writes finish before clearing (compare-and-swap
+  // sync writes its bookkeeping to the local copy in the background).
+  await storage.settled();
+  await new Promise((resolve) => setTimeout(resolve, 0));
   // Clear mock store
   Object.keys(mockStore).forEach(k => delete mockStore[k]);
   localStorage.clear();
@@ -212,7 +216,7 @@ describe('storage syncLoadByToken with a website card seed', () => {
     const result = await storage.syncLoadByToken(TOKEN);
 
     expect(result.familyConfig.childName).toBe('Louis');
-    expect(rpcMock).toHaveBeenCalledWith('profile_upsert_if', expect.objectContaining({ p_token: TOKEN, p_state: expect.objectContaining(local) }));
+    expect(rpcMock).toHaveBeenCalledWith('profile_upsert_if', expect.objectContaining({ p_token: TOKEN, p_state: expect.objectContaining({ lastDate: '2026-09-15', familyConfig: expect.objectContaining({ childName: 'Louis' }) }) }));
   });
 });
 

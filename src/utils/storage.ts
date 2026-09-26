@@ -35,56 +35,102 @@ let writesFrozen = false;
 
 /**
  * Per card, what this page knows about the cloud row (compare-and-swap sync,
- * 26 Sep 2026, reworked after review round 1):
- *   rev      the row's revision as last read or written (null = no row)
- *   server   the row's content at that revision
- *   base     the last state this page handed to its caller or wrote for it.
- *            The card always contains base, and every state the caller
- *            writes later grew from it. So a write sends
- *            mergeStates(base, state, card): the caller's changes since base,
- *            applied onto the card. A caller that never takes on another
- *            device's progress can still never overwrite it.
- *   inflight a write whose answer never came back: it may have landed.
- * base and inflight are also kept in localStorage per card, so the next cold
- * start can apply the local copy onto the card instead of picking one side.
+ * 26 Sep 2026, reworked after review rounds 1 and 2):
+ *   rev       the row's revision as last read or written (null = no row)
+ *   server    the row's content at that revision
+ *   base      the last state this page handed to its caller or wrote for it.
+ *             The card always contains base, and every state the caller
+ *             writes later grew from it. So a write sends
+ *             mergeStates(base, state, card): the caller's changes since base,
+ *             applied onto the card. A caller that never takes on another
+ *             device's progress can still never overwrite it.
+ *   inflights writes whose answer never came back: any of them may have
+ *             landed. The card's short list of write ids (syncWrites) tells.
+ * base and inflights travel inside the local copy itself (see LocalSync and
+ * save()), written together with the state in one go. Whatever copy a cold
+ * start finds, its content grew from the base stored with it, so the next
+ * load can apply that copy's own changes onto the card.
  */
 type Inflight = { id: string; submitted: GameState };
-type SyncInfo = { rev: number | null; server: GameState | null; base: GameState | null; inflight: Inflight | null };
+type SyncInfo = { rev: number | null; server: GameState | null; base: GameState | null; inflights: Inflight[] };
+/** The sync bookkeeping saved inside the local copy. */
+type LocalSync = { token: string; base: GameState | null; inflights: Inflight[]; savedAt: number };
 const sync = new Map<string, SyncInfo>();
-const SYNC_KEY = (token: string) => `ronki_sync_${token}`;
 /** How many recent write ids a card keeps (to spot a write whose answer got lost). */
 const WRITE_IDS_KEPT = 20;
+const INFLIGHTS_KEPT = 10;
+/** A write with no answer after this long counts as "may have landed" and frees the queue. */
+const WRITE_TIMEOUT_MS = 15_000;
+const LOCAL_SYNC_KEY = '__sync';
 
 function getSync(token: string): SyncInfo {
   let s = sync.get(token);
-  if (!s) { s = { rev: null, server: null, base: null, inflight: null }; sync.set(token, s); }
+  if (!s) { s = { rev: null, server: null, base: null, inflights: [] }; sync.set(token, s); }
   return s;
 }
 
-function persistSync(token: string, s: SyncInfo): void {
+/** Order of this page's saves and captured writes: a later number is a newer state. */
+let seq = 0;
+/** The state this page last saved locally, and its number. */
+let lastSaved: { state: GameState; seq: number } | null = null;
+
+/** A state without the local-only bookkeeping. */
+function stripLocal<T>(state: T): T {
+  if (!state || typeof state !== 'object' || !(LOCAL_SYNC_KEY in (state as object))) return state;
+  const { [LOCAL_SYNC_KEY]: _ignored, ...rest } = state as Record<string, unknown>;
+  return rest as T;
+}
+
+function localSyncFor(token: string | null): LocalSync | null {
+  if (!token) return null;
+  const s = sync.get(token);
+  if (!s || (!s.base && !s.inflights.length)) return null;
+  // Strictly increasing on this page, so two saves in one millisecond never tie.
+  lastStamp = Math.max(Date.now(), lastStamp + 1);
+  return { token, base: s.base, inflights: s.inflights, savedAt: lastStamp };
+}
+let lastStamp = 0;
+/** IndexedDB writes commit in the order they were made. */
+let idbChain: Promise<unknown> = Promise.resolve();
+
+/** Write the local copy (localStorage mirror first, then IndexedDB) with the
+ *  bookkeeping of the card that owns this device's cache. */
+async function writeLocal(state: GameState): Promise<void> {
+  const bookkeeping = localSyncFor(getLocalProfileOwner());
+  const blob = (bookkeeping ? { ...state, [LOCAL_SYNC_KEY]: bookkeeping } : state) as GameState;
   try {
-    if (!s.base && !s.inflight) { localStorage.removeItem(SYNC_KEY(token)); return; }
-    localStorage.setItem(SYNC_KEY(token), JSON.stringify({ rev: s.rev, base: s.base, inflight: s.inflight }));
+    // Synchronous localStorage write first, guaranteed-persisted
+    // before save() returns even if IDB later fails.
+    localStorage.setItem(LS_KEY, JSON.stringify(blob));
+  } catch { /* storage full or quota exceeded, IDB still tried below */ }
+  const write = idbChain.then(async () => {
+    const db = await openDB();
+    await new Promise<void>((resolve, reject) => {
+      const tx = db.transaction(STORE, "readwrite");
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+      tx.onabort = () => reject(tx.error);
+      tx.objectStore(STORE).put(blob, KEY);
+    });
+  });
+  idbChain = write.catch(() => undefined);
+  try {
+    await write;
   } catch {
-    // A base that cannot be stored must not survive stale: drop it, so the
-    // next cold start falls back to the day rule instead of a wrong merge.
-    try { localStorage.removeItem(SYNC_KEY(token)); } catch { /* ignore */ }
+    // IDB unavailable / blocked. localStorage is the fallback,
+    // already written above.
   }
 }
 
-function readPersistedSync(token: string): { rev: number | null; base: GameState | null; inflight: Inflight | null } | null {
-  try {
-    const raw = localStorage.getItem(SYNC_KEY(token));
-    return raw ? JSON.parse(raw) : null;
-  } catch { return null; }
-}
-
-/** The caller now holds `state` for this card (a load handed it out). */
-function handOut(token: string, state: GameState | null): void {
-  const s = getSync(token);
-  s.base = state;
-  s.inflight = null;
-  persistSync(token, s);
+/**
+ * The card's bookkeeping changed: write it down with a local copy that
+ * contains everything it refers to, the newer of the last saved state and
+ * the state just sent.
+ */
+function resaveSync(token: string, sent: { state: GameState; seq: number }): void {
+  if (writesFrozen || getLocalProfileOwner() !== token) return;
+  if (!lastSaved || lastSaved.seq < sent.seq) lastSaved = { state: sent.state, seq: sent.seq };
+  void writeLocal(lastSaved.state);
 }
 
 function newWriteId(): string {
@@ -96,13 +142,28 @@ function writeIdsOf(state: unknown): string[] {
   return Array.isArray(w) ? w.filter((x): x is string => typeof x === 'string') : [];
 }
 
+const asObj = (s: GameState | null) => s as unknown as Record<string, unknown> | null;
+const merge3 = (base: GameState | null, local: GameState, card: GameState) =>
+  mergeStates(asObj(base), asObj(local)!, asObj(card)!) as unknown as GameState;
+
 /** The caller's changes since base, applied onto the card, stamped with this write's id. */
 function compose(base: GameState | null, state: GameState, server: GameState | null, id: string): GameState {
-  const merged = server
-    ? mergeStates(base as unknown as Record<string, unknown> | null, state as unknown as Record<string, unknown>, server as unknown as Record<string, unknown>) as unknown as GameState
-    : state;
+  const merged = server ? merge3(base, state, server) : state;
   const ids = [...writeIdsOf(merged).filter(x => x !== id), id].slice(-WRITE_IDS_KEPT);
   return { ...merged, syncWrites: ids } as GameState;
+}
+
+/**
+ * The card moved on while this page wrote. If it holds one of this page's
+ * unanswered writes, that write landed: its state is the new base. If the
+ * card's id list is full and none is found, nobody can tell: merge without
+ * a base (never counts anything twice).
+ */
+function resolveBase(s: SyncInfo, base: GameState | null, card: GameState | null): GameState | null {
+  const ids = writeIdsOf(card);
+  for (let i = s.inflights.length - 1; i >= 0; i--) if (ids.includes(s.inflights[i].id)) return s.inflights[i].submitted;
+  if (s.inflights.length && ids.length >= WRITE_IDS_KEPT) return null;
+  return base;
 }
 
 /** Same content apart from the write ids. */
@@ -115,32 +176,6 @@ function sameContent(a: unknown, b: unknown): boolean {
   return jsonEqual(strip(a), strip(b));
 }
 
-/**
- * Does `local` look like it grew from `base`? Checked on everything that only
- * grows. A local copy that is behind (its last save never finished) must not
- * be applied onto the card: its "changes" would undo progress.
- */
-function descendsFrom(base: GameState, local: GameState): boolean {
-  const b = base as unknown as Record<string, unknown>;
-  const l = local as unknown as Record<string, unknown>;
-  const s = (v: unknown) => (typeof v === 'string' ? v : '');
-  const n = (v: unknown) => (typeof v === 'number' && Number.isFinite(v) ? v : 0);
-  const arr = (v: unknown): unknown[] => (Array.isArray(v) ? v : []);
-  const idOf = (v: unknown) => (v && typeof v === 'object' ? (v as { id?: unknown }).id : undefined);
-  const isDone = (v: unknown) => !!v && typeof v === 'object' && (v as { done?: unknown }).done === true;
-  if (s(l.lastDate) < s(b.lastDate)) return false;
-  for (const k of ['totalTasksDone', 'adventureCount', 'tripCursor', 'catEvo']) if (n(l[k]) < n(b[k])) return false;
-  const found = arr(l.treasuresFound);
-  if (arr(b.treasuresFound).some(t => !found.includes(t))) return false;
-  const logIds = new Set(arr(l.expeditionLog).map(idOf));
-  if (arr(b.expeditionLog).some(e => idOf(e) !== undefined && !logIds.has(idOf(e)))) return false;
-  if (s(l.lastDate) === s(b.lastDate)) {
-    const done = new Set(arr(l.quests).filter(isDone).map(q => String(idOf(q))));
-    if (arr(b.quests).some(q => isDone(q) && !done.has(String(idOf(q))))) return false;
-  }
-  return true;
-}
-
 /** One cloud write per card at a time: a later save waits for the one in flight (verifier F3). */
 const writeChains = new Map<string, Promise<unknown>>();
 function serialize<T>(token: string, fn: () => Promise<T>): Promise<T> {
@@ -148,6 +183,14 @@ function serialize<T>(token: string, fn: () => Promise<T>): Promise<T> {
   const next = prev.then(fn, fn);
   writeChains.set(token, next.catch(() => undefined));
   return next;
+}
+
+/** Resolves like the call, or rejects after ms (the request may still land). */
+function withTimeout<T>(p: PromiseLike<T>, ms: number): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error('timeout')), ms);
+    Promise.resolve(p).then(v => { clearTimeout(timer); resolve(v); }, e => { clearTimeout(timer); reject(e); });
+  });
 }
 
 /** Whether the server has profile_upsert_if; null until the first try. A
@@ -172,57 +215,66 @@ function missingFunction(error: unknown): boolean {
   return e.code === 'PGRST202' || e.code === '42883';
 }
 
-async function writeCard(token: string, state: GameState): Promise<CloudWrite> {
+/** An error answer from PostgREST or Postgres (it has a code): nothing was
+ *  written. A network failure comes back from supabase-js as an error with an
+ *  empty code (status 0), and the write may have landed (verifier R2-1). */
+function definitelyNotWritten(error: unknown): boolean {
+  const code = (error as { code?: unknown } | null)?.code;
+  return typeof code === 'string' && code.length > 0;
+}
+
+async function writeCard(token: string, sent: { state: GameState; seq: number }): Promise<CloudWrite> {
   if (writesFrozen) return { status: 'frozen' };
   if (casAvailable === false && Date.now() >= casRetryAt) casAvailable = null;
+  const state = sent.state;
   const s = getSync(token);
   const id = newWriteId();
   if (casAvailable !== false) {
-    let pending = s.inflight; // an earlier write whose answer never came
     let base = s.base;
     let toWrite = compose(base, state, s.server, id);
     let missing = false;
     for (let attempt = 0; attempt < 3; attempt++) {
-      s.inflight = { id, submitted: state };
-      persistSync(token, s);
+      s.inflights = [...s.inflights.filter(f => f.id !== id), { id, submitted: state }].slice(-INFLIGHTS_KEPT);
+      resaveSync(token, sent);
       let res: { data?: unknown; error?: unknown };
       try {
-        res = await supabase.rpc('profile_upsert_if', {
+        res = await withTimeout(supabase.rpc('profile_upsert_if', {
           p_token: token,
           p_state: toWrite as unknown as Record<string, unknown>,
           p_expected_rev: s.rev,
-        }) as { data?: unknown; error?: unknown };
+        }) as PromiseLike<{ data?: unknown; error?: unknown }>, WRITE_TIMEOUT_MS);
       } catch {
-        return { status: 'offline' }; // may have landed: inflight stays
+        return { status: 'offline' }; // may have landed: stays in inflights
       }
       if (res?.error) {
-        // An error answer means nothing was written.
-        s.inflight = pending;
-        persistSync(token, s);
+        if (!definitelyNotWritten(res.error)) return { status: 'offline' }; // may have landed
+        s.inflights = s.inflights.filter(f => f.id !== id);
+        resaveSync(token, sent);
         if (missingFunction(res.error)) { missing = true; break; }
         return { status: 'offline' };
       }
       casAvailable = true;
       const d = (res?.data || {}) as { ok?: boolean; rev?: number | null; state?: GameState | null };
       if (d.ok) {
+        // Earlier unanswered writes carried the same expected rev: none of them landed.
         s.rev = typeof d.rev === 'number' ? d.rev : null;
         s.server = toWrite;
         s.base = state;
-        s.inflight = null;
-        persistSync(token, s);
+        s.inflights = [];
+        resaveSync(token, sent);
         const changed = !sameContent(toWrite, state);
         return { status: changed ? 'merged' : 'saved', state: toWrite, changed };
       }
       // The card moved on: another device wrote, or an earlier write of ours
       // landed without its answer (verifier F4). Apply our changes onto it.
+      s.inflights = s.inflights.filter(f => f.id !== id);
       const remote = (d.state as GameState) || null;
-      if (pending && remote && writeIdsOf(remote).includes(pending.id)) base = pending.submitted;
-      pending = null;
+      base = resolveBase(s, base, remote);
+      s.inflights = [];
       s.rev = remote && typeof d.rev === 'number' ? d.rev : null;
       s.server = remote;
       s.base = base;
-      s.inflight = null;
-      persistSync(token, s);
+      resaveSync(token, sent);
       if (writesFrozen) return { status: 'frozen' };
       toWrite = compose(base, state, remote, id);
     }
@@ -233,16 +285,16 @@ async function writeCard(token: string, state: GameState): Promise<CloudWrite> {
   try {
     // Old unconditional write (server without profile_upsert_if yet).
     const toWrite = compose(s.base, state, s.server, id);
-    const res = await supabase.rpc('profile_upsert', {
+    const res = await withTimeout(supabase.rpc('profile_upsert', {
       p_token: token,
       p_state: toWrite as unknown as Record<string, unknown>,
-    }) as { data?: { rev?: number } | null; error?: unknown };
+    }) as PromiseLike<{ data?: { rev?: number } | null; error?: unknown }>, WRITE_TIMEOUT_MS);
     if (res?.error) return { status: 'offline' };
     s.rev = typeof res?.data?.rev === 'number' ? res.data.rev : null;
     s.server = toWrite;
     s.base = state;
-    s.inflight = null;
-    persistSync(token, s);
+    s.inflights = [];
+    resaveSync(token, sent);
     return { status: 'saved', state: toWrite, changed: !sameContent(toWrite, state) };
   } catch {
     // Silent fail, local IndexedDB + localStorage are the fallback
@@ -251,38 +303,61 @@ async function writeCard(token: string, state: GameState): Promise<CloudWrite> {
 }
 
 
+/** Read the local copy: the newer of IndexedDB and the localStorage mirror
+ *  (both carry the time of their save in the bookkeeping; without it,
+ *  IndexedDB first as before, review round 2 R2-2), plus its bookkeeping. */
+async function loadWithSync(): Promise<{ state: GameState | null; bookkeeping: LocalSync | null }> {
+  // Apr 2026 fix: prefer IndexedDB, but treat localStorage as a
+  // continuous fallback (NOT a one-shot migration that wipes itself).
+  // Previous behaviour deleted the localStorage entry on first load
+  // after migrating it to IDB, which meant if a later save's IDB
+  // transaction failed to commit before tab-close (a real bug, see
+  // save() comments), there was nothing to fall back on. Result for
+  // Marc 27 Apr: Louis re-picks the egg every session.
+  let fromLs: GameState | null = null;
+  try {
+    const ls = localStorage.getItem(LS_KEY);
+    fromLs = ls ? (JSON.parse(ls) as GameState) : null;
+  } catch { fromLs = null; }
+  let fromIdb: GameState | null = null;
+  try {
+    const db = await openDB();
+    fromIdb = await new Promise<GameState | null>((resolve) => {
+      const tx = db.transaction(STORE, "readonly");
+      const req = tx.objectStore(STORE).get(KEY);
+      req.onsuccess = () => resolve((req.result as GameState) || null);
+      req.onerror = () => resolve(null);
+    });
+  } catch { fromIdb = null; }
+  const savedAt = (x: GameState | null) => {
+    const b = x ? (x as unknown as Record<string, unknown>)[LOCAL_SYNC_KEY] as LocalSync | undefined : undefined;
+    return b && typeof b.savedAt === 'number' ? b.savedAt : -1;
+  };
+  const pick = fromIdb && fromLs ? (savedAt(fromLs) > savedAt(fromIdb) ? fromLs : fromIdb) : (fromIdb || fromLs);
+  const raw = pick ? (pick as unknown as Record<string, unknown>)[LOCAL_SYNC_KEY] : null;
+  const bookkeeping = raw && typeof raw === 'object' && typeof (raw as LocalSync).token === 'string'
+    ? { ...(raw as LocalSync), inflights: Array.isArray((raw as LocalSync).inflights) ? (raw as LocalSync).inflights : [] }
+    : null;
+  return { state: pick ? stripLocal(pick) : null, bookkeeping };
+}
+
+/** The caller now holds `state` for this card (a load handed it out). */
+function handOut(token: string, state: GameState | null): void {
+  const s = getSync(token);
+  s.base = state;
+  s.inflights = [];
+}
+
 const storage = {
   // ── Local (IndexedDB with localStorage fallback) ──
   async load(): Promise<GameState | null> {
-    // Apr 2026 fix: prefer IndexedDB, but treat localStorage as a
-    // continuous fallback (NOT a one-shot migration that wipes itself).
-    // Previous behaviour deleted the localStorage entry on first load
-    // after migrating it to IDB, which meant if a later save's IDB
-    // transaction failed to commit before tab-close (a real bug, see
-    // save() comments), there was nothing to fall back on. Result for
-    // Marc 27 Apr: Louis re-picks the egg every session.
-    const readFromLocalStorage = (): GameState | null => {
-      try {
-        const ls = localStorage.getItem(LS_KEY);
-        return ls ? (JSON.parse(ls) as GameState) : null;
-      } catch { return null; }
-    };
+    return (await loadWithSync()).state;
+  },
 
-    try {
-      const db = await openDB();
-      const idbResult = await new Promise<GameState | null>((resolve) => {
-        const tx = db.transaction(STORE, "readonly");
-        const req = tx.objectStore(STORE).get(KEY);
-        req.onsuccess = () => resolve((req.result as GameState) || null);
-        req.onerror = () => resolve(null);
-      });
-      // If IDB has data, use it. Otherwise fall back to localStorage
-      // (which may have a more-recent state from a tab-close save that
-      // didn't make it to IDB).
-      return idbResult || readFromLocalStorage();
-    } catch {
-      return readFromLocalStorage();
-    }
+  /** Resolves once every cloud write and local IndexedDB write started so far has finished. */
+  async settled(): Promise<void> {
+    await Promise.all([...writeChains.values()]);
+    await idbChain;
   },
 
   /** Stop every write from this page (see writesFrozen). One way: only a reload clears it. */
@@ -319,27 +394,12 @@ const storage = {
     // The double-write doubles the storage cost but state objects are
     // small (~50KB peak) and writes happen on a 400ms debounce, total
     // overhead is sub-millisecond per save.
-    let serialized: string | null = null;
-    try {
-      serialized = JSON.stringify(state);
-      // Synchronous localStorage write first, guaranteed-persisted
-      // before save() returns even if IDB later fails.
-      localStorage.setItem(LS_KEY, serialized);
-    } catch { /* storage full or quota exceeded, IDB still tried below */ }
-
-    try {
-      const db = await openDB();
-      await new Promise<void>((resolve, reject) => {
-        const tx = db.transaction(STORE, "readwrite");
-        tx.oncomplete = () => resolve();
-        tx.onerror = () => reject(tx.error);
-        tx.onabort = () => reject(tx.error);
-        tx.objectStore(STORE).put(state, KEY);
-      });
-    } catch {
-      // IDB unavailable / blocked. localStorage is the fallback,
-      // already written above.
-    }
+    //
+    // Sep 2026 (compare-and-swap sync): the copy also carries the card's
+    // sync bookkeeping (see writeLocal), written in the same go.
+    const clean = stripLocal(state);
+    lastSaved = { state: clean, seq: ++seq };
+    await writeLocal(clean);
   },
 
   async clear(): Promise<void> {
@@ -453,7 +513,8 @@ const storage = {
   async cloudSaveByToken(token: string, state: GameState): Promise<CloudWrite> {
     if (!token || !/^[a-f0-9]{32}$/.test(token)) return { status: 'skipped' };
     if (writesFrozen) return { status: 'frozen' };
-    return serialize(token, () => writeCard(token, state));
+    const sent = { state: stripLocal(state), seq: ++seq };
+    return serialize(token, () => writeCard(token, sent));
   },
 
   // ── Sync: resolve local vs cloud, return best state ──
@@ -498,11 +559,8 @@ const storage = {
   // Used by TaskContext when a profile token is present.
   async syncLoadByToken(token: string): Promise<GameState | null> {
     if (!token) return this.load();
-    // What this device last synced with the card, from the previous session
-    // (read before anything in this load replaces it).
-    const persisted = readPersistedSync(token);
-    const [localRaw, cloud] = await Promise.all([
-      this.load(),
+    const [{ state: localRaw, bookkeeping }, cloud] = await Promise.all([
+      loadWithSync(),
       this.cloudLoadByToken(token),
     ]);
 
@@ -536,42 +594,42 @@ const storage = {
       const cloudOnboarded = !!(cloud as any).onboardingDone;
       if ((localPristine && cloudFurther) || (localUnfinished && cloudOnboarded)) {
         handOut(token, cloud);
-        this.save(cloud);
+        await this.save(cloud);
         return cloud;
       }
-      // Compare-and-swap cold start (Astra CAS-05): this device knows what it
-      // last synced with the card. Its local changes since then are applied
-      // onto the card, whatever other devices did meanwhile.
-      if (persisted?.base) {
-        let base = persisted.base;
-        // A write whose answer never came back: if the card holds it, it landed.
-        if (persisted.inflight && writeIdsOf(cloud).includes(persisted.inflight.id)) base = persisted.inflight.submitted;
-        handOut(token, cloud);
-        if (descendsFrom(base, local)) {
-          const merged = mergeStates(base as unknown as Record<string, unknown>, local as unknown as Record<string, unknown>, cloud as unknown as Record<string, unknown>) as unknown as GameState;
-          if (sameContent(merged, cloud)) { this.save(cloud); return cloud; }
-          await this.cloudSaveByToken(token, merged);
-          await this.save(merged);
-          return merged;
+      // Compare-and-swap cold start (review rounds 1 and 2, CAS-05). The
+      // local copy carries the base it grew from: its changes since then are
+      // applied onto the card, whatever other devices did meanwhile. A write
+      // of the previous page that is on the card already is part of the base;
+      // one that is not may still land, so it is kept, restated onto this
+      // card, for the next write to recognise.
+      let base: GameState | null = null;
+      let stillOut: Inflight[] = [];
+      const mine = bookkeeping && bookkeeping.token === token && bookkeeping.base ? bookkeeping : null;
+      if (mine) {
+        const ids = writeIdsOf(cloud);
+        let landed = -1;
+        mine.inflights.forEach((f, i) => { if (ids.includes(f.id)) landed = i; });
+        if (landed >= 0) base = mine.inflights[landed].submitted;
+        else if (mine.inflights.length && ids.length >= WRITE_IDS_KEPT) base = null;
+        else {
+          base = mine.base;
+          stillOut = mine.inflights.map(f => ({ id: f.id, submitted: merge3(mine.base, f.submitted, cloud) }));
         }
-        // The local copy is behind what this device last synced (its last
-        // save never finished): everything it knew is on the card already.
-        this.save(cloud);
+      }
+      // Without a base (the first start after this update, or no way to
+      // tell): keep everything the card has and add what only the local
+      // copy has; nothing is counted twice and nothing the card has goes back.
+      const merged = merge3(base, local, cloud);
+      handOut(token, cloud);
+      getSync(token).inflights = stillOut;
+      if (sameContent(merged, cloud)) {
+        await this.save(cloud);
         return cloud;
       }
-      handOut(token, cloud);
-      const cloudDate = (cloud as any).lastDate || '';
-      const localDate = (local as any).lastDate || '';
-      if (localDate > cloudDate) {
-        // Local is newer (this device played most recently). Push to
-        // cloud (compare-and-swap: a race with another device merges on
-        // the card; this page's later writes are applied onto it).
-        await this.cloudSaveByToken(token, local);
-        return local;
-      }
-      // Cloud wins, cache locally for offline use + faster next boot.
-      this.save(cloud);
-      return cloud;
+      await this.save(merged);
+      await this.cloudSaveByToken(token, merged);
+      return merged;
     }
 
     if (local && !cloud) {
@@ -587,7 +645,7 @@ const storage = {
       // New device that received the token via shared URL, pull
       // cloud state down + cache locally.
       handOut(token, cloud);
-      this.save(cloud);
+      await this.save(cloud);
       return cloud;
     }
 
