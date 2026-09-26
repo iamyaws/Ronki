@@ -343,7 +343,10 @@ export function mergeStates<T extends Obj>(base: T | null, local: T, remote: T):
     // Always with a base (review round 2, CAS-04): a task ticked on both is
     // taken out once below, even when one side's net balance equals the base.
     if (b && DELTA_KEYS.has(key)) {
-      out[key] = (RULES[key] || deltaNum)(b[key], l[key], r[key], ctx);
+      // With a base, a counter it never had starts from zero (or an empty map).
+      const isMap = [l[key], r[key]].some(v => v && typeof v === 'object' && !Array.isArray(v));
+      const from = b[key] ?? (isMap ? {} : 0);
+      out[key] = (RULES[key] || deltaNum)(from, l[key], r[key], ctx);
       deltaMerged.add(key);
       continue;
     }

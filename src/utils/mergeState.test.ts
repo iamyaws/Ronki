@@ -230,6 +230,15 @@ describe('mergeStates', () => {
     expect(m.hp).toBe(70);
   });
 
+  it('a counter the base never had counts from zero (a first tick on both devices counts once, found in the browser)', () => {
+    const b = { ...base(), quests: [q('s_wake', false, { xp: 10 })] } as any;
+    delete b.totalTasksDone;
+    const ticked = { ...b, totalTasksDone: 1, totalQuestCompletions: { s_wake: 1 }, quests: [q('s_wake', true, { xp: 10 })] };
+    const m = mergeStates(b, ticked, { ...ticked }) as any;
+    expect(m.totalQuestCompletions).toEqual({ s_wake: 1 });
+    expect(m.totalTasksDone).toBe(1);
+  });
+
   it('is a no-op when nothing differs', () => {
     const b = base();
     expect(jsonEqual(mergeStates(b, b, b), b)).toBe(true);
