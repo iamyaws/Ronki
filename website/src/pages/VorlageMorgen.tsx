@@ -23,7 +23,7 @@ const FAQ: GuideFaq[] = [
   {
     question: 'Mit oder ohne Belohnung?',
     answer:
-      'Ohne. Der Haken, den dein Kind selbst setzt, ist Rückmeldung genug. Wer für jeden Schritt einen Sticker verspricht, muss die Belohnung meistens bald größer machen, damit sie noch wirkt.',
+      'Ohne. Der Kreis, den dein Kind selbst ausmalt, ist Rückmeldung genug. Wer für jeden Schritt einen Sticker verspricht, muss die Belohnung meistens bald größer machen, damit sie noch wirkt.',
   },
   {
     question: 'Reicht die Seite oder brauche ich das PDF?',

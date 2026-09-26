@@ -154,9 +154,10 @@ describe('Morgenroutine builder', () => {
     renderPage();
     openAdd();
     click('Aufstehen dazunehmen');
-    expect(sheetLabels()).toEqual(['Zähne putzen', 'Anziehen', 'Frühstücken', 'Tasche packen', 'Aufstehen']);
-    expect(window.location.search).toBe('?s=zdfpa');
-    const row = sheetRows()[4];
+    // It lands where it belongs in a morning: on top.
+    expect(sheetLabels()).toEqual(['Aufstehen', 'Zähne putzen', 'Anziehen', 'Frühstücken', 'Tasche packen']);
+    expect(window.location.search).toBe('?s=azdfp');
+    const row = sheetRows()[0];
     expect(row).toHaveTextContent('Licht an, Vorhang auf.');
     expect(sheetPictures(row)).toEqual(['/art/bilderbuch/tasks/wake.webp']);
     // A chosen step leaves the grid.
@@ -177,7 +178,7 @@ describe('Morgenroutine builder', () => {
     renderPage();
     openAdd();
     const field = screen.getByRole('textbox', { name: 'Eigener Schritt' });
-    expect(field).toHaveAttribute('maxLength', '20');
+    expect(field).toHaveAttribute('maxLength', '24');
     expect(field).toHaveAttribute('placeholder', 'z. B. Medizin nehmen');
     expect(screen.getByText(PRIVACY)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Eigenen Schritt dazunehmen' })).toBeDisabled();
@@ -187,20 +188,21 @@ describe('Morgenroutine builder', () => {
     expect(sheetRows()).toHaveLength(4);
     click('Eigenen Schritt dazunehmen');
 
-    const own = sheetRows()[4];
+    // The own step goes in before the school bag.
+    const own = sheetRows()[3];
     expect(own).toHaveTextContent('Medizin nehmen');
     expect(own.querySelectorAll('[data-draw]')).toHaveLength(1);
     expect(sheetPictures(own)).toEqual([]);
-    expect(window.location.search).toBe('?s=zdfpx&e=Medizin+nehmen');
+    expect(window.location.search).toBe('?s=zdfxp&e=Medizin+nehmen');
 
     // Now the step is edited right in its row; spaces stay while typing.
-    const inline = within(builderRows()[4]).getByRole('textbox', { name: 'Eigener Schritt' });
+    const inline = within(builderRows()[3]).getByRole('textbox', { name: 'Eigener Schritt' });
     expect(inline).toHaveValue('Medizin nehmen ');
     fireEvent.change(inline, { target: { value: 'Kuscheltier ' } });
     expect(inline).toHaveValue('Kuscheltier ');
-    expect(sheetPictures(sheetRows()[4])).toEqual(['/art/bilderbuch/tasks/teddy.webp']);
-    expect(sheetRows()[4].querySelectorAll('[data-draw]')).toHaveLength(0);
-    expect(window.location.search).toBe('?s=zdfpx&e=Kuscheltier');
+    expect(sheetPictures(sheetRows()[3])).toEqual(['/art/bilderbuch/tasks/teddy.webp']);
+    expect(sheetRows()[3].querySelectorAll('[data-draw]')).toHaveLength(0);
+    expect(window.location.search).toBe('?s=zdfxp&e=Kuscheltier');
     expect(screen.getByRole('button', { name: 'Kuscheltier entfernen' })).toBeEnabled();
   });
 
@@ -260,7 +262,7 @@ describe('Morgenroutine builder', () => {
     click('Aufstehen dazunehmen');
     fireEvent.change(screen.getByRole('textbox', { name: 'Eigener Schritt' }), { target: { value: 'Medizin ' } });
     click('Eigenen Schritt dazunehmen');
-    expect(window.location.search).toBe('?s=zdfpax&e=Medizin');
+    expect(window.location.search).toBe('?s=azdfxp&e=Medizin');
 
     // Back: the address bar shows an older plan; the page must follow, drafts too.
     act(() => {

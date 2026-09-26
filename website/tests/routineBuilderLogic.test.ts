@@ -134,11 +134,16 @@ describe('Default plan', () => {
 });
 
 describe('Editing the plan', () => {
-  it('adds a step at the end with its default minutes, once', () => {
+  it('adds a step in its usual morning spot with its default minutes, once', () => {
     let plan = addStep(defaultPlan(), 'a');
-    expect(plan.steps).toEqual(['z', 'd', 'f', 'p', 'a']);
-    expect(plan.minutes).toEqual([3, 10, 15, 5, 5]);
+    expect(plan.steps).toEqual(['a', 'z', 'd', 'f', 'p']);
+    expect(plan.minutes).toEqual([5, 3, 10, 15, 5]);
     expect(addStep(plan, 'a')).toBe(plan);
+    // Schuhe go after Frühstücken, before the school bag. In an order the parent
+    // changed, a new step goes before the first step that usually comes later.
+    expect(addStep(defaultPlan(), 's').steps).toEqual(['z', 'd', 'f', 's', 'p']);
+    expect(addStep(withSteps(['p', 'z']), 'd').steps).toEqual(['d', 'p', 'z']);
+    expect(addStep(withSteps(['f']), 'j').steps).toEqual(['f', 'j']);
   });
 
   it('stops at six steps', () => {
@@ -172,12 +177,13 @@ describe('Editing the plan', () => {
   it('adds the own step only with text, and drops its text when it is removed', () => {
     expect(addOwnStep(defaultPlan(), '   ')).toEqual(defaultPlan());
     let plan = addOwnStep(defaultPlan(), '  Medizin   nehmen ');
-    expect(plan.steps).toEqual(['z', 'd', 'f', 'p', 'x']);
+    // The own step goes in before the school bag.
+    expect(plan.steps).toEqual(['z', 'd', 'f', 'x', 'p']);
     expect(plan.own).toBe('Medizin nehmen');
-    expect(plan.minutes.at(-1)).toBe(OWN_STEP_MINUTES);
+    expect(plan.minutes[3]).toBe(OWN_STEP_MINUTES);
     plan = setOwnText(plan, 'Vitamin D');
     expect(plan.own).toBe('Vitamin D');
-    plan = removeStep(plan, 4);
+    plan = removeStep(plan, 3);
     expect(plan.own).toBe('');
     // Without the step there is nowhere for the text to go.
     expect(setOwnText(plan, 'Kuchen')).toBe(plan);
@@ -200,12 +206,14 @@ describe('Editing the plan', () => {
 });
 
 describe('Own step', () => {
-  it('is at most 20 characters, cleaned like a packplan free item', () => {
-    expect(OWN_STEP_MAX).toBe(20);
+  it('is at most 24 characters, cleaned like a packplan free item', () => {
+    expect(OWN_STEP_MAX).toBe(24);
     expect(cleanOwnText('  Medizin \n nehmen  ')).toBe('Medizin nehmen');
-    expect(cleanOwnText('Hausaufgabenkontrolle machen')).toBe('Hausaufgabenkontroll');
-    expect(cleanOwnText('1234567890123456789 x')).toBe('1234567890123456789');
-    expect(Array.from(cleanOwnText(`${'a'.repeat(19)}🎒🎒`))).toHaveLength(20);
+    // Long German words fit: 21 characters.
+    expect(cleanOwnText('Hausaufgabenkontrolle')).toBe('Hausaufgabenkontrolle');
+    expect(cleanOwnText('Hausaufgabenkontrolle machen')).toBe('Hausaufgabenkontrolle ma');
+    expect(cleanOwnText('12345678901234567890123 x')).toBe('12345678901234567890123');
+    expect(Array.from(cleanOwnText(`${'a'.repeat(23)}🎒🎒`))).toHaveLength(24);
   });
 
   it('gets a picture for a word the site knows, otherwise a box to draw in', () => {
@@ -249,7 +257,7 @@ describe('Clock times', () => {
 
 describe('Link', () => {
   it('writes short keys only for what differs from the default', () => {
-    expect(encodePlan(addStep(defaultPlan(), 'a'))).toBe('s=zdfpa');
+    expect(encodePlan(addStep(defaultPlan(), 'a'))).toBe('s=azdfp');
     expect(encodePlan(setTimes(defaultPlan(), true))).toBe('los=0730');
     expect(encodePlan(setMinutes(setTimes(defaultPlan(), true), 1, 12))).toBe('los=0730&m=3.12.15.5');
     // Minutes only travel while times are on.
@@ -284,7 +292,7 @@ describe('Link', () => {
     expect(decodePlan('e=Kuchen').own).toBe('');
     const plan = decodePlan(`s=zx&e=${encodeURIComponent('  Sehr langer eigener Schritt ')}`);
     expect(plan.steps).toEqual(['z', 'x']);
-    expect(plan.own).toBe('Sehr langer eigener');
+    expect(plan.own).toBe('Sehr langer eigener Schr');
     expect(plan.own.length).toBeLessThanOrEqual(OWN_STEP_MAX);
   });
 

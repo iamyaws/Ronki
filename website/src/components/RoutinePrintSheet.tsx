@@ -6,6 +6,7 @@ import {
   RoutineBuilderControls,
   RoutineBuilderShare,
   useRoutinePlan,
+  BUILDER_ANCHOR,
 } from './routine-builder';
 import { leaveNote, sheetDescription, sheetSteps } from '../lib/routine-builder';
 
@@ -178,6 +179,14 @@ function TemplateLayout({
               <p className="mt-5 text-base sm:text-lg text-ink/75 leading-relaxed max-w-2xl">
                 {pageIntro}
               </p>
+            )}
+            {controls && (
+              <a
+                href={`#${BUILDER_ANCHOR}`}
+                className="mt-5 inline-flex items-center gap-2 font-display font-semibold text-base text-cobalt underline decoration-2 underline-offset-4 hover:text-ink"
+              >
+                Eigene Schritte zusammenstellen
+              </a>
             )}
           </header>
         )}

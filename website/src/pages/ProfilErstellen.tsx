@@ -130,7 +130,7 @@ export default function ProfilErstellen() {
     const url = buildShareUrl(phase.token);
     try {
       if (typeof navigator !== 'undefined' && navigator.share) {
-        await navigator.share({ title: 'Ronki — Profil-Karte', url });
+        await navigator.share({ title: 'Ronki: Profil-Karte', url });
         return;
       }
       if (typeof navigator !== 'undefined' && navigator.clipboard) {
@@ -155,8 +155,8 @@ export default function ProfilErstellen() {
   return (
     <PainterlyShell>
       <PageMeta
-        title="Profil-Karte erstellen — Ronki"
-        description="Erstellt eine QR-Karte für euer Kind. Druckt sie aus, klebt sie an den Kühlschrank oder ins Kinderzimmer — ein Scan und Ronki ist da."
+        title="Profil-Karte erstellen · Ronki"
+        description="Erstellt eine QR-Karte für euer Kind. Druckt sie aus, klebt sie an den Kühlschrank oder ins Kinderzimmer. Ein Scan und Ronki ist da."
         canonicalPath="/profil-erstellen"
         noindex
       />
@@ -189,7 +189,7 @@ export default function ProfilErstellen() {
                 Ein kurzes Formular, dann generieren wir eine Karte mit
                 QR-Code. Druckt sie aus, klebt sie an den Kühlschrank
                 oder ins Kinderzimmer. Euer Kind scannt sie auf dem
-                Tablet — und Ronki ist da.
+                Tablet, und Ronki ist da.
               </p>
             )}
           </motion.div>
@@ -215,7 +215,7 @@ export default function ProfilErstellen() {
                   value={childName}
                   onChange={(e) => setChildName(e.target.value)}
                   className="w-full rounded-xl px-4 py-3 bg-white border border-teal-dark/15 text-base text-ink focus:outline-none focus:border-teal focus:ring-2 focus:ring-teal/20"
-                  placeholder="z. B. Louis"
+                  placeholder="Vorname oder Spitzname"
                   maxLength={40}
                 />
               </label>
@@ -265,7 +265,7 @@ export default function ProfilErstellen() {
 
               <p className="text-xs text-ink/55 mt-5 leading-relaxed">
                 Keine E-Mail nötig. Keine Werbung. Der QR-Code ist
-                der einzige Weg in das Profil — bewahrt die Karte gut
+                der einzige Weg in das Profil. Bewahrt die Karte gut
                 auf. Verloren? Auf dieser Seite eine neue erstellen.
               </p>
             </form>

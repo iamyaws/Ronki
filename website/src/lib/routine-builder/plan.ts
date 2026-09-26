@@ -86,7 +86,7 @@ export const MORNING_STEPS: ReadonlyArray<MorningStep> = [
 export const OWN_STEP_CODE = 'x';
 /** Name of the own step where it has no text yet. */
 export const OWN_STEP_LABEL = 'Eigener Schritt';
-export const OWN_STEP_MAX = 20;
+export const OWN_STEP_MAX = 24;
 export const OWN_STEP_MINUTES = 5;
 
 export const MIN_STEPS = 1;
@@ -174,20 +174,42 @@ export function canAdd(plan: RoutinePlan): boolean {
   return plan.steps.length < MAX_STEPS;
 }
 
-export function addStep(plan: RoutinePlan, code: StepCode): RoutinePlan {
-  if (!BY_CODE.has(code) || plan.steps.includes(code) || !canAdd(plan)) return plan;
-  return { ...plan, steps: [...plan.steps, code], minutes: [...plan.minutes, defaultMinutes(code)] };
+/**
+ * Where a new step goes: before the first chosen step that comes later in a
+ * usual morning (catalogue order), so "Aufstehen" lands on top and not
+ * after "Tasche packen". The own step goes in before the school bag, or at
+ * the end when there is none. Parents move it with the arrows from there.
+ */
+function insertAt(plan: RoutinePlan, code: PlanStepCode): number {
+  if (code === OWN_STEP_CODE) {
+    const bag = plan.steps.indexOf('p' as PlanStepCode);
+    return bag >= 0 ? bag : plan.steps.length;
+  }
+  const rank = (c: PlanStepCode) => MORNING_STEPS.findIndex((step) => step.code === c);
+  const mine = rank(code);
+  const later = plan.steps.findIndex((c) => c !== OWN_STEP_CODE && rank(c) > mine);
+  return later >= 0 ? later : plan.steps.length;
 }
 
-/** Adds the own step at the end. Nothing happens without text, at six steps or when it is there already. */
+function insert<T>(list: readonly T[], at: number, item: T): T[] {
+  return [...list.slice(0, at), item, ...list.slice(at)];
+}
+
+export function addStep(plan: RoutinePlan, code: StepCode): RoutinePlan {
+  if (!BY_CODE.has(code) || plan.steps.includes(code) || !canAdd(plan)) return plan;
+  const at = insertAt(plan, code);
+  return { ...plan, steps: insert(plan.steps, at, code), minutes: insert(plan.minutes, at, defaultMinutes(code)) };
+}
+
+/** Adds the own step before the school bag. Nothing happens without text, at six steps or when it is there already. */
 export function addOwnStep(plan: RoutinePlan, text: string): RoutinePlan {
   const own = cleanOwnText(text);
   if (!own || plan.steps.includes(OWN_STEP_CODE) || !canAdd(plan)) return plan;
   return {
     ...plan,
-    steps: [...plan.steps, OWN_STEP_CODE],
+    steps: insert(plan.steps, insertAt(plan, OWN_STEP_CODE), OWN_STEP_CODE),
     own,
-    minutes: [...plan.minutes, OWN_STEP_MINUTES],
+    minutes: insert(plan.minutes, insertAt(plan, OWN_STEP_CODE), OWN_STEP_MINUTES),
   };
 }
 
