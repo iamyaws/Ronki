@@ -99,6 +99,16 @@ export default function ToolsHub() {
               description="Zehn Fragen, bevor das Ding ausgepackt wird. Konto, Ort, Käufe, Zeit. Am Ende weißt du, was du an Tag eins einstellst, und ob die Plattform überhaupt zu eurer Familie passt."
               meta="5 Min · Pro/Kontra + Plattform-Checkliste"
             />
+            <ToolCard
+              index={4}
+              reduced={reduced}
+              tone="cream"
+              eyebrow="Ranzen-Packplan"
+              to="/tools/ranzen-packplan"
+              title="Was muss heute in den Ranzen?"
+              description="Tipp an, was jeden Tag mit muss und was nur an bestimmten Tagen. Dann druckst du für jeden Schultag eine Bildkarte, die dein Kind auch ohne Lesen versteht."
+              meta="3 Min · fünf Tageskarten + Link für die Klasse"
+            />
           </ul>
         </div>
       </section>
@@ -261,7 +271,7 @@ function ClosingBlock({ reduced }: { reduced: boolean | null }) {
         Vermisst du was?
       </p>
       <p className="font-display font-semibold text-base sm:text-lg text-cream leading-relaxed max-w-prose">
-        Diese vier sind der Anfang. Wenn dir ein Werkzeug fehlt, das eine
+        Diese fünf sind der Anfang. Wenn dir ein Werkzeug fehlt, das eine
         Eltern-Entscheidung leichter macht, schreib mir kurz. Ich bau die
         Werkzeuge selbst, eins nach dem anderen.
       </p>

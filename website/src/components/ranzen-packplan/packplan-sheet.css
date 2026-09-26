@@ -1,0 +1,257 @@
+/*
+ * Ranzen-Packplan sheet, on top of the routine sheet (../sheet/sheet.css).
+ *
+ * One A4 page (fixed by .rs-sheet--a4): head with Ronki, then a 2 x 3 grid
+ * of five day cards and one cell for the note, then the footer. The dashed
+ * lines between the cards are the cut lines. The grid takes whatever height
+ * the head leaves, and each card shrinks its pictures by how many things the
+ * day carries (data-size), so the heaviest plan still fits the page.
+ *
+ * Same print rules as sheet.css: white ground, ink outlines, the only fill
+ * is the sky-wash pill behind the daily items.
+ */
+
+.pp-sheet .pp-page {
+  padding: 28px 40px 20px;
+}
+
+/* Grid and cut lines --------------------------------------------------- */
+.pp-grid {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+  border-top: 2px dashed rgba(4, 8, 18, 0.5);
+  border-left: 2px dashed rgba(4, 8, 18, 0.5);
+}
+.pp-cards {
+  display: contents;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.pp-card {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  padding: 9px;
+  border-right: 2px dashed rgba(4, 8, 18, 0.5);
+  border-bottom: 2px dashed rgba(4, 8, 18, 0.5);
+  break-inside: avoid;
+}
+.pp-scissors {
+  position: absolute;
+  z-index: 1;
+  top: -12px;
+  left: 22px;
+  width: 22px;
+  height: 22px;
+  padding: 0 2px;
+  background: #ffffff;
+}
+
+/* One card --------------------------------------------------------------- */
+.pp-card-in {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 10px 12px 10px 14px;
+  border: 2.5px solid #040812;
+  border-radius: 22px;
+  overflow: hidden;
+}
+.pp-card-top {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.pp-day {
+  margin: 0;
+  font-family: 'Fredoka', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 27px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: #040812;
+  white-space: nowrap;
+}
+.pp-daily {
+  flex: none;
+  display: flex;
+  gap: 1px;
+  list-style: none;
+  margin: 0;
+  padding: 3px 9px;
+  background: #b9e3fc;
+  border-radius: 999px;
+}
+.pp-daily .rs-pic {
+  width: 30px;
+  height: 30px;
+}
+/* Days with one row of extras: the daily items get their own row under the
+ * weekday, with bigger pictures. */
+.pp-card-top[data-daily-row] {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 7px;
+}
+.pp-card-top[data-daily-row] .pp-daily {
+  gap: 6px;
+  padding: 4px 12px;
+}
+.pp-card-top[data-daily-row] .pp-daily .rs-pic {
+  width: 42px;
+  height: 42px;
+}
+.pp-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* The day's extras --------------------------------------------------------- */
+.pp-extras {
+  flex: 1 1 auto;
+  min-height: 0;
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(var(--pp-cols, 3), minmax(0, 1fr));
+  align-content: center;
+  justify-items: center;
+  gap: 8px 6px;
+}
+.pp-extra {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.pp-extra-label {
+  display: block;
+  max-width: 100%;
+  margin-top: 3px;
+  font-family: 'Fredoka', system-ui, sans-serif;
+  font-weight: 600;
+  line-height: 1.08;
+  color: #040812;
+  hyphens: manual;
+  -webkit-hyphens: manual;
+  /* Break only at the soft hyphens in the catalogue, never mid-syllable.
+   * scripts/og-ranzen-packplan.mjs --check fails if a label is too wide. */
+  overflow-wrap: normal;
+}
+/* Typed by the parent: may be one long word, so it may break anywhere. */
+.pp-extra--free .pp-extra-label {
+  overflow-wrap: anywhere;
+}
+
+.pp-extras[data-size='big'] :is(.rs-pic, .pp-draw) {
+  width: 92px;
+  height: 92px;
+}
+.pp-extras[data-size='big'] .pp-extra-label {
+  font-size: 17px;
+}
+/* One or two things on top: the ones the child must not miss, so bigger. */
+.pp-extras[data-count='1'] :is(.rs-pic, .pp-draw),
+.pp-extras[data-count='2'] :is(.rs-pic, .pp-draw) {
+  width: 112px;
+  height: 112px;
+}
+.pp-extras[data-count='1'] .pp-extra-label,
+.pp-extras[data-count='2'] .pp-extra-label {
+  font-size: 19px;
+}
+.pp-extras[data-size='mid'] {
+  gap: 6px 4px;
+}
+.pp-extras[data-size='mid'] :is(.rs-pic, .pp-draw) {
+  width: 60px;
+  height: 60px;
+}
+.pp-extras[data-size='mid'] .pp-extra-label {
+  font-size: 13px;
+}
+.pp-extras[data-size='small'] {
+  gap: 5px 3px;
+}
+.pp-extras[data-size='small'] :is(.rs-pic, .pp-draw) {
+  width: 44px;
+  height: 44px;
+}
+.pp-extras[data-size='small'] .pp-extra-label {
+  margin-top: 1px;
+  font-size: 11px;
+}
+
+/* A free item: an empty box the child draws the thing into. The dashed
+ * line matches the cut lines, so it reads as "fill me in", not as a picture. */
+.pp-draw {
+  display: block;
+  box-sizing: border-box;
+  border: 2px dashed rgba(4, 8, 18, 0.45);
+  border-radius: 14px;
+}
+.pp-extras[data-size='small'] .pp-draw {
+  border-radius: 10px;
+}
+
+/* A day with nothing at all, not even daily items: only a hand note. */
+.pp-extras--none {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pp-empty {
+  margin: 0;
+  font-family: 'Gochi Hand', 'Comic Sans MS', cursive;
+  font-size: 20px;
+  line-height: 1.1;
+  color: #40444d;
+}
+
+/* Note cell ------------------------------------------------------------------ */
+.pp-howto {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+  padding: 14px 8px 14px 26px;
+}
+.pp-note {
+  margin: 0;
+  font-family: 'Gochi Hand', 'Comic Sans MS', cursive;
+  font-size: 27px;
+  line-height: 1.2;
+  color: #040812;
+  hyphens: none;
+  -webkit-hyphens: none;
+}
+.pp-hint {
+  margin: 0;
+  padding-left: 12px;
+  border-left: 3px solid #fdd134;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #40444d;
+}

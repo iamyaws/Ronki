@@ -26,6 +26,7 @@ const AppCheckResult = lazy(() => import('./pages/tools/AppCheckResult'));
 const SchlafensRechner = lazy(() => import('./pages/tools/SchlafensRechner'));
 const FamilienCharter = lazy(() => import('./pages/tools/FamilienCharter'));
 const KonsolenCheck = lazy(() => import('./pages/tools/KonsolenCheck'));
+const RanzenPackplan = lazy(() => import('./pages/tools/RanzenPackplan'));
 // The block library. Internal reference page: noindex, not linked from
 // the navigation or the footer, not in the sitemap, not prerendered.
 const Styleguide = lazy(() => import('./pages/Styleguide'));
@@ -60,6 +61,7 @@ const RatgeberMorgenroutineGrundschulkind = lazy(() => import('./pages/ratgeber/
 const RatgeberElternBereich = lazy(() => import('./pages/ratgeber/ElternBereich'));
 const RatgeberMorgenroutineAdhs = lazy(() => import('./pages/ratgeber/MorgenroutineAdhs'));
 const RatgeberZeitumstellungKinder = lazy(() => import('./pages/ratgeber/ZeitumstellungKinder'));
+const RatgeberRanzenPackenErsteKlasse = lazy(() => import('./pages/ratgeber/RanzenPackenErsteKlasse'));
 const Impressum = lazy(() => import('./pages/Impressum'));
 const Datenschutz = lazy(() => import('./pages/Datenschutz'));
 const AGB = lazy(() => import('./pages/AGB'));
@@ -117,6 +119,7 @@ export function AppRoutes() {
         <Route path="/tools/schlafens-rechner" element={<SchlafensRechner />} />
         <Route path="/tools/familien-charter" element={<FamilienCharter />} />
         <Route path="/tools/konsolen-check" element={<KonsolenCheck />} />
+        <Route path="/tools/ranzen-packplan" element={<RanzenPackplan />} />
         <Route path="/ratgeber" element={<Ratgeber />} />
         <Route path="/ratgeber/was-kinder-apps-machen" element={<RatgeberWasKinderAppsMachen />} />
         <Route path="/ratgeber/morgen-troedeln" element={<RatgeberMorgenTroedeln />} />
@@ -129,6 +132,7 @@ export function AppRoutes() {
         <Route path="/ratgeber/eltern-bereich" element={<RatgeberElternBereich />} />
         <Route path="/ratgeber/morgenroutine-adhs" element={<RatgeberMorgenroutineAdhs />} />
         <Route path="/ratgeber/zeitumstellung-kinder" element={<RatgeberZeitumstellungKinder />} />
+        <Route path="/ratgeber/ranzen-packen-erste-klasse" element={<RatgeberRanzenPackenErsteKlasse />} />
         <Route path="/en" element={<HomeEN />} />
         <Route path="/impressum" element={<Impressum />} />
         <Route path="/datenschutz" element={<Datenschutz />} />
