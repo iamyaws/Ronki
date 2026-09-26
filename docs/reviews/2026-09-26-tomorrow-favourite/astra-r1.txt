@@ -1,0 +1,51 @@
+(node:65724) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[codex] Starting Codex task thread.
+[codex] Thread ready (01a0df3f-f95e-7882-8e40-57dbc9504509).
+[codex] Turn started (01a0df3f-fcff-7681-be20-b5d125cbfbd2).
+[codex] Assistant message captured: I’ll read the brief and its named sources, then return the requested review without changing ...
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content -Li...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content -Li... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content -Li...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content -Li... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content 'do...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content 'do... (exit 0)
+[codex] Assistant message captured: I’m using the Ronki read-only review skill. I’ll trace the picture against trip departure and...
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content HAN...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content HAN... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content src...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content src... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content src...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content src... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content src...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content src... (exit 0)
+[codex] Assistant message captured: The normal day and dream paths select the expected picture. I found an old-save mismatch: the...
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "@' import fs fr...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "@' import fs fr... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command '$targets = @(@{...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command '$targets = @(@{... (exit 0)
+[codex] Assistant message captured: TF-01 | SHOULD | `RonkiPassport.jsx:57`; `mergeState.ts:137` Claim: An old treasure’s favouri...
+[codex] Turn completion inferred after the main thread finished and subagent work drained.
+TF-01 | SHOULD | `RonkiPassport.jsx:57`; `mergeState.ts:137`
+Claim: An old treasure’s favourite can silently move to a different treasure after a two-device merge.
+Why it matters to the reader: Reproduced with two legacy mementos without IDs/timestamps: the child selects shell `m-0`; the remote-first merge inserts a stone before it; `favoriteTreasure` remains `m-0`, now pointing at the stone. Fable identifies unstable keys but understates the consequence.
+Fix: Give legacy mementos stable, merge-safe identities before allowing favourite selection. Test that merging another device’s log preserves the selected object.
+
+TF-02 | SHOULD | `TonightRitual.jsx:148`; `TaskContext.tsx:922`
+Claim: A pending legacy memento makes the hook picture show the wrong next destination.
+Why it matters to the reader: Reproduced at cursor zero: the hook shows **Lichtung**, but receiving a random memento without a trip ID leaves the cursor unchanged, so the next departure goes to **Birkenpfad**. The hook adds one for every pending memento; the receiving logic adds one only for a trip ID.
+Fix: Share the cursor-advance rule between receiving and previewing. Cover legacy pending mementos alongside normal day and dream trips.
+
+TF-03 | SHOULD | `TreasureShelf.jsx:15`; `TreasureReveal.jsx:69`
+Claim: A returning repeat treasure can disappear from the Nest shelf immediately after Ronki promises to put it beside his favourite.
+Why it matters to the reader: After t01–t28, repeat t01 with t02 favourited. The shelf shows t02, t28, t27 because `shelfItems` keeps each trip’s first occurrence before reversing. Fable’s intended deduplication also discards recent-visit ordering.
+Fix: Keep unique treasures, but order the Nest shelf by their latest occurrence before placing the favourite first. Test the first repeated trip.
+
+Normal day and dream destination selection matches departure for consistent current saves. All 28 picture files exist; the error handler removes failed images. Ordinary three-way merges preserve remote-only picks and clears, and simultaneous picks take the local value as Fable describes.
+
+Under PRD §6, the new heart and copy introduce no score, scarcity, guilt or return deadline. The heart represents a reversible personal choice.
+
+Verification: source review and in-memory reproductions using extracted source functions. No files changed. Full tests, browser rendering and audio playback were not run.
+
+**NOT YET: a merge can move the child’s favourite heart onto a different treasure.**
+

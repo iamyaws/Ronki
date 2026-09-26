@@ -45,7 +45,8 @@ describe('TreasureReveal', () => {
   });
 
   it('a repeat trip first says so honestly, then the story', () => {
-    mockState = { catEvo: 20, adventureCount: 14, tripCursor: 16, expedition: exp('t03') };
+    // t03 on the second pass through all 28 trips (cursor 30, 30 % 28 = 2).
+    mockState = { catEvo: 20, adventureCount: 28, tripCursor: 30, expedition: exp('t03') };
     const { getByTestId } = render(<TreasureReveal />);
     expect(getByTestId('treasure-reveal').textContent).toContain(lineText('trip_again_01'));
     expect(VoiceAudio.playLocalized).toHaveBeenCalledWith('trip_again_01', 300);
@@ -71,5 +72,21 @@ describe('TreasureReveal', () => {
     mockState = { catEvo: 3, adventureCount: 0, tripCursor: 0, expedition: e };
     const { getByTestId } = render(<TreasureReveal />);
     expect(getByTestId('treasure-reveal').textContent).toContain('Ein altes Blatt.');
+  });
+  it('with a favourite on the shelf, Ronki says the new treasure goes next to it', () => {
+    mockState = { catEvo: 5, adventureCount: 2, tripCursor: 2, favoriteTreasure: 'trip-t01', expedition: exp('t03') };
+    const { getByText } = render(<TreasureReveal onDone={() => {}} />);
+    VoiceAudio.playLocalized.mockClear();
+    fireEvent.click(getByText('Ins Regal stellen'));
+    expect(VoiceAudio.playLocalized).toHaveBeenCalledWith('fav_next_01', 0);
+    expect(VoiceAudio.playLocalized).not.toHaveBeenCalledWith('treasure_shelf_01', 0);
+  });
+
+  it('without a favourite, the plain shelf line', () => {
+    mockState = { catEvo: 5, adventureCount: 2, tripCursor: 2, expedition: exp('t03') };
+    const { getByText } = render(<TreasureReveal onDone={() => {}} />);
+    VoiceAudio.playLocalized.mockClear();
+    fireEvent.click(getByText('Ins Regal stellen'));
+    expect(VoiceAudio.playLocalized).toHaveBeenCalledWith('treasure_shelf_01', 0);
   });
 });

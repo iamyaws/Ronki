@@ -63,7 +63,10 @@ export default function TreasureReveal({ onDone }) {
   const shelve = () => {
     if (firedRef.current) return;
     firedRef.current = true;
-    VoiceAudio.playLocalized('treasure_shelf_01', 0);
+    // With a favourite on the shelf, Ronki says where the new one goes.
+    const favKey = state?.favoriteTreasure;
+    const newKey = treasure?.trip ? `trip-${treasure.trip.id}` : null;
+    VoiceAudio.playLocalized(favKey && favKey !== newKey ? 'fav_next_01' : 'treasure_shelf_01', 0);
     actions?.receiveTreasure?.();
     onDone?.();
   };

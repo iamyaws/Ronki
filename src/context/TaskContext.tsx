@@ -290,10 +290,13 @@ export interface TaskState {
    *  (Astra FC-08: day keys are UTC, so the key alone can let a second
    *  trip through around UTC midnight). */
   lastTripAt?: string | null;
-  /** Index into TRIPS of the next trip (wraps after 14). Old saves: 0. */
+  /** Index into TRIPS of the next trip (wraps after the last trip). Old saves: 0. */
   tripCursor?: number;
   /** Trip ids whose treasure is on the shelf, in order found. */
   treasuresFound?: string[];
+  /** The shelf key of the treasure the child picked as Ronki's favourite
+   *  (first on the shelf, with a heart), or null (26 Sep 2026). */
+  favoriteTreasure?: string | null;
   /** Highest stage index whose GrowthBeat was shown. Old saves: stage of their catEvo. */
   stageSeen?: number;
   /** Whole days between the previous played day and today (set by the day transition). */
@@ -911,7 +914,7 @@ function openTreasure(prev: TaskState, memento: ExpeditionMemento, tripIdHint?: 
   const log = [...(prev.expeditionLog || []), memento];
   const tripId = memento.tripId || tripIdHint;
   const found = Array.isArray(prev.treasuresFound) ? prev.treasuresFound : [];
-  // A repeat after trip 14 goes to the shelf but adds no new treasure.
+  // A repeat after the last trip goes to the shelf but adds no new treasure.
   const treasuresFound = tripId && !found.includes(tripId) ? [...found, tripId] : found;
   const adventureCount = wholeOr(prev.adventureCount, (prev.expeditionLog || []).length) + 1;
   // Only trips from TRIPS move the cursor; an old random memento does not
@@ -1496,6 +1499,7 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
           lastGapDays: wholeOr((raw as any).lastGapDays, 0),
           greetedDate: typeof (raw as any).greetedDate === 'string' ? (raw as any).greetedDate : null,
           extrasEnabled: (raw as any).extrasEnabled === true,
+          favoriteTreasure: typeof (raw as any).favoriteTreasure === 'string' ? (raw as any).favoriteTreasure : null,
         };
         // One-time migration: reset inflated HP from old economy
         if (!raw._v2_economy_reset) {
@@ -2623,6 +2627,15 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
     setState(prev => (!prev || prev.extrasEnabled === v) ? prev : { ...prev, extrasEnabled: v });
   }, []);
 
+  /** The child picks Ronki's favourite treasure; the same one again takes the heart away. */
+  const setFavoriteTreasure = useCallback((key: string | null) => {
+    setState(prev => {
+      if (!prev) return prev;
+      const next = key && prev.favoriteTreasure !== key ? key : null;
+      return (prev.favoriteTreasure ?? null) === next ? prev : { ...prev, favoriteTreasure: next };
+    });
+  }, []);
+
   /** The load path's day transition, when the day changed while the app stayed open. */
   const checkNewDay = useCallback(() => {
     setState(prev => {
@@ -3274,7 +3287,7 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
   })() : emptyComputed;
 
   return (
-    <TaskContext.Provider value={{ state, computed, actions: { complete, setMood, drinkWater, feedCompanion, petCompanion, playCompanion, collectLoginBonus, completeOnboarding, teachBreath, dismissPendingRitual, setEmojiCode, addFriend, markWinkSeen, recordWinkSent, setCaveStyle, setExpedition, startExpedition, rangerDeparted, rangerArrived, receiveMemento, saveJournal, redeemReward, dismissCelebration, startMission, abandonMission, addHP, claimGameReward, consumeStamina, restoreStamina, equipGear, unequipGear, updateBirthdayEpic, updateFamilyConfig, patchState, completeSpecialQuest, recordViewVisit, spawnEgg, collectEgg, fireCelebration, createQuestLine, updateQuestLine, completeQuestLineDay, archiveQuestLine, logFeeling, claimMintBadge, recordMintGamePlay, syncRonkiMood, pickRonkiSadReaction, practiceSkill, markLearnBannerSeen, markTabUnlockSeen, markTabCoachmarkSeen, completeHabit, addCrystals, spendCrystals, giftCrystalToFreund, plantSeed, placeDecor, moveDecor, removeDecor, witnessPlant, departTrip, arriveTrip, receiveTreasure, setRoutine, setEveningStart, markStageSeen, markGreeted, completeTonight, setExtras, checkNewDay }, loading, celebration, toastTrigger }}>
+    <TaskContext.Provider value={{ state, computed, actions: { complete, setMood, drinkWater, feedCompanion, petCompanion, playCompanion, collectLoginBonus, completeOnboarding, teachBreath, dismissPendingRitual, setEmojiCode, addFriend, markWinkSeen, recordWinkSent, setCaveStyle, setExpedition, startExpedition, rangerDeparted, rangerArrived, receiveMemento, saveJournal, redeemReward, dismissCelebration, startMission, abandonMission, addHP, claimGameReward, consumeStamina, restoreStamina, equipGear, unequipGear, updateBirthdayEpic, updateFamilyConfig, patchState, completeSpecialQuest, recordViewVisit, spawnEgg, collectEgg, fireCelebration, createQuestLine, updateQuestLine, completeQuestLineDay, archiveQuestLine, logFeeling, claimMintBadge, recordMintGamePlay, syncRonkiMood, pickRonkiSadReaction, practiceSkill, markLearnBannerSeen, markTabUnlockSeen, markTabCoachmarkSeen, completeHabit, addCrystals, spendCrystals, giftCrystalToFreund, plantSeed, placeDecor, moveDecor, removeDecor, witnessPlant, departTrip, arriveTrip, receiveTreasure, setRoutine, setEveningStart, markStageSeen, markGreeted, completeTonight, setExtras, setFavoriteTreasure, checkNewDay }, loading, celebration, toastTrigger }}>
       {children}
     </TaskContext.Provider>
   );

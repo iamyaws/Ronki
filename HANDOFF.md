@@ -4,6 +4,34 @@ _Single source of truth: done, in flight, backlog. Update before any /compact an
 
 ---
 
+## Supabase security advisor clean-up (26 September 2026, LIVE)
+
+Marc's ask: close the security advisor findings that predate `profiles_cas`, keep everything the site, the keep-alive job and the card need.
+
+**LIVE since 26 Sep 2026, 21:01 CEST (Marc's go).** Migration `advisor_grants` applied to jdpxfvqaoxmnyvlxikce (recorded as version 20260926190102; repo file `supabase/migrations/20260926000200_advisor_grants.sql`).
+- `app_eval_counts` now runs with the caller's rights (`security_invoker`), public key trimmed to select. Anon already reads every `app_evals` row by policy, so the count is the same (checked: YouTube Kids 1 as owner and as anon). Live App-Check on ronki.de: request 200, page shows "Eine andere Person hat YouTube Kids bisher geprüft."
+- EXECUTE revoked from public, anon and authenticated on `notify_feedback_email()` and `rls_auto_enable()` (trigger helpers; both triggers still enabled) and on `profiles_count()`, `profiles_active_count()` (the gate queries run in the SQL editor as owner, unaffected).
+- Kept for the public key on purpose: `waitlist_count` and `update_waitlist_screener` (website waitlist form; not rendered while `LAUNCH_STATE` is `public-alpha`), `leads_count` (daily keep-alive job), the four card functions.
+- Advisors after: the ERROR is gone. Left by design: 7 anon + 7 authenticated WARNs for the kept functions, 2 INFO (`profiles`, `profile_activity` have RLS and no policies), leaked password protection.
+- `scripts/supabase-smoke.mjs` now expects the public key to be refused on the two profile counters (401). PASS against live.
+
+**Not proven end to end: the feedback email trigger.** A rolled-back test insert into `feedback` as a signed-in user was blocked by the session's auto-mode permission check. Evidence instead: the trigger is enabled, and Postgres 17 checks EXECUTE only when a trigger is created (`trigger.c` line 694; `ExecCallTriggerFunc` has no check; event triggers likewise). Live proof is the next real feedback: the feedback-notify function log or the mail.
+
+**Open for Marc.** Leaked password protection needs the Pro plan. 6 of the 11 old prototype sign-in accounts have passwords; the login screen is bypassed (`src/App.jsx:817`) but Auth still accepts email and password with the public key. Options: turn off email sign-ups (Auth, Providers, Email), or switch the protection on if the keep-alive decision moves the project to Pro anyway.
+
+---
+
+## Fair levers: tomorrow as a picture, shelf favourite (26 September 2026, LIVE)
+
+Marc picked two levers from the concept page (https://claude.ai/artifact/FpZkKEuURtfFaPJtADtDi6): "build tomorrow as a picture and the shelf favourite".
+
+- **Tomorrow as a picture.** The good-night hook ("Als Nächstes flieg ich ...") shows a small drawing of that place; a dream-trip night shows the place Ronki dreams of. 28 place pictures in `public/art/bilderbuch/places/t01..t28.webp` (Higgsfield pass 6, 19.25 credits, prompt shown to Marc first, logged in `docs/design-briefs/2026-09-25-higgsfield-log.md`). A new trip wave needs its place pictures too (the test `src/data/trips.pictures.test.js` fails without them).
+- **The shelf favourite.** In the passport the child opens a treasure and taps the heart; it stands first on the passport shelf and the Nest shelf with a heart; the same heart clears it; Ronki says so, and names it when he shelves the next treasure. State `favoriteTreasure` (a shelf key; only trips and keepsakes with an id or time qualify), action `setFavoriteTreasure`.
+- **Review.** Astra one round, three findings applied (stable favourite keys, one cursor rule for the hook preview and opening via `nextTripCursor`, the Nest shelf by newest find). The browser check found the new field was dropped on load (the loader maps fields one by one: every new state field needs a line there).
+- **LIVE since 26 Sep 2026** (PR 36, merge 61488b3): live bundle `index-BTchD0TL.js` carries the favourite and the hook picture; `art/bilderbuch/places/t01..t28.webp` and the two new voice lines are served; app.ronki.de opens with no console errors.
+
+---
+
 ## Compare-and-swap sync (26 September 2026, LIVE)
 
 Marc's ask: "build the compare-and-swap RPC on Supabase" (point 4 of "Open for Marc" below).
@@ -56,7 +84,7 @@ Marc's ask (25 Sep, late): reduce the features, learn from Finch's onboarding an
 3. Two of your own task asks were flagged by the guardrail reviewer as need-framing ("Allein ist es so still im Zimmer", "sonst werd ich ganz steif"); kept as your lines, your call.
 4. Backend, not done: two devices that both change the same card within the same few seconds are still last-writer-wins, as before this pass. The proper fix is a compare-and-swap RPC (`profile_upsert_if(p_token, p_state, p_expected_updated_at)`), a small Supabase migration plus a client change; worth it before any family uses two devices at once. Also: the `telemetry_events` insert policy is `TO authenticated` while the app never signs in, so client events are correct but may not land.
 5. Known limit: day keys stay UTC app-wide, so the day rolls over at 01:00 or 02:00 local time, not at midnight.
-6. Content runway: 14 trips; a daily child reaches trip 15 after about 2.5 weeks, then trips repeat honestly ("Da war ich schon mal"). The next story wave should land before then.
+6. Content runway: **second wave LIVE 26 Sep** (PR 34, merge 7685305; live bundle `index-DLf6c_aZ.js` with the new trips, `de_trip_story_15..28` served as audio): 28 trips, about four weeks for a daily child. Astra-reviewed (t23 no sun gazing, t28 no worry cue), Harry voice, Whisper 28 of 28. A third wave or a seasonal set should land before week five; Legendär needs 42 adventures. Concept page with the loops, the eight rule layers, the refused patterns and the fair levers: https://claude.ai/artifact/FpZkKEuURtfFaPJtADtDi6
 7. German is the default language until a parent picks English (Ronki's new lines exist only in German). `?onboardingPreview=1` now works only in DEV builds (it reset real saves).
 
 ---

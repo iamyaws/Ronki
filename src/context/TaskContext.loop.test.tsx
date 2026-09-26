@@ -217,17 +217,18 @@ describe('receiveTreasure', () => {
     expect(h.state.adventureCount).toBe(5);
   });
 
-  it('walks all 14 trips, wraps to trip 1, and a repeat adds no new treasure; growth is one stage at most per treasure', async () => {
+  it('walks all trips, wraps to trip 1, and a repeat adds no new treasure; growth is one stage at most per treasure', async () => {
+    const N = TRIPS.length;
     at('2026-09-28T07:10:00');
     const h = await mount(louisToday());
     let day = new Date('2026-09-28T07:10:00');
     const stages: number[] = [stageOf(h.state.catEvo)];
     const evos: number[] = [h.state.catEvo];
-    for (let i = 0; i < 16; i++) {
+    for (let i = 0; i < N + 2; i++) {
       vi.setSystemTime(day);
       await act(async () => { h.actions.checkNewDay(); });
       await act(async () => { h.actions.departTrip('day'); });
-      expect(h.state.expedition.tripId).toBe(TRIPS[i % 14].id);
+      expect(h.state.expedition.tripId).toBe(TRIPS[i % N].id);
       vi.setSystemTime(new Date(day.getTime() + 11 * 3600 * 1000)); // 18:10
       await act(async () => { h.actions.arriveTrip(); });
       await act(async () => { h.actions.receiveTreasure(); });
@@ -235,10 +236,10 @@ describe('receiveTreasure', () => {
       evos.push(h.state.catEvo);
       day = new Date(day.getTime() + 24 * 3600 * 1000);
     }
-    expect(h.state.tripCursor).toBe(16);
+    expect(h.state.tripCursor).toBe(N + 2);
     expect(h.state.treasuresFound).toEqual(TRIPS.map(t => t.id));
-    expect(h.state.adventureCount).toBe(5 + 16);
-    expect(h.state.expeditionLog).toHaveLength(5 + 16);
+    expect(h.state.adventureCount).toBe(5 + N + 2);
+    expect(h.state.expeditionLog).toHaveLength(5 + N + 2);
     for (let i = 1; i < evos.length; i++) {
       expect(evos[i]).toBeGreaterThanOrEqual(evos[i - 1]);
       expect(stages[i] - stages[i - 1]).toBeLessThanOrEqual(1);
@@ -248,6 +249,24 @@ describe('receiveTreasure', () => {
     const evolves = eventsNamed('ronki.evolve');
     expect(evolves.length).toBe(new Set(stages).size - 1);
     expect(evolves[0][1]).toMatchObject({ stage: 2 });
+  });
+
+  it('the child picks a favourite treasure; the same one again takes the heart away; it survives a save', async () => {
+    at('2026-09-28T07:10:00');
+    const h = await mount(louisToday());
+    expect(h.state.favoriteTreasure ?? null).toBeNull();
+    await act(async () => { h.actions.setFavoriteTreasure('trip-t02'); });
+    expect(h.state.favoriteTreasure).toBe('trip-t02');
+    await act(async () => { h.actions.setFavoriteTreasure('trip-t05'); });
+    expect(h.state.favoriteTreasure).toBe('trip-t05');
+    await act(async () => { h.actions.setFavoriteTreasure('trip-t05'); });
+    expect(h.state.favoriteTreasure).toBeNull();
+  });
+
+  it('a saved favourite is still there after the app starts again (found in the browser check)', async () => {
+    at('2026-09-28T07:10:00');
+    const h = await mount(louisToday({ favoriteTreasure: 'trip-t02' }));
+    expect(h.state.favoriteTreasure).toBe('trip-t02');
   });
 
   it('keeps every keepsake: the 61st treasure drops nothing (Astra FC-02)', async () => {
