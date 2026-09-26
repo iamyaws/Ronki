@@ -1,0 +1,620 @@
+/*
+ * Routine sheet, option A (Bilderbuch look, 26 Sep 2026).
+ *
+ * Designed at A4 = 794 x 1123 px (96 dpi). The PDF source route and the
+ * print button on the template pages both print this exact layout. On
+ * screen the sheet is fluid; the container queries at the end scale the
+ * parts down when the preview is narrower than the paper.
+ *
+ * Print-friendly on purpose: white ground, ink outlines, no shadows, the
+ * only fills are the sun sticker, the sky-wash done band and the clip lane.
+ * Colours are literal hex (cobalt #0544B0, sky-wash #B9E3FC, sun #FDD134,
+ * ink #040812) so the sheet never depends on which theme variables the
+ * build keeps.
+ */
+
+.rs-sheet {
+  container-type: inline-size;
+  container-name: rs-sheet;
+  position: relative;
+  box-sizing: border-box;
+  background: #ffffff;
+  color: #040812;
+  font-family: 'Plus Jakarta Sans', 'Be Vietnam Pro', system-ui, sans-serif;
+  font-weight: 500;
+  hyphens: manual;
+  -webkit-hyphens: manual;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+.rs-sheet *,
+.rs-sheet *::before,
+.rs-sheet *::after {
+  box-sizing: border-box;
+}
+
+.rs-page {
+  display: flex;
+  flex-direction: column;
+  padding: 30px 44px 24px;
+}
+
+/* Fixed A4 page. 296 mm, not 297, so rounding never spills a blank page. */
+.rs-sheet--a4 {
+  width: 210mm;
+  height: 296mm;
+  overflow: hidden;
+}
+.rs-sheet--a4 .rs-page {
+  height: 100%;
+}
+
+/* Head ---------------------------------------------------------------- */
+.rs-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.rs-head-text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.rs-wordmark {
+  display: block;
+  margin-bottom: 16px;
+}
+.rs-sticker {
+  display: inline-block;
+  background: #fdd134;
+  color: #040812;
+  font-family: 'Gochi Hand', 'Comic Sans MS', cursive;
+  font-size: 20px;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  padding: 6px 14px 4px;
+  border-radius: 8px;
+  transform: rotate(-3deg);
+}
+.rs-title {
+  font-family: 'Fredoka', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 48px;
+  line-height: 1;
+  letter-spacing: -0.015em;
+  color: #040812;
+  margin: 12px 0 0;
+  text-wrap: balance;
+}
+.rs-title--long {
+  font-size: 38px;
+  line-height: 1.02;
+}
+.rs-desc {
+  max-width: 430px;
+  margin: 10px 0 0;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #40444d;
+}
+.rs-name {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 14px 0 0;
+  font-family: 'Fredoka', system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 17px;
+  line-height: 1.2;
+  color: #040812;
+}
+.rs-name-line {
+  flex: 0 1 230px;
+  height: 1em;
+  border-bottom: 2px dotted #040812;
+}
+
+/* Ronki host ----------------------------------------------------------- */
+.rs-host {
+  position: relative;
+  flex: none;
+  width: 210px;
+  margin: -10px -12px 0 0;
+}
+.rs-host-img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.rs-bubble {
+  position: absolute;
+  top: 4px;
+  right: calc(100% - 26px);
+  width: 172px;
+  margin: 0;
+  padding: 10px 14px;
+  background: #ffffff;
+  border: 2.5px solid #040812;
+  border-radius: 22px;
+  font-family: 'Fredoka', system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 18px;
+  line-height: 1.15;
+  text-align: center;
+  text-wrap: balance;
+}
+.rs-tick {
+  position: absolute;
+  left: -14px;
+  top: 112px;
+  width: 32px;
+  height: 32px;
+  transform: rotate(10deg);
+}
+.rs-host--quiet .rs-tick {
+  left: -30px;
+  top: 40px;
+}
+
+/* Clip note (ADHS) ------------------------------------------------------ */
+.rs-now {
+  margin: 16px 0 0;
+  padding: 9px 14px;
+  border: 2px dashed #0544b0;
+  border-radius: 14px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #20242d;
+}
+
+/* Steps ------------------------------------------------------------------ */
+.rs-steps {
+  list-style: none;
+  margin: 24px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.rs-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 146px;
+  padding: 10px 20px 10px 18px;
+  background: #ffffff;
+  border: 2.5px solid #040812;
+  border-radius: 22px;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+.rs-num {
+  flex: none;
+  width: 20px;
+  font-family: 'Fredoka', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 1;
+  color: #0544b0;
+  text-align: center;
+}
+.rs-pic {
+  flex: none;
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.rs-pic img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.rs-pic-emoji {
+  font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;
+  font-size: 64px;
+  line-height: 1;
+}
+.rs-page--compact .rs-pic-emoji {
+  font-size: 50px;
+}
+.rs-page--big .rs-pic-emoji {
+  font-size: 100px;
+}
+.rs-body {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.rs-label {
+  font-family: 'Fredoka', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 28px;
+  line-height: 1.1;
+  color: #040812;
+}
+.rs-hint {
+  font-size: 14px;
+  line-height: 1.35;
+  color: #40444d;
+}
+.rs-time {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-top: 8px;
+  font-family: 'Fredoka', system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: #5b5f68;
+}
+.rs-time-line {
+  display: inline-block;
+  width: 76px;
+  height: 12px;
+  border-bottom: 2px dotted rgba(4, 8, 18, 0.5);
+}
+.rs-ring {
+  flex: none;
+  margin-left: auto;
+  width: 56px;
+  height: 56px;
+  border: 4px solid #0544b0;
+  border-radius: 50%;
+}
+.rs-clip {
+  flex: none;
+  align-self: stretch;
+  width: 24px;
+  margin: -10px 0 -10px -18px;
+  background: #b9e3fc;
+  border-right: 2px dashed rgba(4, 8, 18, 0.35);
+  border-radius: 19.5px 0 0 19.5px;
+}
+
+/* Five or six steps */
+.rs-page--compact .rs-steps {
+  gap: 11px;
+}
+.rs-page--compact .rs-row {
+  min-height: 94px;
+}
+.rs-page--compact .rs-pic {
+  width: 74px;
+  height: 74px;
+}
+.rs-page--compact .rs-label {
+  font-size: 25px;
+}
+.rs-page--compact .rs-time {
+  margin-top: 4px;
+}
+.rs-page--compact .rs-ring {
+  width: 46px;
+  height: 46px;
+}
+
+/* Toddler: pictures only, bigger everything */
+.rs-page--big .rs-steps {
+  gap: 16px;
+}
+/* Sized so four big rows and the done band fit one A4 page (Astra rep 5). */
+.rs-page--big .rs-row {
+  min-height: 150px;
+  padding-right: 30px;
+}
+.rs-page--big .rs-pic {
+  flex: 1 1 auto;
+  width: auto;
+  height: 128px;
+}
+.rs-page--big .rs-pic img {
+  width: 128px;
+}
+.rs-page--big .rs-ring {
+  margin-left: 0;
+  width: 84px;
+  height: 84px;
+  border-width: 5px;
+}
+
+/* Time bar (ADHS) -------------------------------------------------------- */
+.rs-timebar {
+  margin-top: 18px;
+}
+.rs-timebar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.rs-timebar-label {
+  font-family: 'Fredoka', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  color: #0544b0;
+  white-space: nowrap;
+}
+.rs-timebar-track {
+  flex: 1;
+  height: 16px;
+  background: #b9e3fc;
+  border: 2px solid #040812;
+  border-radius: 999px;
+}
+.rs-timebar-note {
+  margin: 6px 0 0;
+  font-size: 12px;
+  line-height: 1.35;
+  color: #40444d;
+}
+
+/* Done band ---------------------------------------------------------------- */
+.rs-done {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-height: 108px;
+  margin-top: 22px;
+  padding: 0 24px 0 20px;
+  background: #b9e3fc;
+  border-radius: 24px;
+}
+.rs-done-img {
+  flex: none;
+  display: block;
+  width: 112px;
+  height: auto;
+  margin-top: -30px;
+}
+.rs-done-text {
+  min-width: 0;
+}
+.rs-done-title {
+  margin: 0;
+  font-family: 'Fredoka', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 34px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+.rs-done-note {
+  margin: 6px 0 0;
+  font-family: 'Gochi Hand', 'Comic Sans MS', cursive;
+  font-size: 21px;
+  line-height: 1.2;
+}
+
+/* Footer -------------------------------------------------------------------- */
+.rs-foot {
+  margin-top: auto;
+  padding-top: 18px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 11px;
+  line-height: 1.3;
+  color: #40444d;
+}
+.rs-foot-url {
+  font-family: 'Fredoka', system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  color: #0544b0;
+  white-space: nowrap;
+}
+
+/* Print: every sheet is one A4 page ----------------------------------------- */
+@media print {
+  .rs-sheet {
+    width: 210mm;
+    height: 296mm;
+    overflow: hidden;
+    break-inside: avoid;
+  }
+  .rs-page {
+    height: 100%;
+  }
+}
+
+/* Screen previews narrower than the paper ------------------------------------ */
+@container rs-sheet (max-width: 760px) {
+  .rs-page {
+    padding: 26px 28px 20px;
+  }
+  .rs-host {
+    width: 180px;
+  }
+  .rs-bubble {
+    width: 150px;
+    font-size: 16px;
+    right: calc(100% - 22px);
+  }
+  .rs-tick {
+    top: 96px;
+  }
+  .rs-title {
+    font-size: 42px;
+  }
+  .rs-title--long {
+    font-size: 34px;
+  }
+  .rs-page .rs-row {
+    min-height: 124px;
+  }
+  .rs-page .rs-pic {
+    width: 88px;
+    height: 88px;
+  }
+  .rs-page--compact .rs-row {
+    min-height: 90px;
+  }
+  .rs-page--compact .rs-pic {
+    width: 68px;
+    height: 68px;
+  }
+  .rs-page--big .rs-row {
+    min-height: 150px;
+  }
+  .rs-page--big .rs-pic {
+    width: auto;
+    height: 124px;
+  }
+  .rs-page--big .rs-pic img {
+    width: 124px;
+  }
+}
+
+@container rs-sheet (max-width: 520px) {
+  .rs-page {
+    padding: 18px 16px 14px;
+  }
+  .rs-head {
+    gap: 8px;
+  }
+  .rs-wordmark {
+    width: auto;
+    height: 20px;
+    margin-bottom: 10px;
+  }
+  .rs-sticker {
+    font-size: 15px;
+    padding: 5px 10px 3px;
+  }
+  .rs-title {
+    font-size: 28px;
+    margin-top: 10px;
+  }
+  .rs-title--long {
+    font-size: 24px;
+  }
+  .rs-desc {
+    font-size: 13px;
+  }
+  .rs-name {
+    font-size: 14px;
+    margin-top: 10px;
+  }
+  .rs-name-line {
+    flex: 1 1 40px;
+  }
+  .rs-host {
+    width: 104px;
+    margin: 0;
+  }
+  /* No room beside him: the bubble sits under Ronki instead. */
+  .rs-bubble {
+    position: relative;
+    top: auto;
+    right: auto;
+    width: auto;
+    margin-top: -2px;
+    padding: 6px 8px;
+    border-width: 2px;
+    border-radius: 14px;
+    font-size: 12.5px;
+  }
+  .rs-tick {
+    left: -10px;
+    top: 58px;
+    width: 22px;
+    height: 22px;
+  }
+  .rs-host--quiet .rs-tick {
+    left: -16px;
+    top: 20px;
+  }
+  .rs-now {
+    font-size: 12px;
+    padding: 8px 10px;
+  }
+  .rs-page .rs-steps {
+    gap: 10px;
+    margin-top: 18px;
+  }
+  .rs-page .rs-row {
+    min-height: 72px;
+    gap: 10px;
+    padding: 8px 12px 8px 10px;
+    border-width: 2px;
+    border-radius: 18px;
+  }
+  .rs-num {
+    width: 12px;
+    font-size: 16px;
+  }
+  .rs-page .rs-pic {
+    width: 52px;
+    height: 52px;
+  }
+  .rs-page .rs-label {
+    font-size: 19px;
+  }
+  .rs-hint {
+    font-size: 13px;
+  }
+  .rs-page .rs-ring {
+    width: 34px;
+    height: 34px;
+    border-width: 3px;
+  }
+  .rs-clip {
+    width: 14px;
+    margin: -8px 0 -8px -10px;
+    border-radius: 16px 0 0 16px;
+  }
+  .rs-page--compact .rs-row {
+    min-height: 66px;
+  }
+  .rs-page--compact .rs-pic {
+    width: 46px;
+    height: 46px;
+  }
+  .rs-page--compact .rs-label {
+    font-size: 18px;
+  }
+  .rs-page--big .rs-row {
+    min-height: 108px;
+    padding-right: 16px;
+  }
+  .rs-page--big .rs-pic {
+    width: auto;
+    height: 88px;
+  }
+  .rs-page--big .rs-pic img {
+    width: 88px;
+  }
+  .rs-page--big .rs-ring {
+    width: 58px;
+    height: 58px;
+    border-width: 4px;
+  }
+  .rs-timebar-label {
+    font-size: 13px;
+  }
+  .rs-done {
+    gap: 10px;
+    min-height: 78px;
+    margin-top: 18px;
+    padding: 10px 14px 10px 10px;
+  }
+  .rs-done-img {
+    width: 70px;
+    margin-top: -22px;
+  }
+  .rs-done-title {
+    font-size: 24px;
+  }
+  .rs-done-note {
+    font-size: 16px;
+  }
+  .rs-foot {
+    flex-direction: column;
+    gap: 2px;
+  }
+}

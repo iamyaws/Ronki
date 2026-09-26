@@ -1,6 +1,7 @@
 import { RoutinePrintSheet } from '../components/RoutinePrintSheet';
 import { VorlageDownload } from '../components/VorlageDownload';
 import { GuideFaq, VorlageGuide } from '../components/VorlageGuide';
+import { VORLAGE_PRINT_ADHS } from './print/VorlagePrint';
 
 const FAQ: GuideFaq[] = [
   {
@@ -33,7 +34,8 @@ const FAQ: GuideFaq[] = [
  * is running right now, and the child moves it down itself.
  *
  * The downloadable PDF (/print/vorlage-adhs) carries the same six steps
- * plus the clip lane and the time bar, which this screen preview leaves out.
+ * and clip lane plus the clip note and the time bar, which this screen
+ * preview leaves out.
  */
 export default function VorlageAdhs() {
   return (
@@ -57,18 +59,20 @@ export default function VorlageAdhs() {
           printHref="/print/vorlage-adhs"
         />
       }
+      ronki={VORLAGE_PRINT_ADHS.ronki}
+      clipLane
       steps={[
-        { icon: '💡', label: 'Licht', hint: 'Rollo hoch, ein Schluck Wasser.' },
-        { icon: '🚽', label: 'Klo', hint: 'Und Hände waschen.' },
-        { icon: '👕', label: 'Anziehen', hint: 'Liegt schon von gestern bereit.' },
-        { icon: '🥣', label: 'Frühstück', hint: 'Am Tisch, in Ruhe.' },
-        { icon: '🪥', label: 'Zähne', hint: 'Immer nach dem Essen.' },
-        { icon: '🎒', label: 'Ranzen', hint: 'Steht an der Tür, Schuhe an.' },
+        { img: 'wake.webp', icon: '💡', label: 'Aufwachen', hint: 'Rollo hoch, ein Schluck Wasser.' },
+        { img: 'toilet.webp', icon: '🚽', label: 'Klo', hint: 'Und Hände waschen.' },
+        { img: 'shirt.webp', icon: '👕', label: 'Anziehen', hint: 'Liegt schon von gestern bereit.' },
+        { img: 'plate.webp', icon: '🥣', label: 'Frühstück', hint: 'Am Tisch, in Ruhe.' },
+        { img: 'toothbrush.webp', icon: '🪥', label: 'Zähne', hint: 'Immer nach dem Essen.' },
+        { img: 'bag.webp', icon: '🎒', label: 'Ranzen', hint: 'Steht an der Tür, Schuhe an.' },
       ]}
     >
       <VorlageGuide
         previewSrc="/vorlagen/previews/adhs.png"
-        previewAlt="Das PDF der ADHS-Vorlage Mein Morgen: sechs Schritte mit je einem Bild und einem Wort (Licht, Klo, Anziehen, Frühstück, Zähne, Ranzen), ein Rand für die Wäscheklammer, Kästchen zum Abhaken und ein Zeitbalken ohne Uhrzeit."
+        previewAlt="Das PDF der ADHS-Vorlage Mein Morgen: sechs Schritte mit je einem Bild und einem Wort (Aufwachen, Klo, Anziehen, Frühstück, Zähne, Ranzen), ein Rand für die Wäscheklammer, Kreise zum Ausmalen, oben Ronki, und ein Zeitbalken ohne Uhrzeit."
         previewCaption="So sieht das PDF aus. Eine Seite A4, mit Rand für die Klammer."
         faq={FAQ}
       />
