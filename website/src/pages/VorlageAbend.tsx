@@ -99,9 +99,8 @@ export default function VorlageAbend() {
                   Zeit ein, als du glaubst zu brauchen.
                 </p>
                 <p>
-                  Am Anfang gehst du noch mit und zeigst aufs Blatt, statt zu erklären. Bleibt
-                  die Reihenfolge jeden Abend gleich, muss sie nicht jeden Abend neu verhandelt
-                  werden.
+                  Am Anfang gehst du noch mit und zeigst aufs Blatt, statt zu erklären. Hilf
+                  dort, wo dein Kind noch Hilfe braucht, und lass es den Rest selbst machen.
                 </p>
               </>
             ),

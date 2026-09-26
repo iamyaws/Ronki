@@ -96,7 +96,7 @@ export default function VorlageMorgen() {
                   Am Anfang gehst du noch mit. Statt zu erklären, zeigst du aufs Blatt: Was ist
                   als Nächstes dran? In dieser Zeit dauert der Morgen oft länger als vorher. Das
                   ist normal. Hilf dort, wo dein Kind noch Hilfe braucht, und lass es den Rest
-                  selbst machen. Wie lange das dauert, ist bei jedem Kind anders.
+                  selbst machen.
                 </p>
               </>
             ),
