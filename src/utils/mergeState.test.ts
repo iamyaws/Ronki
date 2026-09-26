@@ -156,6 +156,52 @@ describe('mergeStates', () => {
     expect(m.onboardingDate).toBe('2026-09-27');
   });
 
+  it('a trip done and back while offline beats the card that still has Ronki away on it (Astra CAS-03)', () => {
+    const b = { ...base(), adventureCount: 2, expedition: { state: 'home', biome: 'morgenwald' } };
+    const local = { ...b, adventureCount: 3, tripCursor: 3, treasuresFound: ['t01', 't02', 't03'], expedition: { state: 'home', biome: 'morgenwald' } };
+    const remote = { ...b, expedition: { state: 'away', biome: 'morgenwald', tripId: 't03' } };
+    const m = mergeStates(b, local, remote) as any;
+    expect(m.adventureCount).toBe(3);
+    expect(m.expedition.state).toBe('home');
+  });
+
+  it('a task ticked on both devices on a new day counts once, even when the base is from yesterday (Astra CAS-04)', () => {
+    const b = { ...base(), lastDate: '2026-09-27', hp: 0, totalTasksDone: 0, totalQuestCompletions: { s_wake: 4 }, quests: [q('s_wake', true, { xp: 10 })] };
+    const today = [q('s_wake', true, { xp: 10 }), q('s_breakfast', false, { xp: 10 })];
+    const a = { ...b, lastDate: '2026-09-28', hp: 10, totalTasksDone: 1, totalQuestCompletions: { s_wake: 5 }, quests: today };
+    const m = mergeStates(b, a, { ...a }) as any;
+    expect(m.hp).toBe(10);
+    expect(m.totalTasksDone).toBe(1);
+    expect(m.totalQuestCompletions).toEqual({ s_wake: 5 });
+  });
+
+  it('the per-task count map stays a map and adds up both devices (verifier F1)', () => {
+    const b = { ...base(), hp: 0, totalTasksDone: 0, totalQuestCompletions: { s_wake: 3, s_breakfast: 2, s_teeth_am: 29 }, quests: [q('s_wake', false, { xp: 10 }), q('s_breakfast', false, { xp: 10 })] };
+    const a = { ...b, hp: 10, totalTasksDone: 1, totalQuestCompletions: { ...b.totalQuestCompletions, s_wake: 4 }, quests: [q('s_wake', true, { xp: 10 }), q('s_breakfast', false, { xp: 10 })] };
+    const c = { ...b, hp: 10, totalTasksDone: 1, totalQuestCompletions: { ...b.totalQuestCompletions, s_breakfast: 3 }, quests: [q('s_wake', false, { xp: 10 }), q('s_breakfast', true, { xp: 10 })] };
+    const m = mergeStates(b, a, c) as any;
+    expect(m.totalQuestCompletions).toEqual({ s_wake: 4, s_breakfast: 3, s_teeth_am: 29 });
+    expect(m.totalTasksDone).toBe(2);
+  });
+
+  it('two devices that both ran the same trip on the same day keep one keepsake', () => {
+    const b = base();
+    const a = { ...b, adventureCount: 3, expeditionLog: [...b.expeditionLog, { id: 'mA', tripId: 't03', ts: '2026-09-28T16:00:00.000Z' }] };
+    const c = { ...b, adventureCount: 3, expeditionLog: [...b.expeditionLog, { id: 'mB', tripId: 't03', ts: '2026-09-28T16:02:00.000Z' }] };
+    const m = mergeStates(b, a, c) as any;
+    expect(m.expeditionLog.filter((e: any) => e.tripId === 't03')).toHaveLength(1);
+    expect(m.adventureCount).toBe(3);
+  });
+
+  it('habits ticked and games played on either device all stay', () => {
+    const b = { ...base(), dailyHabits: {}, gamesPlayedEver: ['memory'] };
+    const a = { ...b, dailyHabits: { vitamin: true }, gamesPlayedEver: ['memory', 'puzzle'] };
+    const c = { ...b, dailyHabits: { liam: true }, gamesPlayedEver: ['memory', 'sort'] };
+    const m = mergeStates(b, a, c) as any;
+    expect(m.dailyHabits).toEqual({ vitamin: true, liam: true });
+    expect([...m.gamesPlayedEver].sort()).toEqual(['memory', 'puzzle', 'sort']);
+  });
+
   it('is a no-op when nothing differs', () => {
     const b = base();
     expect(jsonEqual(mergeStates(b, b, b), b)).toBe(true);

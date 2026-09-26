@@ -79,9 +79,25 @@ function orBool(_b: Json, l: Json, r: Json): Json {
 
 /** A spendable number: both devices' changes add up (Sterne earned on one, spent on the other). */
 function deltaNum(b: Json, l: Json, r: Json): Json {
+  // Only numbers add up; anything else stays this device's value.
+  if ([b, l, r].some(v => v !== undefined && v !== null && typeof v !== 'number')) return l ?? r;
   // Without a common ancestor the two balances cannot be added up: keep the larger.
   if (b === undefined || b === null) return Math.max(num(l), num(r));
   return Math.max(0, num(b) + (num(l) - num(b)) + (num(r) - num(b)));
+}
+
+/** A map of counts per id (totalQuestCompletions): each id adds up both devices' changes. */
+function deltaMap(b: Json, l: Json, r: Json): Json {
+  const isMap = (v: Json) => !!v && typeof v === 'object' && !Array.isArray(v);
+  if (!isMap(l) || !isMap(r)) return isMap(l) ? l : r;
+  const bo = (isMap(b) ? b : null) as Obj | null;
+  const lo = l as Obj;
+  const ro = r as Obj;
+  const out: Obj = {};
+  for (const k of new Set([...Object.keys(ro), ...Object.keys(lo)])) {
+    out[k] = bo ? deltaNum(bo[k] ?? 0, lo[k] ?? 0, ro[k] ?? 0) : Math.max(num(lo[k]), num(ro[k]));
+  }
+  return out;
 }
 
 /** Union of two string lists, keeping first-seen order (remote first). */
@@ -110,6 +126,28 @@ function unionById(key: string) {
     if (items.every(x => ts(x))) items.sort((x, y) => (ts(x) < ts(y) ? -1 : ts(x) > ts(y) ? 1 : 0));
     return items;
   };
+}
+
+/** Ronki's keepsakes: union by id, and one entry per trip per day (two devices
+ *  that both ran the same trip keep one keepsake; there is one trip a day). */
+function keepsakeLog(b: Json, l: Json, r: Json): Json {
+  const items = unionById('id')(b, l, r) as Json[];
+  const seen = new Set<string>();
+  return items.filter(x => {
+    const o = (x && typeof x === 'object' ? x : {}) as Obj;
+    const trip = str(o.tripId);
+    const day = str(o.ts).slice(0, 10);
+    if (!trip || !day) return true;
+    const k = `${trip}|${day}`;
+    if (seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
+}
+
+/** This client's recent write ids (compare-and-swap sync): a short union. */
+function recentIds(b: Json, l: Json, r: Json): Json {
+  return (unionStrings(b, l, r) as string[]).slice(-20);
 }
 
 /** Shallow three-way merge of a nested object (familyConfig, maps of counts). */
@@ -182,16 +220,20 @@ const RULES: Record<string, Rule> = {
   catEvo: maxNum,
   stageSeen: maxNum,
   totalTasksDone: deltaNum,
-  totalQuestCompletions: deltaNum,
+  totalQuestCompletions: deltaMap,
   xp: deltaNum,
-  expeditionLog: unionById('id'),
+  expeditionLog: keepsakeLog,
   treasuresFound: unionStrings,
   micropediaDiscovered: unionStrings,
   tabUnlocksSeen: unionStrings,
   tabCoachmarksSeen: unionStrings,
   completedSpecialQuests: unionStrings,
   unlockedBadges: unionStrings,
+  gamesPlayedEver: unionStrings,
+  mintBadgesEarned: unionStrings,
   journalHistory: unionById('date'),
+  dailyHabits: nested3,
+  syncWrites: recentIds,
   // Spendable.
   hp: deltaNum,
   // Dates.
@@ -227,15 +269,19 @@ const RULES: Record<string, Rule> = {
  */
 /** Numbers where both devices' changes add up, even when they land on the same value. */
 const DELTA_KEYS = new Set(['hp', 'totalTasksDone', 'totalQuestCompletions', 'xp']);
+/** Fields tied to others (the trip state follows adventureCount): always decided by
+ *  their rule, never by "only one side changed" (Astra CAS-03). */
+const ALWAYS_RULE = new Set(['expedition']);
 
-/** Tasks ticked on both devices since the base (same day): counted once, not twice. */
+/** Tasks ticked on both devices on the same day since the base: counted once, not
+ *  twice. A base from an earlier day had none of today's ticks (Astra CAS-04). */
 function overlapDone(b: Obj, l: Obj, r: Obj): Obj[] {
-  const day = str(b.lastDate);
-  if (!day || str(l.lastDate) !== day || str(r.lastDate) !== day) return [];
+  const day = str(l.lastDate);
+  if (!day || str(r.lastDate) !== day) return [];
   const list = (x: Json) => (Array.isArray(x) ? (x as Obj[]) : []);
-  const baseUndone = new Set(list(b.quests).filter(q => q && q.done !== true).map(q => String(q.id)));
+  const baseDone = new Set(str(b.lastDate) === day ? list(b.quests).filter(q => q && q.done === true).map(q => String(q.id)) : []);
   const lDone = new Set(list(l.quests).filter(q => q && q.done === true).map(q => String(q.id)));
-  return list(r.quests).filter(q => q && q.done === true && baseUndone.has(String(q.id)) && lDone.has(String(q.id)));
+  return list(r.quests).filter(q => q && q.done === true && !baseDone.has(String(q.id)) && lDone.has(String(q.id)));
 }
 
 export function mergeStates<T extends Obj>(base: T | null, local: T, remote: T): T {
@@ -249,11 +295,12 @@ export function mergeStates<T extends Obj>(base: T | null, local: T, remote: T):
     // Both devices added to a balance or a task counter: add both changes up,
     // even when they happen to land on the same number.
     if (b && DELTA_KEYS.has(key) && !jsonEqual(l[key], b[key]) && !jsonEqual(r[key], b[key])) {
-      out[key] = deltaNum(b[key], l[key], r[key]);
+      out[key] = (RULES[key] || deltaNum)(b[key], l[key], r[key], ctx);
       deltaMerged.add(key);
       continue;
     }
     if (jsonEqual(l[key], r[key])) continue;
+    if (ALWAYS_RULE.has(key)) { out[key] = RULES[key](b ? b[key] : undefined, l[key], r[key], ctx); continue; }
     // A field only this device has (the card never had it): keep it.
     if (r[key] === undefined) { out[key] = l[key]; continue; }
     if (b) {
@@ -273,7 +320,11 @@ export function mergeStates<T extends Obj>(base: T | null, local: T, remote: T):
     if (twice.length) {
       const pts = twice.reduce((sum, q) => sum + num(q.xp), 0);
       if (deltaMerged.has('totalTasksDone')) out.totalTasksDone = Math.max(0, num(out.totalTasksDone) - twice.length);
-      if (deltaMerged.has('totalQuestCompletions')) out.totalQuestCompletions = Math.max(0, num(out.totalQuestCompletions) - twice.length);
+      if (deltaMerged.has('totalQuestCompletions') && out.totalQuestCompletions && typeof out.totalQuestCompletions === 'object') {
+        const m = { ...(out.totalQuestCompletions as Obj) };
+        for (const q of twice) { const id = String(q.id); if (id in m) m[id] = Math.max(0, num(m[id]) - 1); }
+        out.totalQuestCompletions = m;
+      }
       if (deltaMerged.has('hp')) out.hp = Math.max(0, num(out.hp) - pts);
       if (deltaMerged.has('xp')) out.xp = Math.max(0, num(out.xp) - pts);
     }

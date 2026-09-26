@@ -134,7 +134,7 @@ describe('storage cloud sync by token', () => {
     const w = await storage.cloudSaveByToken(TOKEN, state);
 
     expect(w.status).toBe('saved');
-    expect(rpcMock).toHaveBeenCalledWith('profile_upsert_if', expect.objectContaining({ p_token: TOKEN, p_state: state }));
+    expect(rpcMock).toHaveBeenCalledWith('profile_upsert_if', expect.objectContaining({ p_token: TOKEN, p_state: expect.objectContaining(state) }));
   });
 
   it('swallows a failing write so local storage stays the fallback', async () => {
@@ -212,7 +212,7 @@ describe('storage syncLoadByToken with a website card seed', () => {
     const result = await storage.syncLoadByToken(TOKEN);
 
     expect(result.familyConfig.childName).toBe('Louis');
-    expect(rpcMock).toHaveBeenCalledWith('profile_upsert_if', expect.objectContaining({ p_token: TOKEN, p_state: local }));
+    expect(rpcMock).toHaveBeenCalledWith('profile_upsert_if', expect.objectContaining({ p_token: TOKEN, p_state: expect.objectContaining(local) }));
   });
 });
 
@@ -284,7 +284,7 @@ describe('storage syncLoadByToken sibling guard', () => {
     const result = await storage.syncLoadByToken(CARD_A);
 
     expect(result.familyConfig.childName).toBe('Louis');
-    expect(rpcMock).toHaveBeenCalledWith('profile_upsert_if', expect.objectContaining({ p_token: CARD_A, p_state: childA }));
+    expect(rpcMock).toHaveBeenCalledWith('profile_upsert_if', expect.objectContaining({ p_token: CARD_A, p_state: expect.objectContaining(childA) }));
     expect(localStorage.getItem('ronki_local_owner')).toBe(CARD_A);
   });
 });
@@ -413,7 +413,7 @@ describe('storage.cloudSaveByToken compare-and-swap', () => {
       : { data: { rev: 1 }, error: null }));
     const w = await storage.cloudSaveByToken(T4, { a: 1 });
     expect(w.status).toBe('saved');
-    expect(rpcMock).toHaveBeenCalledWith('profile_upsert', { p_token: T4, p_state: { a: 1 } });
+    expect(rpcMock).toHaveBeenCalledWith('profile_upsert', { p_token: T4, p_state: expect.objectContaining({ a: 1 }) });
   });
 });
 

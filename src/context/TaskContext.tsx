@@ -1635,13 +1635,17 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
         const raw = await storage.load() as GameState | null;
         const merged = { ...(raw || {}), ...state } as GameState;
         const written = await storage.cloudSaveByToken(activeToken, merged);
-        // Another device wrote first and its progress was merged into the
-        // card (compare-and-swap, 26 Sep 2026). Show it: keep the merged
-        // state locally, stop this page from writing its older copy, and
-        // reload onto the merged card. Nothing of either device is lost.
-        if (written?.status === 'merged' && written.changed && written.state) {
-          try { await storage.save(written.state); } catch { /* local save is best effort */ }
-          storage.freezeWrites();
+        // The card now also holds another device's progress (compare-and-
+        // swap, 26 Sep 2026). This page's later writes stay safe: storage
+        // applies them onto the card. To show both, keep this page's newest
+        // state locally (taps made while the write was out included) and
+        // reload: the next load applies it onto the card (review round 1,
+        // CAS-01 and CAS-02).
+        if (written?.status === 'merged' && written.changed) {
+          try {
+            const now = await storage.load() as GameState | null;
+            await storage.save({ ...(now || {}), ...(stateRef.current || state) } as GameState);
+          } catch { /* local save is best effort */ }
           try { window.location.reload(); } catch { /* ignore */ }
         }
       }, 1500);

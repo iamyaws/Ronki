@@ -189,17 +189,26 @@ describe('FC-01: nothing is written to the card before a cloud read reached it',
 });
 
 describe("compare-and-swap: a save that merged another device's progress", () => {
-  it('keeps the merged card locally, stops writing the older copy and reloads onto it', async () => {
+  it("keeps this page's newest state locally, a tap made while the write was out included, and reloads; nothing freezes (CAS-01, CAS-02)", async () => {
     at('2026-09-28T07:10:00');
     const h = await mount(louisToday());
     await drainSaves();
-    const mergedCard = { ...louisToday(), totalTasksDone: 99, companionName: 'Glut' };
-    upsert.mockResolvedValueOnce({ status: 'merged', changed: true, state: mergedCard });
+    (storage.freezeWrites as unknown as ReturnType<typeof vi.fn>).mockClear();
+    let answer!: (v: unknown) => void;
+    upsert.mockImplementationOnce(() => new Promise(res => { answer = res; }));
     await act(async () => { h.actions.complete('s_wash'); });
-    await act(async () => { vi.advanceTimersByTime(2000); });
+    await act(async () => { vi.advanceTimersByTime(2000); }); // the write goes out
+    await act(async () => { h.actions.complete('s_teeth_am'); }); // a tap while it is out
+    const mergedCard = { ...louisToday(), totalTasksDone: 99, companionName: 'Glut' };
+    await act(async () => { answer({ status: 'merged', changed: true, state: mergedCard }); });
     await settle();
-    expect(localSave).toHaveBeenCalledWith(mergedCard);
-    expect(storage.freezeWrites).toHaveBeenCalled();
+    const last = localSave.mock.calls[localSave.mock.calls.length - 1]?.[0];
+    const done = (id: string) => last.quests.find((q: any) => q.id === id)?.done;
+    expect(done('s_wash')).toBe(true);
+    expect(done('s_teeth_am')).toBe(true);
+    // The other device's progress comes back through the next load, not by overwriting this page.
+    expect(last.companionName).not.toBe('Glut');
+    expect(storage.freezeWrites).not.toHaveBeenCalled();
     expect(reload).toHaveBeenCalledTimes(1);
   });
 
