@@ -47,10 +47,10 @@ export default function ToolsHub() {
               Rücken freihalten.
             </h1>
             <p className="mt-6 text-base sm:text-lg text-ink/75 max-w-2xl leading-relaxed">
-              Du bewertest, wir geben dir den Rahmen. Kleine Werkzeuge für
-              die Momente, in denen du als Elternteil eine digitale
-              Entscheidung für dein Kind triffst. Kostenlos, ohne
-              Anmeldung, ohne Cookies.
+              Du entscheidest, wir geben dir den Rahmen. Kleine Werkzeuge
+              für den Familienalltag: vom Ranzen über den Nachmittag bis zur
+              Frage, welche App passt. Kostenlos, ohne Anmeldung, ohne
+              Cookies.
             </p>
           </motion.div>
         </div>

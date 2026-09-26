@@ -125,7 +125,7 @@ function DayColumn({ day, unfit }: { day: SheetDay; unfit: boolean }) {
         <>
           {day.end && (
             <div className="np-block" data-block="end">
-              <TaskPicture img="backpack.webp" />
+              <TaskPicture img="school.webp" />
               <span className="np-label">Schule aus</span>
               <span className="np-time">{day.end}</span>
             </div>

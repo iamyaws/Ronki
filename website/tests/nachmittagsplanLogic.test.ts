@@ -104,7 +104,7 @@ describe('Nachmittagsplan catalogue', () => {
       ['Eigener Termin', null],
     ]);
     for (const kind of APPOINTMENT_KINDS) if (kind.img) expect(TASK_ART.has(kind.img), kind.img).toBe(true);
-    for (const img of ['plate.webp', 'water.webp', 'move.webp', 'homework.webp', 'backpack.webp']) {
+    for (const img of ['plate.webp', 'water.webp', 'move.webp', 'homework.webp', 'school.webp']) {
       expect(TASK_ART.has(img), img).toBe(true);
     }
   });

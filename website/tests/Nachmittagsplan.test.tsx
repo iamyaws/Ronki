@@ -92,7 +92,7 @@ describe('Nachmittagsplan sheet', () => {
     expect(mo.textContent).toContain('Sport');
     expect(mo.textContent).toContain('16:00 bis 17:00');
     expect(pictures(mo)).toEqual([
-      '/art/bilderbuch/tasks/backpack.webp',
+      '/art/bilderbuch/tasks/school.webp',
       '/art/bilderbuch/tasks/plate.webp',
       '/art/bilderbuch/tasks/water.webp',
       '/art/bilderbuch/tasks/move.webp',
