@@ -85,8 +85,10 @@ Supersedes the "Printables redesign" and "Next three tools" paragraphs in the 25
 - PR 26 `art/light-switch`: light pictures (bulb big, switch small); evening step 4 "Licht aus", ADHS step 1 "Licht an". `scripts/cut-task-sheet.py` cuts Higgsfield sheets (`--grid CxR`; a closed region is background only if it follows the measured checker grid and holds both greys).
 - Earlier the same night: PRs 15, 16, 19 (see the 25 Sep section).
 
+**Done later that morning:**
+- PR 27 `tools/ranzen-packplan`: **MERGED 26 Sep, 08:21 UTC.** Tool `/tools/ranzen-packplan` (plan only in the URL, no names, three packing modes without deadlines, one A4 page with five day cards; empty days show the daily items, free items get a box the child draws into, Back restores the plan) and the article `/ratgeber/ranzen-packen-erste-klasse`. Astra rep 6, two rounds. Live: both routes 200 with crawler titles, in the sitemap, share picture served, new code in the live chunk. Open to Marc: the Trinkflasche picture is a water glass (bottle needs the next art batch), and Astra would change the tool intro line "Dein Kind schaut auf die Karte, nicht zu dir." (Fable keeps it).
+
 **In flight:**
-- PR 27 `tools/ranzen-packplan` (worktree `C:\Users\öööö\ronki-packplan`): tool `/tools/ranzen-packplan` (plan only in the URL, no names, three packing modes without deadlines, one A4 page with five day cards) and the article `/ratgeber/ranzen-packen-erste-klasse`. Astra rep 6 round 1 fixed in 5637c3d (empty days show the daily items, free items get a box to draw in, honest link wording, Back restores the plan); round 2 running. Merge when Astra is happy, then check live: tool 200 with crawler title, sitemap, `og-tool-ranzen-packplan.jpg`, article route.
 - PR 17 (Umami, draft): waits for Marc's Umami signup (EU) and website id.
 - PR 20 (Brevo double opt-in, draft, stacked on 17): waits for Marc's Brevo account, DKIM at GoDaddy (DMARC is p=quarantine) and the key in `.env.local`.
 
