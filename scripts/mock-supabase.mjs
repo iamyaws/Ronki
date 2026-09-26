@@ -32,7 +32,7 @@
  *   views    app_eval_counts (app_name, n), computed on read
  *   rpc      waitlist_count, update_waitlist_screener, leads_count,
  *            profiles_count, profiles_active_count, profile_get,
- *            profile_upsert, profile_delete
+ *            profile_upsert, profile_upsert_if, profile_delete
  */
 
 import http from 'node:http';
@@ -652,7 +652,7 @@ const RPC = {
     if (!row) return { status: 200, body: null };
     return {
       status: 200,
-      body: { state: row.state ?? null, updated_at: row.updated_at ?? row.created_at ?? nowIso() },
+      body: { state: row.state ?? null, updated_at: row.updated_at ?? row.created_at ?? nowIso(), rev: row.rev ?? 0 },
     };
   },
 
@@ -664,6 +664,7 @@ const RPC = {
     const state = args.p_state ?? args.state ?? {};
     const updatedAt = nowIso();
     const index = store.profiles.findIndex((r) => r.token === token);
+    let rev = 1;
     if (index === -1) {
       store.profiles.push({
         token,
@@ -671,18 +672,47 @@ const RPC = {
         created_at: updatedAt,
         updated_at: updatedAt,
         last_active_at: updatedAt,
+        rev,
       });
     } else {
+      rev = (store.profiles[index].rev ?? 0) + 1;
       store.profiles[index] = {
         ...store.profiles[index],
         state,
         updated_at: updatedAt,
         last_active_at: updatedAt,
+        rev,
       };
     }
     recordActivity(token);
     saveState();
-    return { status: 200, body: { updated_at: updatedAt } };
+    return { status: 200, body: { updated_at: updatedAt, rev } };
+  },
+
+  // Compare-and-swap write, same contract as the SQL function in
+  // supabase/migrations/20260926000100_profiles_cas.sql.
+  profile_upsert_if(args) {
+    const token = String(args.p_token ?? args.token ?? '');
+    if (!TOKEN_RE.test(token)) {
+      return { status: 400, error: { code: 'P0001', message: 'invalid token' } };
+    }
+    const state = args.p_state ?? {};
+    const expected = args.p_expected_rev === undefined ? null : args.p_expected_rev;
+    const updatedAt = nowIso();
+    const index = store.profiles.findIndex((r) => r.token === token);
+    const row = index === -1 ? null : store.profiles[index];
+    const current = row ? (row.rev ?? 0) : null;
+    const ok = expected === null ? row === null : (row !== null && current === Number(expected));
+    if (ok) {
+      const rev = row ? current + 1 : 1;
+      const next = { ...(row || { token, created_at: updatedAt }), state, updated_at: updatedAt, last_active_at: updatedAt, rev };
+      if (index === -1) store.profiles.push(next); else store.profiles[index] = next;
+      recordActivity(token);
+      saveState();
+      return { status: 200, body: { ok: true, rev, updated_at: updatedAt } };
+    }
+    if (!row) return { status: 200, body: { ok: false, rev: null, updated_at: null, state: null } };
+    return { status: 200, body: { ok: false, rev: current, updated_at: row.updated_at ?? null, state: row.state ?? null } };
   },
 
   profile_delete(args) {

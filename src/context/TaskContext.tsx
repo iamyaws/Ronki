@@ -1634,6 +1634,12 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
         if (cloudBlockedUntilReload.current) return;
         const raw = await storage.load() as GameState | null;
         const merged = { ...(raw || {}), ...state } as GameState;
+        // Compare-and-swap (26 Sep 2026): if another device wrote first, the
+        // card now holds both devices' progress. This page does not reload or
+        // take it on: every later write carries this page's changes onto the
+        // card (storage keeps the base), so nothing either device did is lost,
+        // including taps made while this write was out. The other device's
+        // progress shows at the next load (review rounds 1 and 2).
         await storage.cloudSaveByToken(activeToken, merged);
       }, 1500);
     } else if (user) {

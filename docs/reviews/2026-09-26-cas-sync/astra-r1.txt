@@ -1,0 +1,84 @@
+(node:56752) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[codex] Starting Codex task thread.
+[codex] Thread ready (01a0dc91-709c-7392-8a6a-f2c241e87b6d).
+[codex] Turn started (01a0dc91-7474-7cd0-9d2e-3f2dda37b674).
+[codex] Assistant message captured: I’ll read the brief and its required sources, then return the requested review without changi...
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content -Li...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content -Li... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Select-String -...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Select-String -... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content 'C:...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content 'C:... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command 'git status --sh...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command 'git status --sh... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content 'C:...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Get-Content 'C:... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command 'git status --sh...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command 'git status --sh... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command 'Get-Content src...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command 'Get-Content src... (exit 0)
+[codex] Assistant message captured: The SQL check and the client merge need separate judgments. I’m tracing what happens when sav...
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command '$s=Get-Content ...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command '$s=Get-Content ... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command 'git branch --sh...
+[codex] Command failed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command 'git branch --sh... (exit 1)
+[codex] Searching:
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command '$s=Get-Content ...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command '$s=Get-Content ... (exit 0)
+[codex] Assistant message captured: I found a likely loss path in the hide-page save: it can merge cloud progress without updatin...
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "@' const fs=req...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "@' const fs=req... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command 'node supabase/t...
+[codex] Command failed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command 'node supabase/t... (exit 1)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Select-String -...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Select-String -... (exit 0)
+[codex] Searching:
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "@' const fs=req...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "@' const fs=req... (exit 0)
+[codex] Running command: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Select-String -...
+[codex] Command completed: "C:\\Users\\öööö\\AppData\\Local\\Microsoft\\WindowsApps\\pwsh.exe" -Command "Select-String -... (exit 0)
+[codex] Assistant message captured: CAS-01 | BLOCKER | `TaskContext.tsx:1691`, `storage.ts:277` Claim: The hide-page save can mer...
+[codex] Turn completion inferred after the main thread finished and subagent work drained.
+CAS-01 | BLOCKER | `TaskContext.tsx:1691`, `storage.ts:277`
+Claim: The hide-page save can merge successfully, then let the resumed page erase that merge.
+Why it matters to the reader: I reproduced this with the actual storage code: the hidden save preserves tasks A+B, but its result is ignored; after returning and completing C, the page saves A+C using the updated revision, erasing B without a conflict.
+Fix: Route every save through one coordinator that adopts merged state, preserves subsequent local actions, and serializes writes. Cover visibilitychange, pagehide and debounced saves with the same integration test.
+
+CAS-02 | BLOCKER | `TaskContext.tsx:1643–1646`
+Claim: Reloading after a merge discards actions taken while the request was running.
+Why it matters to the reader: Fable identifies this correctly but underrates it: ordinary network latency widens the window, and the merged snapshot replaces newer local progress before reload.
+Fix: Track actions or state changes since the submitted snapshot, incorporate them into the merged result, and save again before adoption. Fix before shipping; documenting lost taps is insufficient.
+
+CAS-03 | BLOCKER | `mergeState.ts:262–263`, `expeditionRule`
+Claim: The field-level shortcuts can revive an already completed trip.
+Why it matters to the reader: I reproduced base=`home`, local=trip completed and back `home` with adventureCount 3, remote=that trip still `away`; the result has count 3 but remains `away`, allowing the treasure to be opened again.
+Fix: Resolve expedition, completed-trip records, adventureCount, tripCursor and growth together before the unchanged-field shortcuts. Deduplicate by a stable trip occurrence. Extend the existing treasure/departure test to assert expedition state and that another opening cannot increase progress.
+
+CAS-04 | SHOULD | `mergeState.ts:232–235`
+Claim: Duplicate task rewards are counted twice when the shared base is from yesterday.
+Why it matters to the reader: With yesterday’s base and both devices completing today’s same 10-point task, I reproduced one completed task but `hp=20` and `totalTasksDone=2`; overlap detection exits because the base date differs.
+Fix: Deduplicate completions by task and day, including tasks generated after the base snapshot. Test both a day rollover and a website seed without quests.
+
+CAS-05 | BLOCKER | `storage.ts:396–408`
+Claim: Cold-start reconciliation can still replace newer cloud progress with an older local history.
+Why it matters to the reader: Reading the current cloud revision immediately before uploading a later-dated local snapshot makes CAS succeed, even when that snapshot omits progress from another device; same-day cloud selection instead drops unsent local progress.
+Fix: Persist each token’s acknowledged server state/revision alongside pending local changes, then reconcile before uploading. Fix before calling this safe for two-device use; the freshly read cloud row is not necessarily the ancestor of the local state.
+
+CAS-06 | SHOULD | `storage.ts:51–54`; rollout
+Claim: Legacy fallback activates for errors beyond a missing RPC and stays active for the page’s lifetime.
+Why it matters to the reader: I reproduced a permission-denied error naming `profile_upsert_if` causing an unconditional `profile_upsert`; shipping client first also leaves already-open pages using unconditional writes after migration.
+Fix: Recognize only a confirmed missing-function response, otherwise retain local changes and retry safely. Deploy migration first, verify it, then deploy the corrected client. Old bundles remain last-writer-wins even with new SQL: incrementing rev alerts later CAS writers but cannot stop an old bundle overwriting a completed CAS save.
+
+CAS-07 | SHOULD | `own-read.md`, point 3; `mergeState.ts:268`
+Claim: The own read describes the default conflict rule incorrectly.
+Why it matters to the reader: With a base, unlisted conflicting fields use **local wins**, not remote wins; either blanket policy can silently discard meaningful nested progress.
+Fix: Correct the own read and define explicit policies for persisted progress fields. Reserve a documented winner policy for settings where choosing one value is acceptable.
+
+The SQL’s conditional update is sound for two same-revision callers under READ COMMITTED: PostgreSQL rechecks the predicate after waiting for the competing update. Existing RPC signatures remain compatible. I found no new cross-card read or direct revision-forging path in these migrations. [PostgreSQL documentation](https://www.postgresql.org/docs/18/transaction-iso.html)
+
+A fixed search path avoids the mutable-search-path issue, but Supabase lists advisor checks for security-definer functions executable by anon/authenticated; assess those against the intentional token-credential design rather than promising a clean advisor report. Live grants remain unverified. [Supabase advisors](https://supabase.com/docs/guides/observability/advisors)
+
+Read-only verification: no files changed. The reproductions ran in memory against the actual TypeScript functions with simulated RPC responses. I could not rerun the 35 PostgreSQL checks because `@electric-sql/pglite` is absent; their passing status remains Fable’s reported evidence.
+
+**NOT YET. The client can erase successfully merged progress while presenting a valid current revision.**

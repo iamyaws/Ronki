@@ -4,6 +4,25 @@ _Single source of truth: done, in flight, backlog. Update before any /compact an
 
 ---
 
+## Compare-and-swap sync (26 September 2026, branch `finch/cas-sync`)
+
+Marc's ask: "build the compare-and-swap RPC on Supabase" (point 4 of "Open for Marc" below).
+
+**Done (on the branch, not on main).** Commits 9d04a2e and d48ef54.
+- Migration `supabase/migrations/20260926000100_profiles_cas.sql`: `profiles.rev` (bigint, default 0); `profile_upsert_if(p_token, p_state, p_expected_rev)` writes only while the row still has that rev (null = insert only if no row), else returns the current row; `profile_get` returns rev; `profile_upsert` (website, older bundles) bumps rev. Backward compatible both ways.
+- Client: `src/utils/storage.ts` writes with the rev it last read or wrote; on a race it merges (`src/utils/mergeState.ts`, three-way, accumulate-only rules: tasks done on either device stay done, Sterne and counters add both devices' changes, treasures and adventures union, flags only turn on, identity from the onboarded side) and retries up to 3 times; falls back to the old `profile_upsert` while the server lacks the function. `TaskContext` keeps a merged card locally, freezes writes and reloads onto it.
+- Mock server `scripts/mock-supabase.mjs` implements the same contract. 619 tests green, tsc 23, check:names clean. Two real browser tabs against the mock: A ticks Aufstehen, B ticks Frühstück, the card shows both (totalTasksDone 2, hp 20).
+
+**LIVE on Supabase since 26 Sep 2026, 10:06 (Marc's go).** Migration `profiles_cas` applied to jdpxfvqaoxmnyvlxikce (recorded as version 20260926080610). Checked: the 3 existing cards got rev 0; the three functions are security definer with a fixed search_path; the app key can call them but cannot touch the table; PUBLIC has no grant. Live contract through the public API with a throwaway card (prefix ca5ca5): insert rev 1, insert-only refused with the row, rev 1 to 2, stale rev refused with the row, profile_get shows rev 2, the old profile_upsert bumps to 3 and a later CAS notices, invalid token rejected; the test card and its activity rows deleted, nothing left. Advisors: only the expected "anon can call a security-definer function" for profile_upsert_if (by design, token as credential); older findings (app_eval_counts view, notify_feedback_email and rls_auto_enable callable by anon) spun off as a separate task. The live app bundle still uses the old calls and keeps working.
+
+**Client (branch `finch/cas-sync`, shipping 26 Sep).** Two Astra rounds and seven rounds of a Claude verifier (real supabase-js client, every finding with a test that fails before its fix; `docs/reviews/2026-09-26-cas-sync/verifier-rounds.md`) shaped the design: every write is compare-and-swap and carries only this page's own changes onto the card; the sync bookkeeping (base, writes without an answer, their expected revision and send time) travels inside the local copy, so a cold start applies the local copy's own changes onto the card (IndexedDB or mirror, one tab or two); after a write without an answer the next save reads the card and settles it by id (offline nothing new goes out); requests abort at 15 s; no reload after a merge. Round 7: CLEAN. 652 app tests and 130 website tests green, tsc 23, check:names clean, both builds green; a fresh browser tab on the merged tree renders with no console errors and a tick lands on the card.
+
+**Known limits (documented).** After 20 or more writes by other devices following a lost answer, this device's gains merge without a base (larger balance, nothing counted twice). Saves paused while offline wait for the next change, the pagehide flush or the next start. Old app bundles still write unconditionally until they update.
+
+**Decided by Marc (26 Sep).** Accepted as a known limit: rewards that fire on both devices from the same event outside task ticks (a legacy weekly mission at a day change both devices run, cat care flags, water sips) can be counted twice in a race; extra Sterne only, features are legacy or behind Extras. Ship the client once the verifier's round 3 is clean.
+
+---
+
 ## Finch pass (25-26 September 2026, overnight)
 
 Marc's ask (25 Sep, late): reduce the features, learn from Finch's onboarding and from what makes Finch work (his screen recording, the App Breakdown #55 video, the screensdesign teardown), build what Ronki is missing, keep its essence, make it sticky and at least on par with Finch; "fully authorized to make changes to the app"; "ship it to main when it's tested". Ultracode was on.

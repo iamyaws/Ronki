@@ -188,6 +188,43 @@ describe('FC-01: nothing is written to the card before a cloud read reached it',
   });
 });
 
+describe("compare-and-swap: a save that merged another device's progress", () => {
+  it('does not reload or freeze; a tap made while the write was out is written next (CAS-01, CAS-02)', async () => {
+    at('2026-09-28T07:10:00');
+    const h = await mount(louisToday());
+    await drainSaves();
+    (storage.freezeWrites as unknown as ReturnType<typeof vi.fn>).mockClear();
+    let answer!: (v: unknown) => void;
+    upsert.mockImplementationOnce(() => new Promise(res => { answer = res; }));
+    await act(async () => { h.actions.complete('s_wash'); });
+    await act(async () => { vi.advanceTimersByTime(2000); }); // the write goes out
+    await act(async () => { h.actions.complete('s_teeth_am'); }); // a tap while it is out
+    const mergedCard = { ...louisToday(), totalTasksDone: 99, companionName: 'Glut' };
+    await act(async () => { answer({ status: 'merged', changed: true, state: mergedCard }); });
+    await act(async () => { vi.advanceTimersByTime(2000); }); // the next save
+    await settle();
+    const next = upsert.mock.calls[upsert.mock.calls.length - 1]?.[1];
+    const done = (id: string) => next.quests.find((q: any) => q.id === id)?.done;
+    expect(done('s_wash')).toBe(true);
+    expect(done('s_teeth_am')).toBe(true);
+    // The other device's progress is on the card; this page never writes over it (storage applies its changes onto the card).
+    expect(next.companionName).not.toBe('Glut');
+    expect(storage.freezeWrites).not.toHaveBeenCalled();
+    expect(reload).not.toHaveBeenCalled();
+  });
+
+  it('a plain save does not reload', async () => {
+    at('2026-09-28T07:10:00');
+    const h = await mount(louisToday());
+    await drainSaves();
+    upsert.mockResolvedValueOnce({ status: 'saved' });
+    await act(async () => { h.actions.complete('s_wash'); });
+    await act(async () => { vi.advanceTimersByTime(2000); });
+    await settle();
+    expect(reload).not.toHaveBeenCalled();
+  });
+});
+
 describe('SAVES-1: a stale tab never writes', () => {
   it('coming back on the next day reloads, and no upsert happens before the reload', async () => {
     at('2026-09-28T12:00:00');
