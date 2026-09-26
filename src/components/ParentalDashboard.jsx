@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import WesenParentSection from './wesen/WesenParentSection';
 import { useTask } from '../context/TaskContext';
 import { useTranslation } from '../i18n/LanguageContext';
 import { DEFAULT_FAMILY_CONFIG } from '../types/familyConfig';
@@ -73,6 +74,16 @@ export default function ParentalDashboard({ onClose, currentView, preauthorized 
   const [authed, setAuthed] = useState(preauthorized);
   const [pinError, setPinError] = useState(false);
   const [tab, setTab] = useState('overview');
+  // Wesen test: opened with ?wesen=1 on this device, so this card gets the switch.
+  useEffect(() => {
+    if (!authed || !state) return;
+    try {
+      if (sessionStorage.getItem('ronki-wesen-offer') === '1') {
+        actions?.wesenOffer?.();
+        sessionStorage.removeItem('ronki-wesen-offer');
+      }
+    } catch { /* storage blocked */ }
+  }, [authed, !!state]);
   const [showFeedback, setShowFeedback] = useState(false);
   const DAY_LABELS = lang === 'en' ? DAY_LABELS_EN : DAY_LABELS_DE;
   const tabBarRef = useRef(null);
@@ -723,6 +734,7 @@ function FamilyTab({ state, actions, lang }) {
   return (
     <>
       <RonkisTagSection state={state} actions={actions} />
+      <WesenParentSection state={state} actions={actions} />
 
       {/* Child Profile */}
       <SectionCard icon="face" title="Kind" subtitle={draft.childName || 'Name eingeben'}

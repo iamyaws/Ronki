@@ -1,5 +1,10 @@
 // DEV-only ?clock= shift for loop tests; must run before anything reads Date.
 import './devClock';
+// Wesen test (26 Sep 2026): app.ronki.de/?wesen=1 makes the switch appear
+// in the parent area of the card open on this device (read in ParentalDashboard).
+try {
+  if (new URLSearchParams(window.location.search).get('wesen') === '1') sessionStorage.setItem('ronki-wesen-offer', '1');
+} catch { /* storage blocked: the switch just stays hidden */ }
 import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';

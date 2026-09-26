@@ -21,6 +21,8 @@
  * Pure and deterministic; heavily unit-tested in mergeState.test.ts.
  */
 
+import { mergeWesen, reconcileAfterMerge } from '../loop/wesen';
+
 type Json = unknown;
 type Obj = Record<string, Json>;
 type Ctx = { base: Obj | null; local: Obj; remote: Obj };
@@ -302,6 +304,8 @@ const RULES: Record<string, Rule> = {
   quests: questsRule,
   expedition: expeditionRule,
   familyConfig: nested3,
+  // Wesen test: per-instance merge; the routine and quests are reconciled after the whole merge.
+  wesen: (b, l, r) => mergeWesen(b, l, r),
   taughtBreaths: nested3,
   // The dragon's identity.
   companionName: identityRule,
@@ -381,5 +385,6 @@ export function mergeStates<T extends Obj>(base: T | null, local: T, remote: T):
       if (deltaMerged.has('xp')) out.xp = Math.max(0, num(out.xp) - pts);
     }
   }
-  return out as T;
+  // Wesen: readiness from merged days, and a moved-out task stays out (Astra W-06).
+  return reconcileAfterMerge(out) as T;
 }

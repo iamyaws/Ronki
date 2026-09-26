@@ -64,7 +64,17 @@ export type EventName =
   | 'onboarding.teachfire.complete'
   | 'onboarding.firstday.done'
   | 'first.task.complete'
-  | 'quest.skip';
+  | 'quest.skip'
+  // Wesen test (26 Sep 2026): enum-bound or numeric props only.
+  | 'wesen.toggle'
+  | 'wesen.task'
+  | 'wesen.pick'
+  | 'wesen.step'
+  | 'wesen.beside'
+  | 'wesen.alone'
+  | 'wesen.review'
+  | 'wesen.moveout'
+  | 'wesen.restore';
 
 export type EventProps = Record<string, string | number | boolean>;
 
@@ -73,6 +83,15 @@ export type EventProps = Record<string, string | number | boolean>;
 // against accidental user-string leaks (e.g. a future caller typo'ing
 // `heroName` instead of `toStage`).
 const ALLOWED_PROP_KEYS: Record<EventName, readonly string[]> = {
+  'wesen.toggle': ['on'],
+  'wesen.task': ['kind'],
+  'wesen.pick': ['creature', 'kind'],
+  'wesen.step': ['creature', 'kind', 'steps'],
+  'wesen.beside': ['creature', 'kind'],
+  'wesen.alone': ['creature', 'kind', 'yes'],
+  'wesen.review': ['creature', 'kind', 'yes'],
+  'wesen.moveout': ['creature', 'kind'],
+  'wesen.restore': ['creature', 'kind'],
   'app.open': [],
   'routine.complete': [],
   'quest.complete': ['questId', 'anchor', 'block', 'kind'],

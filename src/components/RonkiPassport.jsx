@@ -6,6 +6,7 @@ import { lineText } from '../data/ronkiLines';
 import { tripById } from '../data/trips';
 import MoodChibi, { ambientMood } from './MoodChibi';
 import StepStones from './drachennest/StepStones';
+import WesenPassportBlock from './wesen/WesenPassportBlock';
 import { PaperCard, QuietLink, SpeechBubble, DoodleIcon } from './bilderbuch';
 
 /**
@@ -147,6 +148,9 @@ export default function RonkiPassport({ onNavigate, onOpenParental }) {
         <div style={{ marginTop: 26 }}>
           <StepStones catEvo={catEvo} adventureCount={adventures} variant={variant} />
         </div>
+
+        {/* 4b. The Wesen friend (test, only when a parent switched it on). */}
+        <WesenPassportBlock state={state} />
 
         {/* 5. The treasure shelf: found only. */}
         {shelf.length > 0 && (

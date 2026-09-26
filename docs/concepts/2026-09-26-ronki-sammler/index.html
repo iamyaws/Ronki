@@ -1,0 +1,498 @@
+<title>Ronkis Wesenbuch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Plus+Jakarta+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap">
+<style>
+:root{
+  --ground:#fff8f2; --paper:#ffffff; --paper-2:#f4ede6; --line:#e2d8cd;
+  --ink:#1e1b17; --ink-2:#4a4540; --ink-3:#7a716a;
+  --teal:#124346; --teal-soft:#d9ecee;
+  --gold:#fcd34d; --gold-ink:#735c00;
+  --forest:#005f46; --forest-soft:#d7efe5;
+  --ember:#e8662a; --ember-soft:#fde3d4;
+  --night:#16302f; --on-night:#f6f0e9;
+  --shadow:0 1px 2px rgba(30,27,23,.06),0 8px 24px rgba(30,27,23,.07);
+  --display:"Fredoka","Baloo 2","Trebuchet MS",system-ui,sans-serif;
+  --body:"Plus Jakarta Sans","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ground:#101d1d; --paper:#172827; --paper-2:#1d3230; --line:#2c4441;
+    --ink:#f6f0e9; --ink-2:#cfc6bc; --ink-3:#9c948b;
+    --teal:#a1cfd3; --teal-soft:#1f3f41;
+    --gold:#eac33e; --gold-ink:#f3d774;
+    --forest:#86d6b6; --forest-soft:#1b3a30;
+    --ember:#f28a55; --ember-soft:#3a2418;
+    --night:#0a1414; --on-night:#f6f0e9;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#101d1d; --paper:#172827; --paper-2:#1d3230; --line:#2c4441;
+  --ink:#f6f0e9; --ink-2:#cfc6bc; --ink-3:#9c948b;
+  --teal:#a1cfd3; --teal-soft:#1f3f41;
+  --gold:#eac33e; --gold-ink:#f3d774;
+  --forest:#86d6b6; --forest-soft:#1b3a30;
+  --ember:#f28a55; --ember-soft:#3a2418;
+  --night:#0a1414; --on-night:#f6f0e9;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;padding-inline:20px;padding-block:0 64px}
+.wrap{max-width:1080px;margin:0 auto}
+h1,h2,h3{font-family:var(--display);font-weight:700;line-height:1.12;text-wrap:balance;margin:0}
+h1{font-size:clamp(2.3rem,5.4vw,3.9rem);letter-spacing:-.01em}
+h2{font-size:clamp(1.6rem,3.2vw,2.3rem)}
+h3{font-size:1.25rem}
+p{margin:0}
+.lede{font-size:1.14rem;color:var(--ink-2);max-width:62ch}
+.eyebrow{font-family:var(--body);font-weight:700;font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ember)}
+section{padding-block:56px 8px}
+.sec-head{display:grid;gap:10px;margin-bottom:28px;max-width:70ch}
+.sec-head p{color:var(--ink-2)}
+img{display:block;max-width:100%}
+
+/* hero */
+.hero{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;padding-block:48px 16px}
+.hero-copy{display:grid;gap:20px}
+.verdict{display:grid;gap:8px;background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:18px 20px;box-shadow:var(--shadow)}
+.verdict b{font-family:var(--display);font-weight:600;font-size:1.15rem;color:var(--forest)}
+.verdict span{color:var(--ink-2)}
+.campfire{position:relative;aspect-ratio:1/1;max-width:100%;border-radius:28px;overflow:hidden;background:var(--night)}
+.campfire .bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.55}
+.campfire .glow{position:absolute;left:50%;bottom:12%;width:62%;aspect-ratio:1;transform:translateX(-50%);background:radial-gradient(circle,rgba(252,211,77,.55),rgba(232,102,42,.25) 40%,transparent 70%)}
+.campfire img.r{position:absolute;left:50%;bottom:8%;width:46%;transform:translateX(-50%)}
+.campfire img.c{position:absolute;width:21%}
+.c1{left:6%;bottom:12%}
+.c2{right:5%;bottom:14%}
+.c3{left:14%;top:14%;filter:brightness(0) opacity(.55)}
+.c4{right:14%;top:10%;filter:brightness(0) opacity(.55)}
+.campfire .tag{position:absolute;left:14px;top:14px;background:rgba(0,0,0,.45);color:#fff;font-size:.75rem;font-weight:600;padding:4px 10px;border-radius:99px}
+
+/* rules */
+.rules{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.rule{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:20px;display:grid;gap:8px;align-content:start}
+.rule .verb{font-family:var(--display);font-size:1.5rem;font-weight:700}
+.rule:nth-child(1) .verb{color:var(--ember)}
+.rule:nth-child(2) .verb{color:var(--forest)}
+.rule:nth-child(3) .verb{color:var(--teal)}
+.rule p{color:var(--ink-2)}
+
+/* mapping */
+.map{display:grid;gap:0;border:1px solid var(--line);border-radius:18px;overflow:hidden;background:var(--paper)}
+.map-row{display:grid;grid-template-columns:200px 1fr;gap:20px;padding:16px 20px;border-top:1px solid var(--line);align-items:baseline}
+.map-row:first-child{border-top:0}
+.map-row .pk{font-weight:700;color:var(--ink-3);font-size:.9rem}
+.map-row .pk small{display:block;font-weight:400}
+.map-row .rk b{font-family:var(--display);font-weight:600;font-size:1.08rem}
+.map-row .rk span{display:block;color:var(--ink-2)}
+
+/* life of one creature */
+.life{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.stage{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:16px;display:grid;gap:10px;align-content:start}
+.stage .n{font-family:var(--display);font-weight:700;color:var(--ink-3);font-size:.95rem}
+.stage .pic{height:130px;display:grid;place-items:center;background:var(--paper-2);border-radius:12px}
+.stage .pic img{max-height:118px}
+.stage .shadow img{filter:brightness(0) opacity(.45)}
+.stage .gone{background:linear-gradient(180deg,var(--teal-soft),var(--paper-2))}
+.stage .gone img{opacity:.9;transform:scale(1.08)}
+.stage h3{font-size:1.1rem}
+.stage p{font-size:.93rem;color:var(--ink-2)}
+.stage .trig{font-size:.82rem;font-weight:600;color:var(--forest);background:var(--forest-soft);border-radius:10px;padding:6px 10px}
+.note{margin-top:16px;color:var(--ink-3);font-size:.92rem;max-width:80ch}
+
+/* phones */
+.phones{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;justify-items:center}
+.phone-wrap{display:grid;gap:12px;justify-items:center;width:100%;max-width:300px}
+.phone{width:100%;aspect-ratio:9/18.5;background:#1e1b17;border-radius:38px;padding:10px;box-shadow:var(--shadow)}
+.screen{position:relative;width:100%;height:100%;border-radius:30px;overflow:hidden;background:#fff8f2;color:#1e1b17;display:flex;flex-direction:column}
+.caption{font-size:.9rem;color:var(--ink-2);text-align:center;max-width:32ch}
+.caption b{color:var(--ink)}
+/* screen 1: nest */
+.s-nest{background:linear-gradient(180deg,#fbe6cf 0%,#fff8f2 55%)}
+.s-top{display:flex;justify-content:space-between;align-items:center;padding:14px 16px 0;font-family:var(--display);font-weight:600;font-size:.95rem}
+.lock{width:26px;height:26px;border-radius:50%;background:#efe4d8;display:grid;place-items:center;font-size:.7rem}
+.nest-stage{position:relative;flex:1}
+.nest-stage .ronki{position:absolute;left:50%;bottom:22%;width:52%;transform:translateX(-50%)}
+.nest-stage .fire{position:absolute;left:50%;bottom:14%;width:46%;height:16px;transform:translateX(-50%);display:flex;gap:4px;justify-content:center}
+.flame{width:14px;height:16px;border-radius:50% 50% 40% 40%;background:#fcd34d}
+.flame.off{background:#e5d8c8}
+.nest-stage .peek{position:absolute;right:4%;bottom:26%;width:26%;filter:brightness(0) opacity(.4)}
+.paws{position:absolute;right:5%;bottom:20%;display:flex;gap:3px}
+.paws i{width:8px;height:8px;border-radius:50%;background:#7a716a}
+.paws i.off{background:#e2d8cd}
+.bubble{position:absolute;left:8%;right:8%;top:6%;background:#fff;border-radius:16px;padding:10px 12px;font-size:.8rem;line-height:1.4;box-shadow:0 4px 12px rgba(30,27,23,.12)}
+.bubble b{font-family:var(--display);font-weight:600}
+.now{margin:0 12px 12px;background:#fff;border-radius:18px;padding:12px;display:flex;gap:10px;align-items:center;box-shadow:0 4px 12px rgba(30,27,23,.1)}
+.now .ico{width:44px;height:44px;border-radius:12px;background:#d9ecee;display:grid;place-items:center;font-family:var(--display);font-weight:700;color:#124346;font-size:.72rem;text-align:center;line-height:1.1}
+.now .t{flex:1;font-family:var(--display);font-weight:600;font-size:.95rem;line-height:1.2}
+.now .t small{display:block;font-family:var(--body);font-weight:400;font-size:.72rem;color:#7a716a}
+.btn{background:#005f46;color:#fff;font-family:var(--display);font-weight:600;font-size:.8rem;padding:8px 12px;border-radius:12px}
+.tabs{display:flex;justify-content:space-around;padding:8px 0 12px;font-size:.72rem;font-weight:700;color:#7a716a;border-top:1px solid #efe4d8;background:#fff}
+.tabs .on{color:#124346}
+/* screen 2: befriend */
+.s-meet{background:radial-gradient(circle at 50% 42%,#2d5a5e 0%,#16302f 70%);color:#f6f0e9;align-items:center;justify-content:center;gap:14px;text-align:center;padding:20px}
+.s-meet .who{width:62%}
+.s-meet h4{font-family:var(--display);font-weight:600;font-size:1.25rem;margin:0}
+.s-meet p{font-size:.82rem;color:#cfe3e4;max-width:24ch}
+.hold{width:84px;height:84px;border-radius:50%;border:3px solid rgba(252,211,77,.5);display:grid;place-items:center;position:relative}
+.hold::after{content:"";position:absolute;inset:-3px;border-radius:50%;border:3px solid transparent;border-top-color:#fcd34d;border-right-color:#fcd34d;transform:rotate(20deg)}
+.hold span{width:38px;height:38px;border-radius:50%;background:rgba(252,211,77,.85)}
+.s-meet .say{font-size:.72rem;color:#a1cfd3;font-style:italic}
+/* screen 3: book */
+.s-book{padding:14px 12px 0;gap:10px}
+.s-book h4{font-family:var(--display);font-weight:700;font-size:1.15rem;margin:0 4px}
+.lbl{font-size:.64rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#7a716a;margin:4px 4px 0}
+.team{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.slot{background:#fff;border-radius:14px;padding:6px 6px 8px;display:grid;gap:4px;justify-items:center;box-shadow:0 2px 6px rgba(30,27,23,.08)}
+.slot img{height:52px}
+.slot .nm{font-family:var(--display);font-weight:600;font-size:.7rem;line-height:1.1;text-align:center}
+.slot .hb{font-size:.58rem;color:#7a716a;text-align:center;line-height:1.2}
+.pips{display:flex;gap:2px}
+.pips i{width:10px;height:4px;border-radius:2px;background:#86d6b6}
+.pips i.off{background:#e2d8cd}
+.slot.empty{border:2px dashed #e2d8cd;background:transparent;box-shadow:none;place-content:center;font-size:.64rem;color:#7a716a;min-height:98px}
+.world{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.w{background:#d9ecee;border-radius:12px;padding:4px;display:grid;justify-items:center;gap:2px}
+.w img{height:40px}
+.w span{font-size:.56rem;font-weight:700;color:#124346;text-align:center;line-height:1.15}
+.w.q{background:#f4ede6}
+.w.q img{filter:brightness(0) opacity(.2)}
+.w.q span{color:#7a716a;font-weight:400}
+
+/* trouble creatures */
+.trouble{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.tcard{background:var(--paper);border:1px solid var(--line);border-radius:18px;overflow:hidden;display:grid}
+.tcard img{width:100%;aspect-ratio:16/10;object-fit:cover}
+.tcard div{padding:14px 16px 16px;display:grid;gap:6px}
+.tcard p{font-size:.93rem;color:var(--ink-2)}
+.tcard .calm{font-size:.84rem;font-weight:600;color:var(--forest)}
+
+/* ages */
+.ages{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.age{border-radius:18px;padding:20px;display:grid;gap:10px;align-content:start;border:1px solid var(--line);background:var(--paper)}
+.age .yr{font-family:var(--display);font-weight:700;font-size:2rem;line-height:1}
+.age:nth-child(1) .yr{color:var(--ember)}
+.age:nth-child(2) .yr{color:var(--forest)}
+.age:nth-child(3) .yr{color:var(--teal)}
+.age ul{margin:0;padding-left:18px;color:var(--ink-2);font-size:.94rem;display:grid;gap:4px}
+.age .flag{font-size:.84rem;background:var(--ember-soft);border-radius:10px;padding:8px 10px;color:var(--ink)}
+
+/* keep / leave */
+.kl{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.kl > div{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:20px;display:grid;gap:12px;align-content:start}
+.kl ul{margin:0;padding:0;list-style:none;display:grid;gap:10px}
+.kl li{display:grid;grid-template-columns:22px 1fr;gap:8px;font-size:.95rem;color:var(--ink-2)}
+.kl li b{color:var(--ink)}
+.kl .y::before{content:"+";font-family:var(--display);font-weight:700;color:var(--forest)}
+.kl .n::before{content:"\2013";font-family:var(--display);font-weight:700;color:var(--ember)}
+
+/* fit */
+.fit{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+.reuse{display:grid;gap:0;border:1px solid var(--line);border-radius:18px;background:var(--paper);overflow:hidden}
+.reuse div{padding:12px 16px;border-top:1px solid var(--line);display:grid;grid-template-columns:1fr auto;gap:10px;font-size:.93rem}
+.reuse div:first-child{border-top:0}
+.reuse code{font-size:.8rem;color:var(--ink-3)}
+.reuse .st{font-size:.75rem;font-weight:700;padding:2px 8px;border-radius:99px;align-self:center;white-space:nowrap}
+.st.built{background:var(--forest-soft);color:var(--forest)}
+.st.part{background:var(--ember-soft);color:var(--ember)}
+pre{margin:0;background:var(--paper-2);border:1px solid var(--line);border-radius:14px;padding:16px;overflow-x:auto;font-size:.8rem;line-height:1.55;color:var(--ink)}
+
+/* next */
+.next{display:grid;grid-template-columns:1.2fr .8fr;gap:24px;align-items:start}
+.test{background:var(--night);color:var(--on-night);border-radius:22px;padding:24px;display:grid;gap:12px}
+.test h3{color:var(--gold)}
+.test ol{margin:0;padding-left:20px;display:grid;gap:8px;color:#dfe9e8}
+.asks{display:grid;gap:10px}
+.ask{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 16px;font-size:.94rem;color:var(--ink-2)}
+.ask b{display:block;color:var(--ink);font-family:var(--display);font-weight:600;font-size:1.02rem}
+
+footer{margin-top:48px;color:var(--ink-3);font-size:.84rem}
+
+@media (max-width:880px){
+  .hero,.fit,.next{grid-template-columns:1fr}
+  .life{grid-template-columns:1fr 1fr}
+  .phones{grid-template-columns:1fr}
+  .rules,.trouble,.ages{grid-template-columns:1fr}
+  .kl{grid-template-columns:1fr}
+}
+@media (max-width:520px){
+  body{padding-inline:16px}
+  .life{grid-template-columns:1fr}
+  .map-row{grid-template-columns:1fr;gap:4px}
+}
+</style>
+
+<div class="wrap">
+
+<header class="hero">
+  <div class="hero-copy">
+    <span class="eyebrow">Concept sketch · 26 Sep 2026</span>
+    <h1>Every creature is a habit.</h1>
+    <p class="lede">What Ronki looks like with a Pokémon heart. The kid still does the real thing in real life. What changes: each habit they are building shows up as a creature that comes closer to Ronki's fire, joins the team, grows up, and one day moves out into the world because it isn't needed anymore.</p>
+    <div class="verdict">
+      <b>Verdict: yes, it works, and it fits better than it looks.</b>
+      <span>Pokémon evolution maps almost one to one onto how a habit matures: with help, then alone, then without thinking. And the last stage lets the creature leave, which is exactly Ronki's promise of stepping aside. It also pulls four half-built Ronki systems into one spine instead of adding a fifth.</span>
+    </div>
+  </div>
+  <div class="campfire" aria-label="Ronki at his fire with two befriended creatures and two shadows waiting at the edge">
+    <img class="bg" src="art/biom-morgenwald.webp" alt="">
+    <div class="glow"></div>
+    <img class="c c3" src="art/c-nachtfluegel.webp" alt="">
+    <img class="c c4" src="art/c-perlenfisch.webp" alt="">
+    <img class="c c1" src="art/c-glutfunke.webp" alt="Glutfunke">
+    <img class="c c2" src="art/c-mrshroom.webp" alt="Mr. Shroom">
+    <img class="r" src="art/ronki-happy.webp" alt="Ronki">
+    <span class="tag">Two friends at the fire, two shadows at the edge</span>
+  </div>
+</header>
+
+<section>
+  <div class="sec-head">
+    <span class="eyebrow">The whole idea in three verbs</span>
+    <h2>Befriend it by doing. Grow it by doing it alone. Let it go.</h2>
+  </div>
+  <div class="rules">
+    <div class="rule"><span class="verb">Befriend</span><p>No throwing, no luck. A creature's shadow waits at the edge of the Nest. Each time the kid does the matching real thing, it comes one step closer. After a handful of times it sits at the fire and joins the team.</p></div>
+    <div class="rule"><span class="verb">Grow</span><p>The creature changes shape when the habit changes shape. It grows up when a parent says "macht das jetzt allein". Counts alone never evolve anything, so tapping doesn't cheat it.</p></div>
+    <div class="rule"><span class="verb">Let go</span><p>Final form: the creature moves out into the world map. The slot frees up for the next habit. The book of moved-out creatures becomes a record of growing up: "Mit 6: Zähne allein."</p></div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <span class="eyebrow">What we borrow and how it changes</span>
+    <h2>Pokémon on the left, Ronki on the right</h2>
+    <p>We keep the feelings Pokémon is great at (discovery, a team you care about, a creature that grows with you) and swap every mechanic that pays for attention with one that pays for real life.</p>
+  </div>
+  <div class="map">
+    <div class="map-row"><div class="pk">Starter Pokémon</div><div class="rk"><b>Ronki</b><span>Already hatches from an egg and already grows by adventures. He is the partner who stays; the others come and go.</span></div></div>
+    <div class="map-row"><div class="pk">Catching<small>ball, luck, rarity</small></div><div class="rk"><b>Befriending by doing</b><span>Ronki's fire draws creatures in. The fire already fills from routine tasks, so the lure is the kid's own morning.</span></div></div>
+    <div class="map-row"><div class="pk">Party of six</div><div class="rk"><b>The team: 3 slots for young kids, up to 6 later</b><span>A hard cap on habits in progress. This is the best thing we steal: it stops parents loading 12 goals at once.</span></div></div>
+    <div class="map-row"><div class="pk">Evolution<small>level, stone, trade</small></div><div class="rk"><b>Habit maturity</b><span>Stage 1 "mit Hilfe", stage 2 "allein", stage 3 "ohne Nachdenken". The parent confirms stage 2; time does stage 3.</span></div></div>
+    <div class="map-row"><div class="pk">Pokédex</div><div class="rk"><b>Das Wesenbuch</b><span>Silhouettes are habits you could pick next, chosen by kid and parent, never rolled. Moved-out creatures carry the age they left at.</span></div></div>
+    <div class="map-row"><div class="pk">Types</div><div class="rk"><b>Life areas</b><span>Körper (teeth, sleep, sport), Kopf (reading, homework), Herz (feelings, calm), Hände (making, tidying), Miteinander (helping, sharing), Draußen.</span></div></div>
+    <div class="map-row"><div class="pk">Gym leaders and badges</div><div class="rk"><b>The Freunde teach one real skill</b><span>Pilzhüter teaches Baum-Pose, Windreiterin Box-Atmung. A badge means a parent saw the kid do it: shoes tied, bike ridden, first book alone.</span></div></div>
+    <div class="map-row"><div class="pk">Wild battles</div><div class="rk"><b>Trouble creatures you calm, not beat</b><span>Flimmerfux, Schnarchling, Wusselwicht already exist as art. They stand for screens, oversleeping, chaos. Calm one enough times and it turns into a friend.</span></div></div>
+    <div class="map-row"><div class="pk">Professor Oak</div><div class="rk"><b>Mama or Papa</b><span>Picks the next creature with the kid and confirms the growth steps. Four taps a week, in the parent area.</span></div></div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <span class="eyebrow">The life of one creature</span>
+    <h2>Glutfunke and brushing teeth, start to finish</h2>
+    <p>Sketched with existing Ronki art. In the real thing, each creature gets its own three-look line drawn in the Bilderbuch style.</p>
+  </div>
+  <div class="life">
+    <div class="stage">
+      <span class="n">1 · Gesehen</span>
+      <div class="pic shadow"><img src="art/c-glutfunke.webp" alt="Shadow of Glutfunke"></div>
+      <h3>A shadow at the edge</h3>
+      <p>Kid and parent pick "Zähne putzen" from the book. Ronki: "Da hinten guckt jemand."</p>
+      <span class="trig">Starts when the family picks it</span>
+    </div>
+    <div class="stage">
+      <span class="n">2 · Befreundet</span>
+      <div class="pic"><img src="art/c-glutfunke.webp" alt="Glutfunke"></div>
+      <h3>Sits at the fire</h3>
+      <p>Five real brushings, one paw step each. Then the hold-still moment and it joins the team.</p>
+      <span class="trig">5 times done (age 4 to 7)</span>
+    </div>
+    <div class="stage">
+      <span class="n">3 · Groß</span>
+      <div class="pic"><img src="art/c-moostaenzer.webp" alt="Glutfunke grown"></div>
+      <h3>Grows up</h3>
+      <p>The parent area asks once a week: "Putzt Louis inzwischen allein?" A yes changes its shape.</p>
+      <span class="trig">Parent says: allein</span>
+    </div>
+    <div class="stage">
+      <span class="n">4 · Ausgezogen</span>
+      <div class="pic gone"><img src="art/c-sturmfluegel.webp" alt="Glutfunke fully grown"></div>
+      <h3>Moves out</h3>
+      <p>After about eight more weeks of "allein" it flies to the world map. Ronki stops asking about teeth.</p>
+      <span class="trig">~8 weeks alone, then the task leaves the Nest</span>
+    </div>
+  </div>
+  <p class="note">Why eight weeks: the best-known study on habit forming (Lally and colleagues, 2010) found a median of 66 days until a behaviour runs on autopilot, with a wide range of 18 to 254. So stage 3 should be a parent-adjustable default, not a promise. The important part is step 4: the task leaves the Nest. That is the fade built into the loop.</p>
+</section>
+
+<section>
+  <div class="sec-head">
+    <span class="eyebrow">Screens</span>
+    <h2>Three screens, and none of them is a new tab</h2>
+    <p>The Finch pass left one Nest screen and a Ronki passport. This lives inside both.</p>
+  </div>
+  <div class="phones">
+    <div class="phone-wrap">
+      <div class="phone"><div class="screen s-nest">
+        <div class="s-top"><span>Guten Morgen, Louis</span><span class="lock">PIN</span></div>
+        <div class="nest-stage">
+          <div class="bubble"><b>Ronki:</b> Da hinten guckt jemand! Wenn du Zähne putzt, traut es sich näher.</div>
+          <img class="peek" src="art/c-glutfunke.webp" alt="">
+          <div class="paws"><i></i><i></i><i></i><i class="off"></i><i class="off"></i></div>
+          <img class="ronki" src="art/ronki-wave.webp" alt="Ronki">
+          <div class="fire"><span class="flame"></span><span class="flame"></span><span class="flame"></span><span class="flame off"></span><span class="flame off"></span></div>
+        </div>
+        <div class="now"><div class="ico">Zähne</div><div class="t">Zähne putzen<small>Jetzt</small></div><span class="btn">Geschafft</span></div>
+        <div class="tabs"><span class="on">Nest</span><span>Ronki</span></div>
+      </div></div>
+      <p class="caption"><b>Nest.</b> The shadow sits beside the fire. Paw steps show how close it is. Same task card as today.</p>
+    </div>
+    <div class="phone-wrap">
+      <div class="phone"><div class="screen s-meet">
+        <img class="who" src="art/c-glutfunke.webp" alt="Glutfunke">
+        <h4>Glutfunke traut sich!</h4>
+        <p>Halt deinen Finger ganz still. Es will schnuppern.</p>
+        <div class="hold"><span></span></div>
+        <span class="say">Ronki: "Es mag dich. Weil du jeden Abend da warst."</span>
+      </div></div>
+      <p class="caption"><b>The befriend moment.</b> A calm hold, like the first fire breath in onboarding. No failure state, no timer.</p>
+    </div>
+    <div class="phone-wrap">
+      <div class="phone"><div class="screen s-book">
+        <h4>Ronkis Wesenbuch</h4>
+        <span class="lbl">Dein Team</span>
+        <div class="team">
+          <div class="slot"><img src="art/c-glutfunke.webp" alt=""><span class="nm">Glutfunke</span><span class="hb">Zähne putzen</span><span class="pips"><i></i><i class="off"></i><i class="off"></i></span></div>
+          <div class="slot"><img src="art/c-mrshroom.webp" alt=""><span class="nm">Mr. Shroom</span><span class="hb">Anziehen</span><span class="pips"><i></i><i></i><i class="off"></i></span></div>
+          <div class="slot empty">Wer kommt als Nächstes?</div>
+        </div>
+        <span class="lbl">In die Welt gezogen</span>
+        <div class="world">
+          <div class="w"><img src="art/c-perlenfisch.webp" alt=""><span>Hände waschen<br>mit 5</span></div>
+          <div class="w"><img src="art/c-goldauge.webp" alt=""><span>Schuhe binden<br>mit 6</span></div>
+          <div class="w q"><img src="art/c-nachtfluegel.webp" alt=""><span>Allein einschlafen</span></div>
+          <div class="w q"><img src="art/c-lichtfluestern.webp" alt=""><span>Allein lesen</span></div>
+        </div>
+        <span class="lbl">Ronki</span>
+        <div class="team">
+          <div class="slot"><img src="art/egg.webp" alt=""><span class="hb">Ei</span></div>
+          <div class="slot"><img src="art/ronki-baby.webp" alt=""><span class="hb">Baby</span></div>
+          <div class="slot"><img src="art/ronki-grown.webp" alt=""><span class="hb">Jungtier</span></div>
+        </div>
+      </div></div>
+      <p class="caption"><b>Ronki passport, lower half.</b> Team with growth pips, the moved-out wall with ages, silhouettes to pick from.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <span class="eyebrow">The battle part, reframed</span>
+    <h2>Trouble creatures: you calm them, and then they're friends</h2>
+    <p>Pokémon needs conflict. Ronki's conflict is inside the kid's day, so the "wild" creatures are the things that make routines hard. There is no fight and no losing. Each calm evening makes the creature a little softer.</p>
+  </div>
+  <div class="trouble">
+    <div class="tcard"><img src="art/b-flimmerfux.webp" alt="Flimmerfux"><div><h3>Flimmerfux</h3><p>Shows up when a screen is on too long. Gets sleepy when the kid switches off on their own.</p><span class="calm">Calmed by: screen off without a fight</span></div></div>
+    <div class="tcard"><img src="art/b-schnarchling.webp" alt="Schnarchling"><div><h3>Schnarchling</h3><p>Pulls the blanket back over your head. Turns into a morning buddy when getting up gets easier.</p><span class="calm">Calmed by: up on the first call</span></div></div>
+    <div class="tcard"><img src="art/b-wusselwicht.webp" alt="Wusselwicht"><div><h3>Wusselwicht</h3><p>Hides one sock every morning. Becomes the tidy-up helper once the school bag is packed the night before.</p><span class="calm">Calmed by: bag packed in the evening</span></div></div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <span class="eyebrow">Across all ages</span>
+    <h2>One loop, three registers</h2>
+    <p>The befriend, grow, let go loop holds from kindergarten to teens. The voice, the art and who picks the habits change.</p>
+  </div>
+  <div class="ages">
+    <div class="age"><span class="yr">4 to 7</span><h3>Das Nest</h3><ul><li>Ronki speaks every line, pictures only</li><li>3 team slots, parent picks with the kid</li><li>Routines: teeth, dressing, bag, bedtime</li><li>Befriend after 5 times</li></ul></div>
+    <div class="age"><span class="yr">8 to 11</span><h3>Die Expedition</h3><ul><li>Kid reads and picks their own next creature</li><li>Up to 6 slots, all six life areas</li><li>Skills with badges: bike, swimming, cooking eggs</li><li>World map fills with moved-out creatures</li><li>Befriend after 7 to 10 times</li></ul></div>
+    <div class="age"><span class="yr">12+</span><h3>Das Feldbuch</h3><ul><li>Teen invents their own creature for a goal they set: sleep, training, study, phone time</li><li>Parent drops out of the loop, teen confirms "allein" themselves</li><li>Ronki becomes a quiet narrator</li></ul><p class="flag">Honest read: a 13-year-old will not use a baby-dragon app. This band needs its own look (sketchbook, line art). Same engine, different skin. Treat it as phase 3 or not at all.</p></div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <span class="eyebrow">Guardrails</span>
+    <h2>What we take from Pokémon, and what never comes in</h2>
+    <p>Pokémon is built to keep you playing. Ronki is built to be needed less. Every borrowed mechanic has to pass that test.</p>
+  </div>
+  <div class="kl">
+    <div>
+      <h3>Take</h3>
+      <ul>
+        <li class="y"><span><b>Silhouettes you want to fill.</b> Curiosity about what's behind the next shadow.</span></li>
+        <li class="y"><span><b>A capped team.</b> Few habits at once, by design.</span></li>
+        <li class="y"><span><b>Visible growth.</b> The creature looks different when the kid is different.</span></li>
+        <li class="y"><span><b>Named, lovable creatures.</b> The kid talks about Glutfunke at dinner, not about "the teeth task".</span></li>
+        <li class="y"><span><b>Mentors with a skill.</b> The Freunde arcs already do this.</span></li>
+      </ul>
+    </div>
+    <div>
+      <h3>Leave out</h3>
+      <ul>
+        <li class="n"><span><b>Luck and rarity.</b> No random encounters, no shinies, no drop rates. That's a loot box for a 6-year-old.</span></li>
+        <li class="n"><span><b>Catch 'em all.</b> The book per age band stays small (about 20). Moving out is the goal, a full book isn't.</span></li>
+        <li class="n"><span><b>Fighting other kids.</b> No PvP, no leaderboards, no trading between families.</span></li>
+        <li class="n"><span><b>Time pressure.</b> No limited events, no "today only", and a creature never walks away because a day was missed. It just waits.</span></li>
+        <li class="n"><span><b>Anything that is Pokémon's.</b> No balls, no names, no look-alikes. Our words: befriend, fire, Wesenbuch.</span></li>
+      </ul>
+    </div>
+  </div>
+  <p class="note">The real risk: when kids start doing a thing for the reward, the reward can crowd out their own reasons (researchers call it the overjustification effect). Two things keep it in check here. The creature mirrors what the kid did instead of paying for it: there is no currency to spend. And the reward leaves on its own once the habit is automatic, which is the moment it would start to do harm.</p>
+</section>
+
+<section>
+  <div class="sec-head">
+    <span class="eyebrow">How it fits the Finch pass</span>
+    <h2>Mostly rewiring what's already in the repo</h2>
+    <p>The Finch pass cut features on purpose. This concept only works if it replaces pieces instead of stacking on them. It does: the treasure shelf becomes the team, the creature book becomes the Wesenbuch, and three orphaned systems get a job.</p>
+  </div>
+  <div class="fit">
+    <div class="reuse">
+      <div><span>20 creatures in 5 chapters<br><code>src/data/creatures.ts</code></span><span class="st built">art exists</span></div>
+      <div><span>7 Freunde with skills, Pilzhüter arc built<br><code>src/data/freunde.ts</code></span><span class="st built">1 of 7 built</span></div>
+      <div><span>3 trouble creatures, full-power and calm art<br><code>public/art/boss-*.webp</code></span><span class="st built">art exists</span></div>
+      <div><span>Ronki's growth stones by adventures<br><code>src/loop/growth.ts</code></span><span class="st built">live</span></div>
+      <div><span>World map and 6 biomes<br><code>features.ts</code> (switched off)</span><span class="st part">parked</span></div>
+      <div><span>Creatures redrawn in the Bilderbuch style, 3 looks each</span><span class="st part">new art</span></div>
+      <div><span>Weekly "allein?" question in the parent area</span><span class="st part">new</span></div>
+    </div>
+    <pre><code>// one habit = one creature
+type Wesen = {
+  id: 'glutfunke';
+  habitTaskId: 'zaehne_abends';  // links to a routine task
+  lifeArea: 'koerper';
+  stage: 'shadow' | 'friend' | 'grown' | 'movedOut';
+  steps: number;              // real completions since picked
+  befriendAt: number;         // 5 / 8 / 10 by age band
+  allowedAloneSince?: string; // parent said "allein"
+  movedOutAt?: string;        // ISO date, shown as age
+};
+// rules (pure, in src/loop/)
+// shadow -> friend : steps >= befriendAt
+// friend -> grown  : parent confirms "allein"
+// grown  -> movedOut: 8 weeks after allein (parent can change)
+//                     and the task leaves the Nest routine</code></pre>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <span class="eyebrow">What I'd do next</span>
+    <h2>Test one creature before drawing twenty</h2>
+  </div>
+  <div class="next">
+    <div class="test">
+      <h3>A two-week test with Louis</h3>
+      <ol>
+        <li>One shadow, one habit Louis doesn't own yet (evening teeth or bag packing), behind a feature switch.</li>
+        <li>Build only the shadow, the paw steps, the hold-still moment and one team slot. Existing creature art is fine for the test.</li>
+        <li>Watch two things: does he mention the creature without the app open, and does the task get easier or does he start bargaining for the creature.</li>
+        <li>If he talks about it and doesn't bargain, draw the first three lines in the Bilderbuch style and build the parent "allein?" step.</li>
+      </ol>
+    </div>
+    <div class="asks">
+      <div class="ask"><b>Your call 1: catch or befriend?</b>I wrote "befriend" everywhere. It's gentler and keeps us away from Pokémon's words. "Fangen" sells better to kids.</div>
+      <div class="ask"><b>Your call 2: does the task really leave?</b>Moving out removes the habit from the Nest. Some parents will want the reminder to stay. Default off, with a parent switch?</div>
+      <div class="ask"><b>Your call 3: is 12+ in scope?</b>The loop holds, the look doesn't. I'd keep Ronki at 4 to 11 and treat teens as a separate product later.</div>
+    </div>
+  </div>
+</section>
+
+<footer>Concept sketch for Ronki, 26 Sep 2026. Art from the Ronki repo (Bilderbuch Ronki, Micropedia creatures, boss art, Morgenwald biome). Not built, nothing changed in the app.</footer>
+</div>

@@ -26,12 +26,16 @@ import GrowthBeat from './GrowthBeat';
 import FeelingsSheet, { SIT_OFFER } from './FeelingsSheet';
 import TreasureShelf from './TreasureShelf';
 import { nestBeat, greetingFor, afternoonTasks, orderWithLater, byeLine } from './returnBeat';
-import { now as clockNow } from '../../loop/clock';
+import { now as clockNow, dayKey } from '../../loop/clock';
 import { stageOf } from '../../loop/growth';
 import { lineText } from '../../data/ronkiLines';
 import { taskAskLineId } from '../../data/taskKinds';
 import { extrasOn, FEATURES } from '../../config/features';
 import CaveStyleSheet from './CaveStyleSheet';
+import WesenInScene from '../wesen/WesenInScene';
+import { WesenPick, WesenMeet, WesenGrow, WesenGoodbye, WesenKeyframes } from '../wesen/WesenMoments';
+import { wesenOf, isOn as wesenIsOn, activeFriend, pendingMoment, wouldStep, stepsOf as wesenSteps } from '../../loop/wesen';
+import { BESIDE_AFTER_DAYS } from '../../data/wesen';
 
 // Ronki-tap voice gate (Apr 2026 voice pass). Marc: "doesn't have to
 // shoot for every tap but once in a while between tapping." Combined
@@ -196,6 +200,18 @@ export default function RoomHub({ onNavigate, onOpenParental, onOpenTonight }) {
   // After Traurig or Besorgt, "Bei Ronki sitzen" is the loud card for this open (spec R5).
   const [sitLoud, setSitLoud] = useState(false);
 
+  // Wesen test (26 Sep 2026): one moment at a time, only when Ronki is
+  // home and no other overlay is open (Astra W-07). The shown moment is
+  // held locally until the child finishes it.
+  const wesen = wesenOf(state);
+  const wesenOn = wesenIsOn(wesen);
+  const wesenFriend = wesenOn ? activeFriend(wesen) : null;
+  const wesenDue = pendingMoment(wesen, state?.familyConfig?.routine);
+  const [wesenShow, setWesenShow] = useState(null); // { kind, friend }
+  const [wesenHop, setWesenHop] = useState(0);
+  const wesenTimer = useRef(null);
+  useEffect(() => () => clearTimeout(wesenTimer.current), []);
+
   // Growth: a stage the child has not seen yet (stageSeen written by markStageSeen).
   const stageNow = stageOf(state?.catEvo);
   const growthPending = typeof state?.stageSeen === 'number' && stageNow >= 2
@@ -240,7 +256,26 @@ export default function RoomHub({ onNavigate, onOpenParental, onOpenTonight }) {
     clearTimeout(floatTimer.current);
   }, []);
 
-  const overlayOpen = showPresence || showStyleSheet || !!feelings || showReveal || showGrowth || (mode === 'departure' && departureOpen);
+  const overlayOpen = showPresence || showStyleSheet || !!feelings || showReveal || showGrowth || (mode === 'departure' && departureOpen) || !!wesenShow;
+
+  // A due Wesen moment opens after a short breath (the tick's cheer and
+  // line go first), never over another overlay, never while Ronki is away,
+  // asleep, leaving or waiting with a treasure.
+  const wesenBlocked = showPresence || showStyleSheet || !!feelings || showReveal || showGrowth || departureOpen
+    || mode === 'away' || mode === 'night' || mode === 'departure' || mode === 'waiting';
+  useEffect(() => {
+    if (wesenShow || !wesenDue || wesenBlocked) return undefined;
+    const t = setTimeout(() => {
+      const w = wesenOf(state);
+      const f = wesenDue === 'goodbye'
+        ? w.friends.find(x => x.movedOutAt && !x.goodbyeSeen && !x.dropped)
+        : activeFriend(w);
+      if (wesenDue !== 'pick' && !f) return;
+      setWesenShow({ kind: wesenDue, friend: f || null });
+    }, 2600);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wesenDue, !!wesenShow, wesenBlocked]);
 
   // Presence (LOOP-3): Ronki speaks by himself and the day's greeting is
   // used up only while the tab is visible and a child is there: a visible
@@ -336,6 +371,16 @@ export default function RoomHub({ onNavigate, onOpenParental, onOpenTonight }) {
     if (mode === 'fire') {
       setJustLit(fire.lit);
       sayPassing('fire_lit_01', 2400);
+    }
+    // Wesen: the friend watched. A line after the fire line, not on the
+    // fifth day (the meeting itself is the moment then).
+    const f = activeFriend(wesen);
+    if (f && wouldStep(wesen, q.id, dayKey(clockNow()))) {
+      setWesenHop(n => n + 1);
+      if (wesenSteps(f) < BESIDE_AFTER_DAYS - 1) {
+        clearTimeout(wesenTimer.current);
+        wesenTimer.current = setTimeout(() => sayPassing(`wesen_step_${f.creatureId}`, 4200), mode === 'fire' ? 2500 : 300);
+      }
     }
   };
 
@@ -643,6 +688,8 @@ export default function RoomHub({ onNavigate, onOpenParental, onOpenTonight }) {
                   />
                 </>
               )}
+
+              {ronkiHome && wesenFriend && <WesenInScene friend={wesenFriend} hop={wesenHop} />}
             </div>
           )}
 
@@ -840,6 +887,12 @@ export default function RoomHub({ onNavigate, onOpenParental, onOpenTonight }) {
       )}
 
       {showStyleSheet && <CaveStyleSheet onClose={() => setShowStyleSheet(false)} />}
+
+      {wesenShow?.kind === 'pick' && <WesenPick onDone={() => setWesenShow(null)} />}
+      {wesenShow?.kind === 'beside' && wesenShow.friend && <WesenMeet friend={wesenShow.friend} onDone={() => setWesenShow(null)} />}
+      {wesenShow?.kind === 'grow' && wesenShow.friend && <WesenGrow friend={wesenShow.friend} onDone={() => setWesenShow(null)} />}
+      {wesenShow?.kind === 'goodbye' && wesenShow.friend && <WesenGoodbye friend={wesenShow.friend} onDone={() => setWesenShow(null)} />}
+      {wesenFriend && <WesenKeyframes />}
 
       {/* Presence moment: full-screen sit with Ronki. */}
       {showPresence && (

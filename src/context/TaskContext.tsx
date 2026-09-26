@@ -21,11 +21,19 @@ import { featureOn } from '../config/features';
 import { now as clockNow, dayKey, daysBetween } from '../loop/clock';
 import { blockAt, dayTripReturnAt, eveningStartFor, nightTripReturnAt } from '../loop/dayPhase';
 import { evoAfterTreasure, stageOf } from '../loop/growth';
+import {
+  wesenOf, stepOnComplete, activeFriend, applyMoveOutAtDayStart, noteRoutineEdit,
+  setEnabled as wesenSetEnabledRule, pickTask as wesenPickTaskRule, pickCreature as wesenPickCreatureRule,
+  markSeen as wesenMarkSeenRule, answerAlone as wesenAnswerAloneRule, setReviewWeeks as wesenSetReviewWeeksRule,
+  answerReview as wesenAnswerReviewRule, restoreTask as wesenRestoreRule, newFriendId,
+} from '../loop/wesen';
+import type { WesenState } from '../loop/wesen';
+import type { CreatureId } from '../data/wesen';
 import { EVENING_STARTS } from '../loop/types';
 import type { LoopActions, TripKind, EveningStart } from '../loop/types';
 import { tripAt } from '../data/trips';
 import { normalizeRoutine, taskKind } from '../data/taskKinds';
-import type { RoutineConfig } from '../data/taskKinds';
+import type { RoutineConfig, TaskKind } from '../data/taskKinds';
 
 // ── Fire-breath progression ──
 /**
@@ -302,6 +310,8 @@ export interface TaskState {
   greetedDate?: string | null;
   /** Parent "Extras zeigen" toggle. Default false. */
   extrasEnabled?: boolean;
+  /** Wesen test (26 Sep 2026, src/loop/wesen.ts). Absent until a parent opens it with ?wesen=1. */
+  wesen?: WesenState;
   /** ISO timestamp of the most recent quest completion. Used by the
    *  PWA prompt gate (and any future "quiet after task" guard) to
    *  hold modal-class notifications back during the inline beat that
@@ -594,6 +604,15 @@ interface TaskComputed {
 
 interface TaskActions extends LoopActions {
   complete: (id: string) => void;
+  wesenOffer: () => void;
+  wesenSetEnabled: (on: boolean) => void;
+  wesenPickTask: (kind: TaskKind) => void;
+  wesenPickCreature: (creatureId: CreatureId) => void;
+  wesenMarkSeen: (friendId: string, which: 'besideSeen' | 'grownSeen' | 'goodbyeSeen') => void;
+  wesenAnswerAlone: (yes: boolean) => void;
+  wesenSetReviewWeeks: (weeks: number) => void;
+  wesenAnswerReview: (yes: boolean) => void;
+  wesenRestore: (friendId: string) => void;
   setMood: (period: string, val: number) => void;
   drinkWater: () => void;
   completeHabit: (habitId: string) => void;
@@ -1496,6 +1515,7 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
           lastGapDays: wholeOr((raw as any).lastGapDays, 0),
           greetedDate: typeof (raw as any).greetedDate === 'string' ? (raw as any).greetedDate : null,
           extrasEnabled: (raw as any).extrasEnabled === true,
+          ...((raw as any).wesen && typeof (raw as any).wesen === 'object' ? { wesen: wesenOf(raw as any) } : {}),
         };
         // One-time migration: reset inflated HP from old economy
         if (!raw._v2_economy_reset) {
@@ -1727,6 +1747,14 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
 
   // ── Day transition ──
   function applyDayTransition(s: TaskState): TaskState {
+    // Wesen: a move-out the parent confirmed on an earlier day takes the
+    // task out of the routine before today's quests are built (never mid-day).
+    if (s.wesen) {
+      const moved = applyMoveOutAtDayStart(wesenOf(s), s.familyConfig?.routine, today());
+      if (moved.changed && moved.routine) {
+        s = { ...s, wesen: moved.wesen, familyConfig: { ...s.familyConfig, routine: moved.routine } };
+      }
+    }
     // Update streak map from yesterday's completed quests
     const newSm = { ...s.sm };
     for (const q of s.quests) {
@@ -2072,7 +2100,23 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
       const events: LoopEvent[] = [['quest.complete', { questId: id, anchor: q.anchor, block, kind }]];
       if ((prev.totalTasksDone || 0) === 0) events.push(['first.task.complete', { block, kind }]);
 
-      const next = { ...prev, quests, dt, hp, drachenEier: screenMin, xp: newXp, boss, bossTrophies, bossDmgToday, orbs, heroStats, totalTasksDone, unlockedBadges, arcEngine, bossKilledToday, arcBeatAdvancedToday, totalQuestCompletions, pendingRitual, ronkiVitals, careTokens, expedition, lastTaskCompletionAt };
+      // Wesen: a day with the linked task done brings the friend one step
+      // closer, only on the not-done to done transition (Astra round 1, Q5).
+      let wesen = prev.wesen;
+      const becameDone = !!quests.find(qq => qq.id === id)?.done;
+      if (wesen && becameDone) {
+        const before = activeFriend(wesenOf(prev));
+        const stepped = stepOnComplete(wesenOf(prev), id, dayKey(nowT), nowT.toISOString());
+        const after = activeFriend(stepped);
+        if (before && after && after !== before) {
+          wesen = stepped;
+          const props = { creature: after.creatureId, kind: after.taskKind };
+          events.push(['wesen.step', { ...props, steps: after.stepDays.length }]);
+          if (!before.besideAt && after.besideAt) events.push(['wesen.beside', props]);
+        }
+      }
+
+      const next = { ...prev, quests, dt, hp, drachenEier: screenMin, xp: newXp, boss, bossTrophies, bossDmgToday, orbs, heroStats, totalTasksDone, unlockedBadges, arcEngine, bossKilledToday, arcBeatAdvancedToday, totalQuestCompletions, pendingRitual, ronkiVitals, careTokens, expedition, lastTaskCompletionAt, ...(wesen ? { wesen } : {}) };
       return withEvents(next, events);
     });
     setToastTrigger(t => t + 1);
@@ -2570,6 +2614,7 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
         ...prev,
         familyConfig: { ...prev.familyConfig, routine: r },
         quests: questsForRoutine(prev, r),
+        ...(prev.wesen ? { wesen: noteRoutineEdit(wesenOf(prev), r, clockNow().toISOString()) } : {}),
       };
     });
   }, []);
@@ -2622,6 +2667,82 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
     const v = !!on;
     setState(prev => (!prev || prev.extrasEnabled === v) ? prev : { ...prev, extrasEnabled: v });
   }, []);
+
+  // ── Wesen test (26 Sep 2026, src/loop/wesen.ts) ──
+  /** Apply a pure Wesen rule; nothing happens when the rule returns the same object. */
+  const updateWesen = useCallback((fn: (w: WesenState) => WesenState, events?: (w: WesenState) => LoopEvent[]) => {
+    setState(prev => {
+      if (!prev) return prev;
+      const w = wesenOf(prev);
+      const nextW = fn(w);
+      if (nextW === w) return prev;
+      const next = { ...prev, wesen: nextW };
+      return events ? withEvents(next, events(nextW)) : next;
+    });
+  }, [withEvents]);
+
+  /** The parent area was opened with ?wesen=1 on this card: the switch appears. */
+  const wesenOffer = useCallback(() => {
+    updateWesen(w => (w.offered ? w : { ...w, offered: true }));
+  }, [updateWesen]);
+
+  const wesenSetEnabled = useCallback((on: boolean) => {
+    updateWesen(w => (w.enabled === on ? w : wesenSetEnabledRule(w, on)), () => [['wesen.toggle', { on }]]);
+  }, [updateWesen]);
+
+  const wesenPickTask = useCallback((kind: TaskKind) => {
+    updateWesen(w => wesenPickTaskRule(w, kind), () => [['wesen.task', { kind }]]);
+  }, [updateWesen]);
+
+  const wesenPickCreature = useCallback((creatureId: CreatureId) => {
+    const t = clockNow();
+    updateWesen(
+      w => wesenPickCreatureRule(w, creatureId, newFriendId(t.getTime()), t.toISOString()),
+      w => { const f = activeFriend(w); return f ? [['wesen.pick', { creature: f.creatureId, kind: f.taskKind }]] : []; },
+    );
+  }, [updateWesen]);
+
+  const wesenMarkSeen = useCallback((friendId: string, which: 'besideSeen' | 'grownSeen' | 'goodbyeSeen') => {
+    updateWesen(w => wesenMarkSeenRule(w, friendId, which), w => {
+      const f = w.friends.find(x => x.id === friendId);
+      return f && which === 'goodbyeSeen' ? [['wesen.moveout', { creature: f.creatureId, kind: f.taskKind }]] : [];
+    });
+  }, [updateWesen]);
+
+  const wesenAnswerAlone = useCallback((yes: boolean) => {
+    updateWesen(
+      w => wesenAnswerAloneRule(w, yes, clockNow()),
+      w => { const f = activeFriend(w); return f ? [['wesen.alone', { creature: f.creatureId, kind: f.taskKind, yes }]] : []; },
+    );
+  }, [updateWesen]);
+
+  const wesenSetReviewWeeks = useCallback((weeks: number) => {
+    updateWesen(w => wesenSetReviewWeeksRule(w, weeks));
+  }, [updateWesen]);
+
+  const wesenAnswerReview = useCallback((yes: boolean) => {
+    updateWesen(
+      w => wesenAnswerReviewRule(w, yes, clockNow()),
+      w => { const f = activeFriend(w); return f ? [['wesen.review', { creature: f.creatureId, kind: f.taskKind, yes }]] : []; },
+    );
+  }, [updateWesen]);
+
+  /** Parent "Wieder zurückholen": the task comes back where it was, today's quests follow. */
+  const wesenRestore = useCallback((friendId: string) => {
+    setState(prev => {
+      if (!prev) return prev;
+      const r = wesenRestoreRule(wesenOf(prev), prev.familyConfig?.routine, friendId, clockNow().toISOString());
+      if (r.wesen === wesenOf(prev) || !r.wesen.friends.some(f => f.id === friendId && f.restoredAt)) return prev;
+      const f = r.wesen.friends.find(x => x.id === friendId);
+      const next: TaskState = {
+        ...prev,
+        wesen: r.wesen,
+        familyConfig: { ...prev.familyConfig, routine: r.routine },
+        quests: questsForRoutine(prev, r.routine),
+      };
+      return f ? withEvents(next, [['wesen.restore', { creature: f.creatureId, kind: f.taskKind }]]) : next;
+    });
+  }, [withEvents]);
 
   /** The load path's day transition, when the day changed while the app stayed open. */
   const checkNewDay = useCallback(() => {
@@ -3274,7 +3395,7 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
   })() : emptyComputed;
 
   return (
-    <TaskContext.Provider value={{ state, computed, actions: { complete, setMood, drinkWater, feedCompanion, petCompanion, playCompanion, collectLoginBonus, completeOnboarding, teachBreath, dismissPendingRitual, setEmojiCode, addFriend, markWinkSeen, recordWinkSent, setCaveStyle, setExpedition, startExpedition, rangerDeparted, rangerArrived, receiveMemento, saveJournal, redeemReward, dismissCelebration, startMission, abandonMission, addHP, claimGameReward, consumeStamina, restoreStamina, equipGear, unequipGear, updateBirthdayEpic, updateFamilyConfig, patchState, completeSpecialQuest, recordViewVisit, spawnEgg, collectEgg, fireCelebration, createQuestLine, updateQuestLine, completeQuestLineDay, archiveQuestLine, logFeeling, claimMintBadge, recordMintGamePlay, syncRonkiMood, pickRonkiSadReaction, practiceSkill, markLearnBannerSeen, markTabUnlockSeen, markTabCoachmarkSeen, completeHabit, addCrystals, spendCrystals, giftCrystalToFreund, plantSeed, placeDecor, moveDecor, removeDecor, witnessPlant, departTrip, arriveTrip, receiveTreasure, setRoutine, setEveningStart, markStageSeen, markGreeted, completeTonight, setExtras, checkNewDay }, loading, celebration, toastTrigger }}>
+    <TaskContext.Provider value={{ state, computed, actions: { complete, setMood, drinkWater, feedCompanion, petCompanion, playCompanion, collectLoginBonus, completeOnboarding, teachBreath, dismissPendingRitual, setEmojiCode, addFriend, markWinkSeen, recordWinkSent, setCaveStyle, setExpedition, startExpedition, rangerDeparted, rangerArrived, receiveMemento, saveJournal, redeemReward, dismissCelebration, startMission, abandonMission, addHP, claimGameReward, consumeStamina, restoreStamina, equipGear, unequipGear, updateBirthdayEpic, updateFamilyConfig, patchState, completeSpecialQuest, recordViewVisit, spawnEgg, collectEgg, fireCelebration, createQuestLine, updateQuestLine, completeQuestLineDay, archiveQuestLine, logFeeling, claimMintBadge, recordMintGamePlay, syncRonkiMood, pickRonkiSadReaction, practiceSkill, markLearnBannerSeen, markTabUnlockSeen, markTabCoachmarkSeen, completeHabit, addCrystals, spendCrystals, giftCrystalToFreund, plantSeed, placeDecor, moveDecor, removeDecor, witnessPlant, departTrip, arriveTrip, receiveTreasure, setRoutine, setEveningStart, markStageSeen, markGreeted, completeTonight, setExtras, checkNewDay, wesenOffer, wesenSetEnabled, wesenPickTask, wesenPickCreature, wesenMarkSeen, wesenAnswerAlone, wesenSetReviewWeeks, wesenAnswerReview, wesenRestore }, loading, celebration, toastTrigger }}>
       {children}
     </TaskContext.Provider>
   );
