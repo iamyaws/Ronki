@@ -1,0 +1,136 @@
+import { describe, it, expect } from 'vitest';
+import { mergeStates, jsonEqual } from './mergeState';
+
+const q = (id: string, done = false, extra: object = {}) => ({ id, anchor: 'morning', done, completions: done ? 1 : 0, ...extra });
+
+const base = () => ({
+  lastDate: '2026-09-28',
+  onboardingDone: true,
+  companionName: 'Knisti',
+  catEvo: 3,
+  adventureCount: 2,
+  tripCursor: 2,
+  hp: 40,
+  totalTasksDone: 10,
+  expedition: { state: 'home', biome: 'morgenwald' },
+  expeditionLog: [{ id: 'm1', ts: '2026-09-26T07:00:00.000Z' }, { id: 'm2', ts: '2026-09-27T07:00:00.000Z' }],
+  treasuresFound: ['t01', 't02'],
+  quests: [q('s_wake'), q('s_breakfast'), q('s_teeth_am')],
+  familyConfig: { childName: 'Louisa', eveningStart: '17:00', routine: { morning: ['wake', 'breakfast', 'teeth_am'], evening: [] } },
+  parentPin: '4711',
+});
+
+describe('jsonEqual', () => {
+  it('ignores key order and treats undefined like null', () => {
+    expect(jsonEqual({ a: 1, b: [1, { c: 2 }] }, { b: [1, { c: 2 }], a: 1 })).toBe(true);
+    expect(jsonEqual({ a: null }, {})).toBe(true);
+    expect(jsonEqual([1, 2], [2, 1])).toBe(false);
+  });
+});
+
+describe('mergeStates', () => {
+  it('a phone that only opened the app changes nothing: the tablet\'s progress stays', () => {
+    const b = base();
+    const phone = { ...b, lastLoginDate: '2026-09-28' }; // remote: only a login stamp
+    const tablet = { ...b, quests: [q('s_wake', true), q('s_breakfast'), q('s_teeth_am')], totalTasksDone: 11, hp: 50 };
+    const m = mergeStates(b, tablet, phone);
+    expect(m.quests[0].done).toBe(true);
+    expect(m.totalTasksDone).toBe(11);
+    expect(m.hp).toBe(50);
+    expect((m as any).lastLoginDate).toBe('2026-09-28');
+  });
+
+  it('tasks ticked on two devices on the same day are all done', () => {
+    const b = base();
+    const phone = { ...b, quests: [q('s_wake', true), q('s_breakfast'), q('s_teeth_am')], totalTasksDone: 11 };
+    const tablet = { ...b, quests: [q('s_wake'), q('s_breakfast', true), q('s_teeth_am')], totalTasksDone: 11 };
+    const m = mergeStates(b, tablet, phone);
+    expect(m.quests.map((x: any) => x.done)).toEqual([true, true, false]);
+    expect(m.totalTasksDone).toBe(11); // counters take the max, never double
+  });
+
+  it('a new day on one device wins the task list over yesterday\'s on the other', () => {
+    const b = base();
+    const tablet = { ...b, lastDate: '2026-09-29', quests: [q('s_wake', true)] };
+    const phone = { ...b, quests: [q('s_wake'), q('s_breakfast', true), q('s_teeth_am')] };
+    const m = mergeStates(b, tablet, phone);
+    expect(m.lastDate).toBe('2026-09-29');
+    expect(m.quests).toEqual([q('s_wake', true)]);
+  });
+
+  it('a treasure opened on one device and a departure on the other keep the treasure and the count', () => {
+    const b = base();
+    const tablet = {
+      ...b,
+      adventureCount: 3, tripCursor: 3, catEvo: 4,
+      expeditionLog: [...b.expeditionLog, { id: 'm3', ts: '2026-09-28T07:00:00.000Z' }],
+      treasuresFound: ['t01', 't02', 't03'],
+    };
+    const phone = { ...b, expedition: { state: 'away', biome: 'morgenwald', tripId: 't03' } };
+    const m = mergeStates(b, tablet, phone);
+    expect(m.adventureCount).toBe(3);
+    expect(m.treasuresFound).toEqual(['t01', 't02', 't03']);
+    expect(m.expeditionLog.map((x: any) => x.id)).toEqual(['m1', 'm2', 'm3']);
+    expect(m.catEvo).toBe(4);
+  });
+
+  it('when both change the trip, the side further along wins', () => {
+    const b = { ...base(), expedition: { state: 'away', biome: 'morgenwald', tripId: 't03' } };
+    const waiting = { ...b, expedition: { state: 'waiting', biome: 'morgenwald', tripId: 't03' } };
+    const received = { ...b, adventureCount: 3, expedition: { state: 'home', biome: 'morgenwald' } };
+    expect(mergeStates(b, waiting, received).expedition.state).toBe('home');
+    expect(mergeStates(b, received, waiting).expedition.state).toBe('home');
+  });
+
+  it('Sterne earned on one device and spent on the other both count', () => {
+    const b = base();
+    const earned = { ...b, hp: 60 }; // +20
+    const spent = { ...b, hp: 10 }; // -30
+    expect(mergeStates(b, earned, spent).hp).toBe(30);
+    expect(mergeStates(b, spent, earned).hp).toBe(30);
+  });
+
+  it('a parent setting changed on one device and a task on the other both survive', () => {
+    const b = base();
+    const phone = { ...b, parentPin: '9999', familyConfig: { ...b.familyConfig, eveningStart: '18:00' } };
+    const tablet = { ...b, familyConfig: { ...b.familyConfig, routine: { morning: ['wake'], evening: [] } }, totalTasksDone: 11 };
+    const m = mergeStates(b, tablet, phone);
+    expect(m.parentPin).toBe('9999');
+    expect(m.familyConfig.eveningStart).toBe('18:00');
+    expect(m.familyConfig.routine).toEqual({ morning: ['wake'], evening: [] });
+    expect(m.totalTasksDone).toBe(11);
+  });
+
+  it('without a base (never read the card) the card\'s own dragon stays', () => {
+    const card = base();
+    const localHatch = { kidIntroSeen: true, onboardingDone: false, companionName: 'Funki', catEvo: 3, lastDate: '2026-09-28', newField: 1 };
+    const m = mergeStates(null, localHatch as any, card as any) as any;
+    expect(m.companionName).toBe('Knisti');
+    expect(m.onboardingDone).toBe(true);
+    expect(m.catEvo).toBe(3);
+    expect(m.adventureCount).toBe(2);
+    expect(m.parentPin).toBe('4711');
+    expect(m.newField).toBe(1);
+  });
+
+  it('without a base, Sterne are not added twice', () => {
+    const card = { ...base(), hp: 40 };
+    const local = { ...base(), hp: 45 };
+    expect(mergeStates(null, local, card).hp).toBe(45);
+  });
+
+  it('flags that only turn on stay on; the first day stays first', () => {
+    const b = { ...base(), onboardingDone: false, onboardingDate: undefined as any };
+    const a = { ...b, onboardingDone: true, onboardingDate: '2026-09-27' };
+    const c = { ...b, kidIntroSeen: true, onboardingDate: '2026-09-28' };
+    const m = mergeStates(b, a, c) as any;
+    expect(m.onboardingDone).toBe(true);
+    expect(m.kidIntroSeen).toBe(true);
+    expect(m.onboardingDate).toBe('2026-09-27');
+  });
+
+  it('is a no-op when nothing differs', () => {
+    const b = base();
+    expect(jsonEqual(mergeStates(b, b, b), b)).toBe(true);
+  });
+});

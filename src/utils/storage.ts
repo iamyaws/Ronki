@@ -7,6 +7,7 @@
 // without clobbering Louis's existing dev state. When the experiment
 // merges back to main the suffix gets removed in the same commit.
 import type { GameState } from '../types';
+import { mergeStates, jsonEqual } from './mergeState';
 import { supabase } from '../lib/supabase';
 import { claimLocalProfile, getLocalProfileOwner } from '../lib/profileToken';
 
@@ -31,6 +32,26 @@ const cloudReadStatus = new Map<string, 'ok' | 'failed'>();
  *  page writes nothing, locally or to the cloud: its in-memory state may be
  *  older than what another device saved (review fix round 1, SAVES-1). */
 let writesFrozen = false;
+
+/** Per token: the card's revision and content as this session last read or
+ *  wrote them (compare-and-swap sync, 26 Sep 2026). rev null = no row. */
+const synced = new Map<string, { rev: number | null; state: GameState | null }>();
+/** Whether the server has profile_upsert_if; null until the first try. */
+let casAvailable: boolean | null = null;
+
+/** Result of a cloud write. 'merged': another device wrote first, both
+ *  devices' progress was merged and written; `state` is what the card now holds. */
+export type CloudWrite = {
+  status: 'saved' | 'merged' | 'offline' | 'frozen' | 'skipped';
+  state?: GameState;
+  /** True when the merged state differs from what this device tried to write. */
+  changed?: boolean;
+};
+
+function missingFunction(error: unknown): boolean {
+  const e = (error || {}) as { code?: string; message?: string };
+  return e.code === 'PGRST202' || e.code === '42883' || /profile_upsert_if/.test(String(e.message || ''));
+}
 
 
 const storage = {
@@ -195,8 +216,14 @@ const storage = {
         return null;
       }
       cloudReadStatus.set(token, 'ok');
-      if (!data) return null;
-      return ((data as { state?: GameState }).state as GameState) || null;
+      if (!data) {
+        synced.set(token, { rev: null, state: null });
+        return null;
+      }
+      const d = data as { state?: GameState; rev?: number };
+      const state = (d.state as GameState) || null;
+      synced.set(token, { rev: typeof d.rev === 'number' ? d.rev : 0, state });
+      return state;
     } catch {
       cloudReadStatus.set(token, 'failed');
       return null;
@@ -213,22 +240,77 @@ const storage = {
     return cloudReadStatus.get(token) === 'ok';
   },
 
-  async cloudSaveByToken(token: string, state: GameState): Promise<void> {
-    if (!token || !/^[a-f0-9]{32}$/.test(token)) return;
-    if (writesFrozen) return;
+  /**
+   * Write one family's card. Compare-and-swap (profile_upsert_if): the write
+   * only goes through while the card still has the revision this session
+   * last saw. If another device wrote first, both devices' progress is merged
+   * (src/utils/mergeState.ts) and written with the new revision, up to three
+   * tries. Falls back to the old unconditional profile_upsert while the server
+   * does not have the function yet. Never throws.
+   */
+  async cloudSaveByToken(token: string, state: GameState): Promise<CloudWrite> {
+    if (!token || !/^[a-f0-9]{32}$/.test(token)) return { status: 'skipped' };
+    if (writesFrozen) return { status: 'frozen' };
+    if (casAvailable !== false) {
+      const known = synced.get(token);
+      let expected: number | null = known ? known.rev : null;
+      let base: GameState | null = known ? known.state : null;
+      let toWrite: GameState = state;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        let res: { data?: unknown; error?: unknown };
+        try {
+          res = await supabase.rpc('profile_upsert_if', {
+            p_token: token,
+            p_state: toWrite as unknown as Record<string, unknown>,
+            p_expected_rev: expected,
+          }) as { data?: unknown; error?: unknown };
+        } catch {
+          return { status: 'offline' };
+        }
+        if (res?.error) {
+          if (missingFunction(res.error)) { casAvailable = false; break; }
+          return { status: 'offline' };
+        }
+        casAvailable = true;
+        const d = (res?.data || {}) as { ok?: boolean; rev?: number | null; state?: GameState | null };
+        if (d.ok) {
+          synced.set(token, { rev: typeof d.rev === 'number' ? d.rev : null, state: toWrite });
+          if (attempt === 0) return { status: 'saved', state: toWrite };
+          return { status: 'merged', state: toWrite, changed: !jsonEqual(toWrite, state) };
+        }
+        if (writesFrozen) return { status: 'frozen' };
+        // Another device wrote first: merge its row in and try again.
+        const remote = (d.state as GameState) || null;
+        if (remote) {
+          toWrite = mergeStates(
+            base as unknown as Record<string, unknown> | null,
+            toWrite as unknown as Record<string, unknown>,
+            remote as unknown as Record<string, unknown>,
+          ) as unknown as GameState;
+          base = remote;
+          expected = typeof d.rev === 'number' ? d.rev : null;
+        } else {
+          // The row is gone: write it fresh.
+          base = null;
+          expected = null;
+        }
+      }
+      if (casAvailable !== false) return { status: 'offline' }; // three races in a row: the next save tries again
+    }
     try {
-      // profile_upsert stamps updated_at server-side and records today
-      // in profile_activity, which is what the active-family counter
-      // reads. It rejects a malformed token with an error we swallow.
-      await supabase.rpc('profile_upsert', {
+      // Legacy unconditional write (server without profile_upsert_if).
+      const res = await supabase.rpc('profile_upsert', {
         p_token: token,
         p_state: state as unknown as Record<string, unknown>,
-      });
+      }) as { data?: { rev?: number } | null; error?: unknown };
+      if (res?.error) return { status: 'offline' };
+      synced.set(token, { rev: typeof res?.data?.rev === 'number' ? res.data.rev : null, state });
+      return { status: 'saved', state };
     } catch {
       // Silent fail, local IndexedDB + localStorage are the fallback
+      return { status: 'offline' };
     }
   },
-
 
   // ── Sync: resolve local vs cloud, return best state ──
   async syncLoad(userId: string): Promise<GameState | null> {
@@ -313,8 +395,10 @@ const storage = {
       const localDate = (local as any).lastDate || '';
       if (localDate > cloudDate) {
         // Local is newer (this device played most recently). Push to
-        // cloud, return local.
-        this.cloudSaveByToken(token, local);
+        // cloud (compare-and-swap: a race with another device merges),
+        // return what the card now holds.
+        const w = await this.cloudSaveByToken(token, local);
+        if (w.status === 'merged' && w.state) { await this.save(w.state); return w.state; }
         return local;
       }
       // Cloud wins, cache locally for offline use + faster next boot.
@@ -327,7 +411,10 @@ const storage = {
       // first time, migrate to cloud. Only when the read really found no
       // row: after a failed read the card may hold a dragon we could not
       // see, so local stays local (Astra FC-01).
-      if (this.cloudReadOk(token)) this.cloudSaveByToken(token, local);
+      if (this.cloudReadOk(token)) {
+        const w = await this.cloudSaveByToken(token, local);
+        if (w.status === 'merged' && w.state) { await this.save(w.state); return w.state; }
+      }
       return local;
     }
 

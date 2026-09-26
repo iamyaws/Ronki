@@ -127,18 +127,19 @@ describe('storage cloud sync by token', () => {
     expect(rpcMock).not.toHaveBeenCalled();
   });
 
-  it('writes a profile through profile_upsert', async () => {
-    rpcMock.mockResolvedValue({ data: { updated_at: '2026-09-15T08:00:00Z' }, error: null });
+  it('writes a profile through profile_upsert_if (compare-and-swap)', async () => {
+    rpcMock.mockResolvedValue({ data: { ok: true, rev: 1, updated_at: '2026-09-15T08:00:00Z' }, error: null });
     const state = { hero: { name: 'Ronki' }, quests: [] };
 
-    await storage.cloudSaveByToken(TOKEN, state);
+    const w = await storage.cloudSaveByToken(TOKEN, state);
 
-    expect(rpcMock).toHaveBeenCalledWith('profile_upsert', { p_token: TOKEN, p_state: state });
+    expect(w.status).toBe('saved');
+    expect(rpcMock).toHaveBeenCalledWith('profile_upsert_if', expect.objectContaining({ p_token: TOKEN, p_state: state }));
   });
 
-  it('swallows a failing profile_upsert so local storage stays the fallback', async () => {
+  it('swallows a failing write so local storage stays the fallback', async () => {
     rpcMock.mockRejectedValue(new Error('offline'));
-    await expect(storage.cloudSaveByToken(TOKEN, { hero: {} })).resolves.toBeUndefined();
+    await expect(storage.cloudSaveByToken(TOKEN, { hero: {} })).resolves.toMatchObject({ status: 'offline' });
   });
 });
 
@@ -205,13 +206,13 @@ describe('storage syncLoadByToken with a website card seed', () => {
             data: { state: { ...seed, lastDate: '2026-09-10', onboardingDone: true }, updated_at: '2026-09-10T08:00:00Z' },
             error: null,
           })
-        : Promise.resolve({ data: { updated_at: '2026-09-15T08:00:01Z' }, error: null }),
+        : Promise.resolve({ data: { ok: true, rev: 1, updated_at: '2026-09-15T08:00:01Z' }, error: null }),
     );
 
     const result = await storage.syncLoadByToken(TOKEN);
 
     expect(result.familyConfig.childName).toBe('Louis');
-    expect(rpcMock).toHaveBeenCalledWith('profile_upsert', { p_token: TOKEN, p_state: local });
+    expect(rpcMock).toHaveBeenCalledWith('profile_upsert_if', expect.objectContaining({ p_token: TOKEN, p_state: local }));
   });
 });
 
@@ -277,13 +278,13 @@ describe('storage syncLoadByToken sibling guard', () => {
             data: { state: { ...childA, lastDate: '2026-09-10' }, updated_at: '2026-09-10T08:00:00Z' },
             error: null,
           })
-        : Promise.resolve({ data: { updated_at: '2026-09-16T08:00:01Z' }, error: null }),
+        : Promise.resolve({ data: { ok: true, rev: 1, updated_at: '2026-09-16T08:00:01Z' }, error: null }),
     );
 
     const result = await storage.syncLoadByToken(CARD_A);
 
     expect(result.familyConfig.childName).toBe('Louis');
-    expect(rpcMock).toHaveBeenCalledWith('profile_upsert', { p_token: CARD_A, p_state: childA });
+    expect(rpcMock).toHaveBeenCalledWith('profile_upsert_if', expect.objectContaining({ p_token: CARD_A, p_state: childA }));
     expect(localStorage.getItem('ronki_local_owner')).toBe(CARD_A);
   });
 });
@@ -307,15 +308,18 @@ describe('storage syncLoadByToken after a failed cloud read', () => {
     const result = await storage.syncLoadByToken(T1);
     expect(result).toMatchObject({ companionName: 'Funki' });
     expect(storage.cloudReadOk(T1)).toBe(false);
-    expect(rpcMock.mock.calls.filter(([fn]) => fn === 'profile_upsert')).toHaveLength(0);
+    expect(rpcMock.mock.calls.filter(([fn]) => fn === 'profile_upsert' || fn === 'profile_upsert_if')).toHaveLength(0);
   });
 
   it('still migrates local to the card when the read really found no row', async () => {
     mockStore['hdx2_drachennest'] = { kidIntroSeen: true, companionName: 'Funki', onboardingDone: false };
-    rpcMock.mockImplementation(async () => ({ data: null, error: null }));
+    rpcMock.mockImplementation(async (fn) => (fn === 'profile_get' ? { data: null, error: null } : { data: { ok: true, rev: 1 }, error: null }));
     await storage.syncLoadByToken(T2);
     expect(storage.cloudReadOk(T2)).toBe(true);
-    expect(rpcMock.mock.calls.filter(([fn]) => fn === 'profile_upsert')).toHaveLength(1);
+    const writes = rpcMock.mock.calls.filter(([fn]) => fn === 'profile_upsert_if');
+    expect(writes).toHaveLength(1);
+    // A card with no row is written with "insert only if still empty".
+    expect(writes[0][1].p_expected_rev).toBeNull();
   });
 });
 
@@ -344,6 +348,72 @@ describe('storage syncLoadByToken: an unfinished local state never beats an onbo
     rpcMock.mockImplementation(async () => ({ data: null, error: { message: 'down' } }));
     await storage.syncLoadByToken(T);
     expect(mockStore['hdx2_drachennest']).toMatchObject({ companionName: 'Geschwister' });
+  });
+});
+
+// Compare-and-swap sync (26 Sep 2026): profile_upsert_if writes only while
+// the card still has the revision this device last saw; a race merges both
+// devices' progress and retries with the new revision.
+describe('storage.cloudSaveByToken compare-and-swap', () => {
+  const T = '6'.repeat(32);
+  beforeEach(() => { rpcMock.mockReset(); });
+
+  it('uses the revision it read, and the next save uses the revision it wrote', async () => {
+    rpcMock.mockImplementation(async (fn, args) => {
+      if (fn === 'profile_get') return { data: { state: { lastDate: '2026-09-28', totalTasksDone: 1 }, rev: 7 }, error: null };
+      return { data: { ok: true, rev: (args.p_expected_rev ?? 0) + 1 }, error: null };
+    });
+    await storage.cloudLoadByToken(T);
+    await storage.cloudSaveByToken(T, { lastDate: '2026-09-28', totalTasksDone: 2 });
+    await storage.cloudSaveByToken(T, { lastDate: '2026-09-28', totalTasksDone: 3 });
+    const writes = rpcMock.mock.calls.filter(([fn]) => fn === 'profile_upsert_if').map(([, a]) => a.p_expected_rev);
+    expect(writes).toEqual([7, 8]);
+  });
+
+  it('a race with another device merges both and retries with the new revision', async () => {
+    const T2 = '7'.repeat(32);
+    const base = { lastDate: '2026-09-28', totalTasksDone: 1, quests: [{ id: 's_wake', done: false }, { id: 's_breakfast', done: false }], treasuresFound: ['t01'] };
+    const theirs = { ...base, totalTasksDone: 2, quests: [{ id: 's_wake', done: true }, { id: 's_breakfast', done: false }], treasuresFound: ['t01', 't02'] };
+    const mine = { ...base, totalTasksDone: 2, quests: [{ id: 's_wake', done: false }, { id: 's_breakfast', done: true }] };
+    let calls = 0;
+    rpcMock.mockImplementation(async (fn, args) => {
+      if (fn === 'profile_get') return { data: { state: base, rev: 3 }, error: null };
+      calls++;
+      if (args.p_expected_rev === 3) return { data: { ok: false, rev: 4, state: theirs }, error: null };
+      return { data: { ok: true, rev: 5 }, error: null };
+    });
+    await storage.cloudLoadByToken(T2);
+    const w = await storage.cloudSaveByToken(T2, mine);
+    expect(calls).toBe(2);
+    expect(w.status).toBe('merged');
+    expect(w.changed).toBe(true);
+    expect(w.state.quests.map(q => q.done)).toEqual([true, true]);
+    expect(w.state.treasuresFound).toEqual(['t01', 't02']);
+    const retry = rpcMock.mock.calls.filter(([fn]) => fn === 'profile_upsert_if')[1][1];
+    expect(retry.p_expected_rev).toBe(4);
+  });
+
+  it('never overwrites a card it never read: an existing row is merged, the card\'s dragon stays', async () => {
+    const T3 = '8'.repeat(32);
+    const card = { onboardingDone: true, companionName: 'Glut', catEvo: 9, lastDate: '2026-09-27' };
+    rpcMock.mockImplementation(async (fn, args) => {
+      if (args.p_expected_rev === null) return { data: { ok: false, rev: 2, state: card }, error: null };
+      return { data: { ok: true, rev: 3 }, error: null };
+    });
+    const w = await storage.cloudSaveByToken(T3, { kidIntroSeen: true, onboardingDone: false, companionName: 'Funki', lastDate: '2026-09-28' });
+    expect(w.status).toBe('merged');
+    expect(w.state.companionName).toBe('Glut');
+    expect(w.state.catEvo).toBe(9);
+  });
+
+  it('falls back to the old write while the server does not have the function (last in this block)', async () => {
+    const T4 = '9'.repeat(32);
+    rpcMock.mockImplementation(async (fn) => (fn === 'profile_upsert_if'
+      ? { data: null, error: { code: 'PGRST202', message: 'Could not find the function public.profile_upsert_if' } }
+      : { data: { rev: 1 }, error: null }));
+    const w = await storage.cloudSaveByToken(T4, { a: 1 });
+    expect(w.status).toBe('saved');
+    expect(rpcMock).toHaveBeenCalledWith('profile_upsert', { p_token: T4, p_state: { a: 1 } });
   });
 });
 

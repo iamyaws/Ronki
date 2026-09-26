@@ -1634,7 +1634,16 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
         if (cloudBlockedUntilReload.current) return;
         const raw = await storage.load() as GameState | null;
         const merged = { ...(raw || {}), ...state } as GameState;
-        await storage.cloudSaveByToken(activeToken, merged);
+        const written = await storage.cloudSaveByToken(activeToken, merged);
+        // Another device wrote first and its progress was merged into the
+        // card (compare-and-swap, 26 Sep 2026). Show it: keep the merged
+        // state locally, stop this page from writing its older copy, and
+        // reload onto the merged card. Nothing of either device is lost.
+        if (written?.status === 'merged' && written.changed && written.state) {
+          try { await storage.save(written.state); } catch { /* local save is best effort */ }
+          storage.freezeWrites();
+          try { window.location.reload(); } catch { /* ignore */ }
+        }
       }, 1500);
     } else if (user) {
       clearTimeout(cloudTimer.current);
