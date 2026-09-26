@@ -158,7 +158,7 @@ const ROUTES: RouteMeta[] = [
     title: 'Ranzen packen in der 1. Klasse: eine Karte statt täglicher Suche · Ratgeber · Ronki',
     description:
       'Turnbeutel vergessen, Schwimmsachen zu Hause? Eine Bildkarte pro Schultag zeigt, was in den Ranzen muss. Mit kostenlosem Packplan zum Ausdrucken.',
-    ogImage: '/og-ratgeber-morgenroutine.jpg',
+    ogImage: '/og-tool-ranzen-packplan.jpg',
   },
   {
     path: '/tools/ranzen-packplan',

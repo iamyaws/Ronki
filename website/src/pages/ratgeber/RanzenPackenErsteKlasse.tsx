@@ -16,7 +16,7 @@ export default function RatgeberRanzenPackenErsteKlasse() {
       category="Einschulung"
       readMinutes={5}
       publishedAt="2026-09-26"
-      ogImage="/og-ratgeber-morgenroutine.jpg"
+      ogImage="/og-tool-ranzen-packplan.jpg"
       heroImage="/art/routines/getting-ready.webp"
       heroAlt="Ein Kind macht sich morgens für die Schule fertig."
       related={[

@@ -234,6 +234,10 @@ export default function RanzenPackplan() {
                     </fieldset>
                   ))}
                 </div>
+                <p className="mt-4 text-sm text-ink/70 leading-relaxed">
+                  Der Link zu eurem Plan lässt sich teilen. Trag bei „Noch etwas?“ darum
+                  keine Namen ein.
+                </p>
               </Step>
 
               <Step n={3} id="pp-step-3" title="Wie packt ihr?">
