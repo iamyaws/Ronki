@@ -105,6 +105,21 @@ describe('TonightRitual', () => {
     const dialog = screen.getByRole('dialog');
     fireEvent.click(dialog);
     expect(dialog.textContent).toContain(tripAt(4).hook);
+    // Tomorrow as a picture: the next place, drawn, next to the line.
+    const img = screen.getByTestId('tonight-place');
+    expect(img.getAttribute('src')).toContain('art/bilderbuch/places/t05.webp');
+    expect(img.getAttribute('alt')).toBe(tripAt(4).place);
+    // A picture that fails to load leaves the line on its own.
+    fireEvent.error(img);
+    expect(screen.queryByTestId('tonight-place')).toBeNull();
+    expect(dialog.textContent).toContain(tripAt(4).hook);
+  });
+
+  it('the hook data carries the next place for a day trip and for a dream trip', () => {
+    const day = tonightHook({ ...mockState, lastTripDate: dayKey(EVE), tripCursor: 6, expedition: { state: 'home' } }, EVE);
+    expect(day).toMatchObject({ picture: tripAt(6).picture, place: tripAt(6).place, dream: false });
+    const dream = tonightHook({ ...mockState, quests: bedtime(true), tripCursor: 9 }, EVE);
+    if (dream.dream) expect(dream).toMatchObject({ picture: tripAt(9).picture, place: tripAt(9).place });
   });
 
   it('closing during the hook keeps the dream trip that was just promised (LOOP-2, KIDUX-2)', () => {

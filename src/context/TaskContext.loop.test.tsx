@@ -251,6 +251,24 @@ describe('receiveTreasure', () => {
     expect(evolves[0][1]).toMatchObject({ stage: 2 });
   });
 
+  it('the child picks a favourite treasure; the same one again takes the heart away; it survives a save', async () => {
+    at('2026-09-28T07:10:00');
+    const h = await mount(louisToday());
+    expect(h.state.favoriteTreasure ?? null).toBeNull();
+    await act(async () => { h.actions.setFavoriteTreasure('trip-t02'); });
+    expect(h.state.favoriteTreasure).toBe('trip-t02');
+    await act(async () => { h.actions.setFavoriteTreasure('trip-t05'); });
+    expect(h.state.favoriteTreasure).toBe('trip-t05');
+    await act(async () => { h.actions.setFavoriteTreasure('trip-t05'); });
+    expect(h.state.favoriteTreasure).toBeNull();
+  });
+
+  it('a saved favourite is still there after the app starts again (found in the browser check)', async () => {
+    at('2026-09-28T07:10:00');
+    const h = await mount(louisToday({ favoriteTreasure: 'trip-t02' }));
+    expect(h.state.favoriteTreasure).toBe('trip-t02');
+  });
+
   it('keeps every keepsake: the 61st treasure drops nothing (Astra FC-02)', async () => {
     at('2026-09-28T07:10:00');
     const many = Array.from({ length: 60 }, (_, i) => ({ id: `m${i}`, emoji: '🍁', name: 'Blatt', biome: 'morgenwald', location: 'Weg', quote: 'Schön.', ts: '2026-01-01T00:00:00.000Z' }));

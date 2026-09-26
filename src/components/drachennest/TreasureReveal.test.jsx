@@ -73,4 +73,20 @@ describe('TreasureReveal', () => {
     const { getByTestId } = render(<TreasureReveal />);
     expect(getByTestId('treasure-reveal').textContent).toContain('Ein altes Blatt.');
   });
+  it('with a favourite on the shelf, Ronki says the new treasure goes next to it', () => {
+    mockState = { catEvo: 5, adventureCount: 2, tripCursor: 2, favoriteTreasure: 'trip-t01', expedition: exp('t03') };
+    const { getByText } = render(<TreasureReveal onDone={() => {}} />);
+    VoiceAudio.playLocalized.mockClear();
+    fireEvent.click(getByText('Ins Regal stellen'));
+    expect(VoiceAudio.playLocalized).toHaveBeenCalledWith('fav_next_01', 0);
+    expect(VoiceAudio.playLocalized).not.toHaveBeenCalledWith('treasure_shelf_01', 0);
+  });
+
+  it('without a favourite, the plain shelf line', () => {
+    mockState = { catEvo: 5, adventureCount: 2, tripCursor: 2, expedition: exp('t03') };
+    const { getByText } = render(<TreasureReveal onDone={() => {}} />);
+    VoiceAudio.playLocalized.mockClear();
+    fireEvent.click(getByText('Ins Regal stellen'));
+    expect(VoiceAudio.playLocalized).toHaveBeenCalledWith('treasure_shelf_01', 0);
+  });
 });

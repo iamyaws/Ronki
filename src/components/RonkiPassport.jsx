@@ -36,6 +36,13 @@ function genitive(name) {
  * repeat of a trip after the fourteenth brings no new treasure); old
  * mementos from before the pass have no trip id and all stay.
  */
+/** The favourite first, the rest in the order found. */
+export function favouriteFirst(items, favKey) {
+  if (!favKey) return items;
+  const fav = items.find((s) => s.key === favKey);
+  return fav ? [fav, ...items.filter((s) => s !== fav)] : items;
+}
+
 export function shelfItems(expeditionLog) {
   const seen = new Set();
   const out = [];
@@ -54,7 +61,7 @@ export function shelfItems(expeditionLog) {
 }
 
 export default function RonkiPassport({ onNavigate, onOpenParental }) {
-  const { state } = useTask();
+  const { state, actions } = useTask();
   const [hello, setHello] = useState(false);
   const [openKey, setOpenKey] = useState(null);
   if (!state) return null;
@@ -68,7 +75,8 @@ export default function RonkiPassport({ onNavigate, onOpenParental }) {
   const mood = ambientMood(state.ronkiMood);
   const variant = state.companionVariant;
   const taughtFire = state.taughtSignature === 'fire';
-  const shelf = shelfItems(log);
+  const fav = state.favoriteTreasure || null;
+  const shelf = favouriteFirst(shelfItems(log), fav);
   const open = shelf.find((s) => s.key === openKey) || null;
 
   const tapRonki = () => {
@@ -79,6 +87,12 @@ export default function RonkiPassport({ onNavigate, onOpenParental }) {
   const tapTreasure = (item) => {
     setOpenKey(item.key);
     if (item.voice) VoiceAudio.playLocalized(item.voice, 0);
+  };
+
+  const toggleFavourite = (item) => {
+    const choosing = item.key !== fav;
+    actions?.setFavoriteTreasure?.(item.key);
+    if (choosing) VoiceAudio.playLocalized('fav_set_01', 0);
   };
 
   return (
@@ -173,7 +187,14 @@ export default function RonkiPassport({ onNavigate, onOpenParental }) {
                     }}
                     data-testid="treasure-tile"
                   >
-                    <span aria-hidden="true" style={{ fontSize: 38, lineHeight: 1 }}>{item.emoji}</span>
+                    <span aria-hidden="true" style={{ fontSize: 38, lineHeight: 1, position: 'relative' }}>
+                      {item.emoji}
+                      {item.key === fav && (
+                        <span className="text-ember" style={{ position: 'absolute', right: -16, top: -10, lineHeight: 0 }} data-testid="treasure-heart">
+                          <DoodleIcon name="heart" size={20} filled />
+                        </span>
+                      )}
+                    </span>
                     <span className="font-headline font-semibold text-center" style={{ fontSize: 14, lineHeight: 1.15, marginTop: 6 }}>
                       {item.place}
                     </span>
@@ -186,6 +207,20 @@ export default function RonkiPassport({ onNavigate, onOpenParental }) {
                 <div className="flex items-start gap-3">
                   <span aria-hidden="true" style={{ fontSize: 34, lineHeight: 1 }}>{open.emoji}</span>
                   <p className="font-headline" style={{ fontSize: 19, lineHeight: 1.35 }}>{open.story}</p>
+                </div>
+                <div className="flex justify-end" style={{ marginTop: 10 }}>
+                  <button
+                    type="button"
+                    onClick={() => toggleFavourite(open)}
+                    aria-pressed={open.key === fav}
+                    aria-label="Lieblingsschatz"
+                    className={`inline-flex items-center gap-2 rounded-full active:scale-[0.97] transition-transform ${open.key === fav ? 'bg-ember text-white' : 'bg-paper text-ink'}`}
+                    style={{ border: '2.5px solid var(--color-ink)', padding: '8px 14px', cursor: 'pointer' }}
+                    data-testid="treasure-favourite"
+                  >
+                    <DoodleIcon name="heart" size={24} filled={open.key === fav} />
+                    <span className="font-headline font-semibold" style={{ fontSize: 16 }}>Lieblingsschatz</span>
+                  </button>
                 </div>
               </PaperCard>
             )}

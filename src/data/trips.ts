@@ -13,6 +13,8 @@
  */
 import data from './finchLines.de.json';
 
+const BASE_URL: string = ((import.meta as unknown as { env?: { BASE_URL?: string } }).env?.BASE_URL) || '/';
+
 export interface Trip {
   /** Stable id, 't01' to 't28'. Stored in saves (expedition.tripId, treasuresFound). */
   id: string;
@@ -26,11 +28,14 @@ export interface Trip {
   /** Voice ids for VoiceAudio.playLocalized. */
   storyVoice: string;
   hookVoice: string;
+  /** Small drawing of the place (art/bilderbuch/places/tNN.webp), shown with
+   *  the hook the evening before: tomorrow as a picture (26 Sep 2026). */
+  picture: string;
 }
 
-export const TRIPS: Trip[] = (data.trips as Array<Omit<Trip, 'nn' | 'storyVoice' | 'hookVoice'>>).map(t => {
+export const TRIPS: Trip[] = (data.trips as Array<Omit<Trip, 'nn' | 'storyVoice' | 'hookVoice' | 'picture'>>).map(t => {
   const nn = t.id.slice(1);
-  return { ...t, nn, storyVoice: `trip_story_${nn}`, hookVoice: `trip_hook_${nn}` };
+  return { ...t, nn, storyVoice: `trip_story_${nn}`, hookVoice: `trip_hook_${nn}`, picture: `${BASE_URL}art/bilderbuch/places/${t.id}.webp` };
 });
 
 export const TRIP_COUNT = TRIPS.length;

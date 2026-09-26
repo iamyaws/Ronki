@@ -146,10 +146,12 @@ export function tonightHook(state, when) {
   const dreamOk = tripAllowed(state, 'night', when);
   if (state?.lastTripDate === today || (!dreamOk && state?.lastTripAt)) {
     const trip = tripAt((state?.tripCursor ?? 0) + (state?.expedition?.pendingMemento ? 1 : 0));
-    return { id: trip.hookVoice, text: trip.hook, dream: false };
+    return { id: trip.hookVoice, text: trip.hook, dream: false, picture: trip.picture, place: trip.place };
   }
   if (dreamOk && fireOfBlock(state || {}, 'evening', when).full) {
-    return { id: 'night_trip_01', text: lineText('night_trip_01'), dream: true };
+    // Tomorrow as a picture: the place he dreams of tonight.
+    const next = tripAt((state?.tripCursor ?? 0) + (state?.expedition?.pendingMemento ? 1 : 0));
+    return { id: 'night_trip_01', text: lineText('night_trip_01'), dream: true, picture: next.picture, place: next.place };
   }
   return { id: 'sleep_nest_01', text: lineText('sleep_nest_01'), dream: false };
 }
@@ -386,7 +388,7 @@ export default function TonightRitual({ onClose }) {
       )}
 
       {phase === 'story' && <StoryLine text={story} />}
-      {phase === 'hook' && <StoryLine text={hook.text} kicker={null} />}
+      {phase === 'hook' && <StoryLine text={hook.text} kicker={null} picture={hook.picture} pictureAlt={hook.place} />}
 
       <Lullaby active={phase === 'curtain'} />
 
@@ -542,7 +544,9 @@ function NightFall({ active }) {
 
 // ─── Story line ─────────────────────────────────────────────────
 
-function StoryLine({ text, kicker = 'Ronki erzählt' }) {
+function StoryLine({ text, kicker = 'Ronki erzählt', picture = null, pictureAlt = '' }) {
+  // A missing picture never leaves a broken frame: the line stands alone.
+  const [pictureOk, setPictureOk] = useState(true);
   return (
     <div
       style={{
@@ -555,6 +559,26 @@ function StoryLine({ text, kicker = 'Ronki erzählt' }) {
         textAlign: 'center',
       }}
     >
+      {picture && pictureOk && (
+        <img
+          src={picture}
+          alt={pictureAlt || ''}
+          draggable={false}
+          onError={() => setPictureOk(false)}
+          data-testid="tonight-place"
+          style={{
+            width: 'clamp(84px, 14vh, 132px)',
+            height: 'clamp(84px, 14vh, 132px)',
+            objectFit: 'cover',
+            borderRadius: 18,
+            border: '3px solid rgba(255,255,255,0.92)',
+            boxShadow: '0 8px 22px rgba(4,8,18,0.35)',
+            transform: 'rotate(-2.5deg)',
+            marginBottom: 14,
+            flexShrink: 0,
+          }}
+        />
+      )}
       {kicker && (
         <span
           className="bb-hand inline-block rounded-[10px] bg-sun px-4 py-1.5 text-lg uppercase leading-none text-ink"

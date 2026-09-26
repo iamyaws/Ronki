@@ -16,4 +16,13 @@ describe('TreasureShelf', () => {
     expect(shelf.querySelectorAll('[role="listitem"]')).toHaveLength(3);
     expect(shelf.textContent).toBe('🌰🪨🪶');
   });
+  it('keeps the child\'s favourite in front, with a heart', () => {
+    const m = (tripId, emoji) => ({ id: `m-${tripId}`, ts: '2026-09-26T17:00:00.000Z', emoji, name: tripId, tripId });
+    const log = [m('t01', 'a'), m('t02', 'b'), m('t03', 'c'), m('t04', 'd')];
+    const { getAllByRole, getByTestId } = render(<TreasureShelf log={log} favorite="trip-t01" />);
+    const items = getAllByRole('listitem');
+    expect(items).toHaveLength(3);
+    expect(items[0].textContent).toContain('🍁');
+    expect(items[0].contains(getByTestId('shelf-heart'))).toBe(true);
+  });
 });

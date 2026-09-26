@@ -7,8 +7,9 @@ import { render, fireEvent } from '@testing-library/react';
 // the voice bank are stubbed so the test only looks at what the page
 // shows and says.
 let mockState;
+let mockActions = {};
 vi.mock('../context/TaskContext', () => ({
-  useTask: () => ({ state: mockState, actions: {} }),
+  useTask: () => ({ state: mockState, actions: mockActions }),
 }));
 const playLocalized = vi.fn();
 vi.mock('../utils/voiceAudio', () => ({
@@ -42,6 +43,7 @@ const memento = (tripId, extra = {}) => ({
 
 describe('RonkiPassport', () => {
   beforeEach(() => {
+    mockActions = {};
     playLocalized.mockClear();
     mockState = base();
   });
@@ -82,6 +84,32 @@ describe('RonkiPassport', () => {
     mockState = { ...base(), adventureCount: 4, expeditionLog: [memento('t01'), memento('t02'), memento('t03'), memento('t04')] };
     rerender(<RonkiPassport />);
     expect(queryByTestId('sticker-adventures').textContent).toContain('4 Abenteuer');
+  });
+
+  it('the child picks a favourite treasure from its story card, and Ronki says so', () => {
+    mockActions = { setFavoriteTreasure: vi.fn() };
+    mockState = { ...base(), adventureCount: 2, expeditionLog: [memento('t01'), memento('t02')] };
+    const { getAllByTestId, getByTestId } = render(<RonkiPassport />);
+    fireEvent.click(getAllByTestId('treasure-tile')[1]);
+    fireEvent.click(getByTestId('treasure-favourite'));
+    expect(mockActions.setFavoriteTreasure).toHaveBeenCalledWith('trip-t02');
+    expect(playLocalized).toHaveBeenCalledWith('fav_set_01', 0);
+  });
+
+  it('the favourite stands first on the shelf with a heart, and its heart button is pressed', () => {
+    mockActions = { setFavoriteTreasure: vi.fn() };
+    mockState = { ...base(), adventureCount: 3, favoriteTreasure: 'trip-t02', expeditionLog: [memento('t01'), memento('t02'), memento('t03')] };
+    const { getAllByTestId, getByTestId } = render(<RonkiPassport />);
+    const tiles = getAllByTestId('treasure-tile');
+    expect(tiles[0].textContent).toContain('Lichtung');
+    expect(tiles[0].querySelector('[data-testid="treasure-heart"]')).toBeTruthy();
+    expect(tiles[1].querySelector('[data-testid="treasure-heart"]')).toBeNull();
+    fireEvent.click(tiles[0]);
+    expect(getByTestId('treasure-favourite').getAttribute('aria-pressed')).toBe('true');
+    playLocalized.mockClear();
+    fireEvent.click(getByTestId('treasure-favourite')); // the same one again takes the heart away
+    expect(mockActions.setFavoriteTreasure).toHaveBeenCalledWith('trip-t02');
+    expect(playLocalized).not.toHaveBeenCalledWith('fav_set_01', 0);
   });
 
   it('shows the stepping stones', () => {
