@@ -73,7 +73,7 @@ Marc's ask (25 Sep, late): reduce the features, learn from Finch's onboarding an
 3. Two of your own task asks were flagged by the guardrail reviewer as need-framing ("Allein ist es so still im Zimmer", "sonst werd ich ganz steif"); kept as your lines, your call.
 4. Backend, not done: two devices that both change the same card within the same few seconds are still last-writer-wins, as before this pass. The proper fix is a compare-and-swap RPC (`profile_upsert_if(p_token, p_state, p_expected_updated_at)`), a small Supabase migration plus a client change; worth it before any family uses two devices at once. Also: the `telemetry_events` insert policy is `TO authenticated` while the app never signs in, so client events are correct but may not land.
 5. Known limit: day keys stay UTC app-wide, so the day rolls over at 01:00 or 02:00 local time, not at midnight.
-6. Content runway: 14 trips; a daily child reaches trip 15 after about 2.5 weeks, then trips repeat honestly ("Da war ich schon mal"). The next story wave should land before then.
+6. Content runway: **second wave LIVE 26 Sep** (PR 34, merge 7685305; live bundle `index-DLf6c_aZ.js` with the new trips, `de_trip_story_15..28` served as audio): 28 trips, about four weeks for a daily child. Astra-reviewed (t23 no sun gazing, t28 no worry cue), Harry voice, Whisper 28 of 28. A third wave or a seasonal set should land before week five; Legendär needs 42 adventures. Concept page with the loops, the eight rule layers, the refused patterns and the fair levers: https://claude.ai/artifact/FpZkKEuURtfFaPJtADtDi6
 7. German is the default language until a parent picks English (Ronki's new lines exist only in German). `?onboardingPreview=1` now works only in DEV builds (it reset real saves).
 
 ---
