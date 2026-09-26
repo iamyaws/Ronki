@@ -22,6 +22,7 @@
  */
 import { supabase } from './supabase';
 import { trackEvent } from './analytics';
+import { cleanAppKinds } from './routine-builder';
 
 const TOKEN_REGEX = /^[a-f0-9]{32}$/;
 
@@ -58,6 +59,13 @@ export interface CreateProfileParams {
    * later in the in-app dashboard.
    */
   analyticsEnabled?: boolean;
+  /**
+   * Morning steps the parent picked on the Morgenroutine page, as app kinds
+   * (e.g. 'teeth_am'). Unknown kinds are dropped. With at least one left the
+   * card seeds familyConfig.routine.morning; the evening stays the app's
+   * default because the seed has no evening key.
+   */
+  morning?: string[];
 }
 
 /**
@@ -78,6 +86,7 @@ export async function createProfileOnSite(
   if (pin && !/^\d{4}$/.test(pin)) return { ok: false, reason: 'invalid' };
   if (!supabase) return { ok: false, reason: 'config' };
 
+  const morning = cleanAppKinds(params.morning ?? []);
   const token = generateToken();
   const seedState: Record<string, unknown> = {
     parentOnboardingDone: true,
@@ -90,6 +99,7 @@ export async function createProfileOnSite(
     familyConfig: {
       childName,
       siblings: [],
+      ...(morning.length ? { routine: { morning } } : {}),
     },
     kidIntroSeen: false,
     onboardingDone: false,

@@ -27,7 +27,7 @@
 import { useState, useRef, useEffect, FormEvent } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'motion/react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import QRCode from 'qrcode';
 import { PageMeta } from '../components/PageMeta';
 import { PainterlyShell } from '../components/PainterlyShell';
@@ -45,6 +45,13 @@ import {
   buildShareUrl,
   tokenDisplayFragment,
 } from '../lib/profileSetup';
+import {
+  APP_KIND_LABELS,
+  appKindPicture,
+  cleanAppKinds,
+  type AppMorningKind,
+} from '../lib/routine-builder';
+import { TASK_ART_PATH } from '../components/sheet';
 
 type Phase =
   | { kind: 'form' }
@@ -53,6 +60,9 @@ type Phase =
   | { kind: 'error'; message: string };
 
 export default function ProfilErstellen() {
+  // Morning steps carried over from the Morgenroutine page (?morgen=teeth_am,dress).
+  const { search } = useLocation();
+  const morning = cleanAppKinds(new URLSearchParams(search).get('morgen') ?? '');
   const [phase, setPhase] = useState<Phase>({ kind: 'form' });
   const [childName, setChildName] = useState('');
   const [pin, setPin] = useState('');
@@ -97,6 +107,7 @@ export default function ProfilErstellen() {
     const res = await createProfileOnSite({
       childName: trimmedName,
       pin: pin || null,
+      ...(morning.length ? { morning } : {}),
     });
     if (res.ok) {
       trackEvent('ProfilErstellen Success');
@@ -188,6 +199,7 @@ export default function ProfilErstellen() {
       {(phase.kind === 'form' || phase.kind === 'submitting' || phase.kind === 'error') && (
         <section className="px-6 pb-16">
           <div className="max-w-md mx-auto">
+            {morning.length > 0 && <CarriedSteps kinds={morning} />}
             <form
               onSubmit={handleSubmit}
               className="rounded-3xl bg-cream/60 border border-teal-dark/10 p-6 sm:p-8 shadow-sm"
@@ -362,5 +374,43 @@ export default function ProfilErstellen() {
 
       <style>{profileCardCss + profileCardPreviewCss + profileCardPrintCss}</style>
     </PainterlyShell>
+  );
+}
+
+/**
+ * The morning steps a parent picked on /vorlagen/morgenroutine, shown above
+ * the form so it is clear what the new card starts with.
+ */
+function CarriedSteps({ kinds }: { kinds: AppMorningKind[] }) {
+  return (
+    <section
+      aria-labelledby="carried-steps"
+      className="mb-6 rounded-3xl border border-teal-dark/10 bg-white/70 p-5 sm:p-6"
+    >
+      <h2 id="carried-steps" className="font-display font-semibold text-lg text-ink">
+        Diese Schritte übernimmt Ronki
+      </h2>
+      <ul className="mt-3 flex flex-wrap gap-2">
+        {kinds.map((kind) => (
+          <li
+            key={kind}
+            className="flex items-center gap-2 rounded-2xl border border-teal-dark/10 bg-white py-1.5 pl-1.5 pr-3 text-sm font-display font-semibold text-ink"
+          >
+            <img
+              src={`${TASK_ART_PATH}${appKindPicture(kind)}`}
+              alt=""
+              width={64}
+              height={64}
+              className="h-9 w-9 object-contain"
+            />
+            {APP_KIND_LABELS[kind]}
+          </li>
+        ))}
+      </ul>
+      <p className="mt-3 text-xs text-ink/60 leading-relaxed">
+        Die hast du auf der Vorlage für die Morgenroutine ausgesucht. Im Eltern-Bereich der App
+        kannst du sie jederzeit ändern.
+      </p>
+    </section>
   );
 }
