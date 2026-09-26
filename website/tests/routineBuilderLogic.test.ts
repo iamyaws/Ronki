@@ -33,6 +33,7 @@ import {
   startTimes,
   type RoutinePlan,
   type StepCode,
+  printedTimes,
 } from '../src/lib/routine-builder';
 import taskKindsSource from '../../src/data/taskKinds.ts?raw';
 
@@ -71,7 +72,7 @@ describe('Morning catalogue', () => {
       ['t', 'Wasser trinken', 'water.webp', 1, 'water'],
       ['n', 'Tier füttern', 'pet-bowl.webp', 3, null],
       ['s', 'Schuhe anziehen', 'sneakers.webp', 3, null],
-      ['j', 'Jacke und Mütze', 'hat-gloves.webp', 2, null],
+      ['j', 'Jacke anziehen', 'rain-jacket.webp', 2, null],
       ['p', 'Tasche packen', 'bag.webp', 5, 'packcheck'],
     ]);
     for (const step of MORNING_STEPS) expect(step.hint.length).toBeGreaterThan(0);
@@ -238,7 +239,8 @@ describe('Clock times', () => {
 
   it('puts the times on the sheet and the leave time in the done band only when times are on', () => {
     let plan = setLeave(setTimes(defaultPlan(), true), '07:40');
-    expect(sheetSteps(plan).map((s) => s.time)).toEqual(['7:07', '7:10', '7:20', '7:35']);
+    // Printed rounded down to five minutes (the exact starts are 7:07, 7:10, 7:20, 7:35).
+    expect(sheetSteps(plan).map((s) => s.time)).toEqual(['7:05', '7:10', '7:20', '7:35']);
     expect(leaveNote(plan)).toBe('Für heute fertig. Los um 7:40 Uhr.');
     plan = setTimes(plan, false);
     expect(sheetSteps(plan).map((s) => s.time)).toEqual([undefined, undefined, undefined, undefined]);
@@ -361,5 +363,18 @@ describe('Ronki app', () => {
     expect(cleanAppKinds(['packcheck', 7, 'water'])).toEqual(['packcheck', 'water']);
     expect(cleanAppKinds('')).toEqual([]);
     expect(cleanAppKinds(null)).toEqual([]);
+  });
+});
+
+describe('Printed times and the card link, after review', () => {
+  it('prints a rounded time only where it changes from the row above', () => {
+    // Exact starts 7:24, 7:27, 7:28, 7:30: rounded 7:20, 7:25, 7:25, 7:30.
+    const plan = setMinutes(setMinutes(setMinutes(setLeave(setTimes(withSteps(['z', 't', 'b', 'p']), true), '07:35'), 0, 3), 1, 1), 2, 2);
+    expect(printedTimes(plan)).toEqual(['7:20', '7:25', undefined, '7:30']);
+  });
+
+  it('gives no card link when the school bag is the only app step', () => {
+    expect(cardLink(withSteps(['k', 's', 'p']))).toBeNull();
+    expect(cardLink(withSteps(['k', 'z', 'p']))).toBe('/profil-erstellen?morgen=teeth_am,packcheck');
   });
 });

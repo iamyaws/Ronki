@@ -261,7 +261,7 @@
 }
 /* A filled time from the builder: same place as the blank line, in cobalt. */
 .rs-time--set {
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 700;
   color: #0544b0;
 }
@@ -320,7 +320,7 @@
 }
 .rs-page--compact .rs-time--set {
   margin-top: 1px;
-  font-size: 15px;
+  font-size: 18px;
   line-height: 1.1;
 }
 

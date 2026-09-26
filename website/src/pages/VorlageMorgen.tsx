@@ -1,5 +1,5 @@
 import { RoutinePrintSheet } from '../components/RoutinePrintSheet';
-import { BUILDER_ANCHOR } from '../components/routine-builder';
+import { JumpToBuilder } from '../components/routine-builder';
 import { VorlageDownload } from '../components/VorlageDownload';
 import { GuideFaq, GuideLink, VorlageGuide } from '../components/VorlageGuide';
 import { VORLAGE_PRINT_MORGEN } from './print/VorlagePrint';
@@ -28,7 +28,7 @@ const FAQ: GuideFaq[] = [
   {
     question: 'Reicht die Seite oder brauche ich das PDF?',
     answer:
-      'Die Seite reicht. Tipp oben auf Drucken, dann druckt dein Browser nur das Blatt. Das PDF ist die fertige Datei mit Feldern für eure Uhrzeiten, die du speichern und immer wieder drucken kannst.',
+      'Die Seite reicht. Tipp unter dem Blatt auf Drucken, dann druckt dein Browser nur das Blatt, mit euren Schritten und Uhrzeiten. Das PDF hat unsere vier Schritte mit leeren Feldern für die Uhrzeit, zum Speichern und immer wieder Drucken.',
   },
 ];
 
@@ -50,6 +50,7 @@ export default function VorlageMorgen() {
           title="Die Morgenroutine"
           pdfHref="/vorlagen/morgenroutine.pdf"
           printHref="/print/vorlage-morgen"
+          sheetOnPage
         />
       }
       ronki={VORLAGE_PRINT_MORGEN.ronki}
@@ -106,9 +107,9 @@ export default function VorlageMorgen() {
               <>
                 <p>
                   Die vier Schritte sind ein Vorschlag. Oben unter{' '}
-                  <a href={`#${BUILDER_ANCHOR}`} className="text-cobalt underline decoration-2 underline-offset-4">
+                  <JumpToBuilder className="text-cobalt underline decoration-2 underline-offset-4">
                     Eure Schritte
-                  </a>{' '}
+                  </JumpToBuilder>{' '}
                   stellst du euren Morgen selbst zusammen: Schritte dazunehmen, rausnehmen oder
                   verschieben. Kommt bei euch das Frühstück vor dem Anziehen, schieb es nach oben.
                   Wichtig ist nur, dass die Reihenfolge jeden Tag gleich bleibt. Was jeden Tag

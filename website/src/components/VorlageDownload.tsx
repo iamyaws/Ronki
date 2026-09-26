@@ -43,6 +43,10 @@ interface Props {
   title: string;
   /** Route of the clean print page for the no-email path. */
   printHref: string;
+  /** The page prints its own sheet with the family's steps (morning builder):
+   *  the no-email line then points to the sheet below instead of the fixed
+   *  print route, and the box says the PDF holds our four steps. */
+  sheetOnPage?: boolean;
 }
 
 /** Cobalt tick drawn on the white box. Same path as the specimen's check. */
@@ -52,7 +56,7 @@ const CHECK_MARK =
 const BOX_CLASS =
   'mt-0.5 h-7 w-7 shrink-0 cursor-pointer appearance-none rounded-lg border-[2.5px] border-white bg-white bg-[length:22px_22px] bg-center bg-no-repeat';
 
-export function VorlageDownload({ source, pdfHref, title, printHref }: Props) {
+export function VorlageDownload({ source, pdfHref, title, printHref, sheetOnPage = false }: Props) {
   const emailId = useId();
   const consentId = useId();
   const updatesId = useId();
@@ -127,8 +131,9 @@ export function VorlageDownload({ source, pdfHref, title, printHref }: Props) {
       ) : (
         <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-4" noValidate>
           <p className="text-sm text-white/90 leading-relaxed">
-            Eine Seite A4, zum Aufhängen an den Kühlschrank. Trag deine E-Mail ein, dann
-            öffnen wir dir das PDF.
+            {sheetOnPage
+              ? 'Eine Seite A4 mit unseren vier Schritten, zum Aufhängen an den Kühlschrank. Trag deine E-Mail ein, dann öffnen wir dir das PDF.'
+              : 'Eine Seite A4, zum Aufhängen an den Kühlschrank. Trag deine E-Mail ein, dann öffnen wir dir das PDF.'}
           </p>
 
           <div className="flex flex-col gap-1.5">
@@ -232,14 +237,34 @@ export function VorlageDownload({ source, pdfHref, title, printHref }: Props) {
 
       <p className="mt-4 text-sm text-white/90 leading-relaxed">
         Ohne E-Mail:{' '}
-        <Link
-          to={printHref}
-          onClick={() => trackEvent('Vorlage Download', { vorlage: source, weg: 'druck' })}
-          className="text-white underline decoration-sun decoration-2 underline-offset-4"
-        >
-          Diese Seite ist selbst schon druckbar
-        </Link>
-        . Strg+P genügt.
+        {sheetOnPage ? (
+          <>
+            <a
+              href="#vorschau"
+              onClick={(event) => {
+                // Scroll without a history entry, so Back never lands on an older plan.
+                event.preventDefault();
+                trackEvent('Vorlage Download', { vorlage: source, weg: 'druck' });
+                document.getElementById('vorschau')?.scrollIntoView?.({ block: 'start', behavior: 'smooth' });
+              }}
+              className="text-white underline decoration-sun decoration-2 underline-offset-4"
+            >
+              Das Blatt weiter unten ist selbst schon druckbar
+            </a>
+            . Tipp dort auf Drucken.
+          </>
+        ) : (
+          <>
+            <Link
+              to={printHref}
+              onClick={() => trackEvent('Vorlage Download', { vorlage: source, weg: 'druck' })}
+              className="text-white underline decoration-sun decoration-2 underline-offset-4"
+            >
+              Diese Seite ist selbst schon druckbar
+            </Link>
+            . Strg+P genügt.
+          </>
+        )}
       </p>
     </section>
   );

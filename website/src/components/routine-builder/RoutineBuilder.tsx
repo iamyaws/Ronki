@@ -38,7 +38,7 @@ import {
   setLeave,
   setMinutes,
   setTimes,
-  startTimes,
+  printedTimes,
   stepLabel,
   stepPicture,
   type PlanStepCode,
@@ -48,9 +48,34 @@ import type { RoutinePlanState } from './useRoutinePlan';
 /** Anchor of the builder, for links from the guide on the same page. */
 export const BUILDER_ANCHOR = 'eure-schritte';
 
-export const OWN_STEP_PRIVACY = 'Trag hier nur einen Schritt ein, keine Namen: Der Text steht auch im Link.';
+export const OWN_STEP_PRIVACY =
+  'Kennen wir das Wort, etwa Mütze oder Hausaufgaben, kommt ein Bild aufs Blatt. Sonst bleibt ein leeres Feld, in das dein Kind vor dem ersten Morgen selbst ein Bild malt. Trag hier nur einen Schritt ein, keine Namen: Der Text steht auch im Link.';
+
+/** Scrolls to the builder without a history entry, so Back never lands on an older plan. */
+export function JumpToBuilder({ className, children }: { className?: string; children: ReactNode }) {
+  return (
+    <a
+      href={`#${BUILDER_ANCHOR}`}
+      className={className}
+      onClick={(event) => {
+        event.preventDefault();
+        document.getElementById(BUILDER_ANCHOR)?.scrollIntoView?.({ block: 'start', behavior: 'smooth' });
+      }}
+    >
+      {children}
+    </a>
+  );
+}
 export const LINK_NOTE =
   'Im Link stehen eure Schritte, die Uhrzeiten und euer eigener Schritt. Alle mit dem Link können das lesen.';
+
+/** "Die Uhrzeiten und die anderen Schritte bleiben auf eurem Blatt." or nothing. */
+function paperOnly(times: boolean, rest: boolean): string {
+  const parts = [times && 'die Uhrzeiten', rest && 'die anderen Schritte'].filter(Boolean) as string[];
+  if (!parts.length) return '';
+  const joined = parts.join(' und ');
+  return ` ${joined[0].toUpperCase()}${joined.slice(1)} bleiben auf eurem Blatt.`;
+}
 
 /* ------------------------------------------------------------------ */
 /* Above the preview                                                   */
@@ -61,7 +86,7 @@ export function RoutineBuilderControls({ builder }: { builder: RoutinePlanState 
   const [adding, setAdding] = useState(false);
   const full = !canAdd(plan);
   const hasOwn = plan.steps.includes(OWN_STEP_CODE);
-  const starts = plan.times ? startTimes(plan.leave, plan.minutes) : [];
+  const times = printedTimes(plan);
   const missing = MORNING_STEPS.filter((step) => !plan.steps.includes(step.code));
   const titleId = `${BUILDER_ANCHOR}-titel`;
 
@@ -85,7 +110,7 @@ export function RoutineBuilderControls({ builder }: { builder: RoutinePlanState 
             builder={builder}
             code={code}
             index={i}
-            start={starts[i]}
+            start={times[i]}
           />
         ))}
       </ol>
@@ -202,8 +227,8 @@ export function RoutineBuilderControls({ builder }: { builder: RoutinePlanState 
             </div>
             <p className="mt-2 text-sm text-ink/65 leading-relaxed">
               Wir rechnen rückwärts: Der letzte Schritt ist fertig, wenn ihr losmüsst. Wie lange
-              ein Schritt dauert, stellst du oben mit Minus und Plus ein. Der erste Schritt fängt
-              um {clockLabel(starts[0])} Uhr an.
+              ein Schritt dauert, stellst du oben mit Minus und Plus ein. Auf dem Blatt stehen die
+              Zeiten auf fünf Minuten abgerundet, so findet dein Kind sie leichter auf der Uhr.
             </p>
           </div>
         )}
@@ -267,7 +292,7 @@ function StepItem({
             </span>
           )}
           {plan.times && start && (
-            <span className="mt-0.5 block text-sm text-ink/65">ab {clockLabel(start)} Uhr</span>
+            <span className="mt-0.5 block text-sm text-ink/65">ab {start} Uhr</span>
           )}
         </div>
         <div className="flex w-full flex-wrap items-center justify-end gap-2 sm:w-auto sm:flex-nowrap">
@@ -456,14 +481,16 @@ export function RoutineBuilderShare({ builder }: { builder: RoutinePlanState }) 
             onClick={() => trackEvent('Karte aus Vorlage', { vorlage: 'morgen' })}
             className="bb-press inline-flex items-center gap-2 rounded-full border-[2.5px] border-ink bg-sun px-6 py-3 font-display font-bold text-base text-ink"
           >
-            Mit Ronki weitermachen
+            Kostenlose Ronki-Karte erstellen
             <svg aria-hidden viewBox="0 0 64 64" className="h-4 w-4">
               <use href="#bb-arrow" />
             </svg>
           </Link>
           <p className="mt-3 text-sm text-ink/75 leading-relaxed">
-            Ronki übernimmt in der App: {kinds.map((kind) => APP_KIND_LABELS[kind]).join(', ')}.
-            {rest ? ' Der Rest bleibt auf eurem Blatt.' : ''}
+            Ronki ist unsere kostenlose App für Kinder, ohne E-Mail und ohne Werbung. Du bekommst
+            eine Karte mit QR-Code, die dein Kind auf dem Tablet scannt. Dann fragt Ronki in eurer
+            Reihenfolge nach: {kinds.map((kind) => APP_KIND_LABELS[kind]).join(', ')}.
+            {paperOnly(plan.times, rest)}
           </p>
         </div>
       )}

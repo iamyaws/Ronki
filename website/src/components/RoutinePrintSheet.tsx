@@ -6,7 +6,7 @@ import {
   RoutineBuilderControls,
   RoutineBuilderShare,
   useRoutinePlan,
-  BUILDER_ANCHOR,
+  JumpToBuilder,
 } from './routine-builder';
 import { leaveNote, sheetDescription, sheetSteps } from '../lib/routine-builder';
 
@@ -181,12 +181,9 @@ function TemplateLayout({
               </p>
             )}
             {controls && (
-              <a
-                href={`#${BUILDER_ANCHOR}`}
-                className="mt-5 inline-flex items-center gap-2 font-display font-semibold text-base text-cobalt underline decoration-2 underline-offset-4 hover:text-ink"
-              >
+              <JumpToBuilder className="mt-5 inline-flex items-center gap-2 font-display font-semibold text-base text-cobalt underline decoration-2 underline-offset-4 hover:text-ink">
                 Eigene Schritte zusammenstellen
-              </a>
+              </JumpToBuilder>
             )}
           </header>
         )}
@@ -198,12 +195,14 @@ function TemplateLayout({
         {controls && <div className="print:hidden max-w-3xl mx-auto px-6 pb-10">{controls}</div>}
 
         <div className="max-w-3xl mx-auto px-6 pb-16 print:max-w-none print:m-0 print:p-0">
-          <div className="print:hidden mb-6">
+          <div id="vorschau" className="print:hidden mb-6 scroll-mt-24">
             <p className="bb-hand text-2xl uppercase text-cobalt leading-none mb-2">
               Vorschau
             </p>
             <p className="text-sm text-ink/70 leading-relaxed">
-              So wird deine Vorlage aussehen. Tipp auf „Drucken" oben rechts. Dein Browser zeigt dir dann die Druckvorschau, wo du auch auf „Als PDF speichern" umschalten kannst.
+              {controls
+                ? 'So wird dein Blatt aussehen. Tipp unter dem Blatt auf „Drucken". Dein Browser zeigt dir dann die Druckvorschau, wo du auch auf „Als PDF speichern" umschalten kannst.'
+                : 'So wird deine Vorlage aussehen. Tipp auf „Drucken" oben rechts. Dein Browser zeigt dir dann die Druckvorschau, wo du auch auf „Als PDF speichern" umschalten kannst.'}
             </p>
           </div>
           <div className="bg-white rounded-[28px] overflow-hidden border-[3px] border-ink print:rounded-none print:border-0 print:overflow-visible">

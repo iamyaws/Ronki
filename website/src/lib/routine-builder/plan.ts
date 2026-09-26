@@ -79,7 +79,7 @@ export const MORNING_STEPS: ReadonlyArray<MorningStep> = [
   { code: 't', label: 'Wasser trinken', hint: 'Ein Glas Wasser.', img: 'water.webp', minutes: 1, app: 'water' },
   { code: 'n', label: 'Tier füttern', hint: 'Futter in den Napf, frisches Wasser.', img: 'pet-bowl.webp', minutes: 3 },
   { code: 's', label: 'Schuhe anziehen', hint: 'Klett zu, fertig.', img: 'sneakers.webp', minutes: 3 },
-  { code: 'j', label: 'Jacke und Mütze', hint: 'Was sagt das Wetter heute?', img: 'hat-gloves.webp', minutes: 2 },
+  { code: 'j', label: 'Jacke anziehen', hint: 'Was sagt das Wetter heute? Mütze dazu?', img: 'rain-jacket.webp', minutes: 2 },
   { code: 'p', label: 'Tasche packen', hint: 'Brotdose, Trinken, Hausaufgaben.', img: 'bag.webp', minutes: 5, app: 'packcheck' },
 ];
 
@@ -296,11 +296,38 @@ export function clockLabel(hhmm: string): string {
 
 const COUNT_WORDS = ['Ein', 'Zwei', 'Drei', 'Vier', 'Fünf', 'Sechs'];
 
+/** Plan positions that go on the sheet: an own step without text stays off, it would print an empty row. */
+function sheetIndices(plan: RoutinePlan): number[] {
+  return plan.steps.flatMap((code, i) => (code === OWN_STEP_CODE && !plan.own ? [] : [i]));
+}
+
+/**
+ * Clock times as the sheet prints them, one per plan position (undefined
+ * where no time is printed). Each start is rounded down to five minutes,
+ * which a child finds on a kitchen clock, and printed only where it changes
+ * from the row above, so the sheet never reads like a stopwatch. The leave
+ * time in the done band stays exact.
+ */
+export function printedTimes(plan: RoutinePlan): (string | undefined)[] {
+  const out: (string | undefined)[] = plan.steps.map(() => undefined);
+  if (!plan.times) return out;
+  const keep = sheetIndices(plan);
+  const starts = startTimes(plan.leave, keep.map((i) => plan.minutes[i]));
+  let last = '';
+  keep.forEach((i, n) => {
+    const rounded = fromMinutes(Math.floor(toMinutes(starts[n]) / 5) * 5);
+    if (rounded !== last) out[i] = clockLabel(rounded);
+    last = rounded;
+  });
+  return out;
+}
+
 /** Steps as the sheet draws them, with the clock time when times are on. */
 export function sheetSteps(plan: RoutinePlan): SheetStep[] {
-  const starts = plan.times ? startTimes(plan.leave, plan.minutes) : [];
-  return plan.steps.map((code, i) => {
-    const time = plan.times ? clockLabel(starts[i]) : undefined;
+  const times = printedTimes(plan);
+  return sheetIndices(plan).map((i) => {
+    const code = plan.steps[i];
+    const time = times[i];
     if (code === OWN_STEP_CODE) {
       const img = stepPicture(plan, code);
       return img ? { img, label: plan.own, time } : { draw: true, label: plan.own, time };
@@ -312,9 +339,10 @@ export function sheetSteps(plan: RoutinePlan): SheetStep[] {
 
 /** The line under the sheet title. For the four default steps it is the line the page always had. */
 export function sheetDescription(plan: RoutinePlan): string {
-  const n = plan.steps.length;
+  const shown = sheetIndices(plan).map((i) => plan.steps[i]);
+  const n = shown.length;
   const count = `${COUNT_WORDS[n - 1] ?? String(n)} ${n === 1 ? 'Schritt' : 'Schritte'}`;
-  const toBag = plan.steps[n - 1] === 'p' ? ' bis zur Tasche' : '';
+  const toBag = shown[n - 1] === 'p' ? ' bis zur Tasche' : '';
   return `${count}${toBag}. Dein Kind malt den Kreis aus, wenn ein Schritt geschafft ist.`;
 }
 
@@ -356,10 +384,16 @@ export function appKindPicture(kind: AppMorningKind): string {
   return MORNING_STEPS.find((step) => step.app === kind)!.img;
 }
 
-/** Link to the card page carrying the app kinds, or null when no chosen step is in the app. Never the own step. */
+/**
+ * Link to the card page carrying the app kinds, or null when no chosen step
+ * is in the app. Never the own step. Only the school bag is not enough: the
+ * app drops it on weekends and in the holidays, which would leave the child
+ * a morning without a task.
+ */
 export function cardLink(plan: RoutinePlan): string | null {
   const kinds = appKindsFor(plan);
-  return kinds.length ? `/profil-erstellen?morgen=${kinds.join(',')}` : null;
+  if (!kinds.length || (kinds.length === 1 && kinds[0] === 'packcheck')) return null;
+  return `/profil-erstellen?morgen=${kinds.join(',')}`;
 }
 
 /* ------------------------------------------------------------------ */

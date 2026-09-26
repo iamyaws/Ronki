@@ -12,7 +12,8 @@ const DEFAULT_DESCRIPTION =
   'Vier Schritte bis zur Tasche. Dein Kind malt den Kreis aus, wenn ein Schritt geschafft ist.';
 const LINK_NOTE =
   'Im Link stehen eure Schritte, die Uhrzeiten und euer eigener Schritt. Alle mit dem Link können das lesen.';
-const PRIVACY = 'Trag hier nur einen Schritt ein, keine Namen: Der Text steht auch im Link.';
+const PRIVACY =
+  'Kennen wir das Wort, etwa Mütze oder Hausaufgaben, kommt ein Bild aufs Blatt. Sonst bleibt ein leeres Feld, in das dein Kind vor dem ersten Morgen selbst ein Bild malt. Trag hier nur einen Schritt ein, keine Namen: Der Text steht auch im Link.';
 
 type PlausibleCall = [string, { props?: Record<string, unknown> }?];
 
@@ -91,7 +92,7 @@ describe('Morgenroutine builder', () => {
     expect(builder).toHaveClass('print:hidden');
     const linkButton = screen.getByRole('button', { name: 'Link kopieren' });
     expect(linkButton.closest('.print\\:hidden')).not.toBeNull();
-    expect(screen.getByRole('link', { name: /Mit Ronki weitermachen/ }).closest('.print\\:hidden')).not.toBeNull();
+    expect(screen.getByRole('link', { name: /Kostenlose Ronki-Karte erstellen/ }).closest('.print\\:hidden')).not.toBeNull();
     // The sheet itself is not hidden in print.
     expect(screen.getByRole('list', { name: 'Die Schritte' }).closest('.print\\:hidden')).toBeNull();
   });
@@ -216,8 +217,9 @@ describe('Morgenroutine builder', () => {
     expect(window.location.search).toBe('?los=0730');
     fireEvent.change(screen.getByRole('combobox', { name: 'Wann müsst ihr los?' }), { target: { value: '07:40' } });
     expect(window.location.search).toBe('?los=0740');
+    // Rounded down to five minutes: 7:07 prints as 7:05.
     expect(sheetRows().map((row) => row.querySelector('[data-time]')?.textContent)).toEqual([
-      '7:07 Uhr',
+      '7:05 Uhr',
       '7:10 Uhr',
       '7:20 Uhr',
       '7:35 Uhr',
@@ -227,7 +229,7 @@ describe('Morgenroutine builder', () => {
     // Five more minutes for breakfast: everything before it starts earlier.
     for (let i = 0; i < 5; i += 1) click('Frühstücken: eine Minute mehr');
     expect(window.location.search).toBe('?los=0740&m=3.10.20.5');
-    expect(sheetRows()[0].querySelector('[data-time]')).toHaveTextContent('7:02 Uhr');
+    expect(sheetRows()[0].querySelector('[data-time]')).toHaveTextContent('7:00 Uhr');
     expect(sheetRows()[3].querySelector('[data-time]')).toHaveTextContent('7:35 Uhr');
 
     fireEvent.click(toggle);
@@ -326,32 +328,54 @@ describe('Morgenroutine builder', () => {
 
   it('carries the app steps into the card link, in sheet order and without the own step', () => {
     renderPage('?s=kzaxhp&e=Medizin+nehmen&los=0740');
-    const link = screen.getByRole('link', { name: /Mit Ronki weitermachen/ });
+    const link = screen.getByRole('link', { name: /Kostenlose Ronki-Karte erstellen/ });
     expect(link).toHaveAttribute('href', '/profil-erstellen?morgen=teeth_am,wake,packcheck');
     expect(link.getAttribute('href')).not.toMatch(/Medizin|los|e=/);
     expect(
       screen.getByText(
-        'Ronki übernimmt in der App: Zähne putzen, Aufstehen, Schultasche. Der Rest bleibt auf eurem Blatt.',
+        'Ronki ist unsere kostenlose App für Kinder, ohne E-Mail und ohne Werbung. Du bekommst eine Karte mit QR-Code, die dein Kind auf dem Tablet scannt. Dann fragt Ronki in eurer Reihenfolge nach: Zähne putzen, Aufstehen, Schultasche. Die Uhrzeiten und die anderen Schritte bleiben auf eurem Blatt.',
       ),
     ).toBeInTheDocument();
   });
 
   it('names no rest when the app takes over every step', () => {
     renderPage();
-    expect(screen.getByRole('link', { name: /Mit Ronki weitermachen/ })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: /Kostenlose Ronki-Karte erstellen/ })).toHaveAttribute(
       'href',
       '/profil-erstellen?morgen=teeth_am,dress,breakfast,packcheck',
     );
     expect(
-      screen.getByText('Ronki übernimmt in der App: Zähne putzen, Anziehen, Frühstück, Schultasche.'),
+      screen.getByText(
+        'Ronki ist unsere kostenlose App für Kinder, ohne E-Mail und ohne Werbung. Du bekommst eine Karte mit QR-Code, die dein Kind auf dem Tablet scannt. Dann fragt Ronki in eurer Reihenfolge nach: Zähne putzen, Anziehen, Frühstück, Schultasche.',
+      ),
     ).toBeInTheDocument();
-    expect(screen.queryByText(/Der Rest bleibt/)).toBeNull();
+    expect(screen.queryByText(/bleiben auf eurem Blatt/)).toBeNull();
   });
 
   it('hides the card button when no chosen step is in the app', () => {
     renderPage('?s=khx&e=Medizin');
-    expect(screen.queryByRole('link', { name: /Mit Ronki weitermachen/ })).toBeNull();
-    expect(screen.queryByText(/Ronki übernimmt/)).toBeNull();
+    expect(screen.queryByRole('link', { name: /Kostenlose Ronki-Karte erstellen/ })).toBeNull();
+    expect(screen.queryByText(/fragt Ronki in eurer Reihenfolge/)).toBeNull();
+  });
+
+  it('hides the card button when the school bag is the only app step (the app drops it on weekends)', () => {
+    renderPage('?s=ksjp');
+    expect(screen.queryByRole('link', { name: /Kostenlose Ronki-Karte erstellen/ })).toBeNull();
+  });
+
+  it('leaves an own step without text off the sheet, so no empty row prints', () => {
+    renderPage('?s=zdx');
+    expect(sheetLabels()).toEqual(['Zähne putzen', 'Anziehen']);
+  });
+
+  it('jumps to the builder without a history entry, so Back never lands on an older plan', () => {
+    renderPage();
+    const before = window.history.length;
+    const jumps = screen.getAllByRole('link', { name: /Eigene Schritte zusammenstellen|Eure Schritte/ });
+    expect(jumps.length).toBeGreaterThan(0);
+    for (const jump of jumps) fireEvent.click(jump);
+    expect(window.history.length).toBe(before);
+    expect(window.location.hash).toBe('');
   });
 
   it('counts the first change once and the card button, never the steps', () => {
@@ -359,7 +383,7 @@ describe('Morgenroutine builder', () => {
     click('Zähne putzen nach unten');
     click('Anziehen entfernen');
     fireEvent.click(screen.getByRole('switch', { name: 'Uhrzeiten dazuschreiben' }));
-    fireEvent.click(screen.getByRole('link', { name: /Mit Ronki weitermachen/ }));
+    fireEvent.click(screen.getByRole('link', { name: /Kostenlose Ronki-Karte erstellen/ }));
     expect(plausibleCalls()).toEqual([
       ['Vorlage angepasst', { props: { vorlage: 'morgen' } }],
       ['Karte aus Vorlage', { props: { vorlage: 'morgen' } }],
@@ -390,7 +414,7 @@ describe('Other template pages keep their fixed steps', () => {
     expect(screen.queryByRole('heading', { name: 'Eure Schritte' })).toBeNull();
     expect(screen.queryByRole('switch')).toBeNull();
     expect(screen.queryByRole('button', { name: 'Link kopieren' })).toBeNull();
-    expect(screen.queryByRole('link', { name: /Mit Ronki weitermachen/ })).toBeNull();
+    expect(screen.queryByRole('link', { name: /Kostenlose Ronki-Karte erstellen/ })).toBeNull();
     expect(sheetRows()).toHaveLength(count);
   });
 });

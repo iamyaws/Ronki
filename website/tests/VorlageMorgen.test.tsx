@@ -46,11 +46,11 @@ describe('Morgenroutine Vorlage', () => {
     expect(img).toHaveAttribute('height');
   });
 
-  it('keeps the no-email print route and links the ADHS variant', () => {
+  it('points the no-email line to the sheet on the page and links the ADHS variant', () => {
     setup();
-    expect(screen.getByRole('link', { name: /diese seite ist selbst schon druckbar/i })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: /das blatt weiter unten ist selbst schon druckbar/i })).toHaveAttribute(
       'href',
-      '/print/vorlage-morgen',
+      '#vorschau',
     );
     expect(screen.getByRole('link', { name: 'Vorlage bei ADHS' })).toHaveAttribute('href', '/vorlagen/adhs');
   });

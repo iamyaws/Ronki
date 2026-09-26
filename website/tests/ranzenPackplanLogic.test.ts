@@ -266,3 +266,12 @@ describe('pictures for free items', () => {
     expect(pictureForFree('')).toBeNull();
   });
 });
+
+describe('free text cleaning', () => {
+  it('drops invisible format characters that would print mirrored or hidden text', () => {
+    expect(cleanFreeText('Lat\u202Eerne')).toBe('Laterne');
+    expect(cleanFreeText('\u200BGeld\uFEFF')).toBe('Geld');
+    // The zero-width joiner stays, it builds emoji.
+    expect(cleanFreeText('\u{1F469}\u200D\u{1F467}')).toBe('\u{1F469}\u200D\u{1F467}');
+  });
+});
