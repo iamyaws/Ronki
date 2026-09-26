@@ -1,15 +1,19 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { trackEvent } from '../../lib/analytics';
 import {
+  MORNING,
   OWN_STEP_CODE,
-  addOwnStep,
-  decodePlan,
-  encodePlan,
+  kitAddOwnStep,
+  kitDecodePlan,
+  kitEncodePlan,
   setOwnText,
+  type RoutineKit,
   type RoutinePlan,
 } from '../../lib/routine-builder';
 
 export interface RoutinePlanState {
+  /** Morning or evening: catalogue, times and app steps of the page. */
+  kit: RoutineKit;
   plan: RoutinePlan;
   /** The own step as the parent types it, spaces and all. The plan keeps the cleaned text. */
   ownDraft: string;
@@ -31,7 +35,9 @@ export interface RoutinePlanState {
  * /morgen short link) keeps its tags until the parent changes something,
  * so the page view is still counted with them.
  */
-export function useRoutinePlan(pagePath: string): RoutinePlanState {
+export function useRoutinePlan(pagePath: string, kit: RoutineKit = MORNING): RoutinePlanState {
+  const decodePlan = (search: string) => kitDecodePlan(kit, search);
+  const encodePlan = (plan: RoutinePlan) => kitEncodePlan(kit, plan);
   const [plan, setPlan] = useState<RoutinePlan>(() =>
     decodePlan(typeof window === 'undefined' ? '' : window.location.search),
   );
@@ -51,6 +57,7 @@ export function useRoutinePlan(pagePath: string): RoutinePlanState {
     if (encodePlan(decodePlan(window.location.search)) === query) return;
     const next = `${pagePath}${query ? `?${query}` : ''}${window.location.hash}`;
     window.history.replaceState(window.history.state, '', next);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, pagePath]);
 
   // Back and forward change the address bar without remounting the page.
@@ -65,15 +72,16 @@ export function useRoutinePlan(pagePath: string): RoutinePlanState {
     }
     window.addEventListener('popstate', restore);
     return () => window.removeEventListener('popstate', restore);
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kit]);
 
   const update = useCallback((change: (prev: RoutinePlan) => RoutinePlan) => {
     setPlan(change);
     if (!counted.current) {
       counted.current = true;
-      trackEvent('Vorlage angepasst', { vorlage: 'morgen' });
+      trackEvent('Vorlage angepasst', { vorlage: kit.id });
     }
-  }, []);
+  }, [kit]);
 
   const changeOwn = useCallback(
     (text: string) => {
@@ -84,8 +92,8 @@ export function useRoutinePlan(pagePath: string): RoutinePlanState {
   );
 
   const addOwn = useCallback(() => {
-    update((prev) => addOwnStep(prev, ownDraft));
-  }, [update, ownDraft]);
+    update((prev) => kitAddOwnStep(kit, prev, ownDraft));
+  }, [update, ownDraft, kit]);
 
-  return { plan, ownDraft, update, changeOwn, addOwn, shareUrl };
+  return { kit, plan, ownDraft, update, changeOwn, addOwn, shareUrl };
 }

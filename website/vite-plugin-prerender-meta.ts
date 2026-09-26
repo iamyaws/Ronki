@@ -109,7 +109,7 @@ const ROUTES: RouteMeta[] = [
     ogImage: '/og-vorlage-abendroutine.jpg',
     title: 'Abendroutine Vorlage für Kinder zum Ausdrucken · Ronki',
     description:
-      'Kostenlose Abendroutine Vorlage für Kinder zum Ausdrucken. Vier Schritte bis ins Bett, zum Abhaken. Dazu: wann ihr anfangt und was hilft, wenn es hakt.',
+      'Kostenlose Abendroutine Vorlage für Kinder zum Ausdrucken. Wähl eure Schritte mit Bildern, dein Kind malt die Kreise aus. Dazu: wann ihr anfangt, was hilft.',
   },
   {
     path: '/vorlagen/kleine-geschwister',

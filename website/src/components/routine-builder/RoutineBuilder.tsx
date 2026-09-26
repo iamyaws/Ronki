@@ -1,5 +1,6 @@
 /**
- * The morning routine builder on /vorlagen/morgenroutine.
+ * The routine builder on /vorlagen/morgenroutine and /vorlagen/abendroutine
+ * (the kit in `builder.kit` says which).
  *
  * `RoutineBuilderControls` sits above the sheet preview: the chosen steps
  * with buttons to move and remove them, a picture grid to add more, one
@@ -18,38 +19,57 @@ import { TASK_ART_PATH } from '../sheet';
 import { trackEvent } from '../../lib/analytics';
 import { copyText } from '../../lib/clipboard';
 import {
-  APP_KIND_LABELS,
-  LEAVE_TIMES,
   MAX_MINUTES,
   MIN_MINUTES,
-  MORNING_STEPS,
+  MORNING,
   OWN_STEP_CODE,
   OWN_STEP_MAX,
-  SHARE_TEXT,
-  addStep,
-  appKindsFor,
   canAdd,
-  cardLink,
-  catalogueStep,
   cleanOwnText,
   clockLabel,
+  isEndStep,
+  kitAddStep,
+  kitAppKindsFor,
+  kitCardLink,
+  kitSetLeave,
+  kitStepLabel,
+  kitStepPicture,
   moveStep,
+  printedTimes,
   removeStep,
-  setLeave,
   setMinutes,
   setTimes,
-  printedTimes,
-  stepLabel,
-  stepPicture,
-  type PlanStepCode,
+  stepOf,
+  type RoutineKit,
 } from '../../lib/routine-builder';
 import type { RoutinePlanState } from './useRoutinePlan';
 
 /** Anchor of the builder, for links from the guide on the same page. */
 export const BUILDER_ANCHOR = 'eure-schritte';
 
-export const OWN_STEP_PRIVACY =
-  'Kennen wir das Wort, etwa Mütze oder Hausaufgaben, kommt ein Bild aufs Blatt. Sonst bleibt ein leeres Feld, in das dein Kind vor dem ersten Morgen selbst ein Bild malt. Trag hier nur einen Schritt ein, keine Namen: Der Text steht auch im Link.';
+/** Words that differ between the morning and the evening builder. */
+const COPY = {
+  morgen: {
+    dayPart: 'Morgen',
+    ownExample: 'Mütze oder Hausaufgaben',
+    timeQuestion: 'Wann müsst ihr los?',
+    countBack: 'Wir rechnen rückwärts: Der letzte Schritt ist fertig, wenn ihr losmüsst.',
+  },
+  abend: {
+    dayPart: 'Abend',
+    ownExample: 'Kuscheltier oder Buch',
+    timeQuestion: 'Wann ist Licht aus?',
+    countBack: 'Wir rechnen vom Lichtausmachen rückwärts: Bis dahin sind die Schritte davor fertig.',
+  },
+} as const;
+
+/** The note under the own step: picture or a box to draw in, and no names. */
+export function ownStepNote(kit: RoutineKit): string {
+  const copy = COPY[kit.id];
+  return `Kennen wir das Wort, etwa ${copy.ownExample}, kommt ein Bild aufs Blatt. Sonst bleibt ein leeres Feld, in das dein Kind vor dem ersten ${copy.dayPart} selbst ein Bild malt. Trag hier nur einen Schritt ein, keine Namen: Der Text steht auch im Link.`;
+}
+
+export const OWN_STEP_PRIVACY = ownStepNote(MORNING);
 
 /** Scrolls to the builder without a history entry, so Back never lands on an older plan. */
 export function JumpToBuilder({ className, children }: { className?: string; children: ReactNode }) {
@@ -85,12 +105,14 @@ function paperOnly(times: boolean, rest: boolean): string {
 /* ------------------------------------------------------------------ */
 
 export function RoutineBuilderControls({ builder }: { builder: RoutinePlanState }) {
-  const { plan, ownDraft, update, changeOwn, addOwn } = builder;
+  const { kit, plan, ownDraft, update, changeOwn, addOwn } = builder;
+  const copy = COPY[kit.id];
+  const ownNote = ownStepNote(kit);
   const [adding, setAdding] = useState(false);
   const full = !canAdd(plan);
   const hasOwn = plan.steps.includes(OWN_STEP_CODE);
-  const times = printedTimes(plan);
-  const missing = MORNING_STEPS.filter((step) => !plan.steps.includes(step.code));
+  const times = printedTimes(plan, kit.endStep);
+  const missing = kit.steps.filter((step) => !plan.steps.includes(step.code));
   const titleId = `${BUILDER_ANCHOR}-titel`;
 
   return (
@@ -103,7 +125,7 @@ export function RoutineBuilderControls({ builder }: { builder: RoutinePlanState 
         Eure Schritte
       </h2>
       <p className="mt-2 text-sm sm:text-base text-ink/70 leading-relaxed">
-        Such bis zu sechs Schritte aus, in der Reihenfolge von eurem Morgen.
+        Such bis zu sechs Schritte aus, in der Reihenfolge von eurem {copy.dayPart}.
       </p>
 
       <ol aria-labelledby={titleId} className="mt-4 space-y-2">
@@ -117,7 +139,7 @@ export function RoutineBuilderControls({ builder }: { builder: RoutinePlanState 
           />
         ))}
       </ol>
-      {hasOwn && <p className="mt-2 text-sm text-ink/65 leading-relaxed">{OWN_STEP_PRIVACY}</p>}
+      {hasOwn && <p className="mt-2 text-sm text-ink/65 leading-relaxed">{ownNote}</p>}
 
       <div className="mt-4">
         <button
@@ -149,7 +171,7 @@ export function RoutineBuilderControls({ builder }: { builder: RoutinePlanState 
                   key={step.code}
                   type="button"
                   aria-label={`${step.label} dazunehmen`}
-                  onClick={() => update((prev) => addStep(prev, step.code))}
+                  onClick={() => update((prev) => kitAddStep(kit, prev, step.code))}
                   className="flex min-w-0 flex-col items-center gap-1 rounded-2xl border-[2.5px] border-ink/15 bg-white px-1.5 pb-2 pt-2.5 text-center font-display font-semibold text-xs sm:text-sm leading-tight text-ink/80 transition-colors hover:border-ink/50"
                 >
                   <img
@@ -196,7 +218,7 @@ export function RoutineBuilderControls({ builder }: { builder: RoutinePlanState 
                   Dazunehmen
                 </button>
               </div>
-              <p className="mt-2 text-sm text-ink/65 leading-relaxed">{OWN_STEP_PRIVACY}</p>
+              <p className="mt-2 text-sm text-ink/65 leading-relaxed">{ownNote}</p>
             </div>
           )}
         </div>
@@ -213,15 +235,15 @@ export function RoutineBuilderControls({ builder }: { builder: RoutinePlanState 
           <div className="mt-3">
             <div className="flex flex-wrap items-center gap-3">
               <label htmlFor="rb-los" className="font-display font-semibold text-base text-ink">
-                Wann müsst ihr los?
+                {copy.timeQuestion}
               </label>
               <select
                 id="rb-los"
                 value={plan.leave}
-                onChange={(event) => update((prev) => setLeave(prev, event.target.value))}
+                onChange={(event) => update((prev) => kitSetLeave(kit, prev, event.target.value))}
                 className="rounded-xl border-[2.5px] border-ink/20 bg-white px-3 py-2 font-display font-semibold text-base text-ink focus:border-cobalt focus:outline-none"
               >
-                {LEAVE_TIMES.map((time) => (
+                {kit.times.map((time) => (
                   <option key={time} value={time}>
                     {clockLabel(time)} Uhr
                   </option>
@@ -229,7 +251,7 @@ export function RoutineBuilderControls({ builder }: { builder: RoutinePlanState 
               </select>
             </div>
             <p className="mt-2 text-sm text-ink/65 leading-relaxed">
-              Wir rechnen rückwärts: Der letzte Schritt ist fertig, wenn ihr losmüsst. Wie lange
+              {copy.countBack} Wie lange
               ein Schritt dauert, stellst du oben mit Minus und Plus ein. Auf dem Blatt stehen die
               Zeiten auf fünf Minuten abgerundet, so findet dein Kind sie leichter auf der Uhr.
             </p>
@@ -247,15 +269,17 @@ function StepItem({
   start,
 }: {
   builder: RoutinePlanState;
-  code: PlanStepCode;
+  code: string;
   index: number;
   start?: string;
 }) {
-  const { plan, ownDraft, update, changeOwn } = builder;
-  const label = stepLabel(plan, code);
-  const img = stepPicture(plan, code);
+  const { kit, plan, ownDraft, update, changeOwn } = builder;
+  const label = kitStepLabel(kit, plan, code);
+  const img = kitStepPicture(kit, plan, code);
   const count = plan.steps.length;
   const minutes = plan.minutes[index];
+  // "Licht aus" as the last step is the moment itself: no minutes, "um" instead of "ab".
+  const isEnd = isEndStep(kit, plan, index);
 
   return (
     <li className="rounded-2xl border-[2.5px] border-ink/15 bg-white p-2 pr-2.5">
@@ -291,15 +315,17 @@ function StepItem({
             />
           ) : (
             <span className="block font-display font-bold text-base leading-tight text-ink">
-              {catalogueStep(code)?.label}
+              {stepOf(kit, code)?.label}
             </span>
           )}
           {plan.times && start && (
-            <span className="mt-0.5 block text-sm text-ink/65">ab {start} Uhr</span>
+            <span className="mt-0.5 block text-sm text-ink/65">
+              {isEnd ? 'um' : 'ab'} {start} Uhr
+            </span>
           )}
         </div>
         <div className="flex w-full flex-wrap items-center justify-end gap-2 sm:w-auto sm:flex-nowrap">
-          {plan.times && (
+          {plan.times && !isEnd && (
             <div className="mr-auto flex items-center gap-1 sm:mr-2">
               <IconButton
                 label={`${label}: eine Minute weniger`}
@@ -408,15 +434,15 @@ function Switch({
 /* ------------------------------------------------------------------ */
 
 export function RoutineBuilderShare({ builder }: { builder: RoutinePlanState }) {
-  const { plan, shareUrl } = builder;
+  const { kit, plan, shareUrl } = builder;
   const [copied, setCopied] = useState(false);
   const [canShare] = useState(
     () => typeof navigator !== 'undefined' && typeof navigator.share === 'function',
   );
   const copiedTimer = useRef<number | undefined>(undefined);
-  const card = cardLink(plan);
-  const kinds = appKindsFor(plan);
-  const rest = plan.steps.some((code) => !catalogueStep(code)?.app);
+  const card = kitCardLink(kit, plan);
+  const kinds = kitAppKindsFor(kit, plan);
+  const rest = plan.steps.some((code) => !stepOf(kit, code)?.app);
 
   useEffect(() => () => window.clearTimeout(copiedTimer.current), []);
 
@@ -429,7 +455,7 @@ export function RoutineBuilderShare({ builder }: { builder: RoutinePlanState }) 
 
   async function handleShare() {
     try {
-      await navigator.share({ title: 'Morgenroutine', text: SHARE_TEXT, url: shareUrl });
+      await navigator.share({ title: kit.shareTitle, text: kit.shareText, url: shareUrl });
     } catch {
       // Closed the share sheet, or the browser refused. Nothing to do.
     }
@@ -481,7 +507,7 @@ export function RoutineBuilderShare({ builder }: { builder: RoutinePlanState }) 
         <div className="mt-8 rounded-[22px] border-[2.5px] border-ink bg-sky-wash/50 p-4 sm:p-5">
           <Link
             to={card}
-            onClick={() => trackEvent('Karte aus Vorlage', { vorlage: 'morgen' })}
+            onClick={() => trackEvent('Karte aus Vorlage', { vorlage: kit.id })}
             className="bb-press inline-flex items-center gap-2 rounded-full border-[2.5px] border-ink bg-sun px-6 py-3 font-display font-bold text-base text-ink"
           >
             Kostenlose Ronki-Karte erstellen
@@ -492,7 +518,7 @@ export function RoutineBuilderShare({ builder }: { builder: RoutinePlanState }) 
           <p className="mt-3 text-sm text-ink/75 leading-relaxed">
             Ronki ist unsere kostenlose App für Kinder, ohne E-Mail und ohne Werbung. Du bekommst
             eine Karte mit QR-Code, die dein Kind auf dem Tablet scannt. Dann fragt Ronki in eurer
-            Reihenfolge nach: {kinds.map((kind) => APP_KIND_LABELS[kind]).join(', ')}.
+            Reihenfolge nach: {kinds.map((kind) => kit.appLabels[kind]).join(', ')}.
             {paperOnly(plan.times, rest)}
           </p>
         </div>

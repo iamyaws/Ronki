@@ -2,7 +2,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import VorlageMorgen from '../src/pages/VorlageMorgen';
-import VorlageAbend from '../src/pages/VorlageAbend';
 import VorlageAdhs from '../src/pages/VorlageAdhs';
 import VorlageKleineGeschwister from '../src/pages/VorlageKleineGeschwister';
 import { SHARE_TEXT } from '../src/lib/routine-builder';
@@ -402,7 +401,6 @@ describe('Morgenroutine builder', () => {
 
 describe('Other template pages keep their fixed steps', () => {
   it.each([
-    ['Abend', VorlageAbend, 4],
     ['ADHS', VorlageAdhs, 6],
     ['Kleine Geschwister', VorlageKleineGeschwister, 4],
   ] as const)('%s has no builder, no switch and no link row', (_, Page, count) => {
