@@ -52,9 +52,12 @@ export function shelfItems(expeditionLog) {
     if (trip) {
       if (seen.has(trip.id)) continue;
       seen.add(trip.id);
-      out.push({ key: `trip-${trip.id}`, emoji: trip.emoji || m.emoji, name: trip.treasure || m.name, place: trip.place, story: trip.story, voice: trip.storyVoice });
+      out.push({ key: `trip-${trip.id}`, emoji: trip.emoji || m.emoji, name: trip.treasure || m.name, place: trip.place, story: trip.story, voice: trip.storyVoice, stable: true });
     } else {
-      out.push({ key: `m-${m.id || m.ts || out.length}`, emoji: m.emoji, name: m.name, place: m.name || '', story: m.quote || '', voice: null });
+      // Only an id or a timestamp is a stable key; a position is not, so an
+      // old keepsake without either can be looked at but not be the favourite
+      // (a merge could shift it, Astra TF-01).
+      out.push({ key: `m-${m.id || m.ts || out.length}`, emoji: m.emoji, name: m.name, place: m.name || '', story: m.quote || '', voice: null, stable: !!(m.id || m.ts) });
     }
   }
   return out;
@@ -208,7 +211,7 @@ export default function RonkiPassport({ onNavigate, onOpenParental }) {
                   <span aria-hidden="true" style={{ fontSize: 34, lineHeight: 1 }}>{open.emoji}</span>
                   <p className="font-headline" style={{ fontSize: 19, lineHeight: 1.35 }}>{open.story}</p>
                 </div>
-                <div className="flex justify-end" style={{ marginTop: 10 }}>
+                {open.stable && (<div className="flex justify-end" style={{ marginTop: 10 }}>
                   <button
                     type="button"
                     onClick={() => toggleFavourite(open)}
@@ -221,7 +224,7 @@ export default function RonkiPassport({ onNavigate, onOpenParental }) {
                     <DoodleIcon name="heart" size={24} filled={open.key === fav} />
                     <span className="font-headline font-semibold" style={{ fontSize: 16 }}>Lieblingsschatz</span>
                   </button>
-                </div>
+                </div>)}
               </PaperCard>
             )}
           </section>

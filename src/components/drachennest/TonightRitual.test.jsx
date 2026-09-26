@@ -41,7 +41,7 @@ function runToStory() {
 describe('tonightHook', () => {
   it('after a trip today: the next trip, never with a time word', () => {
     const today = dayKey(EVE);
-    const waiting = { lastTripDate: today, tripCursor: 3, expedition: { state: 'away', pendingMemento: { id: 'm' } } };
+    const waiting = { lastTripDate: today, tripCursor: 3, expedition: { state: 'away', tripId: 't04', pendingMemento: { id: 'm', tripId: 't04' } } };
     const h = tonightHook(waiting, EVE);
     expect(h).toMatchObject({ id: tripAt(4).hookVoice, text: tripAt(4).hook, dream: false });
     expect(h.text).not.toMatch(/Morgen/);
@@ -99,7 +99,7 @@ describe('TonightRitual', () => {
   });
 
   it('after a day trip tells the next trip hook', () => {
-    mockState = { ...mockState, lastTripDate: dayKey(EVE), tripCursor: 3, expedition: { state: 'waiting', pendingMemento: { id: 'm' } } };
+    mockState = { ...mockState, lastTripDate: dayKey(EVE), tripCursor: 3, expedition: { state: 'waiting', tripId: 't04', pendingMemento: { id: 'm', tripId: 't04' } } };
     render(<TonightRitual onClose={() => {}} />);
     runToStory();
     const dialog = screen.getByRole('dialog');
@@ -113,6 +113,13 @@ describe('TonightRitual', () => {
     fireEvent.error(img);
     expect(screen.queryByTestId('tonight-place')).toBeNull();
     expect(dialog.textContent).toContain(tripAt(4).hook);
+  });
+
+  it('an old keepsake without a trip does not move the cursor, so the picture shows the real next place (Astra TF-02)', () => {
+    const st = { ...mockState, lastTripDate: dayKey(EVE), tripCursor: 0, expedition: { state: 'waiting', pendingMemento: { id: 'old', emoji: '🍁' } } };
+    expect(tonightHook(st, EVE)).toMatchObject({ place: tripAt(0).place, picture: tripAt(0).picture });
+    const withTrip = { ...st, expedition: { state: 'waiting', tripId: 't01', pendingMemento: { id: 'm', tripId: 't01' } } };
+    expect(tonightHook(withTrip, EVE)).toMatchObject({ place: tripAt(1).place });
   });
 
   it('the hook data carries the next place for a day trip and for a dream trip', () => {

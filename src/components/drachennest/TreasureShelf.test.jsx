@@ -25,4 +25,11 @@ describe('TreasureShelf', () => {
     expect(items[0].textContent).toContain('🍁');
     expect(items[0].contains(getByTestId('shelf-heart'))).toBe(true);
   });
+  it('a repeat trip shows as the newest find, next to the favourite (Astra TF-03)', () => {
+    const m = (tripId, n) => ({ id: `m-${tripId}-${n}`, ts: `2026-10-${String(n).padStart(2, '0')}T17:00:00.000Z`, emoji: 'x', name: tripId, tripId });
+    const log = Array.from({ length: 28 }, (_, i) => m(`t${String(i + 1).padStart(2, '0')}`, i + 1)).concat([m('t01', 29)]);
+    const { getAllByRole } = render(<TreasureShelf log={log} favorite="trip-t02" />);
+    const names = getAllByRole('listitem').map(li => li.getAttribute('aria-label'));
+    expect(names).toEqual(['Feder', 'Ahornblatt', 'Drachenschuppe']);
+  });
 });

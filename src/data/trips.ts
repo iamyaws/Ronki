@@ -40,6 +40,18 @@ export const TRIPS: Trip[] = (data.trips as Array<Omit<Trip, 'nn' | 'storyVoice'
 
 export const TRIP_COUNT = TRIPS.length;
 
+/**
+ * The cursor of the next departure: opening a pending treasure moves the
+ * cursor only when it came from a trip (the same rule as openTreasure in
+ * TaskContext), so a preview never shows a place Ronki will not fly to.
+ */
+export function nextTripCursor(state: { tripCursor?: number; expedition?: { pendingMemento?: { tripId?: string } | null; tripId?: string } | null } | null | undefined): number {
+  const cur = Number.isFinite(state?.tripCursor) && (state?.tripCursor as number) > 0 ? Math.floor(state?.tripCursor as number) : 0;
+  const e = state?.expedition;
+  const advances = !!e?.pendingMemento && !!(e.pendingMemento.tripId || e.tripId);
+  return cur + (advances ? 1 : 0);
+}
+
 /** The trip at a cursor position (wraps after the last one). */
 export function tripAt(cursor: number): Trip {
   const n = Number.isFinite(cursor) && cursor > 0 ? Math.floor(cursor) : 0;

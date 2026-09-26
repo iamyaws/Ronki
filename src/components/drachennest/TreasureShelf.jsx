@@ -12,7 +12,9 @@ import { shelfItems } from '../RonkiPassport';
  * (picked in Ronki's passport) always stands in front, with a heart.
  */
 export default function TreasureShelf({ log, favorite = null }) {
-  const all = shelfItems(log).reverse();
+  // Newest find first, each treasure once (a repeat trip counts as its
+  // latest find, Astra TF-03).
+  const all = shelfItems((Array.isArray(log) ? log : []).slice().reverse());
   const fav = favorite ? all.find(s => s.key === favorite) : null;
   const items = fav ? [fav, ...all.filter(s => s !== fav)].slice(0, 3) : all.slice(0, 3);
   if (!items.length) return null;

@@ -8,7 +8,7 @@ import MoodChibi from '../MoodChibi';
 import { getCatStage } from '../../utils/helpers';
 import { now as clockNow, dayKey } from '../../loop/clock';
 import { fireOfBlock } from '../../loop/fire';
-import { tripAt, tripById } from '../../data/trips';
+import { tripAt, tripById, nextTripCursor } from '../../data/trips';
 import { lineText } from '../../data/ronkiLines';
 
 // Path to the lullaby audio. Royalty-free 4-bar loop, ~30s.
@@ -145,12 +145,12 @@ export function tonightHook(state, when) {
   // departTrip would then ignore.
   const dreamOk = tripAllowed(state, 'night', when);
   if (state?.lastTripDate === today || (!dreamOk && state?.lastTripAt)) {
-    const trip = tripAt((state?.tripCursor ?? 0) + (state?.expedition?.pendingMemento ? 1 : 0));
+    const trip = tripAt(nextTripCursor(state));
     return { id: trip.hookVoice, text: trip.hook, dream: false, picture: trip.picture, place: trip.place };
   }
   if (dreamOk && fireOfBlock(state || {}, 'evening', when).full) {
     // Tomorrow as a picture: the place he dreams of tonight.
-    const next = tripAt((state?.tripCursor ?? 0) + (state?.expedition?.pendingMemento ? 1 : 0));
+    const next = tripAt(nextTripCursor(state));
     return { id: 'night_trip_01', text: lineText('night_trip_01'), dream: true, picture: next.picture, place: next.place };
   }
   return { id: 'sleep_nest_01', text: lineText('sleep_nest_01'), dream: false };

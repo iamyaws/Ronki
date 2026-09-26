@@ -112,6 +112,15 @@ describe('RonkiPassport', () => {
     expect(playLocalized).not.toHaveBeenCalledWith('fav_set_01', 0);
   });
 
+  it('an old keepsake without an id or a time can be looked at but not be the favourite (Astra TF-01)', () => {
+    mockActions = { setFavoriteTreasure: vi.fn() };
+    mockState = { ...base(), adventureCount: 1, expeditionLog: [{ emoji: '🐚', name: 'Muschel', quote: 'Vom Meer.' }] };
+    const { getAllByTestId, queryByTestId, getByTestId } = render(<RonkiPassport />);
+    fireEvent.click(getAllByTestId('treasure-tile')[0]);
+    expect(getByTestId('treasure-story')).toBeTruthy();
+    expect(queryByTestId('treasure-favourite')).toBeNull();
+  });
+
   it('shows the stepping stones', () => {
     const { getByTestId } = render(<RonkiPassport />);
     expect(getByTestId('step-stones')).toBeTruthy();
