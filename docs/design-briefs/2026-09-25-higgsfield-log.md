@@ -109,3 +109,13 @@ Marc's go: plan "printables in option A, and the Ranzen-Packplan tool" (26 Sep 2
 | 91 | 715bff1f | One 4 x 3 sheet: gym bag, swim bag with goggles, folded spare clothes, pencil case, slippers, lunch box, recorder, paint box, rain jacket, school notebook with a letter, child's toilet, teddy bear | cut locally with `scripts/cut-task-sheet.py` into `website/public/art/bilderbuch/tasks/*.webp` (256 px) |
 
 1 image, 2.75 credits. The model painted the transparent ground as a grey checkerboard; the cutter removes it (edge-connected checker plus closed gaps that hold both checker greys in large shares) and keeps white paint with crayon grain.
+
+## Fifth pass: light switch pictures (26 Sep 2026, website session)
+
+Marc's go: "yes, do the light-switch pictures batch" (26 Sep 2026), after Astra rep 5 found the evening "Licht aus" step showed a glowing night light. Same model and settings; references: the task sheets 25cf94f7 and 715bff1f.
+
+| # | Job | What | File |
+|---|---|---|---|
+| 92 | d650a115 | One 2 x 2 sheet: hand switching a ceiling lamp on; switch plus glowing bulb; hand switching the lamp off with moon and stars; switch plus dark bulb with moon | cut with `scripts/cut-task-sheet.py --grid 2x2`; the two bulb versions composed locally (bulb large, switch small in the lower left corner) into `website/public/art/bilderbuch/tasks/light-on.webp` and `light-off.webp`, so they read at the same size as the other steps |
+
+1 image, 2.75 credits. The cutter now measures the checkerboard grid on the known background and only removes a closed region when its greys follow that grid (the switch rocker's grey shading was being cut before).

@@ -57,7 +57,7 @@ export default function VorlageAbend() {
         { img: 'toothbrush.webp', icon: '🪥', label: 'Zähne putzen', hint: 'Auch die hinten im Mund.' },
         { img: 'wash.webp', icon: '🧼', label: 'Gesicht waschen', hint: 'Mit Wasser, ganz sanft.' },
         { img: 'pajama.webp', icon: '🌙', label: 'Pyjama an', hint: 'Die Sachen von heute in den Korb.' },
-        { img: 'nightlight.webp', icon: '📖', label: 'Licht aus', hint: 'Eine Geschichte, dann schlafen.' },
+        { img: 'light-off.webp', icon: '📖', label: 'Licht aus', hint: 'Eine Geschichte, dann schlafen.' },
       ]}
     >
       <VorlageGuide

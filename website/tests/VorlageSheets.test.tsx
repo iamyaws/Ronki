@@ -54,7 +54,7 @@ describe('Print sheets in the Bilderbuch look', () => {
       ['Zähne putzen', 'toothbrush.webp'],
       ['Gesicht waschen', 'wash.webp'],
       ['Pyjama an', 'pajama.webp'],
-      ['Licht aus', 'nightlight.webp'],
+      ['Licht aus', 'light-off.webp'],
     ]);
     expect(VORLAGE_PRINT_KLEINE_GESCHWISTER.steps.map((s) => s.img)).toEqual([
       'toothbrush.webp',
@@ -63,7 +63,7 @@ describe('Print sheets in the Bilderbuch look', () => {
       'teddy.webp',
     ]);
     expect(VORLAGE_PRINT_ADHS.steps.map((s) => [s.label, s.img])).toEqual([
-      ['Licht', 'wake.webp'],
+      ['Licht an', 'light-on.webp'],
       ['Klo', 'toilet.webp'],
       ['Anziehen', 'shirt.webp'],
       ['Frühstück', 'plate.webp'],

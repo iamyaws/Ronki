@@ -62,7 +62,7 @@ export default function VorlageAdhs() {
       ronki={VORLAGE_PRINT_ADHS.ronki}
       clipLane
       steps={[
-        { img: 'wake.webp', icon: '💡', label: 'Licht', hint: 'Rollo hoch, ein Schluck Wasser.' },
+        { img: 'light-on.webp', icon: '💡', label: 'Licht an', hint: 'Rollo hoch, ein Schluck Wasser.' },
         { img: 'toilet.webp', icon: '🚽', label: 'Klo', hint: 'Und Hände waschen.' },
         { img: 'shirt.webp', icon: '👕', label: 'Anziehen', hint: 'Liegt schon von gestern bereit.' },
         { img: 'plate.webp', icon: '🥣', label: 'Frühstück', hint: 'Am Tisch, in Ruhe.' },
@@ -72,7 +72,7 @@ export default function VorlageAdhs() {
     >
       <VorlageGuide
         previewSrc="/vorlagen/previews/adhs.png"
-        previewAlt="Das PDF der ADHS-Vorlage Mein Morgen: sechs Schritte mit je einem Bild und einem Wort (Licht, Klo, Anziehen, Frühstück, Zähne, Ranzen), ein Rand für die Wäscheklammer, Kreise zum Ausmalen, oben Ronki, und ein Zeitbalken ohne Uhrzeit."
+        previewAlt="Das PDF der ADHS-Vorlage Mein Morgen: sechs Schritte mit je einem Bild und einem Wort (Licht an, Klo, Anziehen, Frühstück, Zähne, Ranzen), ein Rand für die Wäscheklammer, Kreise zum Ausmalen, oben Ronki, und ein Zeitbalken ohne Uhrzeit."
         previewCaption="So sieht das PDF aus. Eine Seite A4, mit Rand für die Klammer."
         faq={FAQ}
       />
