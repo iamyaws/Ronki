@@ -45,7 +45,8 @@ describe('TreasureReveal', () => {
   });
 
   it('a repeat trip first says so honestly, then the story', () => {
-    mockState = { catEvo: 20, adventureCount: 14, tripCursor: 16, expedition: exp('t03') };
+    // t03 on the second pass through all 28 trips (cursor 30, 30 % 28 = 2).
+    mockState = { catEvo: 20, adventureCount: 28, tripCursor: 30, expedition: exp('t03') };
     const { getByTestId } = render(<TreasureReveal />);
     expect(getByTestId('treasure-reveal').textContent).toContain(lineText('trip_again_01'));
     expect(VoiceAudio.playLocalized).toHaveBeenCalledWith('trip_again_01', 300);

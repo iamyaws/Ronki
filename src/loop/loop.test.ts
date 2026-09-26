@@ -155,12 +155,24 @@ describe('content', () => {
     expect(normalizeRoutine(undefined)).toEqual(DEFAULT_ROUTINE);
     expect(normalizeRoutine({ morning: ['wake', 'bogus'], evening: [] })).toEqual({ morning: ['wake'], evening: [] });
   });
-  it('has 14 trips in a fixed order that wraps honestly', () => {
-    expect(TRIPS).toHaveLength(14);
+  it('has 28 trips (two waves) in a fixed order that wraps honestly', () => {
+    expect(TRIPS).toHaveLength(28);
+    expect(TRIPS.map(t => t.id)).toEqual(Array.from({ length: 28 }, (_, i) => `t${String(i + 1).padStart(2, '0')}`));
     expect(tripAt(0).id).toBe('t01');
-    expect(tripAt(14).id).toBe('t01');
-    expect(isRepeat(14)).toBe(true);
-    expect(isRepeat(13)).toBe(false);
+    expect(tripAt(14).id).toBe('t15');
+    expect(isRepeat(14)).toBe(false);
+    expect(tripAt(28).id).toBe('t01');
+    expect(isRepeat(28)).toBe(true);
+    expect(isRepeat(27)).toBe(false);
+  });
+  it('every trip has a unique place and treasure picture, and short spoken lines without dashes', () => {
+    expect(new Set(TRIPS.map(t => t.place)).size).toBe(TRIPS.length);
+    expect(new Set(TRIPS.map(t => t.emoji)).size).toBe(TRIPS.length);
+    for (const t of TRIPS) {
+      expect(t.story.split(/\s+/).length).toBeLessThanOrEqual(27);
+      expect(t.hook.startsWith('Als Nächstes flieg ich')).toBe(true);
+      expect(`${t.story} ${t.hook}`).not.toMatch(/[–—]/);
+    }
   });
   it('fills names only in the bubble text', () => {
     expect(lineText('meet_askname_01', { nick: 'Funki' })).toBe('Ich bin Funki! Und wie heißt du?');

@@ -290,7 +290,7 @@ export interface TaskState {
    *  (Astra FC-08: day keys are UTC, so the key alone can let a second
    *  trip through around UTC midnight). */
   lastTripAt?: string | null;
-  /** Index into TRIPS of the next trip (wraps after 14). Old saves: 0. */
+  /** Index into TRIPS of the next trip (wraps after the last trip). Old saves: 0. */
   tripCursor?: number;
   /** Trip ids whose treasure is on the shelf, in order found. */
   treasuresFound?: string[];
@@ -911,7 +911,7 @@ function openTreasure(prev: TaskState, memento: ExpeditionMemento, tripIdHint?: 
   const log = [...(prev.expeditionLog || []), memento];
   const tripId = memento.tripId || tripIdHint;
   const found = Array.isArray(prev.treasuresFound) ? prev.treasuresFound : [];
-  // A repeat after trip 14 goes to the shelf but adds no new treasure.
+  // A repeat after the last trip goes to the shelf but adds no new treasure.
   const treasuresFound = tripId && !found.includes(tripId) ? [...found, tripId] : found;
   const adventureCount = wholeOr(prev.adventureCount, (prev.expeditionLog || []).length) + 1;
   // Only trips from TRIPS move the cursor; an old random memento does not
