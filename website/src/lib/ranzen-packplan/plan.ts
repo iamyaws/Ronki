@@ -166,13 +166,14 @@ export function cleanFreeText(raw: string): string {
  * Pictures for free items the tool knows by name. Only whole words from
  * these lists count, plurals and common compounds written out, so a word
  * that merely contains one ("Schuhkarton", "Aufkleber") never gets a
- * picture of something else (Astra code review, PR 32). Checked in this
- * order, so in "Geld für den Ausflug" the purse wins over the backpack.
+ * picture of something else (Astra code review, PR 32). A word is only
+ * listed when the picture shows that very thing: no sun hat for
+ * "Sonnencreme", no apple for "Banane", no backpack for "Ausflug" (round 2).
  * Anything else gets an empty box on the card to draw in.
  */
 const FREE_PICTURES: ReadonlyArray<{ img: string; words: readonly string[] }> = [
   { img: 'slippers.webp', words: ['hausschuh', 'hausschuhe', 'puschen', 'pantoffeln'] },
-  { img: 'rubber-boots.webp', words: ['gummistiefel', 'regenstiefel', 'stiefel', 'matschhose', 'matschsachen'] },
+  { img: 'rubber-boots.webp', words: ['gummistiefel', 'regenstiefel'] },
   {
     img: 'coin-purse.webp',
     words: ['geld', 'taschengeld', 'ausflugsgeld', 'klassengeld', 'kopiergeld', 'bastelgeld', 'milchgeld',
@@ -183,17 +184,17 @@ const FREE_PICTURES: ReadonlyArray<{ img: string; words: readonly string[] }> = 
     words: ['laterne', 'laternen', 'laternenumzug', 'laternenlauf', 'laternenfest', 'martinslaterne',
       'martinsumzug', 'lampion', 'lampions'],
   },
-  { img: 'apple.webp', words: ['obst', 'obsttag', 'obstdose', 'apfel', 'äpfel', 'frucht', 'früchte', 'gemüse', 'banane'] },
+  { img: 'apple.webp', words: ['obst', 'obsttag', 'obstdose', 'apfel', 'äpfel'] },
   { img: 'glue-stick.webp', words: ['kleber', 'klebestift', 'kleberstift', 'klebstoff'] },
   { img: 'scissors.webp', words: ['schere', 'bastelschere', 'kinderschere'] },
-  { img: 'sun-hat.webp', words: ['sonnenhut', 'sonnenmütze', 'sonnencreme', 'hut', 'kappe', 'basecap'] },
-  { img: 'hat-gloves.webp', words: ['mütze', 'mützen', 'wollmütze', 'handschuh', 'handschuhe', 'schal', 'wintersachen'] },
+  { img: 'sun-hat.webp', words: ['sonnenhut', 'sonnenmütze', 'hut'] },
+  { img: 'hat-gloves.webp', words: ['mütze', 'mützen', 'wollmütze', 'handschuh', 'handschuhe'] },
   {
     img: 'sneakers.webp',
     words: ['schuh', 'schuhe', 'turnschuh', 'turnschuhe', 'sportschuh', 'sportschuhe', 'hallenschuh',
       'hallenschuhe', 'sneaker', 'sneakers'],
   },
-  { img: 'chestnuts.webp', words: ['kastanie', 'kastanien', 'eicheln'] },
+  { img: 'chestnuts.webp', words: ['kastanie', 'kastanien'] },
   { img: 'bottle.webp', words: ['trinkflasche', 'wasserflasche', 'flasche', 'trinken'] },
   { img: 'lunchbox.webp', words: ['brotdose', 'brotbox', 'frühstücksdose', 'frühstück', 'pausenbrot'] },
   { img: 'teddy.webp', words: ['kuscheltier', 'kuscheltiere', 'stofftier', 'teddy', 'teddybär'] },
@@ -205,11 +206,10 @@ const FREE_PICTURES: ReadonlyArray<{ img: string; words: readonly string[] }> = 
   { img: 'book.webp', words: ['buch', 'bücher', 'lesebuch', 'büchereibuch', 'bibliotheksbuch', 'bilderbuch'] },
   {
     img: 'homework.webp',
-    words: ['hausaufgaben', 'hausaufgabenheft', 'heft', 'hefte', 'matheheft', 'schreibheft', 'arbeitsblatt',
-      'arbeitsblätter'],
+    words: ['hausaufgaben', 'hausaufgabenheft', 'heft', 'hefte', 'matheheft', 'schreibheft'],
   },
   { img: 'rain-jacket.webp', words: ['jacke', 'regenjacke', 'matschjacke', 'winterjacke'] },
-  { img: 'backpack.webp', words: ['rucksack', 'ausflug', 'ausflugstag', 'wandertag', 'waldtag'] },
+  { img: 'backpack.webp', words: ['rucksack'] },
 ];
 
 /** Every picture a free item can get, for the check that the files ship. */

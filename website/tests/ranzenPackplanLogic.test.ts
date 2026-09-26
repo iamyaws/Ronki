@@ -234,7 +234,6 @@ describe('pictures for free items', () => {
     ['Gummistiefel', 'rubber-boots.webp'],
     ['Kastanien', 'chestnuts.webp'],
     ['Rucksack', 'backpack.webp'],
-    ['Wandertag', 'backpack.webp'],
     ['Kuscheltier', 'teddy.webp'],
     ['Elternbrief', 'school-letter.webp'],
     ['Mitteilungsheft', 'school-letter.webp'],
@@ -259,6 +258,11 @@ describe('pictures for free items', () => {
     expect(pictureForFree('Aufkleber')).toBeNull();
     expect(pictureForFree('Hutschachtel')).toBeNull();
     expect(pictureForFree('Geldspiel')).toBeNull();
+    // Round 2: words whose picture would show a different thing.
+    for (const word of ['Sonnencreme', 'Matschhose', 'Banane', 'Eicheln', 'Gemüse', 'Kappe', 'Schal',
+      'Ausflug', 'Wandertag', 'Arbeitsblatt', 'Stiefel']) {
+      expect(pictureForFree(word)).toBeNull();
+    }
     expect(pictureForFree('')).toBeNull();
   });
 });
