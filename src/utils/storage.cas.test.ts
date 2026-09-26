@@ -214,6 +214,42 @@ describe('compare-and-swap: answers that never come (review round 2)', () => {
     expect(card(T).hp).toBe(22);
   });
 
+  it('a write that landed as the wifi dropped is never forgotten, however many offline saves follow (verifier R4-1)', async () => {
+    const T = 'ba'.repeat(16);
+    server.rows.set(T, { state: { ...S0(), hp: 50 }, rev: 1 });
+    const A = await device();
+    let S = await load(A, T);
+    let reachable = true;
+    let loseNextAnswer = true;
+    hook = async (fn, _a, run) => {
+      if (!reachable) return { data: null, error: { message: 'TypeError: Failed to fetch', code: '' }, status: 0 };
+      if (fn === 'profile_upsert_if' && loseNextAnswer) { loseNextAnswer = false; run(); reachable = false; return { data: null, error: { message: 'TypeError: Failed to fetch', code: '' }, status: 0 }; }
+      return run();
+    };
+    S = reward(S, 10);
+    await A.save(S);
+    await A.cloudSaveByToken(T, S); // landed, answer lost, then the wifi is gone
+    for (let i = 0; i < 12; i++) { S = reward(S, 1); await A.save(S); await A.cloudSaveByToken(T, S); }
+    reachable = true;
+    await A.cloudSaveByToken(T, S);
+    expect(card(T).hp).toBe(50 + 10 + 12);
+    // and the same after a restart instead of a live save
+    const T2 = 'bb'.repeat(16);
+    server.rows.set(T2, { state: { ...S0(), hp: 50 }, rev: 1 });
+    const B = await device();
+    let S2 = await load(B, T2);
+    reachable = true; loseNextAnswer = true;
+    S2 = reward(S2, 10);
+    await B.save(S2);
+    await B.cloudSaveByToken(T2, S2);
+    for (let i = 0; i < 12; i++) { S2 = reward(S2, 1); await B.save(S2); await B.cloudSaveByToken(T2, S2); }
+    reachable = true;
+    const B2 = await device();
+    const got = await B2.syncLoadByToken(T2);
+    expect(got.hp).toBe(72);
+    expect(card(T2).hp).toBe(72);
+  });
+
   it('a request that never answers frees the queue after the timeout (verifier R2-4)', async () => {
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
     try {

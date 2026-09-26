@@ -243,12 +243,38 @@ async function writeCard(token: string, sent: { state: GameState; seq: number })
   const state = sent.state;
   const s = getSync(token);
   const id = newWriteId();
+  if (casAvailable !== false && s.inflights.length) {
+    // An earlier write never got its answer: read the card and settle it by
+    // its id before writing again (verifier R4-1). Offline, the read fails and
+    // nothing new goes out, so unanswered writes never pile up and one that
+    // may have landed is never dropped.
+    let res: { data?: unknown; error?: unknown };
+    try {
+      res = await withTimeout(supabase.rpc('profile_get', { p_token: token }) as PromiseLike<{ data?: unknown; error?: unknown }>, WRITE_TIMEOUT_MS);
+    } catch {
+      return { status: 'offline' };
+    }
+    if (res?.error) return { status: 'offline' };
+    if (writesFrozen) return { status: 'frozen' };
+    const d = res?.data as { state?: GameState; rev?: number } | null;
+    const card = (d?.state as GameState) || null;
+    const cardRev = d ? (typeof d.rev === 'number' ? d.rev : 0) : null;
+    const landed = s.inflights.some(f => writeIdsOf(card).includes(f.id));
+    s.base = baseAfter(s.inflights, s.base, card, cardRev);
+    // Kept only while it could still land: nothing of ours is on the card and
+    // the card is still at the revision it expected.
+    s.inflights = landed ? [] : s.inflights.filter(f => f.expectedRev === cardRev);
+    s.rev = cardRev;
+    s.server = card;
+    resaveSync(token, sent);
+  }
+  if (casAvailable !== false && s.inflights.length >= INFLIGHTS_KEPT) return { status: 'offline' }; // never drop one that may land
   if (casAvailable !== false) {
     let base = s.base;
     let toWrite = compose(base, state, s.server, id);
     let missing = false;
     for (let attempt = 0; attempt < 3; attempt++) {
-      s.inflights = [...s.inflights.filter(f => f.id !== id), { id, submitted: state, expectedRev: s.rev }].slice(-INFLIGHTS_KEPT);
+      s.inflights = [...s.inflights.filter(f => f.id !== id), { id, submitted: state, expectedRev: s.rev }];
       resaveSync(token, sent);
       let res: { data?: unknown; error?: unknown };
       try {
