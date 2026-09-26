@@ -303,22 +303,23 @@
 .rs-page--big .rs-steps {
   gap: 16px;
 }
+/* Sized so four big rows and the done band fit one A4 page (Astra rep 5). */
 .rs-page--big .rs-row {
-  min-height: 178px;
+  min-height: 150px;
   padding-right: 30px;
 }
 .rs-page--big .rs-pic {
   flex: 1 1 auto;
   width: auto;
-  height: 150px;
+  height: 128px;
 }
 .rs-page--big .rs-pic img {
-  width: 150px;
+  width: 128px;
 }
 .rs-page--big .rs-ring {
   margin-left: 0;
-  width: 92px;
-  height: 92px;
+  width: 84px;
+  height: 84px;
   border-width: 5px;
 }
 

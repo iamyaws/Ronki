@@ -120,11 +120,13 @@ describe('Print sheets in the Bilderbuch look', () => {
     }
   });
 
-  it('ends the morning and the evening sheet with the done band', () => {
-    for (const template of [VORLAGE_PRINT_MORGEN, VORLAGE_PRINT_ABEND]) {
+  it('ends the morning, evening and toddler sheet with the done band (Astra rep 5)', () => {
+    for (const template of [VORLAGE_PRINT_MORGEN, VORLAGE_PRINT_ABEND, VORLAGE_PRINT_KLEINE_GESCHWISTER]) {
       const { unmount } = renderPrint(template);
       expect(screen.getByText('Geschafft!')).toBeInTheDocument();
-      expect(screen.getByText('Male den letzten Kreis aus. Ronki jubelt mit.')).toBeInTheDocument();
+      // The band points at no circle of its own, so it only says the morning is done.
+      expect(screen.getByText('Für heute fertig. Ronki jubelt mit.')).toBeInTheDocument();
+      expect(screen.queryByText(/Male den letzten Kreis aus/)).toBeNull();
       unmount();
     }
   });

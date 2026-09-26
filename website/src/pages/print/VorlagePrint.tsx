@@ -106,6 +106,7 @@ export const VORLAGE_PRINT_KLEINE_GESCHWISTER: VorlagePrintTemplate = {
   description: 'Ganz einfach, nur mit Bildern. Ein Bild geschafft, ein Kreis ausgemalt.',
   accent: '#0544B0',
   bigIcons: true,
+  done: true,
   // No bubble: this sheet has no words for the child.
   ronki: { pose: 'happy' },
   steps: [

@@ -25,8 +25,8 @@ const ROOT = resolve(import.meta.dirname, '..');
 const PUBLIC = join(ROOT, 'website', 'public');
 
 const CARDS = [
-  { slug: 'morgenroutine', headline: 'Morgenroutine für Kinder', sub: 'Vier Schritte mit Bildern, zum Abhaken.' },
-  { slug: 'abendroutine', headline: 'Abendroutine für Kinder', sub: 'Vier Schritte bis ins Bett, zum Abhaken.' },
+  { slug: 'morgenroutine', headline: 'Morgenroutine für Kinder', sub: 'Vier Schritte mit Bildern, Kreise zum Ausmalen.' },
+  { slug: 'abendroutine', headline: 'Abendroutine für Kinder', sub: 'Vier Schritte bis ins Bett, Kreise zum Ausmalen.' },
   { slug: 'kleine-geschwister', headline: 'Routine für Kleinkinder', sub: 'Vier große Bilder, kein Text.' },
   { slug: 'adhs', headline: 'Morgenplan bei ADHS', sub: 'Sechs kleine Schritte, ein Bild pro Schritt.' },
 ];

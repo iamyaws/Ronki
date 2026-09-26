@@ -278,7 +278,14 @@ const WAIT_FOR_SHEET = `(async () => {
   await Promise.all(images.map((img) => img.decode().catch(() => null)));
   const broken = images.filter((img) => !img.complete || img.naturalWidth === 0).map((img) => img.src);
   const fonts = [...new Set([...document.fonts].filter((f) => f.status === 'loaded').map((f) => f.family.replace(/"/g, '')))];
-  return { ok: broken.length === 0, reason: broken.length ? 'images did not load: ' + broken.join(', ') : '', images: images.length, fonts };
+  // The A4 sheet hides overflow, so content that does not fit is cut off without
+  // a second page (Astra rep 5 found the toddler done band clipped this way).
+  const page = document.querySelector('.rs-page');
+  const clipped = page ? page.scrollHeight - page.clientHeight : 0;
+  const reasons = [];
+  if (broken.length) reasons.push('images did not load: ' + broken.join(', '));
+  if (clipped > 1) reasons.push('sheet content is ' + clipped + ' px taller than the page and would be cut off');
+  return { ok: reasons.length === 0, reason: reasons.join('; '), images: images.length, fonts };
 })()`;
 
 async function printRoute(edge, url, out) {

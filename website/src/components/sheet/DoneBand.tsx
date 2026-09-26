@@ -3,7 +3,7 @@ import { RONKI_ART_PATH } from './RonkiHost';
 /** Sky-wash band at the end of the list: the "done" moment, with Ronki cheering. */
 export function DoneBand({
   title = 'Geschafft!',
-  note = 'Male den letzten Kreis aus. Ronki jubelt mit.',
+  note = 'Für heute fertig. Ronki jubelt mit.',
 }: {
   title?: string;
   note?: string;
