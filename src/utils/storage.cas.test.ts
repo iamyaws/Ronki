@@ -250,6 +250,41 @@ describe('compare-and-swap: answers that never come (review round 2)', () => {
     expect(card(T2).hp).toBe(72);
   });
 
+  it('writes the gateway keeps refusing without a code never stop the sync for good (verifier R5-1)', async () => {
+    let now = Date.parse('2026-09-28T07:00:00Z');
+    vi.spyOn(Date, 'now').mockImplementation(() => now);
+    const gateway = { down: true };
+    hook = async (fn, _a, run) => (fn === 'profile_upsert_if' && gateway.down
+      ? { data: null, error: { message: '<html>504 Gateway Time-out</html>' }, status: 504 } // not written, no code
+      : run());
+    for (const restart of [false, true]) {
+      const T = restart ? 'bd'.repeat(16) : 'bc'.repeat(16);
+      server.rows.set(T, { state: { ...S0(), hp: 50 }, rev: 1 });
+      gateway.down = true;
+      const A = await device();
+      let S = await load(A, T);
+      for (let i = 0; i < 12; i++) {
+        S = reward(S, 1);
+        await A.save(S);
+        await A.cloudSaveByToken(T, S);
+        now += 1_500;
+      }
+      expect(card(T).hp).toBe(50);
+      gateway.down = false;
+      now += 61_000; // a minute later the gateway is back
+      if (restart) {
+        const A2 = await device();
+        const got = await A2.syncLoadByToken(T);
+        expect(got.hp).toBe(62);
+      } else {
+        S = reward(S, 1);
+        await A.save(S);
+        expect((await A.cloudSaveByToken(T, S)).status).toBe('saved');
+      }
+      expect(card(T).hp).toBe(restart ? 62 : 63);
+    }
+  });
+
   it('a request that never answers frees the queue after the timeout (verifier R2-4)', async () => {
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
     try {

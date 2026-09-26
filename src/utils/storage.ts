@@ -52,16 +52,21 @@ let writesFrozen = false;
  * load can apply that copy's own changes onto the card.
  */
 /** A write whose answer never came, the state it carried, and the revision it expected. */
-type Inflight = { id: string; submitted: GameState; expectedRev: number | null };
+type Inflight = { id: string; submitted: GameState; expectedRev: number | null; sentAt?: number };
 type SyncInfo = { rev: number | null; server: GameState | null; base: GameState | null; inflights: Inflight[] };
 /** The sync bookkeeping saved inside the local copy. */
 type LocalSync = { token: string; base: GameState | null; inflights: Inflight[]; savedAt: number };
 const sync = new Map<string, SyncInfo>();
 /** How many recent write ids a card keeps (to spot a write whose answer got lost). */
 const WRITE_IDS_KEPT = 20;
-const INFLIGHTS_KEPT = 10;
+const INFLIGHTS_KEPT = 5;
 /** A write with no answer after this long counts as "may have landed" and frees the queue. */
 const WRITE_TIMEOUT_MS = 15_000;
+/** A write not on the card this long after it was sent will not land any more (verifier R5-1). */
+const LANDS_WITHIN_MS = 4 * WRITE_TIMEOUT_MS;
+/** Could this unanswered write still land on a card at cardRev? */
+const mayStillLand = (f: Inflight, cardRev: number | null, now: number) =>
+  f.expectedRev === cardRev && now - (f.sentAt ?? 0) < LANDS_WITHIN_MS;
 const LOCAL_SYNC_KEY = '__sync';
 
 function getSync(token: string): SyncInfo {
@@ -261,9 +266,11 @@ async function writeCard(token: string, sent: { state: GameState; seq: number })
     const cardRev = d ? (typeof d.rev === 'number' ? d.rev : 0) : null;
     const landed = s.inflights.some(f => writeIdsOf(card).includes(f.id));
     s.base = baseAfter(s.inflights, s.base, card, cardRev);
-    // Kept only while it could still land: nothing of ours is on the card and
-    // the card is still at the revision it expected.
-    s.inflights = landed ? [] : s.inflights.filter(f => f.expectedRev === cardRev);
+    // Kept only while it could still land: nothing of ours is on the card, the
+    // card is still at the revision it expected, and it went out less than a
+    // minute ago. So writes the server keeps refusing without a code (a
+    // gateway error, a timeout) never wedge the queue (verifier R5-1).
+    s.inflights = landed ? [] : s.inflights.filter(f => mayStillLand(f, cardRev, Date.now()));
     s.rev = cardRev;
     s.server = card;
     resaveSync(token, sent);
@@ -274,7 +281,7 @@ async function writeCard(token: string, sent: { state: GameState; seq: number })
     let toWrite = compose(base, state, s.server, id);
     let missing = false;
     for (let attempt = 0; attempt < 3; attempt++) {
-      s.inflights = [...s.inflights.filter(f => f.id !== id), { id, submitted: state, expectedRev: s.rev }];
+      s.inflights = [...s.inflights.filter(f => f.id !== id), { id, submitted: state, expectedRev: s.rev, sentAt: Date.now() }];
       resaveSync(token, sent);
       let res: { data?: unknown; error?: unknown };
       try {
@@ -663,8 +670,8 @@ const storage = {
         // A write still out can land only while the card is at the revision it expected.
         if (base === mine.base && !inflights.some(f => ids.includes(f.id))) {
           stillOut = inflights
-            .filter(f => f.expectedRev !== null && f.expectedRev === cardRev)
-            .map(f => ({ id: f.id, submitted: merge3(mine.base, f.submitted, cloud), expectedRev: f.expectedRev }));
+            .filter(f => f.expectedRev !== null && mayStillLand(f, cardRev, Date.now()))
+            .map(f => ({ id: f.id, submitted: merge3(mine.base, f.submitted, cloud), expectedRev: f.expectedRev, sentAt: f.sentAt }));
         }
       }
       // Without a base (the first start after this update, or no way to
