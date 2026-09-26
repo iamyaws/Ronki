@@ -38,7 +38,18 @@ const calls: string[] = [];
   const run = () => handle(fn, clone(a));
   return hook ? hook(fn, a, run) : run();
 };
-vi.mock('../lib/supabase', () => ({ supabase: { rpc: (fn: string, a: any) => (globalThis as any).__casRpc(fn, a) } }));
+vi.mock('../lib/supabase', () => ({
+  supabase: {
+    rpc: (fn: string, a: any) => {
+      const p = (globalThis as any).__casRpc(fn, a);
+      const signals = (globalThis as any).__casSignals as AbortSignal[] | null;
+      if (!signals) return p;
+      // Like postgrest-js: a thenable builder with abortSignal().
+      const b: any = { then: (x: any, y: any) => p.then(x, y), abortSignal(sig: AbortSignal) { signals.push(sig); return b; } };
+      return b;
+    },
+  },
+}));
 
 /** A fresh copy of the storage module = one device. */
 async function device() {
@@ -253,6 +264,7 @@ describe('compare-and-swap: answers that never come (review round 2)', () => {
   it('writes the gateway keeps refusing without a code never stop the sync for good (verifier R5-1)', async () => {
     let now = Date.parse('2026-09-28T07:00:00Z');
     vi.spyOn(Date, 'now').mockImplementation(() => now);
+    vi.spyOn(performance, 'now').mockImplementation(() => now);
     const gateway = { down: true };
     hook = async (fn, _a, run) => (fn === 'profile_upsert_if' && gateway.down
       ? { data: null, error: { message: '<html>504 Gateway Time-out</html>' }, status: 504 } // not written, no code
@@ -283,6 +295,80 @@ describe('compare-and-swap: answers that never come (review round 2)', () => {
       }
       expect(card(T).hp).toBe(restart ? 62 : 63);
     }
+  });
+
+  it('a stuck upload is cancelled at the timeout, not just given up on (verifier R6-1)', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    (globalThis as any).__casSignals = [];
+    try {
+      const T = 'be'.repeat(16);
+      server.rows.set(T, { state: S0(), rev: 1 });
+      const A = await device();
+      await load(A, T);
+      hook = async (fn, _a, run) => (fn === 'profile_upsert_if' ? new Promise(() => {}) : run());
+      const p = A.cloudSaveByToken(T, reward(S0(), 10));
+      await vi.advanceTimersByTimeAsync(15_000);
+      expect((await p).status).toBe('offline');
+      const signals = (globalThis as any).__casSignals as AbortSignal[];
+      expect(signals.length).toBeGreaterThan(0);
+      expect(signals[signals.length - 1].aborted).toBe(true);
+    } finally {
+      (globalThis as any).__casSignals = null;
+      vi.useRealTimers();
+    }
+  });
+
+  it('a device clock set forward does not age a slow write early (verifier R6-2)', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    let wall = Date.parse('2026-09-28T07:00:00Z');
+    let mono = 1_000;
+    vi.spyOn(Date, 'now').mockImplementation(() => wall);
+    vi.spyOn(performance, 'now').mockImplementation(() => mono);
+    try {
+      const T = 'bf'.repeat(16);
+      server.rows.set(T, { state: S0(), rev: 1 });
+      const A = await device();
+      await load(A, T);
+      let held: null | (() => void) = null;
+      let first = true;
+      hook = async (fn, _a, run) => {
+        if (fn !== 'profile_upsert_if') return run();
+        if (first) { first = false; return new Promise(res => { held = () => res(run()); }); }
+        if (held) { held(); held = null; } // the slow upload lands just before the next write
+        return run();
+      };
+      const W1 = reward(S0(), 10);
+      const p1 = A.cloudSaveByToken(T, W1);
+      mono += 15_000;
+      await vi.advanceTimersByTimeAsync(15_000);
+      expect((await p1).status).toBe('offline');
+      wall += 60_000; // the wall clock jumps a minute ahead
+      mono += 1_000;
+      await A.cloudSaveByToken(T, pet(W1));
+      expect(card(T).hp).toBe(21);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('a device clock set back never pauses the saves (verifier R6-3)', async () => {
+    let now = Date.parse('2026-09-29T07:00:00Z'); // the tablet clock is a day ahead
+    vi.spyOn(Date, 'now').mockImplementation(() => now);
+    const gateway = { down: true };
+    hook = async (fn, _a, run) => (fn === 'profile_upsert_if' && gateway.down
+      ? { data: null, error: { message: '<html>504 Gateway Time-out</html>' }, status: 504 }
+      : run());
+    const T = 'c1'.repeat(16);
+    server.rows.set(T, { state: { ...S0(), hp: 50 }, rev: 1 });
+    const A = await device();
+    let S = await load(A, T);
+    for (let i = 0; i < 6; i++) { S = reward(S, 1); await A.save(S); await A.cloudSaveByToken(T, S); }
+    gateway.down = false;
+    now = Date.parse('2026-09-28T07:00:30Z'); // the clock is corrected, a day back
+    const A2 = await device();
+    const got = await A2.syncLoadByToken(T);
+    expect(got.hp).toBe(56);
+    expect(card(T).hp).toBe(56);
   });
 
   it('a request that never answers frees the queue after the timeout (verifier R2-4)', async () => {

@@ -52,7 +52,7 @@ let writesFrozen = false;
  * load can apply that copy's own changes onto the card.
  */
 /** A write whose answer never came, the state it carried, and the revision it expected. */
-type Inflight = { id: string; submitted: GameState; expectedRev: number | null; sentAt?: number };
+type Inflight = { id: string; submitted: GameState; expectedRev: number | null; sentAt?: number; sentPerf?: number; page?: string };
 type SyncInfo = { rev: number | null; server: GameState | null; base: GameState | null; inflights: Inflight[] };
 /** The sync bookkeeping saved inside the local copy. */
 type LocalSync = { token: string; base: GameState | null; inflights: Inflight[]; savedAt: number };
@@ -64,9 +64,22 @@ const INFLIGHTS_KEPT = 5;
 const WRITE_TIMEOUT_MS = 15_000;
 /** A write not on the card this long after it was sent will not land any more (verifier R5-1). */
 const LANDS_WITHIN_MS = 4 * WRITE_TIMEOUT_MS;
-/** Could this unanswered write still land on a card at cardRev? */
-const mayStillLand = (f: Inflight, cardRev: number | null, now: number) =>
-  f.expectedRev === cardRev && now - (f.sentAt ?? 0) < LANDS_WITHIN_MS;
+/** This page, so an unanswered write sent from it can be aged on the monotonic clock. */
+const PAGE_ID = Math.random().toString(36).slice(2, 12);
+const perfNow = () => (typeof performance !== 'undefined' && typeof performance.now === 'function' ? performance.now() : Date.now());
+/** How long ago an unanswered write went out: on this page by the monotonic
+ *  clock (a clock set forward cannot age it early), across a restart by the
+ *  wall clock (verifier R6-2). */
+function ageOf(f: Inflight): number {
+  if (f.page === PAGE_ID && typeof f.sentPerf === 'number') return perfNow() - f.sentPerf;
+  return Date.now() - (f.sentAt ?? 0);
+}
+/** Could this unanswered write still land on a card at cardRev? A negative age
+ *  (the clock was set back) counts as expired, never as "just sent" (R6-3). */
+const mayStillLand = (f: Inflight, cardRev: number | null) => {
+  const age = ageOf(f);
+  return f.expectedRev === cardRev && age >= 0 && age < LANDS_WITHIN_MS;
+};
 const LOCAL_SYNC_KEY = '__sync';
 
 function getSync(token: string): SyncInfo {
@@ -205,11 +218,20 @@ function serialize<T>(token: string, fn: () => Promise<T>): Promise<T> {
 }
 
 /** Resolves like the call, or rejects after ms (the request may still land). */
-function withTimeout<T>(p: PromiseLike<T>, ms: number): Promise<T> {
+function withTimeout<T>(p: PromiseLike<T>, ms: number, onTimeout?: () => void): Promise<T> {
   return new Promise<T>((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error('timeout')), ms);
+    const timer = setTimeout(() => { try { onTimeout?.(); } catch { /* ignore */ } reject(new Error('timeout')); }, ms);
     Promise.resolve(p).then(v => { clearTimeout(timer); resolve(v); }, e => { clearTimeout(timer); reject(e); });
   });
+}
+
+/** An RPC that is cancelled, not just given up on, after WRITE_TIMEOUT_MS: a
+ *  stuck upload cannot land a minute later (verifier R6-1). */
+function rpcTimed<T>(fn: string, args: Record<string, unknown>): Promise<T> {
+  const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  let call = supabase.rpc(fn, args) as unknown as { abortSignal?: (s: AbortSignal) => unknown } & PromiseLike<T>;
+  if (ctrl && typeof call.abortSignal === 'function') call = call.abortSignal(ctrl.signal) as typeof call;
+  return withTimeout(call, WRITE_TIMEOUT_MS, () => ctrl?.abort());
 }
 
 /** Whether the server has profile_upsert_if; null until the first try. A
@@ -255,7 +277,7 @@ async function writeCard(token: string, sent: { state: GameState; seq: number })
     // may have landed is never dropped.
     let res: { data?: unknown; error?: unknown };
     try {
-      res = await withTimeout(supabase.rpc('profile_get', { p_token: token }) as PromiseLike<{ data?: unknown; error?: unknown }>, WRITE_TIMEOUT_MS);
+      res = await rpcTimed<{ data?: unknown; error?: unknown }>('profile_get', { p_token: token });
     } catch {
       return { status: 'offline' };
     }
@@ -270,7 +292,7 @@ async function writeCard(token: string, sent: { state: GameState; seq: number })
     // card is still at the revision it expected, and it went out less than a
     // minute ago. So writes the server keeps refusing without a code (a
     // gateway error, a timeout) never wedge the queue (verifier R5-1).
-    s.inflights = landed ? [] : s.inflights.filter(f => mayStillLand(f, cardRev, Date.now()));
+    s.inflights = landed ? [] : s.inflights.filter(f => mayStillLand(f, cardRev));
     s.rev = cardRev;
     s.server = card;
     resaveSync(token, sent);
@@ -281,15 +303,15 @@ async function writeCard(token: string, sent: { state: GameState; seq: number })
     let toWrite = compose(base, state, s.server, id);
     let missing = false;
     for (let attempt = 0; attempt < 3; attempt++) {
-      s.inflights = [...s.inflights.filter(f => f.id !== id), { id, submitted: state, expectedRev: s.rev, sentAt: Date.now() }];
+      s.inflights = [...s.inflights.filter(f => f.id !== id), { id, submitted: state, expectedRev: s.rev, sentAt: Date.now(), sentPerf: perfNow(), page: PAGE_ID }];
       resaveSync(token, sent);
       let res: { data?: unknown; error?: unknown };
       try {
-        res = await withTimeout(supabase.rpc('profile_upsert_if', {
+        res = await rpcTimed<{ data?: unknown; error?: unknown }>('profile_upsert_if', {
           p_token: token,
           p_state: toWrite as unknown as Record<string, unknown>,
           p_expected_rev: s.rev,
-        }) as PromiseLike<{ data?: unknown; error?: unknown }>, WRITE_TIMEOUT_MS);
+        });
       } catch {
         return { status: 'offline' }; // may have landed: stays in inflights
       }
@@ -334,10 +356,10 @@ async function writeCard(token: string, sent: { state: GameState; seq: number })
   try {
     // Old unconditional write (server without profile_upsert_if yet).
     const toWrite = compose(s.base, state, s.server, id);
-    const res = await withTimeout(supabase.rpc('profile_upsert', {
+    const res = await rpcTimed<{ data?: { rev?: number } | null; error?: unknown }>('profile_upsert', {
       p_token: token,
       p_state: toWrite as unknown as Record<string, unknown>,
-    }) as PromiseLike<{ data?: { rev?: number } | null; error?: unknown }>, WRITE_TIMEOUT_MS);
+    });
     if (res?.error) return { status: 'offline' };
     s.rev = typeof res?.data?.rev === 'number' ? res.data.rev : null;
     s.server = toWrite;
@@ -670,7 +692,7 @@ const storage = {
         // A write still out can land only while the card is at the revision it expected.
         if (base === mine.base && !inflights.some(f => ids.includes(f.id))) {
           stillOut = inflights
-            .filter(f => f.expectedRev !== null && mayStillLand(f, cardRev, Date.now()))
+            .filter(f => f.expectedRev !== null && mayStillLand(f, cardRev))
             .map(f => ({ id: f.id, submitted: merge3(mine.base, f.submitted, cloud), expectedRev: f.expectedRev, sentAt: f.sentAt }));
         }
       }
