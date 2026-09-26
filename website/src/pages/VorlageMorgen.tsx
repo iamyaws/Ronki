@@ -18,7 +18,7 @@ const FAQ: GuideFaq[] = [
   {
     question: 'Was, wenn mein Kind noch nicht lesen kann?',
     answer:
-      'Das macht nichts. Jeder Schritt hat ein großes Bild. Lies die Wörter in den ersten Tagen vor und zeig dabei auf das Bild. Nach ein paar Morgen erkennt dein Kind die Schritte allein.',
+      'Das macht nichts. Jeder Schritt hat ein großes Bild. Lies die Wörter in den ersten Tagen vor und zeig dabei auf das Bild. Für einen eigenen Schritt ohne Bild malt ihr vor dem ersten Morgen eins in das freie Feld.',
   },
   {
     question: 'Mit oder ohne Belohnung?',
@@ -89,14 +89,14 @@ export default function VorlageMorgen() {
             ),
           },
           {
-            heading: 'Wie lange, bis es von allein läuft',
+            heading: 'Die ersten Morgen mit dem Blatt',
             body: (
               <>
                 <p>
-                  Rechne mit etwa zwei Wochen, in denen du noch mitgehst. Statt zu erklären,
-                  zeigst du aufs Blatt: Was ist als Nächstes dran? In dieser Zeit dauert der
-                  Morgen oft länger als vorher. Das ist normal. Nach ein paar Wochen macht dein
-                  Kind die Schritte, weil sie dran sind, und nicht mehr, weil du sie ansagst.
+                  Am Anfang gehst du noch mit. Statt zu erklären, zeigst du aufs Blatt: Was ist
+                  als Nächstes dran? In dieser Zeit dauert der Morgen oft länger als vorher. Das
+                  ist normal. Hilf dort, wo dein Kind noch Hilfe braucht, und lass es den Rest
+                  selbst machen.
                 </p>
               </>
             ),

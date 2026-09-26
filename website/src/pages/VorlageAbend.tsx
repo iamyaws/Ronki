@@ -99,9 +99,8 @@ export default function VorlageAbend() {
                   Zeit ein, als du glaubst zu brauchen.
                 </p>
                 <p>
-                  In den ersten zwei Wochen gehst du noch mit und zeigst aufs Blatt, statt zu
-                  erklären. Danach wird es meistens ruhiger, weil die Reihenfolge nicht mehr
-                  jeden Abend neu verhandelt wird.
+                  Am Anfang gehst du noch mit und zeigst aufs Blatt, statt zu erklären. Hilf
+                  dort, wo dein Kind noch Hilfe braucht, und lass es den Rest selbst machen.
                 </p>
               </>
             ),
