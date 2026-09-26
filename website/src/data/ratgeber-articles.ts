@@ -103,6 +103,15 @@ export const ARTICLES: Article[] = [
     image: '/art/bioms/Sonnenglast_sun-highlands.webp',
   },
   {
+    slug: 'ranzen-packen-erste-klasse',
+    title: 'Ranzen packen in der 1. Klasse: eine Karte statt täglicher Suche',
+    description:
+      'Turnbeutel vergessen, Schwimmsachen zu Hause? Eine Bildkarte pro Schultag zeigt, was in den Ranzen muss. Mit kostenlosem Packplan zum Ausdrucken.',
+    category: 'Einschulung',
+    readMinutes: 5,
+    image: '/art/routines/getting-ready.webp',
+  },
+  {
     slug: 'eltern-bereich',
     title: 'Der Eltern-Bereich in Ronki: was drin ist und wie du hinkommst',
     description:

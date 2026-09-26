@@ -1,6 +1,7 @@
 import { RoutinePrintSheet } from '../components/RoutinePrintSheet';
 import { VorlageDownload } from '../components/VorlageDownload';
 import { GuideFaq, GuideLink, VorlageGuide } from '../components/VorlageGuide';
+import { VORLAGE_PRINT_KLEINE_GESCHWISTER } from './print/VorlagePrint';
 
 // Keep title and description in sync with website/vite-plugin-prerender-meta.ts.
 const META_TITLE = 'Routine-Vorlage für Kleinkinder zum Ausdrucken · Ronki';
@@ -39,6 +40,7 @@ export default function VorlageKleineGeschwister() {
       description="Ganz einfach, nur mit Bildern. Dein kleines Kind malt den großen Kreis aus, wenn es fertig ist."
       accent="#0544B0"
       bigIcons
+      done
       pageTitle="Routine-Vorlage für Kleinkinder (2 bis 4 Jahre) zum Ausdrucken"
       pageIntro="Vier große Bilder, kein Text. Für die Kleinen, die sehen, wie das große Geschwisterkind abhakt, und mitmachen wollen. Druck diese Seite direkt aus, ohne Anmeldung, oder hol dir das fertige PDF."
       metaTitle={META_TITLE}
@@ -51,17 +53,18 @@ export default function VorlageKleineGeschwister() {
           printHref="/print/vorlage-kleine-geschwister"
         />
       }
+      ronki={VORLAGE_PRINT_KLEINE_GESCHWISTER.ronki}
       steps={[
-        { icon: '🪥', label: '' },
-        { icon: '👕', label: '' },
-        { icon: '🥣', label: '' },
-        { icon: '🧸', label: '' },
+        { img: 'toothbrush.webp', icon: '🪥', label: '' },
+        { img: 'shirt.webp', icon: '👕', label: '' },
+        { img: 'plate.webp', icon: '🥣', label: '' },
+        { img: 'teddy.webp', icon: '🧸', label: '' },
       ]}
       footerLine="ronki.de · für kleine Geschwister"
     >
       <VorlageGuide
         previewSrc="/vorlagen/previews/kleine-geschwister.png"
-        previewAlt="Das PDF der Kleinkind-Vorlage Mein Tag: vier große Bilder ohne Text (Zahnbürste, T-Shirt, Müslischale, Teddy), daneben je ein großes Kästchen zum Abhaken."
+        previewAlt="Das PDF der Kleinkind-Vorlage Mein Tag: vier große Bilder ohne Text (Zahnbürste, T-Shirt, Müslischale, Teddy), daneben je ein großer Kreis zum Ausmalen, oben Ronki."
         previewCaption="So sieht das PDF aus. Eine Seite A4."
         faq={FAQ}
         sections={[
@@ -71,7 +74,7 @@ export default function VorlageKleineGeschwister() {
               <>
                 <p>
                   Kleine Kinder schauen sich viel bei den Großen ab. Wenn das Schulkind morgens
-                  seine Kästchen abhakt, will das kleine Geschwisterkind oft auch ein Blatt.
+                  seine Kreise ausmalt, will das kleine Geschwisterkind oft auch ein Blatt.
                   Genau dafür ist diese Vorlage da. Sie hat vier Bilder: Zahnbürste, T-Shirt,
                   Frühstücksschale und einen Teddy, der bei euch fürs Spielen oder fürs Bett
                   stehen kann.
@@ -123,7 +126,7 @@ export default function VorlageKleineGeschwister() {
               <>
                 <p>
                   Ein Kleinkind, das heute nicht will, will heute nicht. Lass das Blatt hängen
-                  und macht ohne weiter. Kein Schimpfen über leere Kästchen und kein Vergleich
+                  und macht ohne weiter. Kein Schimpfen über leere Kreise und kein Vergleich
                   mit dem großen Geschwisterkind. Das Blatt soll Lust aufs Mitmachen machen,
                   sonst wird es zum nächsten Streitpunkt.
                 </p>

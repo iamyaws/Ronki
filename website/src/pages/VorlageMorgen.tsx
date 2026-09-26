@@ -1,6 +1,7 @@
 import { RoutinePrintSheet } from '../components/RoutinePrintSheet';
 import { VorlageDownload } from '../components/VorlageDownload';
 import { GuideFaq, GuideLink, VorlageGuide } from '../components/VorlageGuide';
+import { VORLAGE_PRINT_MORGEN } from './print/VorlagePrint';
 
 // Keep title and description in sync with website/vite-plugin-prerender-meta.ts.
 const META_TITLE = 'Morgenroutine Vorlage für Kinder zum Ausdrucken · Ronki';
@@ -50,16 +51,28 @@ export default function VorlageMorgen() {
           printHref="/print/vorlage-morgen"
         />
       }
+      ronki={VORLAGE_PRINT_MORGEN.ronki}
+      done
       steps={[
-        { icon: '🪥', label: 'Zähne putzen', hint: 'Oben, unten, außen, innen.' },
-        { icon: '👕', label: 'Anziehen', hint: 'Wetter angucken, dann Sachen raussuchen.' },
-        { icon: '🥣', label: 'Frühstücken', hint: 'Am Tisch, in Ruhe.' },
-        { icon: '🎒', label: 'Tasche packen', hint: 'Brotdose, Trinken, Hausaufgaben.' },
+        { img: 'toothbrush.webp', icon: '🪥', label: 'Zähne putzen', hint: 'Oben, unten, außen, innen.' },
+        { img: 'shirt.webp', icon: '👕', label: 'Anziehen', hint: 'Wetter angucken, dann Sachen raussuchen.' },
+        { img: 'plate.webp', icon: '🥣', label: 'Frühstücken', hint: 'Am Tisch, in Ruhe.' },
+        { img: 'bag.webp', icon: '🎒', label: 'Tasche packen', hint: 'Brotdose, Trinken, Hausaufgaben.' },
       ]}
+      // Off by default: start with four steps, add these once the four sit.
+      extraSteps={{
+        switchLabel: 'Aufstehen und Waschen dazunehmen',
+        description:
+          'Sechs Schritte bis zur Tasche. Dein Kind malt den Kreis aus, wenn ein Schritt geschafft ist.',
+        steps: [
+          { img: 'wake.webp', icon: '☀️', label: 'Aufstehen', hint: 'Licht an, Vorhang auf.' },
+          { img: 'wash.webp', icon: '🧼', label: 'Waschen', hint: 'Gesicht und Hände.' },
+        ],
+      }}
     >
       <VorlageGuide
         previewSrc="/vorlagen/previews/morgenroutine.png"
-        previewAlt="Das PDF der Morgenroutine-Vorlage: vier Schritte mit Bildern (Zähne putzen, Anziehen, Frühstücken, Tasche packen), daneben je ein Feld für die Uhrzeit und ein Kästchen zum Abhaken."
+        previewAlt="Das PDF der Morgenroutine-Vorlage: vier Schritte mit Bildern (Zähne putzen, Anziehen, Frühstücken, Tasche packen), daneben je ein Feld für die Uhrzeit und ein Kreis zum Ausmalen, oben Ronki mit einer Sprechblase."
         previewCaption="So sieht das PDF aus. Eine Seite A4."
         faq={FAQ}
         sections={[
@@ -73,9 +86,8 @@ export default function VorlageMorgen() {
                   oder der Kühlschrank. Wichtig ist nur: Dein Kind sieht es, ohne zu suchen.
                 </p>
                 <p>
-                  Den Haken setzt dein Kind selbst, nicht du. Hier in der Vorschau sind es
-                  Kreise zum Ausmalen, im PDF Kästchen zum Abhaken. Beides funktioniert. Wer
-                  selbst abhakt, sieht am Ende, was er geschafft hat.
+                  Den Kreis malt dein Kind selbst aus, nicht du. Wer selbst ausmalt, sieht am
+                  Ende, was er geschafft hat.
                 </p>
                 <p>
                   Du willst nicht jeden Tag neu drucken? Steck das Blatt in eine Klarsichthülle
@@ -109,7 +121,8 @@ export default function VorlageMorgen() {
                   bleibt. Was jeden Tag anders ist, wird jeden Tag neu verhandelt.
                 </p>
                 <p>
-                  Nimm für den Anfang nicht mehr als vier oder fünf Schritte. Klo, Hände
+                  Nimm für den Anfang vier Schritte. Wenn die sitzen, nimm Aufstehen und
+                  Waschen dazu. Klo, Hände
                   waschen oder Schuhe passen meistens in einen Schritt, den es schon gibt. Wenn
                   dein Kind schon beim Anfangen hängen bleibt, probier die{' '}
                   <GuideLink to="/vorlagen/adhs">Vorlage bei ADHS</GuideLink>. Sie hat sechs
@@ -126,7 +139,7 @@ export default function VorlageMorgen() {
                   Es wird Morgen geben, an denen gar nichts geht. Dein Kind hat schlecht
                   geschlafen, die Hose kratzt, alle sind spät dran. Dann hilfst du eben mit und
                   bringst alle aus dem Haus. Mach am Nachmittag kein Thema daraus, welche
-                  Kästchen leer geblieben sind. Am nächsten Morgen fängt das Blatt wieder oben
+                  Kreise leer geblieben sind. Am nächsten Morgen fängt das Blatt wieder oben
                   an.
                 </p>
                 <p>

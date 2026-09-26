@@ -154,6 +154,20 @@ const ROUTES: RouteMeta[] = [
     ogImage: '/og-ratgeber-einschulung.jpg',
   },
   {
+    path: '/ratgeber/ranzen-packen-erste-klasse',
+    title: 'Ranzen packen in der 1. Klasse: eine Karte statt täglicher Suche · Ratgeber · Ronki',
+    description:
+      'Turnbeutel vergessen, Schwimmsachen zu Hause? Eine Bildkarte pro Schultag zeigt, was in den Ranzen muss. Mit kostenlosem Packplan zum Ausdrucken.',
+    ogImage: '/og-tool-ranzen-packplan.jpg',
+  },
+  {
+    path: '/tools/ranzen-packplan',
+    title: 'Ranzen-Packplan: Bildkarten für jeden Schultag · Ronki',
+    description:
+      'Was muss heute in den Ranzen? Tipp an, was an welchem Schultag mit muss, und druck für jeden Tag eine Bildkarte aus. Kostenlos, ohne Anmeldung.',
+    ogImage: '/og-tool-ranzen-packplan.jpg',
+  },
+  {
     path: '/impressum',
     title: 'Impressum: Ronki',
     description: 'Anbieterkennzeichnung nach § 5 DDG und § 18 MStV.',

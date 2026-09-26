@@ -93,6 +93,35 @@ Marc's ask: make the new Bilderbuch design live in the real PWA, benchmarked aga
 
 **Follow-ups.** Parent dashboard and legal pages still carry hard-coded teal accents (readable, not restyled). Freunde, micropedia creatures, mini-games, bosses and birthday scenes keep their old painterly art. The first-breath fire puff is still a gradient. `CaveStyleSheet` keeps the old look. Belohnungsbank copy still names Funkelzeit (pre-existing). Material Symbols still loads from Google for screens outside the core loop. The Profile's Pflege and Erinnerungen segments and the Buch are restyled but not reachable from any tab (pre-existing). Animated WebP on an old iPad and a Fire HD is untested on a real device.
 
+## Where things stand (26 September 2026, morning)
+
+Supersedes the "Printables redesign" and "Next three tools" paragraphs in the 25 Sep section below. Reviews and renders (not in git): `C:\Users\öööö\ronki\reviews\`.
+
+**Done and live:**
+- PR 25 `printables/option-a`: option A is the standard for all four templates (Marc, 26 Sep). Shared sheet parts in `website/src/components/sheet/`, the app's task pictures and Ronki on every sheet, a "done" band on morning, evening and toddler. Morning prints 4 steps; the page has a switch "Aufstehen und Waschen dazunehmen" for 6 (Marc: "4 printed, 6 selectable"). `scripts/print-vorlagen.mjs` now fails on a broken picture, a second page, or content cut off at the page bottom, and renders the previews from the PDFs. Astra rep 5 closed in two rounds.
+- PR 26 `art/light-switch`: light pictures (bulb big, switch small); evening step 4 "Licht aus", ADHS step 1 "Licht an". `scripts/cut-task-sheet.py` cuts Higgsfield sheets (`--grid CxR`; a closed region is background only if it follows the measured checker grid and holds both greys).
+- Earlier the same night: PRs 15, 16, 19 (see the 25 Sep section).
+
+**Done later that morning:**
+- PR 27 `tools/ranzen-packplan`: **MERGED 26 Sep, 08:21 UTC.** Tool `/tools/ranzen-packplan` (plan only in the URL, no names, three packing modes without deadlines, one A4 page with five day cards; empty days show the daily items, free items get a box the child draws into, Back restores the plan) and the article `/ratgeber/ranzen-packen-erste-klasse`. Astra rep 6, two rounds. Live: both routes 200 with crawler titles, in the sitemap, share picture served, new code in the live chunk. Open to Marc: the Trinkflasche picture is a water glass (bottle needs the next art batch), and Astra would change the tool intro line "Dein Kind schaut auf die Karte, nicht zu dir." (Fable keeps it).
+
+**In flight:**
+- PR 17 (Umami, draft): waits for Marc's Umami signup (EU) and website id.
+- PR 20 (Brevo double opt-in, draft, stacked on 17): waits for Marc's Brevo account, DKIM at GoDaddy (DMARC is p=quarantine) and the key in `.env.local`.
+
+**Backlog, in order:**
+1. Morning routine configurator inside `/vorlagen/morgenroutine` (Fable recommends it; waits for Marc's go; one build agent plus Astra).
+2. Next art batch (Higgsfield, prompt to Marc first): Trinkflasche as a bottle (the packplan uses a water glass), plus pictures for common free items.
+3. Tool 2 Nachmittagsplan and tool 3 Abend mit zwei Kindern, each with an article (`C:\Users\öööö\ronki\launch\research\2026-09-26-tools-lineup.md`).
+4. Refresh the launch kit's share picture and carousel sheet to the option A sheets.
+5. Marc: Search Console indexing for the Zeitumstellung and Ranzen articles; accounts and first posts (Umami first, then messages, Instagram, TikTok and YouTube, then LinkedIn); six families for tool tests.
+6. Marc's call on the template promise "Nach ein paar Wochen macht dein Kind die Schritte..." (Astra R2-01); no-email print route above the email form (R2-02).
+7. Abendroutine refresh (keyword map #1); later: dark mornings, Advent, holidays.
+8. Watch Gmail for a Supabase pause warning until 16 Oct 2026; if one arrives, ask Marc about Pro.
+9. Telemetry anon-insert policy (follow-up 5 below); Umami keeps six months, note monthly numbers here.
+
+**Budget note:** Claude subagents for the printables and packplan task used about 631k of the 800k cap (two Opus build agents). Astra passes run on the Codex quota.
+
 ## Where things stand (25 September 2026, overnight)
 
 Growth engine approved by Marc: spec [docs/strategy/2026-09-25-growth-engine-design.md](docs/strategy/2026-09-25-growth-engine-design.md) (read its last section, "Changes the same night"), plan [docs/superpowers/plans/2026-09-25-foundation-and-launch.md](docs/superpowers/plans/2026-09-25-foundation-and-launch.md), keyword map [docs/strategy/2026-09-25-keyword-map.md](docs/strategy/2026-09-25-keyword-map.md). Astra reviews (not in git): `C:\Users\öööö\ronki\reviews\`. Launch kit (not in git): `C:\Users\öööö\ronki\launch\2026-09-26\KIT.md`.
