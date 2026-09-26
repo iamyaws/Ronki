@@ -46,7 +46,34 @@ describe('mergeStates', () => {
     const tablet = { ...b, quests: [q('s_wake'), q('s_breakfast', true), q('s_teeth_am')], totalTasksDone: 11 };
     const m = mergeStates(b, tablet, phone);
     expect(m.quests.map((x: any) => x.done)).toEqual([true, true, false]);
-    expect(m.totalTasksDone).toBe(11); // counters take the max, never double
+    expect(m.totalTasksDone).toBe(12); // two different tasks: both count
+  });
+
+  it('two devices earning at once: Sterne and counters add up, even when they land on the same number', () => {
+    const b = { ...base(), hp: 0, totalTasksDone: 0, quests: [q('s_wake', false, { xp: 10 }), q('s_breakfast', false, { xp: 10 })] };
+    const a = { ...b, hp: 10, totalTasksDone: 1, quests: [q('s_wake', true, { xp: 10 }), q('s_breakfast', false, { xp: 10 })] };
+    const c = { ...b, hp: 10, totalTasksDone: 1, quests: [q('s_wake', false, { xp: 10 }), q('s_breakfast', true, { xp: 10 })] };
+    const m = mergeStates(b, a, c);
+    expect(m.hp).toBe(20);
+    expect(m.totalTasksDone).toBe(2);
+  });
+
+  it('the same task ticked on both devices counts once', () => {
+    const b = { ...base(), hp: 0, totalTasksDone: 0, quests: [q('s_wake', false, { xp: 10 }), q('s_breakfast', false, { xp: 10 })] };
+    const a = { ...b, hp: 10, totalTasksDone: 1, quests: [q('s_wake', true, { xp: 10 }), q('s_breakfast', false, { xp: 10 })] };
+    const m = mergeStates(b, a, { ...a });
+    expect(m.quests.map((x: any) => x.done)).toEqual([true, false]);
+    expect(m.hp).toBe(10);
+    expect(m.totalTasksDone).toBe(1);
+  });
+
+  it('side quests: the card keeps its own; one only this device picked survives only if done', () => {
+    // A card seed without quests: both devices built today's list at load.
+    const b = { ...base(), quests: undefined as any };
+    const local = { ...b, quests: [q('s_wake', true), q('side_x', false, { sideQuest: true }), q('side_y', true, { sideQuest: true })] };
+    const remote = { ...b, quests: [q('s_wake'), q('side_a', false, { sideQuest: true })] };
+    const m = mergeStates(b, local, remote);
+    expect(m.quests.map((x: any) => x.id)).toEqual(['s_wake', 'side_a', 'side_y']);
   });
 
   it('a new day on one device wins the task list over yesterday\'s on the other', () => {

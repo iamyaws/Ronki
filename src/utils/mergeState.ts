@@ -144,6 +144,9 @@ const questsRule: Rule = (_b, l, r, ctx) => {
     if (!q || typeof q !== 'object') continue;
     const id = String(q.id);
     const other = byId.get(id);
+    // Side quests are picked at random per device: the card keeps its own,
+    // and one only this device picked survives only if it was done here.
+    if (!other && q.sideQuest === true && q.done !== true) continue;
     if (!other) { byId.set(id, { ...q }); continue; }
     byId.set(id, {
       ...other,
@@ -178,9 +181,9 @@ const RULES: Record<string, Rule> = {
   tripCursor: maxNum,
   catEvo: maxNum,
   stageSeen: maxNum,
-  totalTasksDone: maxNum,
-  totalQuestCompletions: maxNum,
-  xp: maxNum,
+  totalTasksDone: deltaNum,
+  totalQuestCompletions: deltaNum,
+  xp: deltaNum,
   expeditionLog: unionById('id'),
   treasuresFound: unionStrings,
   micropediaDiscovered: unionStrings,
@@ -222,13 +225,34 @@ const RULES: Record<string, Rule> = {
  * Merge this device's save (local) with the card's current row (remote),
  * given the card as this device last knew it (base, or null).
  */
+/** Numbers where both devices' changes add up, even when they land on the same value. */
+const DELTA_KEYS = new Set(['hp', 'totalTasksDone', 'totalQuestCompletions', 'xp']);
+
+/** Tasks ticked on both devices since the base (same day): counted once, not twice. */
+function overlapDone(b: Obj, l: Obj, r: Obj): Obj[] {
+  const day = str(b.lastDate);
+  if (!day || str(l.lastDate) !== day || str(r.lastDate) !== day) return [];
+  const list = (x: Json) => (Array.isArray(x) ? (x as Obj[]) : []);
+  const baseUndone = new Set(list(b.quests).filter(q => q && q.done !== true).map(q => String(q.id)));
+  const lDone = new Set(list(l.quests).filter(q => q && q.done === true).map(q => String(q.id)));
+  return list(r.quests).filter(q => q && q.done === true && baseUndone.has(String(q.id)) && lDone.has(String(q.id)));
+}
+
 export function mergeStates<T extends Obj>(base: T | null, local: T, remote: T): T {
   const b = (base || null) as Obj | null;
   const l = local as Obj;
   const r = remote as Obj;
   const ctx: Ctx = { base: b, local: l, remote: r };
   const out: Obj = { ...r };
+  const deltaMerged = new Set<string>();
   for (const key of new Set([...Object.keys(l), ...Object.keys(r)])) {
+    // Both devices added to a balance or a task counter: add both changes up,
+    // even when they happen to land on the same number.
+    if (b && DELTA_KEYS.has(key) && !jsonEqual(l[key], b[key]) && !jsonEqual(r[key], b[key])) {
+      out[key] = deltaNum(b[key], l[key], r[key]);
+      deltaMerged.add(key);
+      continue;
+    }
     if (jsonEqual(l[key], r[key])) continue;
     // A field only this device has (the card never had it): keep it.
     if (r[key] === undefined) { out[key] = l[key]; continue; }
@@ -243,6 +267,16 @@ export function mergeStates<T extends Obj>(base: T | null, local: T, remote: T):
     // when there is a base, else the card's value (never overwrite what we never saw).
     out[key] = rule ? rule(b ? b[key] : undefined, l[key], r[key], ctx) : (b ? l[key] : r[key]);
   }
-  // Keys only this device knows are kept (a new field added by this build).
+  // A task ticked on both devices was counted by both: take it out once.
+  if (b && deltaMerged.size) {
+    const twice = overlapDone(b, l, r);
+    if (twice.length) {
+      const pts = twice.reduce((sum, q) => sum + num(q.xp), 0);
+      if (deltaMerged.has('totalTasksDone')) out.totalTasksDone = Math.max(0, num(out.totalTasksDone) - twice.length);
+      if (deltaMerged.has('totalQuestCompletions')) out.totalQuestCompletions = Math.max(0, num(out.totalQuestCompletions) - twice.length);
+      if (deltaMerged.has('hp')) out.hp = Math.max(0, num(out.hp) - pts);
+      if (deltaMerged.has('xp')) out.xp = Math.max(0, num(out.xp) - pts);
+    }
+  }
   return out as T;
 }
