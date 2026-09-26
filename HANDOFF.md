@@ -4,6 +4,21 @@ _Single source of truth: done, in flight, backlog. Update before any /compact an
 
 ---
 
+## Compare-and-swap sync (26 September 2026, branch `finch/cas-sync`)
+
+Marc's ask: "build the compare-and-swap RPC on Supabase" (point 4 of "Open for Marc" below).
+
+**Done (on the branch, not on main).** Commits 9d04a2e and d48ef54.
+- Migration `supabase/migrations/20260926000100_profiles_cas.sql`: `profiles.rev` (bigint, default 0); `profile_upsert_if(p_token, p_state, p_expected_rev)` writes only while the row still has that rev (null = insert only if no row), else returns the current row; `profile_get` returns rev; `profile_upsert` (website, older bundles) bumps rev. Backward compatible both ways.
+- Client: `src/utils/storage.ts` writes with the rev it last read or wrote; on a race it merges (`src/utils/mergeState.ts`, three-way, accumulate-only rules: tasks done on either device stay done, Sterne and counters add both devices' changes, treasures and adventures union, flags only turn on, identity from the onboarded side) and retries up to 3 times; falls back to the old `profile_upsert` while the server lacks the function. `TaskContext` keeps a merged card locally, freezes writes and reloads onto it.
+- Mock server `scripts/mock-supabase.mjs` implements the same contract. 619 tests green, tsc 23, check:names clean. Two real browser tabs against the mock: A ticks Aufstehen, B ticks Frühstück, the card shows both (totalTasksDone 2, hp 20).
+
+**In flight.**
+- Applying the migration to production (jdpxfvqaoxmnyvlxikce) was blocked by the session's permission guard on 26 Sep; needs Marc's go (or Marc runs the SQL file himself in the Supabase SQL editor). After it: live test with a throwaway token (insert rev 1, update rev 2, stale rev refused with the row, profile_get shows rev), delete the test row, security advisors.
+- Reviews (Astra round on the CAS diff, one real-storage verifier), then PR, CI, merge, live bundle check for `profile_upsert_if`.
+
+---
+
 ## Finch pass (25-26 September 2026, overnight)
 
 Marc's ask (25 Sep, late): reduce the features, learn from Finch's onboarding and from what makes Finch work (his screen recording, the App Breakdown #55 video, the screensdesign teardown), build what Ronki is missing, keep its essence, make it sticky and at least on par with Finch; "fully authorized to make changes to the app"; "ship it to main when it's tested". Ultracode was on.
