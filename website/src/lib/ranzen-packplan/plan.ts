@@ -163,34 +163,53 @@ export function cleanFreeText(raw: string): string {
 }
 
 /**
- * Pictures for free items the tool knows by name. Checked in this order, so
- * the specific word wins ("Hausschuhe" before "Schuhe", "Geld für den
- * Ausflug" gets the purse, not the backpack). A word matches when it is the
- * stem, starts with it (Laternenumzug) or ends with it (Taschengeld,
- * Sonnenhut), so a stem hidden inside another word ("hut" in "Schutz") does
- * not. Compounds need the specific entry first: "Handschuhe" ends with
- * "schuhe" and "Sonnenmütze" with "mütze". Anything else gets an empty box on the card to draw in.
+ * Pictures for free items the tool knows by name. Only whole words from
+ * these lists count, plurals and common compounds written out, so a word
+ * that merely contains one ("Schuhkarton", "Aufkleber") never gets a
+ * picture of something else (Astra code review, PR 32). Checked in this
+ * order, so in "Geld für den Ausflug" the purse wins over the backpack.
+ * Anything else gets an empty box on the card to draw in.
  */
-const FREE_PICTURES: ReadonlyArray<{ img: string; stems: readonly string[] }> = [
-  { img: 'slippers.webp', stems: ['hausschuh', 'hausschuhe', 'puschen'] },
-  { img: 'rubber-boots.webp', stems: ['gummistiefel', 'stiefel', 'matschsachen', 'matschhose'] },
-  { img: 'coin-purse.webp', stems: ['geld', 'münze', 'münzen', 'euro', 'portemonnaie', 'geldbeutel', 'geldbörse'] },
-  { img: 'lantern.webp', stems: ['laterne', 'laternen', 'lampion', 'lampions'] },
-  { img: 'apple.webp', stems: ['obst', 'apfel', 'äpfel', 'frucht', 'früchte', 'gemüse'] },
-  { img: 'glue-stick.webp', stems: ['kleber', 'klebestift', 'klebstoff'] },
-  { img: 'scissors.webp', stems: ['schere'] },
-  { img: 'sun-hat.webp', stems: ['sonnenhut', 'sonnenmütze', 'sonnencreme', 'hut', 'kappe'] },
-  { img: 'hat-gloves.webp', stems: ['mütze', 'handschuh', 'handschuhe', 'schal'] },
-  { img: 'sneakers.webp', stems: ['turnschuh', 'turnschuhe', 'sportschuh', 'sportschuhe', 'hallenschuh', 'hallenschuhe', 'schuh', 'schuhe'] },
-  { img: 'chestnuts.webp', stems: ['kastanie', 'kastanien', 'eicheln', 'bastelsachen'] },
-  { img: 'bottle.webp', stems: ['trinkflasche', 'flasche'] },
-  { img: 'lunchbox.webp', stems: ['brotdose', 'frühstück', 'pausenbrot'] },
-  { img: 'teddy.webp', stems: ['kuscheltier', 'teddy', 'stofftier'] },
-  { img: 'school-letter.webp', stems: ['mitteilungsheft', 'elternbrief', 'brief', 'zettel', 'unterschrift', 'formular'] },
-  { img: 'book.webp', stems: ['buch', 'bücher', 'lesebuch'] },
-  { img: 'homework.webp', stems: ['hausaufgaben', 'hausaufgabenheft', 'heft', 'hefte', 'arbeitsblatt'] },
-  { img: 'rain-jacket.webp', stems: ['jacke', 'regenjacke', 'matschjacke'] },
-  { img: 'backpack.webp', stems: ['rucksack', 'ausflug', 'wandertag', 'waldtag'] },
+const FREE_PICTURES: ReadonlyArray<{ img: string; words: readonly string[] }> = [
+  { img: 'slippers.webp', words: ['hausschuh', 'hausschuhe', 'puschen', 'pantoffeln'] },
+  { img: 'rubber-boots.webp', words: ['gummistiefel', 'regenstiefel', 'stiefel', 'matschhose', 'matschsachen'] },
+  {
+    img: 'coin-purse.webp',
+    words: ['geld', 'taschengeld', 'ausflugsgeld', 'klassengeld', 'kopiergeld', 'bastelgeld', 'milchgeld',
+      'münze', 'münzen', 'euro', 'portemonnaie', 'geldbeutel', 'geldbörse'],
+  },
+  {
+    img: 'lantern.webp',
+    words: ['laterne', 'laternen', 'laternenumzug', 'laternenlauf', 'laternenfest', 'martinslaterne',
+      'martinsumzug', 'lampion', 'lampions'],
+  },
+  { img: 'apple.webp', words: ['obst', 'obsttag', 'obstdose', 'apfel', 'äpfel', 'frucht', 'früchte', 'gemüse', 'banane'] },
+  { img: 'glue-stick.webp', words: ['kleber', 'klebestift', 'kleberstift', 'klebstoff'] },
+  { img: 'scissors.webp', words: ['schere', 'bastelschere', 'kinderschere'] },
+  { img: 'sun-hat.webp', words: ['sonnenhut', 'sonnenmütze', 'sonnencreme', 'hut', 'kappe', 'basecap'] },
+  { img: 'hat-gloves.webp', words: ['mütze', 'mützen', 'wollmütze', 'handschuh', 'handschuhe', 'schal', 'wintersachen'] },
+  {
+    img: 'sneakers.webp',
+    words: ['schuh', 'schuhe', 'turnschuh', 'turnschuhe', 'sportschuh', 'sportschuhe', 'hallenschuh',
+      'hallenschuhe', 'sneaker', 'sneakers'],
+  },
+  { img: 'chestnuts.webp', words: ['kastanie', 'kastanien', 'eicheln'] },
+  { img: 'bottle.webp', words: ['trinkflasche', 'wasserflasche', 'flasche', 'trinken'] },
+  { img: 'lunchbox.webp', words: ['brotdose', 'brotbox', 'frühstücksdose', 'frühstück', 'pausenbrot'] },
+  { img: 'teddy.webp', words: ['kuscheltier', 'kuscheltiere', 'stofftier', 'teddy', 'teddybär'] },
+  {
+    img: 'school-letter.webp',
+    words: ['mitteilungsheft', 'elternbrief', 'brief', 'zettel', 'unterschrift', 'formular',
+      'einverständniserklärung'],
+  },
+  { img: 'book.webp', words: ['buch', 'bücher', 'lesebuch', 'büchereibuch', 'bibliotheksbuch', 'bilderbuch'] },
+  {
+    img: 'homework.webp',
+    words: ['hausaufgaben', 'hausaufgabenheft', 'heft', 'hefte', 'matheheft', 'schreibheft', 'arbeitsblatt',
+      'arbeitsblätter'],
+  },
+  { img: 'rain-jacket.webp', words: ['jacke', 'regenjacke', 'matschjacke', 'winterjacke'] },
+  { img: 'backpack.webp', words: ['rucksack', 'ausflug', 'ausflugstag', 'wandertag', 'waldtag'] },
 ];
 
 /** Every picture a free item can get, for the check that the files ship. */
@@ -198,16 +217,14 @@ export const FREE_PICTURE_FILES: readonly string[] = [...new Set(FREE_PICTURES.m
 
 /** Picture file for a free item, or null when the card should show a box to draw in. */
 export function pictureForFree(text: string): string | null {
-  const words = cleanFreeText(text)
-    .toLocaleLowerCase('de-DE')
-    .split(/[^a-zäöüß]+/)
-    .filter(Boolean);
+  const words = new Set(
+    cleanFreeText(text)
+      .toLocaleLowerCase('de-DE')
+      .split(/[^a-zäöüß]+/)
+      .filter(Boolean),
+  );
   for (const entry of FREE_PICTURES) {
-    for (const stem of entry.stems) {
-      if (words.some((w) => w === stem || w.startsWith(stem) || (stem.length >= 3 && w.endsWith(stem)))) {
-        return entry.img;
-      }
-    }
+    if (entry.words.some((word) => words.has(word))) return entry.img;
   }
   return null;
 }

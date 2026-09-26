@@ -241,6 +241,8 @@ describe('pictures for free items', () => {
     ['Matheheft', 'homework.webp'],
     ['Lesebuch', 'book.webp'],
     ['Wasserflasche', 'bottle.webp'],
+    ['Bücherei-Buch', 'book.webp'],
+    ['Geld für den Ausflug', 'coin-purse.webp'],
   ])('%s gets %s', (text, img) => {
     expect(pictureForFree(text)).toBe(img);
   });
@@ -249,9 +251,14 @@ describe('pictures for free items', () => {
     for (const file of FREE_PICTURE_FILES) expect(TASK_ART.has(file)).toBe(true);
   });
 
-  it('leaves unknown words and stems hidden inside other words without a picture', () => {
+  it('leaves unknown words and words that only contain a known one without a picture', () => {
     expect(pictureForFree('Muffins')).toBeNull();
     expect(pictureForFree('Schutzbrille')).toBeNull();
+    // Astra code review, PR 32: these once got sneakers and a glue stick.
+    expect(pictureForFree('Schuhkarton')).toBeNull();
+    expect(pictureForFree('Aufkleber')).toBeNull();
+    expect(pictureForFree('Hutschachtel')).toBeNull();
+    expect(pictureForFree('Geldspiel')).toBeNull();
     expect(pictureForFree('')).toBeNull();
   });
 });
