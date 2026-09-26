@@ -15,6 +15,8 @@ import {
   toggleDaily,
   toggleExtra,
   type PackPlan,
+  FREE_PICTURE_FILES,
+  pictureForFree,
 } from '../src/lib/ranzen-packplan';
 
 // File names of the drawn task pictures that ship with the site.
@@ -210,5 +212,46 @@ describe('Ranzen-Packplan free item', () => {
   it('is stored cleaned when set through the helpers', () => {
     const plan = setFree(defaultPlan(), 'mo', '  Kuscheltier  ');
     expect(plan.days.mo.free).toBe('Kuscheltier');
+  });
+});
+
+describe('pictures for free items', () => {
+  it.each([
+    ['Laterne', 'lantern.webp'],
+    ['Laternenumzug', 'lantern.webp'],
+    ['Geld für den Ausflug', 'coin-purse.webp'],
+    ['Taschengeld', 'coin-purse.webp'],
+    ['Obsttag', 'apple.webp'],
+    ['Apfel', 'apple.webp'],
+    ['Klebestift', 'glue-stick.webp'],
+    ['Schere', 'scissors.webp'],
+    ['Turnschuhe', 'sneakers.webp'],
+    ['Hausschuhe', 'slippers.webp'],
+    ['Handschuhe', 'hat-gloves.webp'],
+    ['Mütze', 'hat-gloves.webp'],
+    ['Sonnenmütze', 'sun-hat.webp'],
+    ['Sonnenhut', 'sun-hat.webp'],
+    ['Gummistiefel', 'rubber-boots.webp'],
+    ['Kastanien', 'chestnuts.webp'],
+    ['Rucksack', 'backpack.webp'],
+    ['Wandertag', 'backpack.webp'],
+    ['Kuscheltier', 'teddy.webp'],
+    ['Elternbrief', 'school-letter.webp'],
+    ['Mitteilungsheft', 'school-letter.webp'],
+    ['Matheheft', 'homework.webp'],
+    ['Lesebuch', 'book.webp'],
+    ['Wasserflasche', 'bottle.webp'],
+  ])('%s gets %s', (text, img) => {
+    expect(pictureForFree(text)).toBe(img);
+  });
+
+  it('only points to pictures that ship with the site', () => {
+    for (const file of FREE_PICTURE_FILES) expect(TASK_ART.has(file)).toBe(true);
+  });
+
+  it('leaves unknown words and stems hidden inside other words without a picture', () => {
+    expect(pictureForFree('Muffins')).toBeNull();
+    expect(pictureForFree('Schutzbrille')).toBeNull();
+    expect(pictureForFree('')).toBeNull();
   });
 });

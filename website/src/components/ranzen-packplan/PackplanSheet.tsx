@@ -6,6 +6,7 @@ import {
   SUPPORT_MODES,
   WEEKDAYS,
   cleanFreeText,
+  pictureForFree,
   type PackPlan,
   type WeekdayId,
 } from '../../lib/ranzen-packplan';
@@ -85,6 +86,7 @@ function DayCard({ plan, day, label }: { plan: PackPlan; day: WeekdayId; label: 
   const daily = DAILY_ITEMS.filter((item) => plan.daily.includes(item.id));
   const extras = EXTRA_ITEMS.filter((item) => plan.days[day].extras.includes(item.id));
   const free = cleanFreeText(plan.days[day].free);
+  const freeImg = free ? pictureForFree(free) : null;
   const count = extras.length + (free ? 1 : 0);
   // A day with nothing on top shows the daily items as its main pictures, so
   // the card never shows an empty middle or a thing that is not packed
@@ -137,9 +139,14 @@ function DayCard({ plan, day, label }: { plan: PackPlan; day: WeekdayId; label: 
             ))}
             {free && (
               <li className="pp-extra pp-extra--free">
-                {/* An empty box instead of a stand-in picture: the child draws
-                    the thing in, so the card never shows the wrong object. */}
-                <span className="pp-draw" data-draw aria-hidden />
+                {/* A known word gets its picture; anything else an empty box
+                    the child draws into, never a stand-in that shows the
+                    wrong object. */}
+                {freeImg ? (
+                  <TaskPicture img={freeImg} />
+                ) : (
+                  <span className="pp-draw" data-draw aria-hidden />
+                )}
                 <span className="pp-extra-label">{free}</span>
               </li>
             )}

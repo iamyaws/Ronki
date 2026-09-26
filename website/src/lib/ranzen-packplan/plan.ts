@@ -70,7 +70,7 @@ export const WEEKDAYS: ReadonlyArray<{ id: WeekdayId; label: string }> = [
 
 export const DAILY_ITEMS: ReadonlyArray<PackItem<DailyItemId>> = [
   { id: 'brotdose', code: 'b', label: 'Brotdose', img: 'lunchbox.webp' },
-  { id: 'trinkflasche', code: 't', label: 'Trinkflasche', printLabel: `Trink${SHY}flasche`, img: 'water.webp' },
+  { id: 'trinkflasche', code: 't', label: 'Trinkflasche', printLabel: `Trink${SHY}flasche`, img: 'bottle.webp' },
   { id: 'maeppchen', code: 'm', label: 'Mäppchen', img: 'pencil-case.webp' },
   {
     id: 'hausaufgabenheft',
@@ -160,6 +160,56 @@ export function cleanFreeText(raw: string): string {
   // eslint-disable-next-line no-control-regex
   const folded = raw.replace(/[\u0000-\u001F\u007F-\u009F]/g, ' ').replace(/\s+/g, ' ').trim();
   return Array.from(folded).slice(0, FREE_TEXT_MAX).join('').trim();
+}
+
+/**
+ * Pictures for free items the tool knows by name. Checked in this order, so
+ * the specific word wins ("Hausschuhe" before "Schuhe", "Geld für den
+ * Ausflug" gets the purse, not the backpack). A word matches when it is the
+ * stem, starts with it (Laternenumzug) or ends with it (Taschengeld,
+ * Sonnenhut), so a stem hidden inside another word ("hut" in "Schutz") does
+ * not. Compounds need the specific entry first: "Handschuhe" ends with
+ * "schuhe" and "Sonnenmütze" with "mütze". Anything else gets an empty box on the card to draw in.
+ */
+const FREE_PICTURES: ReadonlyArray<{ img: string; stems: readonly string[] }> = [
+  { img: 'slippers.webp', stems: ['hausschuh', 'hausschuhe', 'puschen'] },
+  { img: 'rubber-boots.webp', stems: ['gummistiefel', 'stiefel', 'matschsachen', 'matschhose'] },
+  { img: 'coin-purse.webp', stems: ['geld', 'münze', 'münzen', 'euro', 'portemonnaie', 'geldbeutel', 'geldbörse'] },
+  { img: 'lantern.webp', stems: ['laterne', 'laternen', 'lampion', 'lampions'] },
+  { img: 'apple.webp', stems: ['obst', 'apfel', 'äpfel', 'frucht', 'früchte', 'gemüse'] },
+  { img: 'glue-stick.webp', stems: ['kleber', 'klebestift', 'klebstoff'] },
+  { img: 'scissors.webp', stems: ['schere'] },
+  { img: 'sun-hat.webp', stems: ['sonnenhut', 'sonnenmütze', 'sonnencreme', 'hut', 'kappe'] },
+  { img: 'hat-gloves.webp', stems: ['mütze', 'handschuh', 'handschuhe', 'schal'] },
+  { img: 'sneakers.webp', stems: ['turnschuh', 'turnschuhe', 'sportschuh', 'sportschuhe', 'hallenschuh', 'hallenschuhe', 'schuh', 'schuhe'] },
+  { img: 'chestnuts.webp', stems: ['kastanie', 'kastanien', 'eicheln', 'bastelsachen'] },
+  { img: 'bottle.webp', stems: ['trinkflasche', 'flasche'] },
+  { img: 'lunchbox.webp', stems: ['brotdose', 'frühstück', 'pausenbrot'] },
+  { img: 'teddy.webp', stems: ['kuscheltier', 'teddy', 'stofftier'] },
+  { img: 'school-letter.webp', stems: ['mitteilungsheft', 'elternbrief', 'brief', 'zettel', 'unterschrift', 'formular'] },
+  { img: 'book.webp', stems: ['buch', 'bücher', 'lesebuch'] },
+  { img: 'homework.webp', stems: ['hausaufgaben', 'hausaufgabenheft', 'heft', 'hefte', 'arbeitsblatt'] },
+  { img: 'rain-jacket.webp', stems: ['jacke', 'regenjacke', 'matschjacke'] },
+  { img: 'backpack.webp', stems: ['rucksack', 'ausflug', 'wandertag', 'waldtag'] },
+];
+
+/** Every picture a free item can get, for the check that the files ship. */
+export const FREE_PICTURE_FILES: readonly string[] = [...new Set(FREE_PICTURES.map((entry) => entry.img))];
+
+/** Picture file for a free item, or null when the card should show a box to draw in. */
+export function pictureForFree(text: string): string | null {
+  const words = cleanFreeText(text)
+    .toLocaleLowerCase('de-DE')
+    .split(/[^a-zäöüß]+/)
+    .filter(Boolean);
+  for (const entry of FREE_PICTURES) {
+    for (const stem of entry.stems) {
+      if (words.some((w) => w === stem || w.startsWith(stem) || (stem.length >= 3 && w.endsWith(stem)))) {
+        return entry.img;
+      }
+    }
+  }
+  return null;
 }
 
 function inOrder<Id extends string>(catalogue: ReadonlyArray<PackItem<Id>>, ids: Iterable<Id>): Id[] {
