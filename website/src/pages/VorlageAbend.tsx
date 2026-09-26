@@ -18,7 +18,7 @@ const FAQ: GuideFaq[] = [
   {
     question: 'Was, wenn mein Kind noch nicht lesen kann?',
     answer:
-      'Das macht nichts. Jeder Schritt hat ein großes Bild. Lies die Wörter an den ersten Abenden vor und zeig dabei auf das Bild. Nach ein paar Tagen kennt dein Kind die Reihenfolge.',
+      'Das macht nichts. Jeder Schritt hat ein großes Bild. Lies die Wörter an den ersten Abenden vor und zeig dabei auf das Bild. Für einen eigenen Schritt ohne Bild malt ihr vor dem ersten Abend eins in das freie Feld.',
   },
   {
     question: 'Mit oder ohne Belohnung?',
