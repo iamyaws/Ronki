@@ -139,7 +139,7 @@
       "story": "Im hohen Baum wohnt eine Vogelfamilie. Die Kleinen haben laut gepiept. Unten lag eine blaue Eierschale. Da ist jemand geschlüpft. So wie ich damals!",
       "hook": "Als Nächstes flieg ich zum Vogelbaum. Da piept es." },
     { "id": "t23", "place": "Sonnenblumenfeld", "emoji": "🌻", "treasure": "Sonnenblumenkern",
-      "story": "Die Sonnenblumen sind größer als ich. Sie gucken alle zur Sonne, da hab ich mitgeguckt. Ups, ein Kern ist zwischen meine Schuppen gerutscht.",
+      "story": "Die Sonnenblumen sind größer als ich. Ich hab unter einer Blüte gestanden. Ups, ein Kern ist zwischen meine Schuppen gerutscht. Den hab ich mitgebracht.",
       "hook": "Als Nächstes flieg ich zu den Sonnenblumen. Die sind riesig." },
     { "id": "t24", "place": "Echofelsen", "emoji": "🔔", "treasure": "Glockenblume",
       "story": "Am großen Felsen hab ich Hallo gerufen. Der Felsen hat Hallo zurückgerufen! Daneben wächst eine Glockenblume. Geklingelt hat sie nicht, ich hab's probiert.",
@@ -154,7 +154,7 @@
       "story": "Ganz oben auf dem Berg sieht man alles. Den Wald, den Bach, den See. Und ganz klein unser Nest! Ich hab mir alles gemerkt, für dich.",
       "hook": "Als Nächstes flieg ich ganz hoch, auf den Berg!" },
     { "id": "t28", "place": "Rund ums Nest", "emoji": "🐉", "treasure": "Drachenschuppe",
-      "story": "Diesmal bin ich nur einmal um unser Nest geflogen. Dabei ist mir eine Schuppe ausgefallen. Keine Sorge, da wächst eine neue. Die alte ist für dich.",
+      "story": "Diesmal bin ich einmal um unser Nest geflogen. Eine lockere Schuppe hat gekitzelt und ist abgefallen. Darunter wächst schon eine neue. Die alte ist für dich.",
       "hook": "Als Nächstes flieg ich einmal um unser Nest. Ganz langsam." }
   ]
 }

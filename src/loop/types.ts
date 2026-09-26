@@ -95,7 +95,7 @@ export interface LoopStateFields {
   lastTripDate?: string | null;
   /** ISO time of the last departure (a dream trip: its evening start); departures stay 8 hours apart. */
   lastTripAt?: string | null;
-  /** Index into TRIPS of the next trip (wraps after 14). Old saves: 0. */
+  /** Index into TRIPS of the next trip (wraps after the last trip). Old saves: 0. */
   tripCursor?: number;
   /** Trip ids whose treasure is on the shelf, in order found. */
   treasuresFound?: string[];
