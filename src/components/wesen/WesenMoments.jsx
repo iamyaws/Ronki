@@ -44,7 +44,7 @@ function useSayOnce(id, delay = 500) {
 // ── Pick ─────────────────────────────────────────────────────────────
 
 export function WesenPick({ onDone }) {
-  const { actions } = useTask();
+  const { state, actions } = useTask();
   const reduced = useReducedMotion();
   const [picked, setPicked] = useState(null);
   const lineId = picked ? `wesen_picked_${picked}` : 'wesen_pick_01';
@@ -58,6 +58,10 @@ export function WesenPick({ onDone }) {
 
   return (
     <div role="dialog" aria-modal="true" aria-label="Ein Wesen aussuchen" data-testid="wesen-pick" className="bg-white text-ink" style={SHELL}>
+      {/* Ronki hosts the moment (Astra A6): he is there first, the newcomers come to him. */}
+      <div style={{ width: 130, height: 130, marginBottom: 8 }}>
+        <MoodChibi size={130} variant={state?.companionVariant} stage={getCatStage(state?.catEvo ?? 3)} mood="happy" keepStage bare style={{ width: '100%', height: '100%' }} />
+      </div>
       <div className="flex justify-center" style={{ gap: 10, width: '100%', maxWidth: 440 }}>
         {CREATURES.map(c => {
           const gone = picked && picked !== c.id;
