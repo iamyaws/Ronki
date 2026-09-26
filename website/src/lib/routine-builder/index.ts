@@ -2,6 +2,7 @@ export * from './plan';
 export * from './evening';
 export {
   clockRange,
+  isEndStep,
   kitAddOwnStep,
   kitAddStep,
   kitAppKindPicture,

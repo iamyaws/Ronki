@@ -47,6 +47,12 @@ export interface RoutineKit {
   defaultTime: string;
   /** Clock times a parent can pick, as "HH:MM". */
   times: readonly string[];
+  /**
+   * A step that is the moment itself rather than something that takes time
+   * ("Licht aus"): when it is the last step it gets the clock time exactly
+   * and the steps before it count back from there.
+   */
+  endStep?: string;
   /** Done band line when times are on, e.g. "Für heute fertig. Los um 7:40 Uhr." */
   timeNote: (clock: string) => string;
   /** App task kinds for this block; must match ROUTINE_CHOICES in the app (drift test). */
@@ -288,23 +294,34 @@ function sheetIndices(plan: RoutinePlan): number[] {
  * from the row above, so the sheet never reads like a stopwatch. The time in
  * the done band stays exact.
  */
-export function printedTimes(plan: RoutinePlan): (string | undefined)[] {
+export function printedTimes(plan: RoutinePlan, endStep?: string): (string | undefined)[] {
   const out: (string | undefined)[] = plan.steps.map(() => undefined);
   if (!plan.times) return out;
   const keep = sheetIndices(plan);
-  const starts = startTimes(plan.leave, keep.map((i) => plan.minutes[i]));
+  const lastIndex = keep[keep.length - 1];
+  // "Licht aus" as the last step is the clock time itself (Astra AB-02).
+  const ends = endStep !== undefined && lastIndex !== undefined && plan.steps[lastIndex] === endStep;
+  const counted = ends ? keep.slice(0, -1) : keep;
+  const starts = startTimes(plan.leave, counted.map((i) => plan.minutes[i]));
   let last = '';
-  keep.forEach((i, n) => {
+  counted.forEach((i, n) => {
     const rounded = fromMinutes(Math.floor(toMinutes(starts[n]) / 5) * 5);
     if (rounded !== last) out[i] = clockLabel(rounded);
     last = rounded;
   });
+  if (ends) out[lastIndex] = clockLabel(plan.leave);
   return out;
+}
+
+/** True when the step at `index` is the kit's end step and last on the sheet, so it has no length of its own. */
+export function isEndStep(kit: RoutineKit, plan: RoutinePlan, index: number): boolean {
+  const keep = sheetIndices(plan);
+  return kit.endStep !== undefined && plan.steps[index] === kit.endStep && keep[keep.length - 1] === index;
 }
 
 /** Steps as the sheet draws them, with the clock time when times are on. */
 export function kitSheetSteps(kit: RoutineKit, plan: RoutinePlan): SheetStep[] {
-  const times = printedTimes(plan);
+  const times = printedTimes(plan, kit.endStep);
   return sheetIndices(plan).map((i) => {
     const code = plan.steps[i];
     const time = times[i];

@@ -67,6 +67,7 @@ export const EVENING: RoutineKit = {
   ownBefore: 'o',
   lastWords: { code: 'o', words: 'bis ins Bett' },
   timeKey: 'aus',
+  endStep: 'o',
   defaultTime: EVENING_DEFAULT_TIME,
   times: LIGHTS_OUT_TIMES,
   timeNote: (clock) => `Für heute fertig. Licht aus um ${clock} Uhr.`,

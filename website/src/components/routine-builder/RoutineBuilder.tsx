@@ -27,6 +27,7 @@ import {
   canAdd,
   cleanOwnText,
   clockLabel,
+  isEndStep,
   kitAddStep,
   kitAppKindsFor,
   kitCardLink,
@@ -52,13 +53,13 @@ const COPY = {
     dayPart: 'Morgen',
     ownExample: 'Mütze oder Hausaufgaben',
     timeQuestion: 'Wann müsst ihr los?',
-    timeEnd: 'wenn ihr losmüsst',
+    countBack: 'Wir rechnen rückwärts: Der letzte Schritt ist fertig, wenn ihr losmüsst.',
   },
   abend: {
     dayPart: 'Abend',
     ownExample: 'Kuscheltier oder Buch',
     timeQuestion: 'Wann ist Licht aus?',
-    timeEnd: 'wenn das Licht ausgeht',
+    countBack: 'Wir rechnen vom Lichtausmachen rückwärts: Bis dahin sind die Schritte davor fertig.',
   },
 } as const;
 
@@ -110,7 +111,7 @@ export function RoutineBuilderControls({ builder }: { builder: RoutinePlanState 
   const [adding, setAdding] = useState(false);
   const full = !canAdd(plan);
   const hasOwn = plan.steps.includes(OWN_STEP_CODE);
-  const times = printedTimes(plan);
+  const times = printedTimes(plan, kit.endStep);
   const missing = kit.steps.filter((step) => !plan.steps.includes(step.code));
   const titleId = `${BUILDER_ANCHOR}-titel`;
 
@@ -250,7 +251,7 @@ export function RoutineBuilderControls({ builder }: { builder: RoutinePlanState 
               </select>
             </div>
             <p className="mt-2 text-sm text-ink/65 leading-relaxed">
-              Wir rechnen rückwärts: Der letzte Schritt ist fertig, {copy.timeEnd}. Wie lange
+              {copy.countBack} Wie lange
               ein Schritt dauert, stellst du oben mit Minus und Plus ein. Auf dem Blatt stehen die
               Zeiten auf fünf Minuten abgerundet, so findet dein Kind sie leichter auf der Uhr.
             </p>
@@ -277,6 +278,8 @@ function StepItem({
   const img = kitStepPicture(kit, plan, code);
   const count = plan.steps.length;
   const minutes = plan.minutes[index];
+  // "Licht aus" as the last step is the moment itself: no minutes, "um" instead of "ab".
+  const isEnd = isEndStep(kit, plan, index);
 
   return (
     <li className="rounded-2xl border-[2.5px] border-ink/15 bg-white p-2 pr-2.5">
@@ -316,11 +319,13 @@ function StepItem({
             </span>
           )}
           {plan.times && start && (
-            <span className="mt-0.5 block text-sm text-ink/65">ab {start} Uhr</span>
+            <span className="mt-0.5 block text-sm text-ink/65">
+              {isEnd ? 'um' : 'ab'} {start} Uhr
+            </span>
           )}
         </div>
         <div className="flex w-full flex-wrap items-center justify-end gap-2 sm:w-auto sm:flex-nowrap">
-          {plan.times && (
+          {plan.times && !isEnd && (
             <div className="mr-auto flex items-center gap-1 sm:mr-2">
               <IconButton
                 label={`${label}: eine Minute weniger`}

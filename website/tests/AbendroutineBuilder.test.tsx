@@ -79,8 +79,13 @@ describe('Evening kit', () => {
 
   it('counts back from lights out and says so in the done band', () => {
     const plan = kitSetLeave(EVENING, setTimes(kitDefaultPlan(EVENING), true), '19:30');
-    // Minutes 3, 3, 3, 1 end at 19:30: exact starts 19:20, 19:23, 19:26, 19:29.
-    expect(kitSheetSteps(EVENING, plan).map((s) => s.time)).toEqual(['19:20', undefined, '19:25', undefined]);
+    // "Licht aus" is the moment itself: 19:30 on its row, the rest counts back
+    // from it (exact starts 19:21, 19:24, 19:27, printed rounded where they change).
+    expect(kitSheetSteps(EVENING, plan).map((s) => s.time)).toEqual(['19:20', undefined, '19:25', '19:30']);
+    // Without "Licht aus" last, the last step simply ends at the time
+    // (exact starts 19:11, 19:14, 19:17, 19:20).
+    const noEnd = kitSetLeave(EVENING, setTimes(kitDecodePlan(EVENING, 's=zwyl'), true), '19:30');
+    expect(kitSheetSteps(EVENING, noEnd).map((s) => s.time)).toEqual(['19:10', undefined, '19:15', '19:20']);
     expect(kitLeaveNote(EVENING, plan)).toBe('Für heute fertig. Licht aus um 19:30 Uhr.');
     expect(kitEncodePlan(EVENING, plan)).toBe('aus=1930');
   });
@@ -151,6 +156,11 @@ describe('Abendroutine page with the builder', () => {
     fireEvent.change(screen.getByRole('combobox', { name: 'Wann ist Licht aus?' }), { target: { value: '20:00' } });
     expect(window.location.search).toBe('?s=zwylo&aus=2000');
     expect(screen.getByText('Für heute fertig. Licht aus um 20:00 Uhr.')).toBeInTheDocument();
+    // The last row says the same time as the band, and has no minutes of its own.
+    const rows = within(screen.getByRole('list', { name: 'Die Schritte' })).getAllByRole('listitem');
+    expect(rows[rows.length - 1].querySelector('[data-time]')).toHaveTextContent('20:00 Uhr');
+    expect(screen.queryByRole('button', { name: 'Licht aus: eine Minute mehr' })).toBeNull();
+    expect(screen.getByText('um 20:00 Uhr')).toBeInTheDocument();
   });
 
   it('offers the card with the evening steps and counts it as the evening', () => {
