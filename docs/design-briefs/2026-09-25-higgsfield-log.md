@@ -99,3 +99,13 @@ Lane B's hatch showed the cream clip under any egg (a kid picking the red egg sa
 **Total spend of the run: 425 credits of 675 (balance 250), under the 450 cap. 41 images and 9 clips.**
 
 Note: the first submission of 60 and 62 to 65 was answered with preset suggestions ("IN THE DARK", "DROWN IN MUSIC") instead of jobs; resubmitted with the presets declined. No credits were spent on the suggestions.
+
+## Fourth pass: packing and sheet pictures (26 Sep 2026, website session)
+
+Marc's go: plan "printables in option A, and the Ranzen-Packplan tool" (26 Sep 2026). Same model and settings as job 25cf94f7; references: the first task sheet 25cf94f7 (style) and the morning scene d5685b24.
+
+| # | Job | What | File |
+|---|---|---|---|
+| 91 | 715bff1f | One 4 x 3 sheet: gym bag, swim bag with goggles, folded spare clothes, pencil case, slippers, lunch box, recorder, paint box, rain jacket, school notebook with a letter, child's toilet, teddy bear | cut locally with `scripts/cut-task-sheet.py` into `website/public/art/bilderbuch/tasks/*.webp` (256 px) |
+
+1 image, 2.75 credits. The model painted the transparent ground as a grey checkerboard; the cutter removes it (edge-connected checker plus closed gaps that hold both checker greys in large shares) and keeps white paint with crayon grain.
