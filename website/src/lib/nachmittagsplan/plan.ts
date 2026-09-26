@@ -454,8 +454,10 @@ export function checkFit(plan: AfternoonPlan): FitProblem[] {
     if (at && end) {
       if (toMinutes(at) < toMinutes(end)) {
         add('school', `Am ${label} beginnen die Hausaufgaben um ${at}, die Schule endet erst um ${end}. Verschieb die Hausaufgaben.`);
-      } else if (plan.arrive) {
-        const arriveFrom = afterAppointment ? (to ?? from!) : end;
+      } else if (plan.arrive && !(afterAppointment && !to)) {
+        // With the appointment first but no end, the arrival time is not
+        // known: fitNotes asks the parent to check instead.
+        const arriveFrom = afterAppointment ? to! : end;
         const arrived = addMinutes(arriveFrom, plan.arrive);
         if (toMinutes(at) < toMinutes(arrived)) {
           add(
@@ -520,23 +522,32 @@ export interface FitNote {
 }
 
 /**
- * What the check cannot know, as a hint that never blocks printing: homework
- * without minutes before an appointment the same day (Astra NP-03). The tool
- * invents no minutes, so the parent checks this one.
+ * What the check cannot know, as hints that never block printing (Astra
+ * NP-03 and round 2). The tool invents no minutes and no end times, so the
+ * parent checks these. At most one hint per day, the most useful first:
+ * homework without minutes before an appointment; an appointment without an
+ * end before homework (or before Ankommen when the child goes straight
+ * there); homework without minutes before dinner.
  */
 export function fitNotes(plan: AfternoonPlan): FitNote[] {
   const notes: FitNote[] = [];
   for (const { id, label } of WEEKDAYS) {
-    const { homework, appointment } = plan.days[id];
+    const day = plan.days[id];
+    const { homework, appointment } = day;
     const home = homework?.where === 'home' ? homework : null;
     const at = home?.at ?? null;
     const from = appointment?.from ?? null;
+    const to = from ? (appointment?.to ?? null) : null;
+    const name = appointment ? nameInSentence(appointment) : '';
+    let message: string | null = null;
     if (home && at && !home.minutes && from && toMinutes(from) > toMinutes(at)) {
-      notes.push({
-        day: id,
-        message: `Für ${label} fehlt die Dauer der Hausaufgaben. Prüf selbst, ob bis ${nameInSentence(appointment!)} um ${from} genug Zeit bleibt.`,
-      });
+      message = `Für ${label} fehlt die Dauer der Hausaufgaben. Prüf selbst, ob bis ${name} um ${from} genug Zeit bleibt.`;
+    } else if (from && !to && (arrivesAfterAppointment(plan, day) || (at && toMinutes(at) > toMinutes(from)))) {
+      message = `Für ${label} fehlt, wann ${name} endet. Prüf selbst, ob danach genug Zeit zum Ankommen und für die Hausaufgaben bleibt.`;
+    } else if (home && at && !home.minutes && plan.dinner && toMinutes(at) < toMinutes(plan.dinner)) {
+      message = `Für ${label} fehlt die Dauer der Hausaufgaben. Prüf selbst, ob bis zum Abendessen um ${plan.dinner} genug Zeit bleibt.`;
     }
+    if (message) notes.push({ day: id, message });
   }
   return notes;
 }

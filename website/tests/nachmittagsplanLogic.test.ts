@@ -625,3 +625,24 @@ describe('fit notes', () => {
     expect(fitNotes(setHomeworkMinutes(plan, 'mo', 30))).toEqual([]);
   });
 });
+
+describe('round 2: unknown appointment end', () => {
+  it('computes no arrival time from an appointment without an end, and asks the parent to check', () => {
+    let plan = day(defaultPlan(), 'mo', { end: '13:00', kind: 'sport', from: '13:15', at: '14:00' });
+    plan = setArrive(plan, 45);
+    expect(checkFit(plan)).toEqual([]);
+    expect(fitNotes(plan)).toEqual([
+      {
+        day: 'mo',
+        message: 'Für Montag fehlt, wann Sport endet. Prüf selbst, ob danach genug Zeit zum Ankommen und für die Hausaufgaben bleibt.',
+      },
+    ]);
+  });
+
+  it('asks about homework without minutes before dinner, one hint per day', () => {
+    const plan = setDinner(day(defaultPlan(), 'di', { end: '13:00', at: '16:00' }), '18:30');
+    expect(fitNotes(plan)).toEqual([
+      { day: 'di', message: 'Für Dienstag fehlt die Dauer der Hausaufgaben. Prüf selbst, ob bis zum Abendessen um 18:30 genug Zeit bleibt.' },
+    ]);
+  });
+});

@@ -81,7 +81,7 @@ export default function RatgeberHausaufgabenStreitErsteKlasse() {
         Die Frage kommt später, und zwar nicht von dir, sondern vom Plan.
       </p>
 
-      <h2>Eine feste Hausaufgabenzeit statt täglicher Verhandlung</h2>
+      <h2>Die Hausaufgabenzeit auf dem Plan</h2>
       <Steps>
         <StepCard n={1} title="Die Zeit steht auf dem Plan">
           <p>
@@ -126,7 +126,8 @@ export default function RatgeberHausaufgabenStreitErsteKlasse() {
         Der kostenlose{' '}
         <Link to="/tools/nachmittagsplan">Nachmittagsplan</Link> zeigt dir, wenn
         sich eingetragene Zeiten an einem Tag überschneiden oder die
-        Hausaufgaben ins Ankommen rutschen. Gedruckt wird erst, wenn die
+        Hausaufgaben ins Ankommen rutschen, und sagt dir, wo eine Dauer oder
+        ein Ende fehlt. Das prüfst du dann selbst. Gedruckt wird erst, wenn die
         eingetragenen Zeiten zusammenpassen. Was du verschiebst, entscheidest
         du.
       </p>

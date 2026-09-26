@@ -374,6 +374,13 @@ describe('Nachmittagsplan page', () => {
     expect(column(preview(), 'fr').textContent).toContain('Reiten');
   });
 
+  it('says on the day when the child goes straight from school to the appointment', () => {
+    renderPage('?mo=1300.h1500.tS1315-1400&ak=45');
+    expect(document.querySelector('[data-straight="mo"]')?.textContent).toContain(
+      'Dein Kind geht direkt von der Schule zu Sport und kommt danach an.',
+    );
+  });
+
   it('jumps with the skip link without a history entry, so Back never wipes the plan (Claude F2)', () => {
     renderPage(UNFIT);
     const before = window.history.length;

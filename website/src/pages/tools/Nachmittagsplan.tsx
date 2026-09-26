@@ -47,6 +47,8 @@ import {
   SHARE_TEXT,
   WEEKDAYS,
   appointmentEndTimes,
+  appointmentLabel,
+  arrivesAfterAppointment,
   checkFit,
   fitNotes,
   decodePlan,
@@ -648,6 +650,7 @@ function DayFields({
   const { homework, appointment } = plan.days[day];
   const home = homework?.where === 'home' ? homework : null;
   const froms = AFTERNOON_TIMES.slice(0, -1);
+  const straight = appointment ? arrivesAfterAppointment(plan, plan.days[day]) : false;
 
   return (
     <fieldset
@@ -670,6 +673,13 @@ function DayFields({
             </li>
           ))}
         </ul>
+      )}
+
+      {straight && appointment && (
+        <p data-straight={day} className="mt-3 rounded-xl bg-sky-wash/60 px-3 py-2 text-sm text-ink leading-relaxed">
+          Dein Kind geht direkt von der Schule zu {appointmentLabel(appointment)} und kommt danach an. Passt das
+          nicht, verschieb den Termin.
+        </p>
       )}
 
       <div role="group" aria-label={`Hausaufgaben am ${label}`} className="mt-4">
