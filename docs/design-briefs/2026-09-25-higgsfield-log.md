@@ -155,3 +155,16 @@ Marc's go: plan "morning routine configurator" (26 Sep 2026), prompt in the plan
 | 100 | 9ec0f1ca | One 2 x 2 sheet: hairbrush with a comb, a made child's bed, a pet food bowl with a paw print, children's glasses with round frames | cut with `scripts/cut-task-sheet.py --grid 2x2` into `website/public/art/bilderbuch/tasks/hairbrush`, `bed`, `pet-bowl`, `glasses` (.webp, 256 px) |
 
 1 image, 2.75 credits, on model at the first try.
+
+## Eighth pass: evening pictures (26 Sep 2026, website session)
+
+Marc's go: "yes, run the art batch for bath and shower" (26 Sep 2026), after Astra rep 8 (AB-01, AB-04). Same model and settings; references: the task sheets 25cf94f7 and 715bff1f.
+
+| # | Job | What | File |
+|---|---|---|---|
+| 101 | cf88c9be | One 2 x 2 sheet: clothes laid out on a child's chair, glasses going into an open case, a bathtub with foam and a rubber duck, a shower with a bath mat | cut from the gap-closed sheet with `scripts/cut-task-sheet.py --grid 2x2 --solid bath` into `website/public/art/bilderbuch/tasks/clothes-chair`, `glasses-case`, `bath`, `shower` (.webp, 256 px) |
+
+1 image, 2.75 credits, on model at the first try. The model drew the foam cloud behind the duck as an open arc, so the background flooded its white inside. Fixed by closing the arc with a short ink stroke on the source sheet (x 634 to 646, y 1316 to 1338) and cutting the bath with the new `--solid` option, which closes hairline outline gaps and keeps everything inside the silhouette as paint.
+
+Marc, the same evening: still images go through Astra (Codex image generation on the ChatGPT plan) from now on, not Higgsfield. This is the last Higgsfield pass for task pictures.
+

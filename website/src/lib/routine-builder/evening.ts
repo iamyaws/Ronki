@@ -5,7 +5,7 @@
  * from lights out instead of leaving the house.
  *
  * Link format (keys only when they differ from the default):
- *   s=azwylo          step codes in order; the default is zwyo
+ *   s=aeswylo         step codes in order; the default is zwyo
  *   e=Medizin nehmen  the own step, only when x is in s
  *   aus=1930          lights-out time as HHMM; being there means times are on
  *   m=20.3.3.3.10.1   minutes per step, only when times are on and they differ
@@ -30,15 +30,18 @@ export const APP_EVENING_LABELS: Record<AppEveningKind, string> = {
 /** Catalogue in the order of a usual evening; new steps are placed by it. */
 export const EVENING_STEPS: ReadonlyArray<RoutineStep> = [
   { code: 'a', label: 'Abendessen', hint: 'Am Tisch, zusammen.', img: 'plate.webp', minutes: 20, app: 'dinner' },
-  { code: 'g', label: 'Sachen rauslegen', hint: 'Kleidung für morgen auf den Stuhl.', img: 'shirt.webp', minutes: 3 },
+  { code: 'g', label: 'Sachen rauslegen', hint: 'Kleidung für morgen auf den Stuhl.', img: 'clothes-chair.webp', minutes: 3 },
   { code: 'p', label: 'Tasche packen', hint: 'Brotdose, Trinkflasche, Hausaufgaben.', img: 'bag.webp', minutes: 5 },
+  // Not in the app, so they stay on paper (Astra AB-04).
+  { code: 'e', label: 'Baden', hint: 'Warmes Wasser, dann abtrocknen.', img: 'bath.webp', minutes: 15 },
+  { code: 's', label: 'Duschen', hint: 'Kurz abbrausen, dann abtrocknen.', img: 'shower.webp', minutes: 10 },
   { code: 'k', label: 'Klo', hint: 'Danach Hände waschen.', img: 'toilet.webp', minutes: 2 },
   { code: 'z', label: 'Zähne putzen', hint: 'Auch die hinten im Mund.', img: 'toothbrush.webp', minutes: 3, app: 'teeth_pm' },
   { code: 'w', label: 'Gesicht waschen', hint: 'Mit Wasser, ganz sanft.', img: 'wash.webp', minutes: 3, app: 'wash_pm' },
   { code: 'y', label: 'Pyjama an', hint: 'Die Sachen von heute in den Korb.', img: 'pajama.webp', minutes: 3, app: 'pyjama' },
   { code: 't', label: 'Wasser trinken', hint: 'Ein Schluck Wasser.', img: 'water.webp', minutes: 1 },
   { code: 'n', label: 'Tier füttern', hint: 'Futter in den Napf, frisches Wasser.', img: 'pet-bowl.webp', minutes: 3 },
-  { code: 'b', label: 'Brille ablegen', hint: 'Ins Etui, neben das Bett.', img: 'glasses.webp', minutes: 1 },
+  { code: 'b', label: 'Brille ablegen', hint: 'Ins Etui, neben das Bett.', img: 'glasses-case.webp', minutes: 1 },
   { code: 'l', label: 'Vorlesen', hint: 'Eine Geschichte zusammen.', img: 'book.webp', minutes: 10, app: 'cuddle' },
   { code: 'u', label: 'Kuscheltier', hint: 'Wer schläft heute mit?', img: 'teddy.webp', minutes: 1 },
   { code: 'm', label: 'Nachtlicht an', hint: 'Das kleine Licht darf anbleiben.', img: 'nightlight.webp', minutes: 1 },

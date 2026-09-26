@@ -14,7 +14,9 @@ not exactly regular). This script removes it:
 Each object is then trimmed, fitted into 232 px and centred on a 256 px canvas,
 like the existing tasks/*.webp.
 
-Run: python scripts/cut-task-sheet.py <sheet.png> <out_dir> [--grid 4x3] name1 name2 ...
+Run: python scripts/cut-task-sheet.py <sheet.png> <out_dir> [--grid 4x3] [--solid name,name] name1 name2 ...
+(--solid: for these pictures an enclosed light area is always paint, never a
+gap, e.g. white foam in a bath that the grid rule would read as checkerboard)
 (names row by row; the default grid is 4 columns by 3 rows)
 """
 import sys
@@ -26,8 +28,12 @@ from scipy import ndimage
 
 sheet_path, out_dir, *rest = sys.argv[1:]
 cols, rows = 4, 3
-if rest[:1] == ['--grid']:
-    cols, rows = (int(v) for v in rest[1].lower().split('x'))
+solid = set()
+while rest[:1] in (['--grid'], ['--solid']):
+    if rest[0] == '--grid':
+        cols, rows = (int(v) for v in rest[1].lower().split('x'))
+    else:
+        solid |= set(rest[1].split(','))
     rest = rest[2:]
 names = rest
 if len(names) != cols * rows:
@@ -115,6 +121,13 @@ for i, name in enumerate(names):
         for lab in edge:
             if sizes[lab - 1] < 0.05 * sizes.max():
                 bg |= parts == lab
+    if name in solid:
+        # Close hairline gaps in the outline (up to about 8 px), then
+        # everything inside the closed silhouette is paint; only background
+        # outside it stays transparent.
+        disk = np.hypot(*np.mgrid[-4:5, -4:5]) <= 4
+        silhouette = ndimage.binary_fill_holes(ndimage.binary_closing(~bg, structure=disk, iterations=1))
+        bg = bg & ~silhouette
     alpha = np.where(bg, 0, 255).astype(np.uint8)
     rgba = np.dstack([cell.astype(np.uint8), alpha])
     ys, xs = np.nonzero(alpha)

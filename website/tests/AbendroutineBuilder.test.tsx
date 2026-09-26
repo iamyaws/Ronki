@@ -70,6 +70,25 @@ describe('Evening kit', () => {
     expect(EVENING_STEPS.some((s) => s.code === 'x')).toBe(false);
   });
 
+  it('offers bath and shower before the pyjama, on paper only', () => {
+    let plan = kitAddStep(EVENING, kitDefaultPlan(EVENING), 'e');
+    expect(plan.steps).toEqual(['e', 'z', 'w', 'y', 'o']);
+    plan = kitAddStep(EVENING, kitDefaultPlan(EVENING), 's');
+    expect(plan.steps).toEqual(['s', 'z', 'w', 'y', 'o']);
+    const bath = EVENING_STEPS.find((step) => step.code === 'e')!;
+    const shower = EVENING_STEPS.find((step) => step.code === 's')!;
+    expect([bath.label, bath.img, bath.app]).toEqual(['Baden', 'bath.webp', undefined]);
+    expect([shower.label, shower.img, shower.app]).toEqual(['Duschen', 'shower.webp', undefined]);
+    // The card never carries them.
+    expect(kitCardLink(EVENING, kitDecodePlan(EVENING, 's=ezyo'))).toBe('/profil-erstellen?abend=teeth_pm,pyjama');
+  });
+
+  it('shows the evening version of laying out clothes and taking off glasses', () => {
+    const img = (code: string) => EVENING_STEPS.find((step) => step.code === code)!.img;
+    expect(img('g')).toBe('clothes-chair.webp');
+    expect(img('b')).toBe('glasses-case.webp');
+  });
+
   it('knows exactly the evening tasks the app offers', () => {
     const match = /evening:\s*\[([^\]]*)\]/.exec(taskKindsSource.split('ROUTINE_CHOICES')[1] ?? '');
     const appList = match ? match[1].split(',').map((k) => k.trim().replace(/'/g, '')).filter(Boolean) : [];
