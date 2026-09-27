@@ -1,5 +1,6 @@
 export * from './plan';
 export * from './evening';
+export * from './clock';
 export {
   clockRange,
   isEndStep,
@@ -13,6 +14,7 @@ export {
   kitDecodePlan,
   kitDefaultPlan,
   kitEncodePlan,
+  kitFirstPrintedTime,
   kitLeaveNote,
   kitSetLeave,
   kitSheetDescription,

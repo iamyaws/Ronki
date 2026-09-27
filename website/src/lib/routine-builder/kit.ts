@@ -14,6 +14,7 @@
 
 import { cleanFreeText, pictureForFree } from '../ranzen-packplan';
 import type { SheetStep } from '../../components/sheet/types';
+import type { ClockStyle } from './clock';
 
 export interface RoutineStep {
   /** One letter in the share link, unique within the kit. */
@@ -65,6 +66,11 @@ export interface RoutineKit {
   notAloneInApp: readonly string[];
   shareTitle: string;
   shareText: string;
+  /**
+   * The page offers clock faces beside the times ("Als Uhr", "Beides").
+   * Morning only; the style lives next to the plan, see `clock.ts`.
+   */
+  clockFaces?: true;
 }
 
 export const OWN_STEP_CODE = 'x';
@@ -319,8 +325,23 @@ export function isEndStep(kit: RoutineKit, plan: RoutinePlan, index: number): bo
   return kit.endStep !== undefined && plan.steps[index] === kit.endStep && keep[keep.length - 1] === index;
 }
 
-/** Steps as the sheet draws them, with the clock time when times are on. */
-export function kitSheetSteps(kit: RoutineKit, plan: RoutinePlan): SheetStep[] {
+/**
+ * Steps as the sheet draws them, with the clock time when times are on.
+ *
+ * `style` only counts on a kit with clock faces while times are on: rows
+ * that print a time get a clock face with that same time, "uhr" without
+ * the time in words, "beides" with it. "zahl" is the sheet as it always was.
+ */
+export function kitSheetSteps(kit: RoutineKit, plan: RoutinePlan, style: ClockStyle = 'zahl'): SheetStep[] {
+  const steps = sheetStepsAsWritten(kit, plan);
+  if (style === 'zahl' || !kit.clockFaces || !plan.times) return steps;
+  return steps.map(({ time, ...step }) => {
+    if (!time) return { ...step, time };
+    return style === 'uhr' ? { ...step, clock: time } : { ...step, time, clock: time };
+  });
+}
+
+function sheetStepsAsWritten(kit: RoutineKit, plan: RoutinePlan): SheetStep[] {
   const times = printedTimes(plan, kit.endStep);
   return sheetIndices(plan).map((i) => {
     const code = plan.steps[i];
@@ -333,6 +354,15 @@ export function kitSheetSteps(kit: RoutineKit, plan: RoutinePlan): SheetStep[] {
     const hint = step.altHint && plan.steps.includes(step.altHint.when) ? step.altHint.hint : step.hint;
     return { img: step.img, label: step.label, hint, time };
   });
+}
+
+/** Sheet position of the first step and the time printed beside it, or null when times are off. */
+export function kitFirstPrintedTime(kit: RoutineKit, plan: RoutinePlan): { code: string; time: string } | null {
+  if (!plan.times) return null;
+  const times = printedTimes(plan, kit.endStep);
+  const first = sheetIndices(plan)[0];
+  if (first === undefined || !times[first]) return null;
+  return { code: plan.steps[first], time: times[first]! };
 }
 
 /** The line under the sheet title. For the default steps it is the line the page always had. */
