@@ -28,6 +28,7 @@ const FamilienCharter = lazy(() => import('./pages/tools/FamilienCharter'));
 const KonsolenCheck = lazy(() => import('./pages/tools/KonsolenCheck'));
 const RanzenPackplan = lazy(() => import('./pages/tools/RanzenPackplan'));
 const Nachmittagsplan = lazy(() => import('./pages/tools/Nachmittagsplan'));
+const AbendZweiKinder = lazy(() => import('./pages/tools/AbendZweiKinder'));
 // The block library. Internal reference page: noindex, not linked from
 // the navigation or the footer, not in the sitemap, not prerendered.
 const Styleguide = lazy(() => import('./pages/Styleguide'));
@@ -123,6 +124,7 @@ export function AppRoutes() {
         <Route path="/tools/konsolen-check" element={<KonsolenCheck />} />
         <Route path="/tools/ranzen-packplan" element={<RanzenPackplan />} />
         <Route path="/tools/nachmittagsplan" element={<Nachmittagsplan />} />
+        <Route path="/tools/abend-mit-zwei-kindern" element={<AbendZweiKinder />} />
         <Route path="/ratgeber" element={<Ratgeber />} />
         <Route path="/ratgeber/was-kinder-apps-machen" element={<RatgeberWasKinderAppsMachen />} />
         <Route path="/ratgeber/morgen-troedeln" element={<RatgeberMorgenTroedeln />} />

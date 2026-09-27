@@ -182,6 +182,13 @@ const ROUTES: RouteMeta[] = [
     ogImage: '/og-tool-nachmittagsplan.jpg',
   },
   {
+    path: '/tools/abend-mit-zwei-kindern',
+    title: 'Abend mit zwei Kindern: wer braucht wann deine Hilfe? · Ronki',
+    description:
+      'Zwei Kinder, ein Erwachsener: Leg beide Abende nebeneinander und sieh, wann dich beide zugleich brauchen. Ein A4-Blatt, kostenlos, ohne Anmeldung.',
+    ogImage: '/og-tool-abend-zwei-kinder.jpg',
+  },
+  {
     path: '/impressum',
     title: 'Impressum: Ronki',
     description: 'Anbieterkennzeichnung nach § 5 DDG und § 18 MStV.',
