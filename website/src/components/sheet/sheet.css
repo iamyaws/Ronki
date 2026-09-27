@@ -690,10 +690,23 @@
   }
 }
 
-/* Time to leave as a face in the done band ("Als Uhr", "Beides"). */
+/* Time to leave as a face in the done band ("Als Uhr", "Beides"), with an
+ * open door beside it: at this time we go out. */
+.rs-done-leave {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+.rs-done-leave-img {
+  display: block;
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+}
 .rs-done .rs-done-clock {
   flex: none;
-  margin-left: auto;
   width: 84px;
   height: 84px;
 }
@@ -707,6 +720,13 @@
   .rs-done .rs-done-clock {
     width: 44px;
     height: 44px;
+  }
+  .rs-done-leave {
+    gap: 4px;
+  }
+  .rs-done-leave-img {
+    width: 38px;
+    height: 38px;
   }
 }
 /* A row whose time stays the same: a small arrow down instead of a face. */

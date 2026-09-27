@@ -180,3 +180,7 @@ Brief: `C:\Users\öööö\ronki\launch\astra-art\brief-2026-09-27-knackpunkt.md`
 ## Astra pass 3: star, moon and two evening pictures (27 Sep 2026, website session)
 
 Brief: `C:\Users\öööö\ronki\launch\astra-art\brief-2026-09-27-stern-mond.md`; references: the two earlier task sheets plus Astra passes 1 and 2. One 2 x 2 sheet (chunky yellow star, sky-blue crescent moon, an adult hand holding a child's hand, two toothbrushes in one cup), 1254 px square, on style at the first try, no credits. Cut with `scripts/cut-task-sheet.py --grid 2x2`: `star.webp` and `moon.webp` are the two children's symbols on the Abend mit zwei Kindern (no names), `hands.webp` marks the steps that need the adult, the toothbrush cup is not shipped (unused, Claude review F8) and stays on the sheet. Sheet saved as `launch/astra-art/astra-sheet-stern-mond.png`.
+
+## Astra pass 4: leaving the house (27 Sep 2026, website session)
+
+Brief: `C:\Users\öööö\ronki\launch\astra-art\brief-2026-09-27-los.md`; references: the two earlier task sheets plus Astra passes 1 to 3. One 2 x 2 sheet (open front door with doormat and sunny outside, kick scooter, pedestrian light on green, bicycle helmet), 1254 px square, no credits. `door-open.webp` sits beside the leave clock in the done band of the morning sheet ("Als Uhr", "Beides"; Astra UHR-01 round 2). Scooter, traffic light and helmet kept in `launch/astra-art/cut/` for a possible "Schulweg" tool. Sheet saved as `launch/astra-art/astra-sheet-los.png`.

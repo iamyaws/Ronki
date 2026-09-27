@@ -77,6 +77,7 @@ interface LayoutProps extends BaseProps {
   sheetDescription?: string;
   doneNote?: string;
   doneClock?: string;
+  doneClockImg?: string;
   /** Screen-only blocks above and below the preview. */
   controls?: ReactNode;
   afterSheet?: ReactNode;
@@ -109,6 +110,7 @@ function BuilderPage({ builder: which, ...props }: BaseProps & { builder: 'morni
       sheetDescription={kitSheetDescription(kit, builder.plan)}
       doneNote={done.note}
       doneClock={done.clock}
+      doneClockImg={done.img}
       controls={<RoutineBuilderControls builder={builder} />}
       afterSheet={<RoutineBuilderShare builder={builder} />}
     />
@@ -124,6 +126,7 @@ function TemplateLayout({
   sheetDescription: shownDescription = description,
   doneNote,
   doneClock,
+  doneClockImg,
   controls,
   afterSheet,
   ronki,
@@ -221,6 +224,7 @@ function TemplateLayout({
               done={done}
               doneNote={doneNote}
               doneClock={doneClock}
+              doneClockImg={doneClockImg}
               big={bigIcons}
               clipLane={clipLane}
               footerUrl={footerLine}

@@ -69,18 +69,26 @@ export function kitEncodeQuery(kit: RoutineKit, plan: RoutinePlan, style: ClockS
 /** Done band text with "Als Uhr": the child finds the time to leave on the face beside it. */
 export const LEAVE_FACE_NOTE = 'Für heute fertig. Los geht es, wenn die Uhr so aussieht.';
 
+/** An open front door beside the leave clock: what happens at that time (Astra UHR-01, round 2). */
+export const LEAVE_PICTURE = 'door-open.webp';
+
 /**
  * The done band at the end of the sheet (Astra UHR-01, Claude F2): with
  * "Als Uhr" and "Beides" the time to leave gets a face too, the one time a
  * child who cannot read the clock needs most. "Als Uhr" says it in words
  * without the number; "Als Zahl" is the band as it always was.
  */
-export function kitDoneLine(kit: RoutineKit, plan: RoutinePlan, style: ClockStyle): { note?: string; clock?: string } {
+export function kitDoneLine(
+  kit: RoutineKit,
+  plan: RoutinePlan,
+  style: ClockStyle,
+): { note?: string; clock?: string; img?: string } {
   const note = kitLeaveNote(kit, plan);
   const shown = kitEffectiveClockStyle(kit, plan, style);
   if (shown === 'zahl') return { note };
   const clock = clockLabel(plan.leave);
-  return shown === 'uhr' ? { note: LEAVE_FACE_NOTE, clock } : { note, clock };
+  const img = LEAVE_PICTURE;
+  return shown === 'uhr' ? { note: LEAVE_FACE_NOTE, clock, img } : { note, clock, img };
 }
 
 /** The "uhr" value in the print event: "aus" without times, else the style the sheet shows. */

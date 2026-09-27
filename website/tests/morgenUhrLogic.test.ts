@@ -205,8 +205,12 @@ describe('Done band with the time to leave (Astra UHR-01, Claude F2)', () => {
 
   it('adds a face only with "Als Uhr" and "Beides", on the morning kit, with times on', () => {
     expect(kitDoneLine(MORNING, plan, 'zahl')).toEqual({ note: 'Für heute fertig. Los um 7:40 Uhr.' });
-    expect(kitDoneLine(MORNING, plan, 'uhr')).toEqual({ note: LEAVE_FACE_NOTE, clock: '7:40' });
-    expect(kitDoneLine(MORNING, plan, 'beides')).toEqual({ note: 'Für heute fertig. Los um 7:40 Uhr.', clock: '7:40' });
+    expect(kitDoneLine(MORNING, plan, 'uhr')).toEqual({ note: LEAVE_FACE_NOTE, clock: '7:40', img: 'door-open.webp' });
+    expect(kitDoneLine(MORNING, plan, 'beides')).toEqual({
+      note: 'Für heute fertig. Los um 7:40 Uhr.',
+      clock: '7:40',
+      img: 'door-open.webp',
+    });
     expect(kitDoneLine(MORNING, morning('?s=az'), 'uhr')).toEqual({ note: undefined });
     const evening = kitDecodePlan(EVENING, '?aus=1930');
     expect(kitDoneLine(EVENING, evening, 'uhr').clock).toBeUndefined();

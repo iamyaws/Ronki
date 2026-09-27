@@ -344,6 +344,8 @@ describe('Time to leave as a face (Astra UHR-01, Claude F2)', () => {
   it('shows a face with "Als Uhr" and says it in words, the number only for screen readers', () => {
     renderMorning('?los=0740&u=uhr');
     expect(band().querySelector('svg[data-clock="7:40"]')).not.toBeNull();
+    // An open door beside the clock: at this time we go out (Astra UHR-01, round 2).
+    expect(band().querySelector('[data-leave] img')!.getAttribute('src')).toBe('/art/bilderbuch/tasks/door-open.webp');
     expect(band().querySelector('.rs-done-note')!.childNodes[0].textContent).toBe(
       'Für heute fertig. Los geht es, wenn die Uhr so aussieht.',
     );
