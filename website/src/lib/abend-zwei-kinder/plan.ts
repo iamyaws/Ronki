@@ -53,7 +53,6 @@ import {
   kitStepPicture,
   minutesOf,
   moveStep as kitMoveStep,
-  printedTimes,
   removeStep as kitRemoveStep,
   setMinutes as kitSetMinutes,
   setOwnText,
@@ -533,14 +532,17 @@ export interface CardStep {
   /** Picture, or null for a box to draw in. */
   img: string | null;
   hint?: string;
-  /** "19:05" where the sheet prints a time (rounded, only where it changes). */
-  time?: string;
 }
 
-/** The child's own card: the steps as the evening sheet prints them. */
+/**
+ * The child's own card: the steps as a picture sequence, no step times
+ * (Astra AZ-01, round 2). The adult plans from the exact overview; a card
+ * that said "19:20" beside the hand on both children's cards would promise
+ * the adult to both at once. The lights-out band keeps the one time a child
+ * needs.
+ */
 export function cardSteps(plan: TwoChildPlan, id: ChildId): CardStep[] {
   const child = plan.children[id];
-  const times = printedTimes(toRoutine(child), END_STEP);
   return sheetIndices(child).map((i) => {
     const code = child.steps[i];
     return {
@@ -548,7 +550,6 @@ export function cardSteps(plan: TwoChildPlan, id: ChildId): CardStep[] {
       label: stepLabel(child, code),
       img: stepPicture(child, code),
       hint: stepHint(child, code),
-      time: times[i],
     };
   });
 }

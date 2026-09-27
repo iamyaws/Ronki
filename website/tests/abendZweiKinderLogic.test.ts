@@ -386,15 +386,11 @@ describe('Clash check', () => {
 });
 
 describe('Sheet data', () => {
-  it('prints the card steps like the evening sheet, with the lights-out band', () => {
+  it('gives the card a picture sequence without step times, and the lights-out band (Astra AZ-01, round 2)', () => {
     const plan = child(defaultPlan(), 's', 'azlo', { aus: '20:00' });
     const steps = cardSteps(plan, 's');
-    expect(steps.map((s) => [s.code, s.time])).toEqual([
-      ['a', '19:25'],
-      ['z', '19:45'],
-      ['l', '19:50'],
-      ['o', '20:00'],
-    ]);
+    expect(steps.map((s) => s.code)).toEqual(['a', 'z', 'l', 'o']);
+    for (const step of steps) expect(step).not.toHaveProperty('time');
     expect(lightsOutLine(plan, 's')).toBe('Licht aus um 20:00 Uhr.');
   });
 

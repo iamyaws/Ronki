@@ -174,11 +174,6 @@ function ChildCard({ plan, id, img }: { plan: TwoChildPlan; id: ChildId; img: st
             <span className="az-card-body">
               <span className="az-card-top">
                 <span className="az-card-label">{step.label}</span>
-                {step.time && (
-                  <span className="az-card-time" data-time>
-                    {step.time} Uhr
-                  </span>
-                )}
               </span>
               {step.hint && <span className="az-card-hint">{step.hint}</span>}
             </span>

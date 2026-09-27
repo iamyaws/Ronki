@@ -311,9 +311,9 @@ export default function AbendZweiKinder() {
                 <AbendZweiKinderSheet plan={plan} clashes={clashes} />
               </ScaledPreview>
               <p className="mt-3 text-sm text-ink/65 leading-relaxed">
-                Eine Seite A4. Oben euer Abend für dich, auf die Minute. Unten zum Ausschneiden eine
-                Karte für jedes Kind, mit Zeiten auf fünf Minuten abgerundet. Häng jede Karte dort auf,
-                wo das Kind seinen Abend macht.
+                Eine Seite A4. Oben stehen die genauen Zeiten für dich. Unten bekommt jedes Kind seine
+                Schritte als Bildfolge, dazu die Licht-aus-Zeit. Häng jede Karte dort auf, wo das Kind
+                seinen Abend macht.
               </p>
 
               <div className="mt-5" data-clash-summary role="status" aria-live="polite">

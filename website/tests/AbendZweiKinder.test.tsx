@@ -85,7 +85,9 @@ describe('Abend mit zwei Kindern sheet', () => {
     // With the Hörspiel, "Licht aus" says good night.
     expect(moon.querySelector('[data-code="o"]')?.textContent).toContain('Augen zu, gute Nacht.');
     expect(star.querySelector('[data-code="o"]')?.textContent).toContain('Augen zu, gute Nacht.');
-    expect(moon.querySelector('[data-code="o"] [data-time]')?.textContent).toBe('20:15 Uhr');
+    // The cards carry no step times; the band holds the lights-out time.
+    expect(moon.querySelector('[data-time]')).toBeNull();
+    expect(star.querySelector('[data-time]')).toBeNull();
   });
 
   it('says "Ihr seid zu zweit." in the head with two adults', () => {
