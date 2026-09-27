@@ -19,7 +19,7 @@
  */
 
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
 import { PageMeta } from '../../components/PageMeta';
 import { PainterlyShell } from '../../components/PainterlyShell';
@@ -29,6 +29,7 @@ import { ArrowRight } from '../../components/AppCheck/Icons';
 import { SchlafensShareCard } from '../../components/AppCheck/SchlafensShareCard';
 import {
   calculateSchedule,
+  wakeUpFromParam,
   type ChildAge,
 } from '../../lib/schlafens-rechner/calculator';
 import { EASE_OUT, fadeUp } from '../../lib/motion';
@@ -38,7 +39,12 @@ const AGES: ChildAge[] = [5, 6, 7, 8, 9];
 export default function SchlafensRechner() {
   const reduced = useReducedMotion();
   const [age, setAge] = useState<ChildAge>(7);
-  const [wakeUp, setWakeUp] = useState<string>('06:30');
+  const { search } = useLocation();
+  // The morning builder links here with the first time on its sheet
+  // (?auf=0650). Read once; the address bar is left as it is.
+  const [wakeUp, setWakeUp] = useState<string>(
+    () => wakeUpFromParam(new URLSearchParams(search).get('auf')) ?? '06:30',
+  );
 
   const schedule = calculateSchedule(age, wakeUp);
 

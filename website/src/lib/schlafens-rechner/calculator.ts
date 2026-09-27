@@ -76,6 +76,16 @@ function parseTime(input: string): Date | null {
   return d;
 }
 
+/**
+ * Wake-up time from the `auf` query value ("0650" from the morning builder)
+ * as "HH:MM", or null unless it is four digits and a valid clock time.
+ */
+export function wakeUpFromParam(value: string | null | undefined): string | null {
+  if (typeof value !== 'string' || !/^\d{4}$/.test(value)) return null;
+  const hhmm = `${value.slice(0, 2)}:${value.slice(2)}`;
+  return parseTime(hhmm) ? hhmm : null;
+}
+
 function formatTime(d: Date): string {
   const h = String(d.getHours()).padStart(2, '0');
   const m = String(d.getMinutes()).padStart(2, '0');
