@@ -114,9 +114,9 @@ describe('Sheet rows with a clock face', () => {
     expect(first.querySelector('svg[data-clock="6:50"]')).not.toBeNull();
     expect(first.querySelector('[data-time]')).toHaveTextContent('6:50 Uhr');
     expect(first.querySelector('[data-clock-label]')).toBeNull();
-    // A row with no printed time keeps the column empty, so the pictures line up.
-    expect(second.querySelector('svg')).toBeNull();
-    expect(second.querySelector('.rs-clock--none')).not.toBeNull();
+    // A row with no printed time gets a small arrow instead of a face (Astra UHR-02).
+    expect(second.querySelector('svg[data-clock]')).toBeNull();
+    expect(second.querySelector('.rs-clock--none svg[data-next]')).not.toBeNull();
     expect(third.querySelector('svg[data-clock="7:05"]')).not.toBeNull();
   });
 

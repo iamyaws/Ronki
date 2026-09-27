@@ -689,3 +689,30 @@
     gap: 2px;
   }
 }
+
+/* Time to leave as a face in the done band ("Als Uhr", "Beides"). */
+.rs-done .rs-done-clock {
+  flex: none;
+  margin-left: auto;
+  width: 84px;
+  height: 84px;
+}
+@container rs-sheet (max-width: 760px) {
+  .rs-done .rs-done-clock {
+    width: 72px;
+    height: 72px;
+  }
+}
+@container rs-sheet (max-width: 520px) {
+  .rs-done .rs-done-clock {
+    width: 44px;
+    height: 44px;
+  }
+}
+/* A row whose time stays the same: a small arrow down instead of a face. */
+.rs-clock--none .rs-next {
+  display: block;
+  width: 50%;
+  height: 50%;
+  margin: 25%;
+}

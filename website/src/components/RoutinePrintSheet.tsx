@@ -8,7 +8,7 @@ import {
   useRoutinePlan,
   JumpToBuilder,
 } from './routine-builder';
-import { EVENING, MORNING, kitLeaveNote, kitSheetDescription, kitSheetSteps } from '../lib/routine-builder';
+import { EVENING, MORNING, kitDoneLine, kitSheetDescription, kitSheetSteps } from '../lib/routine-builder';
 
 /* ------------------------------------------------------------------ */
 /* Types                                                               */
@@ -76,6 +76,7 @@ interface LayoutProps extends BaseProps {
   /** Line under the sheet title; `description` stays the meta fallback. */
   sheetDescription?: string;
   doneNote?: string;
+  doneClock?: string;
   /** Screen-only blocks above and below the preview. */
   controls?: ReactNode;
   afterSheet?: ReactNode;
@@ -100,12 +101,14 @@ export function RoutinePrintSheet(props: Props) {
 function BuilderPage({ builder: which, ...props }: BaseProps & { builder: 'morning' | 'evening' }) {
   const kit = which === 'evening' ? EVENING : MORNING;
   const builder = useRoutinePlan(`/vorlagen/${props.slug}`, kit);
+  const done = kitDoneLine(kit, builder.plan, builder.clockStyle);
   return (
     <TemplateLayout
       {...props}
       steps={kitSheetSteps(kit, builder.plan, builder.clockStyle)}
       sheetDescription={kitSheetDescription(kit, builder.plan)}
-      doneNote={kitLeaveNote(kit, builder.plan)}
+      doneNote={done.note}
+      doneClock={done.clock}
       controls={<RoutineBuilderControls builder={builder} />}
       afterSheet={<RoutineBuilderShare builder={builder} />}
     />
@@ -120,6 +123,7 @@ function TemplateLayout({
   steps,
   sheetDescription: shownDescription = description,
   doneNote,
+  doneClock,
   controls,
   afterSheet,
   ronki,
@@ -216,6 +220,7 @@ function TemplateLayout({
               host={ronki}
               done={done}
               doneNote={doneNote}
+              doneClock={doneClock}
               big={bigIcons}
               clipLane={clipLane}
               footerUrl={footerLine}

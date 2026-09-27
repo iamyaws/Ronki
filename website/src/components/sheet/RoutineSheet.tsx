@@ -18,6 +18,8 @@ export interface RoutineSheetProps {
   done?: boolean;
   /** Line in the done band instead of its usual one, e.g. when the family leaves. */
   doneNote?: string;
+  /** A face for the time to leave in the done band ("7:40"). */
+  doneClock?: string;
   /** Toddler sheet: pictures only, bigger rows and rings. */
   big?: boolean;
   /** Tighter rows. Also switched on by itself for five or more steps. */
@@ -50,6 +52,7 @@ export function RoutineSheet({
   host,
   done = false,
   doneNote,
+  doneClock,
   big = false,
   compact = false,
   showTimes = false,
@@ -104,7 +107,7 @@ export function RoutineSheet({
           </div>
         )}
 
-        {done && <DoneBand {...(doneNote ? { note: doneNote } : {})} />}
+        {done && <DoneBand {...(doneNote ? { note: doneNote } : {})} {...(doneClock ? { clock: doneClock } : {})} />}
 
         <SheetFooter url={footerUrl} />
       </div>

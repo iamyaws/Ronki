@@ -10,7 +10,7 @@ const MORNING_PATH = '/vorlagen/morgenroutine';
 const EVENING_PATH = '/vorlagen/abendroutine';
 const QUESTION = 'Wie steht die Uhrzeit auf dem Blatt?';
 const NOTE =
-  'Am 25. Oktober werden die Uhren eine Stunde zurückgestellt. Wie ihr den Morgen davor anpasst, steht im Artikel zur Zeitumstellung.';
+  'Am 25. Oktober werden die Uhren eine Stunde zurückgestellt. Wie ihr euren Morgen darauf einstellt, steht im Artikel zur Zeitumstellung.';
 
 type PlausibleCall = [string, { props?: Record<string, unknown> }?];
 
@@ -84,9 +84,7 @@ describe('Clock style on the morning builder', () => {
       'Beides',
     ]);
     expect(screen.getByRole('radio', { name: 'Als Zahl' })).toBeChecked();
-    expect(
-      screen.getByText('Als Uhr: Neben dem Schritt steht eine Uhr, die so aussieht wie eure Küchenuhr zu der Zeit.'),
-    ).toBeInTheDocument();
+    expect(screen.getByText('Als Uhr: Neben dem Schritt steht eine Uhr, die so aussieht wie eure Küchenuhr zu der Zeit. Bleibt die Zeit gleich, steht dort ein kleiner Pfeil: Dann geht es gleich nach dem Schritt darüber weiter. Auch „Geschafft!“ bekommt eine Uhr: Los geht es, wenn die Küchenuhr so aussieht.')).toBeInTheDocument();
     expect(group.closest('.print\\:hidden')).not.toBeNull();
   });
 
@@ -220,9 +218,13 @@ describe('Wake-up line on the morning builder', () => {
     fireEvent.change(screen.getByRole('combobox', { name: 'Wann müsst ihr los?' }), { target: { value: '07:00' } });
     // 7:00 minus 33 minutes: 6:27, printed 6:25.
     expect(screen.getByText('Der erste Schritt beginnt um 6:25 Uhr.')).toBeInTheDocument();
+    // Not a wake-up time, so the Rechner opens empty (Astra UHR-03, Claude F3).
+    expect(document.querySelector('[data-wake-line]')!.textContent).toBe(
+      'Der erste Schritt beginnt um 6:25 Uhr. Welche Schlafenszeit passt zu eurer Aufstehzeit? Der Schlafens-Rechner rechnet es aus.',
+    );
     expect(screen.getByRole('link', { name: 'Der Schlafens-Rechner rechnet es aus' })).toHaveAttribute(
       'href',
-      '/tools/schlafens-rechner?auf=0625',
+      '/tools/schlafens-rechner',
     );
   });
 
@@ -275,6 +277,8 @@ describe('Clock change note', () => {
 });
 
 describe('Print event', () => {
+  const openPrintDialog = () => act(() => void window.dispatchEvent(new Event('beforeprint')));
+
   it.each([
     ['', 'aus'],
     ['?los=0740', 'zahl'],
@@ -283,32 +287,74 @@ describe('Print event', () => {
     ['?u=beides', 'aus'],
   ])('morning %s sends uhr=%s and nothing about the plan', (search, uhr) => {
     renderMorning(`?s=azx&e=Medizin${search ? `&${search.slice(1)}` : ''}`);
-    fireEvent.click(builderPrintButton());
-    expect(window.print).toHaveBeenCalledTimes(1);
+    openPrintDialog();
     expect(plausibleCalls()).toEqual([
       ['Vorlage Drucken', { props: { vorlage: 'morgen', weg: 'baukasten', uhr } }],
     ]);
     expect(JSON.stringify(plausibleCalls())).not.toMatch(/Medizin|Aufstehen|s=|los|0740|u=/);
   });
 
+  it('counts every way to print, once per dialog (Claude F1)', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 9, 1, 7, 0));
+    renderMorning('?los=0740&u=uhr');
+    // The button under the sheet only opens the dialog; the dialog is what counts.
+    fireEvent.click(builderPrintButton());
+    expect(window.print).toHaveBeenCalledTimes(1);
+    expect(plausibleCalls()).toEqual([]);
+    // Toolbar button, Ctrl+P or the browser menu: the browser fires beforeprint.
+    openPrintDialog();
+    openPrintDialog(); // a second event for the same dialog
+    expect(plausibleCalls()).toHaveLength(1);
+    vi.setSystemTime(new Date(2026, 9, 1, 7, 1));
+    openPrintDialog();
+    expect(plausibleCalls()).toHaveLength(2);
+  });
+
   it('follows a style picked on the page', () => {
     renderMorning('?los=0740');
     pick('Als Uhr');
-    fireEvent.click(builderPrintButton());
+    openPrintDialog();
     expect(plausibleCalls()).toContainEqual([
       'Vorlage Drucken',
       { props: { vorlage: 'morgen', weg: 'baukasten', uhr: 'uhr' } },
     ]);
   });
 
-  it.each([
-    ['', 'aus'],
-    ['?aus=1930', 'zahl'],
-    ['?aus=1930&u=uhr', 'zahl'],
-  ])('evening %s sends uhr=%s', (search, uhr) => {
+  it.each(['', '?aus=1930', '?aus=1930&u=uhr'])('evening %s sends no print event (no clock styles there)', (search) => {
     renderEvening(search);
+    openPrintDialog();
     fireEvent.click(builderPrintButton());
-    expect(plausibleCalls()).toEqual([['Vorlage Drucken', { props: { vorlage: 'abend', weg: 'baukasten', uhr } }]]);
+    expect(window.print).toHaveBeenCalledTimes(1);
+    expect(plausibleCalls().filter(([name]) => name === 'Vorlage Drucken')).toEqual([]);
+  });
+});
+
+describe('Time to leave as a face (Astra UHR-01, Claude F2)', () => {
+  function band() {
+    return sheet().querySelector('.rs-done')!;
+  }
+
+  it('keeps the band as it was with "Als Zahl"', () => {
+    renderMorning('?los=0740');
+    expect(band().querySelector('svg[data-clock]')).toBeNull();
+    expect(band()).toHaveTextContent('Für heute fertig. Los um 7:40 Uhr.');
+  });
+
+  it('shows a face with "Als Uhr" and says it in words, the number only for screen readers', () => {
+    renderMorning('?los=0740&u=uhr');
+    expect(band().querySelector('svg[data-clock="7:40"]')).not.toBeNull();
+    expect(band().querySelector('.rs-done-note')!.childNodes[0].textContent).toBe(
+      'Für heute fertig. Los geht es, wenn die Uhr so aussieht.',
+    );
+    expect(band().querySelector('.rs-done-note .rs-sr')).toHaveTextContent('7:40 Uhr');
+  });
+
+  it('shows the face next to the number with "Beides"', () => {
+    renderMorning('?los=0740&u=beides');
+    expect(band().querySelector('svg[data-clock="7:40"]')).not.toBeNull();
+    expect(band()).toHaveTextContent('Für heute fertig. Los um 7:40 Uhr.');
+    expect(band().querySelector('.rs-sr')).toBeNull();
   });
 });
 

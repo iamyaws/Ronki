@@ -91,7 +91,7 @@ const CLOCK_STYLE_LABELS: Record<ClockStyle, string> = {
 
 export const CLOCK_STYLE_QUESTION = 'Wie steht die Uhrzeit auf dem Blatt?';
 export const CLOCK_STYLE_NOTE =
-  'Als Uhr: Neben dem Schritt steht eine Uhr, die so aussieht wie eure Küchenuhr zu der Zeit.';
+  'Als Uhr: Neben dem Schritt steht eine Uhr, die so aussieht wie eure Küchenuhr zu der Zeit. Bleibt die Zeit gleich, steht dort ein kleiner Pfeil: Dann geht es gleich nach dem Schritt darüber weiter. Auch „Geschafft!“ bekommt eine Uhr: Los geht es, wenn die Küchenuhr so aussieht.';
 
 const TEXT_LINK = 'text-cobalt underline decoration-2 underline-offset-4 hover:text-ink';
 
@@ -103,7 +103,7 @@ export function ClockChangeNote({ today = new Date() }: { today?: Date }) {
   if (!showClockChangeNote(today)) return null;
   return (
     <p data-clock-change className="mt-4 rounded-2xl bg-sky-wash/50 px-4 py-3 text-sm text-ink/75 leading-relaxed">
-      Am 25. Oktober werden die Uhren eine Stunde zurückgestellt. Wie ihr den Morgen davor anpasst,
+      Am 25. Oktober werden die Uhren eine Stunde zurückgestellt. Wie ihr euren Morgen darauf einstellt,
       steht im{' '}
       <Link to="/ratgeber/zeitumstellung-kinder" className={TEXT_LINK}>
         Artikel zur Zeitumstellung
@@ -300,8 +300,8 @@ export function RoutineBuilderControls({ builder, today }: { builder: RoutinePla
             </p>
             {wake && (
               <p data-wake-line className="mt-2 text-sm text-ink/65 leading-relaxed">
-                <span className="font-display font-semibold text-ink">{wake.text}</span> Welche
-                Schlafenszeit passt dazu?{' '}
+                <span className="font-display font-semibold text-ink">{wake.text}</span>{' '}
+                {wake.auf ? 'Welche Schlafenszeit passt dazu?' : 'Welche Schlafenszeit passt zu eurer Aufstehzeit?'}{' '}
                 <Link to={sleepCalculatorLink(wake.auf)} className={TEXT_LINK}>
                   Der Schlafens-Rechner rechnet es aus
                 </Link>
@@ -528,6 +528,32 @@ export function RoutineBuilderShare({ builder }: { builder: RoutinePlanState }) 
 
   useEffect(() => () => window.clearTimeout(copiedTimer.current), []);
 
+  // One count per print dialog, whichever way it opens (the button under the
+  // sheet, the toolbar button, Ctrl+P, the browser menu), and only where the
+  // clock styles exist (Claude F1). It counts dialogs opened, not pages that
+  // came out of the printer (Astra UHR-04). How the sheet looks, never what
+  // is on it.
+  const printInfo = useRef({ kit, plan, clockStyle });
+  printInfo.current = { kit, plan, clockStyle };
+  useEffect(() => {
+    if (!kit.clockFaces) return;
+    let last = -Infinity;
+    const onBeforePrint = () => {
+      const now = Date.now();
+      // Some browsers fire twice for one dialog.
+      if (now - last < 1000) return;
+      last = now;
+      const info = printInfo.current;
+      trackEvent('Vorlage Drucken', {
+        vorlage: info.kit.id,
+        weg: 'baukasten',
+        uhr: kitPrintClockProp(info.kit, info.plan, info.clockStyle),
+      });
+    };
+    window.addEventListener('beforeprint', onBeforePrint);
+    return () => window.removeEventListener('beforeprint', onBeforePrint);
+  }, [kit.clockFaces]);
+
   async function handleCopy() {
     if (!(await copyText(shareUrl))) return;
     setCopied(true);
@@ -548,15 +574,7 @@ export function RoutineBuilderShare({ builder }: { builder: RoutinePlanState }) 
       <div className="flex flex-wrap items-center gap-3">
         <button
           type="button"
-          onClick={() => {
-            // How the sheet looks, never what is on it.
-            trackEvent('Vorlage Drucken', {
-              vorlage: kit.id,
-              weg: 'baukasten',
-              uhr: kitPrintClockProp(kit, plan, clockStyle),
-            });
-            window.print();
-          }}
+          onClick={() => window.print()}
           className="bb-press bb-press--night inline-flex items-center gap-2 rounded-full bg-cobalt px-6 py-3 font-display font-bold text-base text-white"
         >
           <svg aria-hidden viewBox="0 0 64 64" className="h-5 w-5">

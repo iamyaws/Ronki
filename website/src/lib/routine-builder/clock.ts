@@ -17,7 +17,16 @@
  * (index.html keeps only utm_, ref and source in the page address).
  */
 
-import { kitDecodePlan, kitEncodePlan, kitFirstPrintedTime, stepOf, type RoutineKit, type RoutinePlan } from './kit';
+import {
+  clockLabel,
+  kitDecodePlan,
+  kitEncodePlan,
+  kitFirstPrintedTime,
+  kitLeaveNote,
+  stepOf,
+  type RoutineKit,
+  type RoutinePlan,
+} from './kit';
 
 export type ClockStyle = 'zahl' | 'uhr' | 'beides';
 
@@ -57,6 +66,23 @@ export function kitEncodeQuery(kit: RoutineKit, plan: RoutinePlan, style: ClockS
   return base ? `${base}&${key}` : key;
 }
 
+/** Done band text with "Als Uhr": the child finds the time to leave on the face beside it. */
+export const LEAVE_FACE_NOTE = 'Für heute fertig. Los geht es, wenn die Uhr so aussieht.';
+
+/**
+ * The done band at the end of the sheet (Astra UHR-01, Claude F2): with
+ * "Als Uhr" and "Beides" the time to leave gets a face too, the one time a
+ * child who cannot read the clock needs most. "Als Uhr" says it in words
+ * without the number; "Als Zahl" is the band as it always was.
+ */
+export function kitDoneLine(kit: RoutineKit, plan: RoutinePlan, style: ClockStyle): { note?: string; clock?: string } {
+  const note = kitLeaveNote(kit, plan);
+  const shown = kitEffectiveClockStyle(kit, plan, style);
+  if (shown === 'zahl') return { note };
+  const clock = clockLabel(plan.leave);
+  return shown === 'uhr' ? { note: LEAVE_FACE_NOTE, clock } : { note, clock };
+}
+
 /** The "uhr" value in the print event: "aus" without times, else the style the sheet shows. */
 export function kitPrintClockProp(kit: RoutineKit, plan: RoutinePlan, style: ClockStyle): 'aus' | ClockStyle {
   return plan.times ? kitEffectiveClockStyle(kit, plan, style) : 'aus';
@@ -72,8 +98,12 @@ const WAKE_CODE = 'a';
 export interface WakeLine {
   /** "Auf dem Blatt: Aufstehen um 6:50 Uhr." or "Der erste Schritt beginnt um 6:50 Uhr." */
   text: string;
-  /** The same time as HHMM for the Schlafens-Rechner link, e.g. "0650". */
-  auf: string;
+  /**
+   * The same time as HHMM for the Schlafens-Rechner link, e.g. "0650", only
+   * when the first step is Aufstehen. Any other first step starts after the
+   * child is up, so its time is no wake-up time (Astra UHR-03, Claude F3).
+   */
+  auf: string | null;
 }
 
 /**
@@ -89,13 +119,14 @@ export function kitWakeLine(kit: RoutineKit, plan: RoutinePlan): WakeLine | null
     first.code === WAKE_CODE && wake
       ? `Auf dem Blatt: ${wake.label} um ${first.time} Uhr.`
       : `Der erste Schritt beginnt um ${first.time} Uhr.`;
+  if (first.code !== WAKE_CODE) return { text, auf: null };
   const [h, m] = first.time.split(':');
   return { text, auf: `${h.padStart(2, '0')}${m}` };
 }
 
-/** Link to the Schlafens-Rechner with the wake-up time filled in. */
-export function sleepCalculatorLink(auf: string): string {
-  return `/tools/schlafens-rechner?auf=${auf}`;
+/** Link to the Schlafens-Rechner, with the wake-up time filled in when there is one. */
+export function sleepCalculatorLink(auf: string | null): string {
+  return auf ? `/tools/schlafens-rechner?auf=${auf}` : '/tools/schlafens-rechner';
 }
 
 /**

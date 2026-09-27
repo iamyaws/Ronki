@@ -8,7 +8,9 @@ import {
   kitEncodeQuery,
   kitPrintClockProp,
   kitSheetSteps,
+  kitDoneLine,
   kitWakeLine,
+  LEAVE_FACE_NOTE,
   printedTimes,
   showClockChangeNote,
   sleepCalculatorLink,
@@ -145,11 +147,12 @@ describe('Wake-up line on the morning page', () => {
     expect(sleepCalculatorLink(line!.auf)).toBe('/tools/schlafens-rechner?auf=0650');
   });
 
-  it('names the first step otherwise, even when Aufstehen comes later', () => {
+  it('names the first step otherwise, even when Aufstehen comes later, and guesses no wake-up time', () => {
     expect(kitWakeLine(MORNING, morning('?los=0740'))).toEqual({
       text: 'Der erste Schritt beginnt um 7:05 Uhr.',
-      auf: '0705',
+      auf: null,
     });
+    expect(sleepCalculatorLink(null)).toBe('/tools/schlafens-rechner');
     expect(kitWakeLine(MORNING, morning('?s=za&los=0730'))!.text).toBe('Der erste Schritt beginnt um 7:20 Uhr.');
   });
 
@@ -194,5 +197,19 @@ describe('Print event value', () => {
     const evening = kitDecodePlan(EVENING, '?aus=1930');
     expect(kitPrintClockProp(EVENING, evening, 'uhr')).toBe('zahl');
     expect(kitPrintClockProp(EVENING, kitDecodePlan(EVENING, ''), 'beides')).toBe('aus');
+  });
+});
+
+describe('Done band with the time to leave (Astra UHR-01, Claude F2)', () => {
+  const plan = morning('?los=0740');
+
+  it('adds a face only with "Als Uhr" and "Beides", on the morning kit, with times on', () => {
+    expect(kitDoneLine(MORNING, plan, 'zahl')).toEqual({ note: 'Für heute fertig. Los um 7:40 Uhr.' });
+    expect(kitDoneLine(MORNING, plan, 'uhr')).toEqual({ note: LEAVE_FACE_NOTE, clock: '7:40' });
+    expect(kitDoneLine(MORNING, plan, 'beides')).toEqual({ note: 'Für heute fertig. Los um 7:40 Uhr.', clock: '7:40' });
+    expect(kitDoneLine(MORNING, morning('?s=az'), 'uhr')).toEqual({ note: undefined });
+    const evening = kitDecodePlan(EVENING, '?aus=1930');
+    expect(kitDoneLine(EVENING, evening, 'uhr').clock).toBeUndefined();
+    expect(LEAVE_FACE_NOTE).toBe('Für heute fertig. Los geht es, wenn die Uhr so aussieht.');
   });
 });

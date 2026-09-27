@@ -44,9 +44,9 @@ const HEAVIEST = `?s=adhnxj&e=${encodeURIComponent(OWN)}&los=0740&m=5.10.5.5.5.5
 const STEPS = 6;
 
 const STYLES = [
-  { name: 'zahl', query: '', faces: 0, words: STEPS },
-  { name: 'uhr', query: '&u=uhr', faces: STEPS, words: 0 },
-  { name: 'beides', query: '&u=beides', faces: STEPS, words: STEPS },
+  { name: 'zahl', query: '', faces: 0, leave: 0, words: STEPS },
+  { name: 'uhr', query: '&u=uhr', faces: STEPS, leave: 1, words: 0 },
+  { name: 'beides', query: '&u=beides', faces: STEPS, leave: 1, words: STEPS },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -267,11 +267,19 @@ const MEASURE_PRINT = `(() => {
   for (const text of sheet.querySelectorAll('.rs-label, .rs-hint, .rs-time')) {
     if (text.scrollWidth - text.clientWidth > 1) clipped.push('text "' + text.textContent + '" overflows');
   }
-  const faces = [...sheet.querySelectorAll('svg[data-clock]')].filter((f) => f.getBoundingClientRect().width > 0);
+  const faces = [...sheet.querySelectorAll('.rs-row svg[data-clock]')].filter((f) => f.getBoundingClientRect().width > 0);
+  const leave = done ? [...done.querySelectorAll('svg[data-clock]')].filter((f) => f.getBoundingClientRect().width > 0) : [];
+  if (leave.length && done) {
+    const l = leave[0].getBoundingClientRect();
+    const d = done.getBoundingClientRect();
+    if (l.top < d.top - 0.5 || l.bottom > d.bottom + 0.5 || l.right > d.right + 0.5) clipped.push('leave clock sticks out of the done band');
+  }
   return {
     clipped,
     rows: rows.length,
     faces: faces.length,
+    leave: leave.length,
+    leaveSize: leave.length ? Math.round(leave[0].getBoundingClientRect().width) : 0,
     faceSize: faces.length ? Math.round(faces[0].getBoundingClientRect().width) : 0,
     words: sheet.querySelectorAll('[data-time]').length,
     hidden: sheet.querySelectorAll('[data-clock-label]').length,
@@ -344,12 +352,13 @@ async function checkStyle(edge, base, dir, style) {
     await edge.send('Emulation.setEmulatedMedia', { media: '' }, tab.sessionId);
     console.log(
       `${style.name}: ${m.rows} rows (${m.heights.join(', ')} px), ${m.faces} clock faces` +
-        `${m.faces ? ` at ${m.faceSize} px` : ''}, ${m.words} times in words, ${m.hidden} for screen readers only, ` +
+        `${m.faces ? ` at ${m.faceSize} px` : ''}, ${m.leave} leave clock${m.leave ? ` at ${m.leaveSize} px` : ''}, ${m.words} times in words, ${m.hidden} for screen readers only, ` +
         `${m.spare} px spare above the footer`,
     );
     if (m.clipped.length) throw new Error(`${style.name} is cut off: ${m.clipped.join('; ')}`);
     if (m.rows !== STEPS) throw new Error(`${style.name} shows ${m.rows} rows, expected ${STEPS}`);
     if (m.faces !== style.faces) throw new Error(`${style.name} shows ${m.faces} clock faces, expected ${style.faces}`);
+    if (m.leave !== style.leave) throw new Error(`${style.name} shows ${m.leave} leave clocks, expected ${style.leave}`);
     if (m.words !== style.words) throw new Error(`${style.name} shows ${m.words} times in words, expected ${style.words}`);
 
     const pdf = join(dir, `morgen-uhr-${style.name}.pdf`);
