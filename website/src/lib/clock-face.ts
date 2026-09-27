@@ -15,8 +15,8 @@ export const TICK_OUTER = 41;
 export const TICK_INNER_MINOR = 36;
 export const TICK_INNER_MAJOR = 32;
 export const NUMERAL_RADIUS = 24;
-export const HOUR_HAND = 20;
-export const MINUTE_HAND = 31;
+export const HOUR_HAND = 19;
+export const MINUTE_HAND = 34;
 
 export interface Point {
   x: number;

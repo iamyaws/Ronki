@@ -637,13 +637,17 @@
   .rs-page--compact .rs-label {
     font-size: 18px;
   }
+  /* Phone preview: the face stays small so the words keep their width. */
   .rs-page .rs-clock {
-    width: 44px;
-    height: 44px;
-  }
-  .rs-page--compact .rs-clock {
     width: 40px;
     height: 40px;
+  }
+  .rs-page--compact .rs-clock {
+    width: 34px;
+    height: 34px;
+  }
+  .rs-page--clocks .rs-row {
+    gap: 8px;
   }
   .rs-page--big .rs-row {
     min-height: 108px;
