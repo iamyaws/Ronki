@@ -121,6 +121,15 @@ export const ARTICLES: Article[] = [
     image: '/art/bioms/Sonnenglast_sun-highlands.webp',
   },
   {
+    slug: 'abendroutine-zwei-kinder',
+    title: 'Abendroutine mit zwei Kindern: wer braucht wann deine Hilfe?',
+    description:
+      'Zwei Kinder, zwei Schlafenszeiten, ein Erwachsener? So legst du den Abend so, dass dich nicht beide gleichzeitig brauchen. Mit kostenlosem Abendplan.',
+    category: 'Abendroutine',
+    readMinutes: 6,
+    image: '/art/bioms/Sternenmeer_sea-of-stars.webp',
+  },
+  {
     slug: 'eltern-bereich',
     title: 'Der Eltern-Bereich in Ronki: was drin ist und wie du hinkommst',
     description:

@@ -64,6 +64,7 @@ const RatgeberMorgenroutineAdhs = lazy(() => import('./pages/ratgeber/Morgenrout
 const RatgeberZeitumstellungKinder = lazy(() => import('./pages/ratgeber/ZeitumstellungKinder'));
 const RatgeberRanzenPackenErsteKlasse = lazy(() => import('./pages/ratgeber/RanzenPackenErsteKlasse'));
 const RatgeberHausaufgabenStreitErsteKlasse = lazy(() => import('./pages/ratgeber/HausaufgabenStreitErsteKlasse'));
+const RatgeberAbendroutineZweiKinder = lazy(() => import('./pages/ratgeber/AbendroutineZweiKinder'));
 const Impressum = lazy(() => import('./pages/Impressum'));
 const Datenschutz = lazy(() => import('./pages/Datenschutz'));
 const AGB = lazy(() => import('./pages/AGB'));
@@ -137,6 +138,7 @@ export function AppRoutes() {
         <Route path="/ratgeber/zeitumstellung-kinder" element={<RatgeberZeitumstellungKinder />} />
         <Route path="/ratgeber/ranzen-packen-erste-klasse" element={<RatgeberRanzenPackenErsteKlasse />} />
         <Route path="/ratgeber/hausaufgaben-streit-erste-klasse" element={<RatgeberHausaufgabenStreitErsteKlasse />} />
+        <Route path="/ratgeber/abendroutine-zwei-kinder" element={<RatgeberAbendroutineZweiKinder />} />
         <Route path="/en" element={<HomeEN />} />
         <Route path="/impressum" element={<Impressum />} />
         <Route path="/datenschutz" element={<Datenschutz />} />

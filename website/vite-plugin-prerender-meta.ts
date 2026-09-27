@@ -168,6 +168,13 @@ const ROUTES: RouteMeta[] = [
     ogImage: '/og-tool-nachmittagsplan.jpg',
   },
   {
+    path: '/ratgeber/abendroutine-zwei-kinder',
+    title: 'Abendroutine mit zwei Kindern: wer braucht wann deine Hilfe? · Ratgeber · Ronki',
+    description:
+      'Zwei Kinder, zwei Schlafenszeiten, ein Erwachsener? So legst du den Abend so, dass dich nicht beide gleichzeitig brauchen. Mit kostenlosem Abendplan.',
+    ogImage: '/og-tool-abend-zwei-kinder.jpg',
+  },
+  {
     path: '/tools/ranzen-packplan',
     title: 'Ranzen-Packplan: Bildkarten für jeden Schultag · Ronki',
     description:
