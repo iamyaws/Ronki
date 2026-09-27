@@ -84,7 +84,7 @@ describe('Abend mit zwei Kindern sheet', () => {
     expect(pictures(moon)).toContain('/art/bilderbuch/tasks/headphones.webp');
     // With the Hörspiel, "Licht aus" says good night.
     expect(moon.querySelector('[data-code="o"]')?.textContent).toContain('Augen zu, gute Nacht.');
-    expect(star.querySelector('[data-code="o"]')?.textContent).toContain('Eine Geschichte, dann schlafen.');
+    expect(star.querySelector('[data-code="o"]')?.textContent).toContain('Augen zu, gute Nacht.');
     expect(moon.querySelector('[data-code="o"] [data-time]')?.textContent).toBe('20:15 Uhr');
   });
 
@@ -146,7 +146,7 @@ const SAME_STEP = '?sb=z&mb=z';
 // Stern-Kind: Vorlesen 19:20 to 19:30, Mond-Kind: Zähne putzen from 19:21.
 const TWO_STEPS = '?s=lo&sb=l&mb=z';
 const TWO_STEPS_MESSAGE =
-  'Um 19:20 brauchen dich beide: das Stern-Kind bei „Vorlesen“, das Mond-Kind bei „Zähne putzen“. Verschieb eine Licht-aus-Zeit, ändere die Minuten, oder ein Kind macht in der Zeit etwas ohne dich, etwa ein Hörspiel.';
+  'Um 19:21 brauchen dich beide: das Stern-Kind bei „Vorlesen“, das Mond-Kind bei „Zähne putzen“. Verschieb eine Licht-aus-Zeit oder ändere die Minuten. Oder ein Kind macht in der Zeit etwas ohne dich, etwa ein Hörspiel.';
 
 describe('Abend mit zwei Kindern page', () => {
   beforeEach(() => {
@@ -250,12 +250,14 @@ describe('Abend mit zwei Kindern page', () => {
     expect(screen.queryByRole('heading', { name: 'Was macht ihr zusammen?' })).toBeNull();
   });
 
-  it('shows a clash next to both children and above the print button, and blocks printing', () => {
+  it('shows a short clash line next to both children, the full message once above print, and blocks printing', () => {
     const print = vi.fn();
     window.print = print;
     renderPage(TWO_STEPS);
     for (const id of ['s', 'm']) {
-      expect(document.querySelector(`[data-clash-child="${id}"]`)?.textContent).toBe(TWO_STEPS_MESSAGE);
+      const near = document.querySelector(`[data-clash-child="${id}"]`)?.textContent;
+      expect(near).toContain('19:21: Beide brauchen dich.');
+      expect(near).not.toContain(TWO_STEPS_MESSAGE);
     }
     const summary = document.querySelector('[data-clash-summary]')!;
     expect(summary.textContent).toContain('Das passt noch nicht:');
@@ -266,7 +268,7 @@ describe('Abend mit zwei Kindern page', () => {
 
     expect(printButton()).toBeDisabled();
     expect(printButton()).toHaveAccessibleDescription(
-      'Drucken geht, sobald sich nichts mehr überschneidet. Ändere dafür oben Zeiten oder Schritte.',
+      'Drucken geht, sobald alles zusammenpasst. Ändere dafür oben Zeiten oder Schritte.',
     );
     fireEvent.click(printButton());
     expect(print).not.toHaveBeenCalled();
@@ -281,7 +283,7 @@ describe('Abend mit zwei Kindern page', () => {
     renderPage(SAME_STEP);
     expect(printButton()).toBeDisabled();
     expect(document.querySelector('[data-clash-summary]')?.textContent).toContain(
-      'Um 19:20 brauchen dich beide bei „Zähne putzen“. Macht es zusammen: Tipp es unter „Was macht ihr zusammen?“ an.',
+      'Um 19:21 brauchen dich beide bei „Zähne putzen“. Mach es mit beiden zusammen: Tipp es unter „Was macht ihr zusammen?“ an. Oder verschieb eine Licht-aus-Zeit.',
     );
     fireEvent.click(within(togetherGroup()).getByRole('button', { name: 'Zähne putzen' }));
     expect(within(togetherGroup()).getByRole('button', { name: 'Zähne putzen' })).toHaveAttribute('aria-pressed', 'true');
@@ -291,12 +293,12 @@ describe('Abend mit zwei Kindern page', () => {
     expect(window.location.search).toBe('?sb=z&mb=z&z=z');
   });
 
-  it('prints with two adults, and says nothing can overlap', () => {
+  it('prints with two adults, and says only "zusammen" steps must line up', () => {
     renderPage(TWO_STEPS);
     fireEvent.click(screen.getByRole('button', { name: 'Zwei' }));
     expect(printButton()).toBeEnabled();
     expect(document.querySelector('[data-clash-summary]')?.textContent).toContain(
-      'Ihr seid zu zweit. Dann kann sich nichts überschneiden.',
+      'Ihr seid zu zweit: Jeder von euch kann ein Kind ins Bett bringen. Nur was ihr mit beiden zusammen macht, muss bei beiden zur selben Zeit sein.',
     );
     expect(document.querySelector('[data-clash-child="s"]')).toBeNull();
   });
@@ -401,14 +403,17 @@ describe('Abend mit zwei Kindern page', () => {
     );
   });
 
-  it('links the evening template and the Schlafens-Rechner, never the article yet', () => {
+  it('links the evening template, the Schlafens-Rechner and its article (Claude F3)', () => {
     const { container } = renderPage('?sb=z');
     expect(screen.getByRole('link', { name: 'die Abendroutine zum Ausdrucken' })).toHaveAttribute(
       'href',
       '/vorlagen/abendroutine',
     );
     expect(screen.getByRole('link', { name: 'der Schlafens-Rechner' })).toHaveAttribute('href', '/tools/schlafens-rechner');
-    expect(container.querySelector('a[href*="abendroutine-zwei-kinder"]')).toBeNull();
+    expect(screen.getByRole('link', { name: 'Abendroutine mit zwei Kindern' })).toHaveAttribute(
+      'href',
+      '/ratgeber/abendroutine-zwei-kinder',
+    );
     for (const link of Array.from(container.querySelectorAll('a'))) {
       expect(link.getAttribute('href') ?? '').not.toContain('sb=');
     }

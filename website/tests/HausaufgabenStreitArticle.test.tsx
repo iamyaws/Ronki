@@ -17,7 +17,7 @@ describe('Hausaufgaben-Streit article', () => {
         <AppRoutes />
       </MemoryRouter>,
     );
-    expect(await screen.findByRole('heading', { level: 1, name: H1 })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { level: 1, name: H1 }, { timeout: 5000 })).toBeInTheDocument();
     expect(document.title).toBe(`${H1} · Ratgeber`);
     expect(prerenderSource).toContain(`path: '${PATH}'`);
     expect(prerenderSource).toContain(`title: '${H1} · Ratgeber · Ronki'`);

@@ -31,7 +31,7 @@ import { SheetPageStyle, TASK_ART_PATH } from '../../components/sheet';
 import { AbendZweiKinderSheet } from '../../components/abend-zwei-kinder/AbendZweiKinderSheet';
 import { trackEvent } from '../../lib/analytics';
 import { copyText } from '../../lib/clipboard';
-import { OWN_STEP_MAX, cleanOwnText, clockLabel, isEndStep, printedTimes } from '../../lib/routine-builder/kit';
+import { OWN_STEP_MAX, cleanOwnText, clockLabel, isEndStep } from '../../lib/routine-builder/kit';
 import {
   CHILDREN,
   KIT,
@@ -45,6 +45,7 @@ import {
   addOwnStep,
   addStep,
   canAddStep,
+  canMoveStep,
   checkClash,
   decodePlan,
   encodePlan,
@@ -55,8 +56,10 @@ import {
   setOwn,
   setStepMinutes,
   sharedSteps,
+  shortClash,
   stepLabel,
   stepPicture,
+  stepStarts,
   toRoutine,
   toggleNeeds,
   toggleTogether,
@@ -68,6 +71,7 @@ import {
 const PAGE_PATH = '/tools/abend-mit-zwei-kindern';
 const EVENING_TEMPLATE_PATH = '/vorlagen/abendroutine';
 const BEDTIME_PATH = '/tools/schlafens-rechner';
+const ARTICLE_PATH = '/ratgeber/abendroutine-zwei-kinder';
 
 // Keep title and description in sync with website/vite-plugin-prerender-meta.ts.
 const META_TITLE = 'Abend mit zwei Kindern: wer braucht wann deine Hilfe? · Ronki';
@@ -78,10 +82,11 @@ export const LINK_NOTE =
   'Der Plan steht nur im Link, gespeichert wird nichts. Im Link stehen eure Schritte, Zeiten und eigenen Schritte, und alle mit dem Link können das lesen. Schick ihn an die Person, die mit dir die Kinder ins Bett bringt, etwa deinen Partner, deine Partnerin oder den Babysitter.';
 const OWN_NOTE =
   'Trag nur einen Schritt ein, keine Namen: Der Text steht auch im Link. Kennen wir das Wort, kommt ein Bild aufs Blatt. Sonst bleibt ein leeres Feld, in das dein Kind selbst malt.';
-export const PRINT_BLOCKED = 'Drucken geht, sobald sich nichts mehr überschneidet. Ändere dafür oben Zeiten oder Schritte.';
-export const TWO_ADULTS_NOTE = 'Ihr seid zu zweit. Dann kann sich nichts überschneiden.';
+export const PRINT_BLOCKED = 'Drucken geht, sobald alles zusammenpasst. Ändere dafür oben Zeiten oder Schritte.';
+export const TWO_ADULTS_NOTE =
+  'Ihr seid zu zweit: Jeder von euch kann ein Kind ins Bett bringen. Nur was ihr mit beiden zusammen macht, muss bei beiden zur selben Zeit sein.';
 const NOTHING_MARKED = 'Tipp bei den Schritten an, wobei ein Kind dich braucht. Dann siehst du hier, ob sich etwas überschneidet.';
-const ALL_CLEAR = 'Passt: Du wirst nie an zwei Stellen zugleich gebraucht.';
+const ALL_CLEAR = 'Passt: Nach eurem Plan brauchen dich die beiden nie zur selben Zeit.';
 
 /** A4 at 96 dpi, the size the sheet is laid out at (sheet.css: 210 x 296 mm). */
 const A4_WIDTH_PX = 793.7;
@@ -306,8 +311,9 @@ export default function AbendZweiKinder() {
                 <AbendZweiKinderSheet plan={plan} clashes={clashes} />
               </ScaledPreview>
               <p className="mt-3 text-sm text-ink/65 leading-relaxed">
-                Eine Seite A4. Oben euer Abend für dich, unten zum Ausschneiden eine Karte für jedes
-                Kind. Auf dem Blatt stehen die Zeiten auf fünf Minuten abgerundet.
+                Eine Seite A4. Oben euer Abend für dich, auf die Minute. Unten zum Ausschneiden eine
+                Karte für jedes Kind, mit Zeiten auf fünf Minuten abgerundet. Häng jede Karte dort auf,
+                wo das Kind seinen Abend macht.
               </p>
 
               <div className="mt-5" data-clash-summary role="status" aria-live="polite">
@@ -402,6 +408,16 @@ export default function AbendZweiKinder() {
                 der Schlafens-Rechner
               </Link>{' '}
               aus.
+            </p>
+            <p className="mt-4 text-sm sm:text-base text-ink/80 leading-relaxed">
+              Warum nicht jeder Schritt dich braucht, steht im Ratgeber{' '}
+              <Link
+                to={ARTICLE_PATH}
+                className="font-display font-semibold text-cobalt underline decoration-2 underline-offset-4 hover:text-ink"
+              >
+                Abendroutine mit zwei Kindern
+              </Link>
+              .
             </p>
             <p className="mt-4 text-sm sm:text-base text-ink/80 leading-relaxed">
               Ronki ist unsere kostenlose App für Kinder, ohne E-Mail und ohne Werbung.
@@ -530,7 +546,7 @@ function ChildBuilder({
   const [adding, setAdding] = useState(false);
   const child = plan.children[id];
   const routine = toRoutine(child);
-  const times = printedTimes(routine, KIT.endStep);
+  const times = stepStarts(plan, id);
   const full = !canAddStep(plan, id);
   const hasOwn = child.steps.includes(OWN_STEP_CODE);
   const missing = STEPS.filter((step) => !child.steps.includes(step.code));
@@ -548,10 +564,11 @@ function ChildBuilder({
       {mine.length > 0 && (
         <ul data-clash-child={id} className="mb-4 space-y-1.5">
           {mine.map((clash) => (
-            <li key={clash.message} className="rounded-xl bg-sun/60 px-3 py-2 text-sm text-ink leading-relaxed">
-              {clash.message}
+            <li key={clash.message} className="rounded-xl bg-sun/60 px-3 py-2 text-sm font-semibold text-ink leading-relaxed">
+              {shortClash(clash)}
             </li>
           ))}
+          <li className="px-1 text-sm text-ink/70 leading-relaxed">Was du tun kannst, steht über dem Drucken.</li>
         </ul>
       )}
 
@@ -806,14 +823,14 @@ function StepRow({
         <div className="flex gap-1">
           <IconButton
             label={`${name}: ${label} nach oben`}
-            disabled={index === 0}
+            disabled={!canMoveStep(plan, id, index, -1)}
             onClick={() => update((prev) => moveStep(prev, id, index, -1))}
           >
             <use href="#bb-arrow" transform="rotate(-90 32 32)" />
           </IconButton>
           <IconButton
             label={`${name}: ${label} nach unten`}
-            disabled={index === count - 1}
+            disabled={!canMoveStep(plan, id, index, 1)}
             onClick={() => update((prev) => moveStep(prev, id, index, 1))}
           >
             <use href="#bb-arrow" transform="rotate(90 32 32)" />

@@ -45,8 +45,9 @@ export default function RatgeberAbendroutineZweiKinder() {
       <p className="lead">
         Das Große will noch vorgelesen bekommen, das Kleine muss in die Wanne,
         und beide rufen gleichzeitig nach dir. Mit zwei Kindern ist der Abend
-        oft kein Ablauf, sondern ein Hin und Her. Hier ist ein Weg, ihn so zu
-        legen, dass dich nicht beide im selben Moment brauchen.
+        oft kein Ablauf, sondern ein Hin und Her. Hier ist ein Weg, vorher zu
+        sehen, wo dich beide im selben Moment brauchen, und den Abend dann
+        anders zu legen.
       </p>
 
       <h2>So klingt das in Elternforen</h2>
@@ -94,17 +95,15 @@ export default function RatgeberAbendroutineZweiKinder() {
         <StepCard n={3} title="Ein Schritt ohne dich">
           <p>
             Ein Kind hört im Bett ein Hörspiel, während du beim anderen bist.
-            Das klappt am besten, wenn es sicher weiß, dass du zum Gute-Nacht-Sagen
-            wiederkommst. So beschreibt es auch ein Elternteil im
-            urbia-Forum.
+            Unser Vorschlag: Sag ihm vorher, dass du zum Gute-Nacht-Sagen
+            wiederkommst.
           </p>
         </StepCard>
       </Steps>
       <p>
-        Ruhige Rituale helfen beim Schlafen: Die Deutsche Gesellschaft für
-        Kinder- und Jugendmedizin nennt als Beispiele ein Lied singen,
-        beruhigende Musik hören oder eine Geschichte erzählen. Solche Rituale
-        fördern regelmäßige Schlafenszeiten.
+        Feste Rituale helfen, die Schlafenszeiten regelmäßig zu halten. Die
+        Deutsche Gesellschaft für Kinder- und Jugendmedizin nennt als Beispiele
+        ein Lied singen, beruhigende Musik hören oder eine Geschichte erzählen.
       </p>
 
       <h2>Warten ohne Bildschirm</h2>
@@ -132,7 +131,7 @@ export default function RatgeberAbendroutineZweiKinder() {
       <p>
         Auf dem Blatt stehen oben der Abend für dich, beide Kinder
         nebeneinander, und unten zwei Karten zum Abschneiden, eine für jedes
-        Kind, mit Bildern statt Text. Eine Einschlafzeit steht nirgends: Wann
+        Kind, mit einem Bild zu jedem Schritt. Eine Einschlafzeit steht nirgends: Wann
         ein Kind einschläft, weiß kein Plan.
       </p>
 
@@ -147,8 +146,8 @@ export default function RatgeberAbendroutineZweiKinder() {
 
       <Callout type="ausprobieren" label="Für dich">
         <p>
-          Ein Abend, der schiefgeht, ist ein Abend, nicht der ganze Plan. Es
-          reicht, wenn jedes Kind weiß, wann du zu ihm kommst.
+          Ein Abend, der schiefgeht, ist ein Abend, nicht der ganze Plan. Sag
+          jedem Kind, wann du zu ihm kommst.
         </p>
       </Callout>
 

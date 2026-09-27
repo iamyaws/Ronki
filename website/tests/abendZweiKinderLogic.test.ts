@@ -4,13 +4,14 @@ import {
   DEFAULT_LIGHTS_OUT,
   DEFAULT_STEPS,
   KIT,
-  LIGHTS_OUT_ALT_HINT,
+  LIGHTS_OUT_HINT,
   LISTEN_STEP,
   NEEDS_PICTURE,
   SHARE_TEXT,
   STEPS,
   addOwnStep,
   addStep,
+  canMoveStep,
   cardSteps,
   checkClash,
   decodePlan,
@@ -26,6 +27,8 @@ import {
   setOwn,
   setStepMinutes,
   sharedSteps,
+  shortClash,
+  stepStarts,
   timeline,
   toggleNeeds,
   toggleTogether,
@@ -229,9 +232,20 @@ describe('Timeline', () => {
     expect(starts(plan, 's')).toEqual(['z 19:22-19:25', 'x 19:25-19:30', 'o 19:30-19:31']);
   });
 
-  it('counts "Licht aus" as a normal step when it is not last', () => {
+  it('keeps "Licht aus" last, also when moved or read from an old link (Astra AZ-03)', () => {
     const plan = child(defaultPlan(), 's', 'zoy');
-    expect(starts(plan, 's')).toEqual(['z 19:23-19:26', 'o 19:26-19:27', 'y 19:27-19:30']);
+    expect(plan.children.s.steps).toEqual(['z', 'y', 'o']);
+    expect(starts(plan, 's')).toEqual(['z 19:24-19:27', 'y 19:27-19:30', 'o 19:30-19:31']);
+    // Minutes travel with their step.
+    const old = decodePlan('?s=zoy&sm=4.1.9');
+    expect(old.children.s.steps).toEqual(['z', 'y', 'o']);
+    expect(old.children.s.minutes).toEqual([4, 9, 1]);
+    // No arrow moves a step past it, or it away from the end.
+    expect(canMoveStep(plan, 's', 2, -1)).toBe(false);
+    expect(canMoveStep(plan, 's', 1, 1)).toBe(false);
+    expect(canMoveStep(plan, 's', 0, 1)).toBe(true);
+    expect(canMoveStep(plan, 's', 0, -1)).toBe(false);
+    expect(moveStep(plan, 's', 2, -1)).toEqual(plan);
   });
 });
 
@@ -244,9 +258,9 @@ describe('Clash check', () => {
     expect(clashes[0].rule).toBe('beide');
     expect(clashes[0].star.code).toBe('l');
     expect(clashes[0].moon.code).toBe('z');
-    // Vorlesen 19:20 to 19:30, Zähne from 19:21: the sheet prints 19:20.
+    // Vorlesen 19:20 to 19:30, Zähne from 19:21: the adult reads the exact minute.
     expect(clashes[0].message).toBe(
-      'Um 19:20 brauchen dich beide: das Stern-Kind bei „Vorlesen“, das Mond-Kind bei „Zähne putzen“. Verschieb eine Licht-aus-Zeit, ändere die Minuten, oder ein Kind macht in der Zeit etwas ohne dich, etwa ein Hörspiel.',
+      'Um 19:21 brauchen dich beide: das Stern-Kind bei „Vorlesen“, das Mond-Kind bei „Zähne putzen“. Verschieb eine Licht-aus-Zeit oder ändere die Minuten. Oder ein Kind macht in der Zeit etwas ohne dich, etwa ein Hörspiel.',
     );
     expect(fits(plan)).toBe(false);
   });
@@ -272,7 +286,7 @@ describe('Clash check', () => {
     const plan = toggleNeeds(toggleNeeds(defaultPlan(), 's', 'z'), 'm', 'z');
     const [clash] = checkClash(plan);
     expect(clash.message).toBe(
-      'Um 19:20 brauchen dich beide bei „Zähne putzen“. Macht es zusammen: Tipp es unter „Was macht ihr zusammen?“ an.',
+      'Um 19:21 brauchen dich beide bei „Zähne putzen“. Mach es mit beiden zusammen: Tipp es unter „Was macht ihr zusammen?“ an. Oder verschieb eine Licht-aus-Zeit.',
     );
     expect(checkClash(toggleTogether(plan, 'z'))).toEqual([]);
   });
@@ -282,7 +296,7 @@ describe('Clash check', () => {
     plan = child(plan, 'm', 'lo', { aus: '19:35', needs: 'l' }); // 19:25 to 19:35
     const [clash] = checkClash(plan);
     expect(clash.message).toBe(
-      'Um 19:25 brauchen dich beide bei „Vorlesen“. Legt es auf dieselbe Zeit und macht es zusammen, oder verschieb eine Licht-aus-Zeit.',
+      'Um 19:25 brauchen dich beide bei „Vorlesen“. Leg es bei beiden auf dieselbe Zeit und mach es zusammen. Oder verschieb eine Licht-aus-Zeit, damit eins nach dem anderen kommt.',
     );
   });
 
@@ -291,7 +305,7 @@ describe('Clash check', () => {
     plan = child(plan, 'm', 'lo'); // Vorlesen 19:20
     plan = toggleTogether(plan, 'l');
     const message =
-      '„Vorlesen“ macht ihr zusammen, aber beim Stern-Kind beginnt es um 19:10 und beim Mond-Kind um 19:20. Legt es auf dieselbe Zeit oder nehmt „zusammen“ wieder weg.';
+      '„Vorlesen“ macht ihr zusammen, aber beim Stern-Kind beginnt es um 19:10 und beim Mond-Kind um 19:20. Leg es bei beiden auf dieselbe Zeit oder nimm „zusammen“ wieder weg.';
     expect(checkClash(plan).map((c) => [c.rule, c.message])).toEqual([['zusammen', message]]);
     expect(checkClash(setAdults(plan, 2)).map((c) => [c.rule, c.message])).toEqual([['zusammen', message]]);
     // Same time again: nothing left.
@@ -299,20 +313,19 @@ describe('Clash check', () => {
   });
 
   it('flags a "zusammen" step with the same start but other minutes', () => {
-    // Mond: Zähne 19:20 to 19:24, Stern 19:21 to 19:24. The sheet shows 19:20 for both,
-    // so the message names the exact minutes.
+    // Mond: Zähne 19:20 to 19:24, Stern 19:21 to 19:24: the message names the exact minutes.
     const plan = setStepMinutes(toggleTogether(defaultPlan(), 'z'), 'm', 0, 4);
     const two = checkClash(setAdults(plan, 2));
     expect(two).toHaveLength(1);
     expect(two[0].message).toBe(
-      '„Zähne putzen“ macht ihr zusammen, aber beim Stern-Kind beginnt es um 19:21 und beim Mond-Kind um 19:20. Legt es auf dieselbe Minute oder nehmt „zusammen“ wieder weg.',
+      '„Zähne putzen“ macht ihr zusammen, aber beim Stern-Kind beginnt es um 19:21 und beim Mond-Kind um 19:20. Leg es bei beiden auf dieselbe Zeit oder nimm „zusammen“ wieder weg.',
     );
     // Same start, other length.
     let same = child(defaultPlan(), 's', 'lo');
     same = child(same, 'm', 'lzo', { minutes: { l: 7 } });
     same = toggleTogether(same, 'l'); // Stern 19:20 to 19:30, Mond 19:20 to 19:27
     expect(checkClash(same).map((c) => c.message)).toContain(
-      '„Vorlesen“ macht ihr zusammen, aber es dauert beim Stern-Kind 10 und beim Mond-Kind 7 Minuten. Stellt dieselben Minuten ein oder nehmt „zusammen“ wieder weg.',
+      '„Vorlesen“ macht ihr zusammen, aber es dauert beim Stern-Kind 10 und beim Mond-Kind 7 Minuten. Stell bei beiden dieselben Minuten ein oder nimm „zusammen“ wieder weg.',
     );
   });
 
@@ -333,7 +346,7 @@ describe('Clash check', () => {
   it('gives "Licht aus" one minute: two at the same time clash, a minute apart they do not', () => {
     const both = toggleNeeds(toggleNeeds(defaultPlan(), 's', 'o'), 'm', 'o');
     expect(checkClash(both).map((c) => c.message)).toEqual([
-      'Um 19:30 brauchen dich beide bei „Licht aus“. Macht es zusammen: Tipp es unter „Was macht ihr zusammen?“ an.',
+      'Um 19:30 brauchen dich beide bei „Licht aus“. Mach es mit beiden zusammen: Tipp es unter „Was macht ihr zusammen?“ an. Oder verschieb eine Licht-aus-Zeit.',
     ]);
     expect(checkClash(toggleTogether(both, 'o'))).toEqual([]);
     expect(checkClash(setLightsOut(both, 'm', '19:35'))).toEqual([]);
@@ -341,7 +354,7 @@ describe('Clash check', () => {
     let plan = child(defaultPlan(), 's', 'zo', { needs: 'o' });
     plan = child(plan, 'm', 'lo', { aus: '19:35', needs: 'l' }); // Vorlesen 19:25 to 19:35
     expect(checkClash(plan).map((c) => c.message)).toEqual([
-      'Um 19:30 brauchen dich beide: das Stern-Kind bei „Licht aus“, das Mond-Kind bei „Vorlesen“. Verschieb eine Licht-aus-Zeit, ändere die Minuten, oder ein Kind macht in der Zeit etwas ohne dich, etwa ein Hörspiel.',
+      'Um 19:30 brauchen dich beide: das Stern-Kind bei „Licht aus“, das Mond-Kind bei „Vorlesen“. Verschieb eine Licht-aus-Zeit oder ändere die Minuten. Oder ein Kind macht in der Zeit etwas ohne dich, etwa ein Hörspiel.',
     ]);
   });
 
@@ -356,7 +369,7 @@ describe('Clash check', () => {
     let plan = child(defaultPlan(), 's', 'xo', { own: 'Medizin', needs: 'x' }); // Medizin 19:25 to 19:30
     plan = child(plan, 'm', 'zwyo', { needs: 'y' }); // Pyjama 19:27 to 19:30
     expect(checkClash(plan).map((c) => c.message)).toEqual([
-      'Um 19:25 brauchen dich beide: das Stern-Kind bei „Medizin“, das Mond-Kind bei „Pyjama an“. Verschieb eine Licht-aus-Zeit, ändere die Minuten, oder ein Kind macht in der Zeit etwas ohne dich, etwa ein Hörspiel.',
+      'Um 19:27 brauchen dich beide: das Stern-Kind bei „Medizin“, das Mond-Kind bei „Pyjama an“. Verschieb eine Licht-aus-Zeit oder ändere die Minuten. Oder ein Kind macht in der Zeit etwas ohne dich, etwa ein Hörspiel.',
     ]);
     expect(checkClash(setOwn(plan, 's', ''))).toEqual([]);
   });
@@ -385,15 +398,14 @@ describe('Sheet data', () => {
     expect(lightsOutLine(plan, 's')).toBe('Licht aus um 20:00 Uhr.');
   });
 
-  it('says good night at "Licht aus" after a story or a Hörspiel', () => {
+  it('always says good night at "Licht aus": a story is its own step with minutes (Astra AZ-02)', () => {
     const plain = cardSteps(defaultPlan(), 's').find((s) => s.code === 'o')!;
-    expect(plain.hint).toBe('Eine Geschichte, dann schlafen.');
+    expect(plain.hint).toBe(LIGHTS_OUT_HINT);
     for (const story of ['l', 'h']) {
       const plan = addStep(defaultPlan(), 'm', story);
-      expect(cardSteps(plan, 'm').find((s) => s.code === 'o')!.hint).toBe(LIGHTS_OUT_ALT_HINT);
-      expect(cardSteps(plan, 's').find((s) => s.code === 'o')!.hint).toBe('Eine Geschichte, dann schlafen.');
+      expect(cardSteps(plan, 'm').find((s) => s.code === 'o')!.hint).toBe(LIGHTS_OUT_HINT);
     }
-    expect(LIGHTS_OUT_ALT_HINT).toBe('Augen zu, gute Nacht.');
+    expect(LIGHTS_OUT_HINT).toBe('Augen zu, gute Nacht.');
     expect(cardSteps(addStep(defaultPlan(), 's', 'h'), 's').find((s) => s.code === 'h')!.hint).toBe(
       'Zuhören im Bett, bis Licht aus.',
     );
@@ -409,18 +421,41 @@ describe('Sheet data', () => {
     expect(cardSteps(plan, 's').map((s) => s.code)).toEqual(['o']);
   });
 
-  it('lays out the overview by the sheet time, a "zusammen" step once across both columns', () => {
+  it('lays out the overview to the minute, a "zusammen" step once across both columns (Astra AZ-01)', () => {
     const rows = overviewRows(defaultPlan());
     expect(rows.map((r) => (r.kind === 'paar' ? [r.time, r.star.map((i) => i.code).join(''), r.moon.map((i) => i.code).join('')] : r))).toEqual([
-      ['19:20', 'zw', 'zw'],
-      ['19:25', 'y', 'y'],
+      ['19:21', 'z', 'z'],
+      ['19:24', 'w', 'w'],
+      ['19:27', 'y', 'y'],
       ['19:30', 'o', 'o'],
     ]);
     const together = overviewRows(toggleTogether(defaultPlan(), 'z'));
-    expect(together[0]).toMatchObject({ kind: 'zusammen', time: '19:20', item: { code: 'z', needs: true } });
-    // Printed only where it changes: the rest of the five minutes has no time of its own.
-    expect(together[1]).toMatchObject({ kind: 'paar', time: undefined });
+    expect(together[0]).toMatchObject({ kind: 'zusammen', time: '19:21', item: { code: 'z', needs: true } });
+    expect(together[1]).toMatchObject({ kind: 'paar', time: '19:24' });
     expect(together.filter((r) => r.kind === 'zusammen')).toHaveLength(1);
+  });
+
+  it('never hides a handover the check allows inside one printed row (Claude F1)', () => {
+    // Stern needs you 19:21 to 19:24, Mond from 19:24: fine for the check, and two rows on the sheet.
+    const plan = decodePlan('?sb=z&m=lo&mm=6.1&mb=l');
+    expect(checkClash(plan)).toEqual([]);
+    const needRows = overviewRows(plan)
+      .filter((r): r is Extract<typeof r, { kind: 'paar' }> => r.kind === 'paar')
+      .filter((r) => [...r.star, ...r.moon].some((i) => i.needs));
+    expect(needRows.map((r) => [r.time, r.star.filter((i) => i.needs).length, r.moon.filter((i) => i.needs).length])).toEqual([
+      ['19:21', 1, 0],
+      ['19:24', 0, 1],
+    ]);
+    expect(stepStarts(plan, 's')).toEqual(['19:21', '19:24', '19:27', '19:30']);
+    expect(stepStarts(plan, 'm')).toEqual(['19:24', '19:30']);
+  });
+
+  it('gives each clash a short line for next to the child (Astra AZ-07)', () => {
+    const both = checkClash(toggleNeeds(toggleNeeds(defaultPlan(), 's', 'z'), 'm', 'z'));
+    expect(shortClash(both[0])).toBe('19:21: Beide brauchen dich.');
+    let apart = child(defaultPlan(), 's', 'lo', { aus: '19:20' });
+    apart = toggleTogether(child(apart, 'm', 'lo'), 'l');
+    expect(shortClash(checkClash(apart)[0])).toBe('19:10: „Vorlesen“ zusammen, aber nicht gleichzeitig.');
   });
 
   it('puts a "zusammen" step at two times in each column, not across', () => {
@@ -433,7 +468,7 @@ describe('Sheet data', () => {
     let plan = child(defaultPlan(), 's', 'lo', { aus: '19:00' });
     plan = child(plan, 'm', 'zo', { aus: '20:00' });
     const rows = overviewRows(plan).map((r) => (r.kind === 'paar' ? `${r.time} ${r.star.map((i) => i.code).join('')}|${r.moon.map((i) => i.code).join('')}` : ''));
-    expect(rows).toEqual(['18:50 l|', '19:00 o|', '19:55 |z', '20:00 |o']);
+    expect(rows).toEqual(['18:50 l|', '19:00 o|', '19:57 |z', '20:00 |o']);
   });
 });
 
@@ -490,7 +525,7 @@ describe('Link', () => {
     expect(decodePlan('?a=3').adults).toBe(1);
     expect(decodePlan('?s=qqq').children.s.steps).toEqual(['z', 'w', 'y', 'o']);
     // Unknown codes and doubles go; at most six steps.
-    expect(decodePlan('?s=zzwwqloyhae').children.s.steps).toEqual(['z', 'w', 'l', 'o', 'y', 'h']);
+    expect(decodePlan('?s=zzwwqloyhae').children.s.steps).toEqual(['z', 'w', 'l', 'y', 'h', 'o']);
     // Invisible and bidi characters never reach the sheet.
     expect(decodePlan('?s=xo&se=' + encodeURIComponent('‮Medizin​⁦ nehmen')).children.s.own).toBe(
       'Medizin nehmen',

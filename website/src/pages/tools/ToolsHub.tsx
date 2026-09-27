@@ -127,7 +127,7 @@ export default function ToolsHub() {
               to="/tools/abend-mit-zwei-kindern"
               title="Wer braucht wann deine Hilfe?"
               description="Zwei Kinder, zwei Abende, und du bist einmal da. Du legst beide Abende nebeneinander und siehst, wann dich beide zugleich brauchen, bevor du druckst."
-              meta="5 Min · ein A4-Blatt + eine Bildkarte pro Kind"
+              meta="5 Min · ein A4-Blatt, unten eine Karte pro Kind"
               cta="Abend mit zwei Kindern planen"
             />
           </ul>

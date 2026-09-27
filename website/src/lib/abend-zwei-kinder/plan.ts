@@ -83,9 +83,11 @@ export const LISTEN_STEP: RoutineStep = {
   minutes: 15,
 };
 
-/** "Licht aus" gets this hint while "Vorlesen" or the Hörspiel is on the child's list. */
-export const LIGHTS_OUT_ALT_HINT = 'Augen zu, gute Nacht.';
-const STORY_STEPS = ['l', LISTEN_STEP.code];
+/**
+ * "Licht aus" always says good night here (Astra AZ-02): it is a one-minute
+ * moment, so a story is its own step with its own minutes.
+ */
+export const LIGHTS_OUT_HINT = 'Augen zu, gute Nacht.';
 
 /** The evening catalogue with the Hörspiel just before "Licht aus". */
 export const STEPS: ReadonlyArray<RoutineStep> = (() => {
@@ -193,11 +195,34 @@ function fromRoutine(routine: RoutinePlan, needs: readonly string[]): ChildEveni
 }
 
 /**
+ * "Licht aus" is always the last step (Astra AZ-03): the lights-out time on
+ * the card and in the overview is then the moment "Licht aus" happens. When
+ * it is somewhere else (a moved step, an old link) it goes to the end with
+ * its minutes.
+ */
+function pinEnd(child: ChildEvening): ChildEvening {
+  const at = child.steps.indexOf(END_STEP);
+  if (at === -1 || at === child.steps.length - 1) return child;
+  const steps = [...child.steps.slice(0, at), ...child.steps.slice(at + 1), END_STEP];
+  const minutes = [...child.minutes.slice(0, at), ...child.minutes.slice(at + 1), child.minutes[at]];
+  return { ...child, steps, minutes };
+}
+
+/** False where a move would push a step past "Licht aus", or "Licht aus" itself away from the end. */
+export function canMoveStep(plan: TwoChildPlan, id: ChildId, index: number, by: -1 | 1): boolean {
+  const { steps } = plan.children[id];
+  const to = index + by;
+  if (to < 0 || to >= steps.length) return false;
+  return steps[index] !== END_STEP && steps[to] !== END_STEP;
+}
+
+/**
  * Keeps the rules of the plan: "braucht dich" only for steps the child
  * has; "zusammen" only for steps both have (never the own step), and a
  * "zusammen" step needs the adult with both children.
  */
-function normalize(plan: TwoChildPlan): TwoChildPlan {
+function normalize(input: TwoChildPlan): TwoChildPlan {
+  const plan = { ...input, children: { s: pinEnd(input.children.s), m: pinEnd(input.children.m) } };
   const { s, m } = plan.children;
   const together = inOrder(
     plan.together.filter((code) => code !== OWN_STEP_CODE && s.steps.includes(code) && m.steps.includes(code)),
@@ -303,12 +328,11 @@ export function stepPicture(child: ChildEvening, code: string): string | null {
   return kitStepPicture(KIT, toRoutine(child), code);
 }
 
-/** The hint under a step on the child's card. "Licht aus" says good night when a story came before. */
-export function stepHint(child: ChildEvening, code: string): string | undefined {
+/** The hint under a step on the child's card. "Licht aus" always says good night. */
+export function stepHint(_child: ChildEvening, code: string): string | undefined {
   const step = stepOf(KIT, code);
   if (!step) return undefined;
-  if (code === END_STEP && STORY_STEPS.some((story) => child.steps.includes(story))) return LIGHTS_OUT_ALT_HINT;
-  return step.hint;
+  return code === END_STEP ? LIGHTS_OUT_HINT : step.hint;
 }
 
 /* ------------------------------------------------------------------ */
@@ -370,9 +394,25 @@ export function timeline(plan: TwoChildPlan, id: ChildId): TimedStep[] {
   }
 }
 
-/** A time as the sheet prints it: rounded down to five minutes, "19:05" as "19:05", "07:05" as "7:05". */
+/** A time as the child's card prints it: rounded down to five minutes, "07:05" as "7:05". */
 export function sheetClock(minutes: number): string {
   return clockLabel(fromMinutes(Math.floor(minutes / 5) * 5));
+}
+
+/**
+ * A time for the adult, to the minute: the page, the messages and the
+ * overview on the sheet (Astra AZ-01, Claude F1). The check works in exact
+ * minutes, so what the adult reads must too; only the children's cards round.
+ */
+export function adultClock(minutes: number): string {
+  return clockLabel(fromMinutes(minutes));
+}
+
+/** Exact start of every step in the child's list, for the page ("ab 19:21"). Undefined for an empty own step. */
+export function stepStarts(plan: TwoChildPlan, id: ChildId): (string | undefined)[] {
+  const out: (string | undefined)[] = plan.children[id].steps.map(() => undefined);
+  for (const step of timeline(plan, id)) out[step.index] = adultClock(step.start);
+  return out;
 }
 
 /* ------------------------------------------------------------------ */
@@ -403,28 +443,31 @@ function sameTime(a: TimedStep, b: TimedStep): boolean {
 }
 
 function bothMessage(a: TimedStep, b: TimedStep, at: number): string {
-  const when = `Um ${sheetClock(at)}`;
+  const when = `Um ${adultClock(at)}`;
+  const together = quote('Was macht ihr zusammen?');
   if (a.code === b.code && a.code !== OWN_STEP_CODE) {
     return sameTime(a, b)
-      ? `${when} brauchen dich beide bei ${quote(a.label)}. Macht es zusammen: Tipp es unter ${quote('Was macht ihr zusammen?')} an.`
-      : `${when} brauchen dich beide bei ${quote(a.label)}. Legt es auf dieselbe Zeit und macht es zusammen, oder verschieb eine Licht-aus-Zeit.`;
+      ? `${when} brauchen dich beide bei ${quote(a.label)}. Mach es mit beiden zusammen: Tipp es unter ${together} an. Oder verschieb eine Licht-aus-Zeit.`
+      : `${when} brauchen dich beide bei ${quote(a.label)}. Leg es bei beiden auf dieselbe Zeit und mach es zusammen. Oder verschieb eine Licht-aus-Zeit, damit eins nach dem anderen kommt.`;
   }
-  return `${when} brauchen dich beide: das Stern-Kind bei ${quote(a.label)}, das Mond-Kind bei ${quote(b.label)}. Verschieb eine Licht-aus-Zeit, ändere die Minuten, oder ein Kind macht in der Zeit etwas ohne dich, etwa ein Hörspiel.`;
+  return `${when} brauchen dich beide: das Stern-Kind bei ${quote(a.label)}, das Mond-Kind bei ${quote(b.label)}. Verschieb eine Licht-aus-Zeit oder ändere die Minuten. Oder ein Kind macht in der Zeit etwas ohne dich, etwa ein Hörspiel.`;
 }
 
 function togetherMessage(a: TimedStep, b: TimedStep): string {
   const name = quote(a.label);
-  const undo = `nehmt ${quote('zusammen')} wieder weg`;
-  const verb = a.isEnd && b.isEnd ? 'ist es' : 'beginnt es';
-  if (sheetClock(a.start) !== sheetClock(b.start)) {
-    return `${name} macht ihr zusammen, aber beim Stern-Kind ${verb} um ${sheetClock(a.start)} und beim Mond-Kind um ${sheetClock(b.start)}. Legt es auf dieselbe Zeit oder ${undo}.`;
+  const undo = `nimm ${quote('zusammen')} wieder weg`;
+  if (a.start !== b.start) {
+    const verb = a.isEnd && b.isEnd ? 'ist es' : 'beginnt es';
+    return `${name} macht ihr zusammen, aber beim Stern-Kind ${verb} um ${adultClock(a.start)} und beim Mond-Kind um ${adultClock(b.start)}. Leg es bei beiden auf dieselbe Zeit oder ${undo}.`;
   }
-  if (a.start === b.start) {
-    return `${name} macht ihr zusammen, aber es dauert beim Stern-Kind ${a.end - a.start} und beim Mond-Kind ${b.end - b.start} Minuten. Stellt dieselben Minuten ein oder ${undo}.`;
-  }
-  // Same five minutes on the sheet, but not the same minute: name the exact times.
-  const exact = (m: number) => clockLabel(fromMinutes(m));
-  return `${name} macht ihr zusammen, aber beim Stern-Kind beginnt es um ${exact(a.start)} und beim Mond-Kind um ${exact(b.start)}. Legt es auf dieselbe Minute oder ${undo}.`;
+  return `${name} macht ihr zusammen, aber es dauert beim Stern-Kind ${a.end - a.start} und beim Mond-Kind ${b.end - b.start} Minuten. Stell bei beiden dieselben Minuten ein oder ${undo}.`;
+}
+
+/** The short line next to a child's steps; the full message stands above the print button (Astra AZ-07). */
+export function shortClash(clash: Clash): string {
+  return clash.rule === 'beide'
+    ? `${adultClock(clash.at)}: Beide brauchen dich.`
+    : `${adultClock(clash.at)}: ${quote(clash.star.label)} zusammen, aber nicht gleichzeitig.`;
 }
 
 /**
@@ -538,8 +581,9 @@ function overviewItem(step: TimedStep): OverviewItem {
 
 /**
  * The adult's overview, "Unser Abend": both children's steps in the order
- * of the evening, one row per five minutes as the sheet prints them (two
- * steps of a child in the same five minutes share a row). A "zusammen"
+ * of the evening, one row per start minute, to the minute (Astra AZ-01,
+ * Claude F1): a handover at 19:24 must not hide in a 19:20 row. Steps of
+ * both children that start in the same minute share a row. A "zusammen"
  * step at the same time for both is one row across both columns.
  */
 export function overviewRows(plan: TwoChildPlan): OverviewRow[] {
@@ -562,8 +606,8 @@ export function overviewRows(plan: TwoChildPlan): OverviewRow[] {
   let slot = -1;
   let open: Extract<OverviewRow, { kind: 'paar' }> | null = null;
   for (const { child, step } of entries) {
-    const mySlot = Math.floor(step.start / 5) * 5;
-    const time = mySlot !== slot ? sheetClock(step.start) : undefined;
+    const mySlot = step.start;
+    const time = mySlot !== slot ? adultClock(step.start) : undefined;
     if (mySlot !== slot) open = null;
     slot = mySlot;
     if (child === 'both') {
