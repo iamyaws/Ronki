@@ -103,7 +103,7 @@ function BuilderPage({ builder: which, ...props }: BaseProps & { builder: 'morni
   return (
     <TemplateLayout
       {...props}
-      steps={kitSheetSteps(kit, builder.plan)}
+      steps={kitSheetSteps(kit, builder.plan, builder.clockStyle)}
       sheetDescription={kitSheetDescription(kit, builder.plan)}
       doneNote={kitLeaveNote(kit, builder.plan)}
       controls={<RoutineBuilderControls builder={builder} />}
