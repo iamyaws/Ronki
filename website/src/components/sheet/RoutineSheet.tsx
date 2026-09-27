@@ -61,11 +61,15 @@ export function RoutineSheet({
 }: RoutineSheetProps) {
   const density = big ? 'big' : compact || steps.length > 4 ? 'compact' : 'roomy';
   // Filled clock times add a line to every row; a timed sheet packs a little tighter.
-  const timed = steps.some((step) => step.time);
+  const timed = steps.some((step) => step.time || step.clock);
+  // Clock faces get their own column; rows without one keep it empty.
+  const clocks = steps.some((step) => step.clock);
 
   return (
     <section className={`rs-sheet${page ? ' rs-sheet--a4' : ''}`}>
-      <div className={`rs-page rs-page--${density}${timed ? ' rs-page--timed' : ''}`}>
+      <div
+        className={`rs-page rs-page--${density}${timed ? ' rs-page--timed' : ''}${clocks ? ' rs-page--clocks' : ''}`}
+      >
         <SheetHead
           eyebrow={eyebrow}
           title={title}
@@ -84,6 +88,7 @@ export function RoutineSheet({
               step={step}
               showTime={showTimes}
               clipLane={clipLane}
+              clockLane={clocks}
             />
           ))}
         </ol>
