@@ -125,6 +125,12 @@ Marc's ask: make the new Bilderbuch design live in the real PWA, benchmarked aga
 
 **Follow-ups.** Parent dashboard and legal pages still carry hard-coded teal accents (readable, not restyled). Freunde, micropedia creatures, mini-games, bosses and birthday scenes keep their old painterly art. The first-breath fire puff is still a gradient. `CaveStyleSheet` keeps the old look. Belohnungsbank copy still names Funkelzeit (pre-existing). Material Symbols still loads from Google for screens outside the core loop. The Profile's Pflege and Erinnerungen segments and the Buch are restyled but not reachable from any tab (pre-existing). Animated WebP on an old iPad and a Fire HD is untested on a real device.
 
+## Uhr-Bilder on the morning sheet (27 September 2026, IN FLIGHT)
+
+- Marc asked for "tool 4 from the lineup"; the lineup has three tools, so Marc picked idea B from the concept file: clock faces as an optional block on the live morning builder (`/vorlagen/morgenroutine`), no new page. Worktree `C:\Users\öööö\ronki-clock`, branch `vorlagen/morgen-uhr`. Plan: `C:\Users\öööö\.claude\plans\curried-conjuring-otter.md`.
+- Scope: "Als Zahl / Als Uhr / Beides" when times are on (default today's sheet), a static clock face per timed row, a wake-up line with a Schlafens-Rechner link (`?auf=`), a clock-change note until 25 Oct, and the print event `Vorlage Drucken` with `uhr` as the test instrument. Morning only via a kit flag.
+- Order: build agent (Opus, ~300k), Claude two-lens review (~250k), Astra code and visual review, merge when green and reviewed. After live: Louis tries both sheets.
+
 ## Abend mit zwei Kindern and its article (27 September 2026, LIVE)
 
 - PR 46 merged and live-checked: `/tools/abend-mit-zwei-kindern` (tool 3 of the lineup, hub now shows seven tools) and `/ratgeber/abendroutine-zwei-kinder`. One adult or two; two children called Stern-Kind and Mond-Kind (no names, star and moon symbols). Per child: up to six evening steps from the evening kit plus a new "Hörspiel" step (headphones), minutes, lights-out time 18:30 to 21:00, and "braucht dich" per step; a step both children have can be "zusammen" (counts once, needs the adult with both). "Licht aus" always stays last and reads "Augen zu, gute Nacht." (a story is its own step with minutes).
