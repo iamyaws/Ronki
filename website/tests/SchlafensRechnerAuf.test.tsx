@@ -39,7 +39,8 @@ describe('Schlafens-Rechner takes the wake-up time from the builder', () => {
     push.mockRestore();
   });
 
-  it.each(['', '?auf=', '?auf=650', '?auf=06:50', '?auf=2460', '?auf=0760', '?auf=abcd', '?auf=06500', '?x=0650'])(
+  // Every bad value is covered by wakeUpFromParam above; three on the page.
+  it.each(['', '?auf=2460', '?auf=06:50'])(
     'keeps 6:30 for %s',
     (search) => {
       renderRechner(search);
