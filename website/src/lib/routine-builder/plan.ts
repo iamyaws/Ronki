@@ -11,6 +11,8 @@
  *   los=0740          leave time as HHMM; being there means times are on
  *   m=5.3.3.10.15.5   minutes per step in step order, only when times are on
  *                     and they differ from the defaults
+ *   u=uhr / u=beides  clock faces on the sheet, only when times are on
+ *                     (see clock.ts; not part of the plan object)
  */
 
 import {
@@ -140,6 +142,8 @@ export const MORNING: RoutineKit = {
   notAloneInApp: ['packcheck'],
   shareTitle: 'Morgenroutine',
   shareText: SHARE_TEXT,
+  // Parents can put a clock face beside each time (key u in the link).
+  clockFaces: true,
 };
 
 /* ------------------------------------------------------------------ */

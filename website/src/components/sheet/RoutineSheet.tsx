@@ -18,6 +18,10 @@ export interface RoutineSheetProps {
   done?: boolean;
   /** Line in the done band instead of its usual one, e.g. when the family leaves. */
   doneNote?: string;
+  /** A face for the time to leave in the done band ("7:40"). */
+  doneClock?: string;
+  /** A picture beside that face (what happens then). */
+  doneClockImg?: string;
   /** Toddler sheet: pictures only, bigger rows and rings. */
   big?: boolean;
   /** Tighter rows. Also switched on by itself for five or more steps. */
@@ -50,6 +54,8 @@ export function RoutineSheet({
   host,
   done = false,
   doneNote,
+  doneClock,
+  doneClockImg,
   big = false,
   compact = false,
   showTimes = false,
@@ -61,11 +67,15 @@ export function RoutineSheet({
 }: RoutineSheetProps) {
   const density = big ? 'big' : compact || steps.length > 4 ? 'compact' : 'roomy';
   // Filled clock times add a line to every row; a timed sheet packs a little tighter.
-  const timed = steps.some((step) => step.time);
+  const timed = steps.some((step) => step.time || step.clock);
+  // Clock faces get their own column; rows without one keep it empty.
+  const clocks = steps.some((step) => step.clock);
 
   return (
     <section className={`rs-sheet${page ? ' rs-sheet--a4' : ''}`}>
-      <div className={`rs-page rs-page--${density}${timed ? ' rs-page--timed' : ''}`}>
+      <div
+        className={`rs-page rs-page--${density}${timed ? ' rs-page--timed' : ''}${clocks ? ' rs-page--clocks' : ''}`}
+      >
         <SheetHead
           eyebrow={eyebrow}
           title={title}
@@ -84,6 +94,7 @@ export function RoutineSheet({
               step={step}
               showTime={showTimes}
               clipLane={clipLane}
+              clockLane={clocks}
             />
           ))}
         </ol>
@@ -99,7 +110,7 @@ export function RoutineSheet({
           </div>
         )}
 
-        {done && <DoneBand {...(doneNote ? { note: doneNote } : {})} />}
+        {done && <DoneBand {...(doneNote ? { note: doneNote } : {})} {...(doneClock ? { clock: doneClock } : {})} {...(doneClockImg ? { clockImg: doneClockImg } : {})} />}
 
         <SheetFooter url={footerUrl} />
       </div>

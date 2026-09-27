@@ -9,8 +9,13 @@
  * into a free Ronki card with the steps the app knows.
  *
  * Everything here is screen-only. "Drucken" prints the sheet exactly as the
- * preview shows it. Analytics count that the builder was used and that the
- * card button was tapped, never which steps.
+ * preview shows it. Analytics count that the builder was used, that the
+ * card button was tapped and that the sheet was printed (with times or
+ * not, and how they look), never which steps.
+ *
+ * The morning page also offers clock faces beside the times, names the
+ * first time on the sheet with a link to the Schlafens-Rechner, and
+ * mentions the clock change in October while it is ahead.
  */
 
 import { useEffect, useRef, useState, type ReactNode } from 'react';
@@ -19,6 +24,7 @@ import { TASK_ART_PATH } from '../sheet';
 import { trackEvent } from '../../lib/analytics';
 import { copyText } from '../../lib/clipboard';
 import {
+  CLOCK_STYLES,
   MAX_MINUTES,
   MIN_MINUTES,
   MORNING,
@@ -31,15 +37,20 @@ import {
   kitAddStep,
   kitAppKindsFor,
   kitCardLink,
+  kitPrintClockProp,
   kitSetLeave,
   kitStepLabel,
   kitStepPicture,
+  kitWakeLine,
   moveStep,
   printedTimes,
   removeStep,
   setMinutes,
   setTimes,
+  showClockChangeNote,
+  sleepCalculatorLink,
   stepOf,
+  type ClockStyle,
   type RoutineKit,
 } from '../../lib/routine-builder';
 import type { RoutinePlanState } from './useRoutinePlan';
@@ -70,6 +81,37 @@ export function ownStepNote(kit: RoutineKit): string {
 }
 
 export const OWN_STEP_PRIVACY = ownStepNote(MORNING);
+
+/** The three ways a time can stand on the sheet, as the pills name them. */
+const CLOCK_STYLE_LABELS: Record<ClockStyle, string> = {
+  zahl: 'Als Zahl',
+  uhr: 'Als Uhr',
+  beides: 'Beides',
+};
+
+export const CLOCK_STYLE_QUESTION = 'Wie steht die Uhrzeit auf dem Blatt?';
+export const CLOCK_STYLE_NOTE =
+  'Als Uhr: Neben dem Schritt steht eine Uhr, die so aussieht wie eure Küchenuhr zu der Zeit. Bleibt die Zeit gleich, steht dort ein kleiner Pfeil: Dann geht es gleich nach dem Schritt darüber weiter. Auch „Geschafft!“ bekommt eine Uhr: Los geht es, wenn die Küchenuhr so aussieht.';
+
+const TEXT_LINK = 'text-cobalt underline decoration-2 underline-offset-4 hover:text-ink';
+
+/**
+ * The clocks go back on 25 October 2026. Shown on the morning page up to
+ * and including that day; `today` is there for tests.
+ */
+export function ClockChangeNote({ today = new Date() }: { today?: Date }) {
+  if (!showClockChangeNote(today)) return null;
+  return (
+    <p data-clock-change className="mt-4 rounded-2xl bg-sky-wash/50 px-4 py-3 text-sm text-ink/75 leading-relaxed">
+      Am 25. Oktober werden die Uhren eine Stunde zurückgestellt. Wie ihr euren Morgen darauf einstellt,
+      steht im{' '}
+      <Link to="/ratgeber/zeitumstellung-kinder" className={TEXT_LINK}>
+        Artikel zur Zeitumstellung
+      </Link>
+      .
+    </p>
+  );
+}
 
 /** Scrolls to the builder without a history entry, so Back never lands on an older plan. */
 export function JumpToBuilder({ className, children }: { className?: string; children: ReactNode }) {
@@ -104,8 +146,8 @@ function paperOnly(times: boolean, rest: boolean): string {
 /* Above the preview                                                   */
 /* ------------------------------------------------------------------ */
 
-export function RoutineBuilderControls({ builder }: { builder: RoutinePlanState }) {
-  const { kit, plan, ownDraft, update, changeOwn, addOwn } = builder;
+export function RoutineBuilderControls({ builder, today }: { builder: RoutinePlanState; today?: Date }) {
+  const { kit, plan, clockStyle, ownDraft, update, changeClockStyle, changeOwn, addOwn } = builder;
   const copy = COPY[kit.id];
   const ownNote = ownStepNote(kit);
   const [adding, setAdding] = useState(false);
@@ -114,6 +156,7 @@ export function RoutineBuilderControls({ builder }: { builder: RoutinePlanState 
   const times = printedTimes(plan, kit.endStep);
   const missing = kit.steps.filter((step) => !plan.steps.includes(step.code));
   const titleId = `${BUILDER_ANCHOR}-titel`;
+  const wake = kitWakeLine(kit, plan);
 
   return (
     <section
@@ -255,10 +298,49 @@ export function RoutineBuilderControls({ builder }: { builder: RoutinePlanState 
               ein Schritt dauert, stellst du oben mit Minus und Plus ein. Auf dem Blatt stehen die
               Zeiten auf fünf Minuten abgerundet, so findet dein Kind sie leichter auf der Uhr.
             </p>
+            {wake && (
+              <p data-wake-line className="mt-2 text-sm text-ink/65 leading-relaxed">
+                <span className="font-display font-semibold text-ink">{wake.text}</span>{' '}
+                {wake.auf ? 'Welche Schlafenszeit passt dazu?' : 'Welche Schlafenszeit passt zu eurer Aufstehzeit?'}{' '}
+                <Link to={sleepCalculatorLink(wake.auf)} className={TEXT_LINK}>
+                  Der Schlafens-Rechner rechnet es aus
+                </Link>
+                .
+              </p>
+            )}
+            {kit.clockFaces && <ClockStylePicker value={clockStyle} onChange={changeClockStyle} />}
           </div>
         )}
+        {kit.id === 'morgen' && <ClockChangeNote today={today} />}
       </div>
     </section>
+  );
+}
+
+/** "Als Zahl", "Als Uhr", "Beides": radio buttons drawn as pills, like the page's other buttons. */
+function ClockStylePicker({ value, onChange }: { value: ClockStyle; onChange: (style: ClockStyle) => void }) {
+  return (
+    <fieldset className="mt-4">
+      <legend className="font-display font-semibold text-base text-ink">{CLOCK_STYLE_QUESTION}</legend>
+      <div className="mt-2 flex flex-wrap gap-2">
+        {CLOCK_STYLES.map((style) => (
+          <label key={style} className="cursor-pointer">
+            <input
+              type="radio"
+              name="rb-uhr"
+              value={style}
+              checked={value === style}
+              onChange={() => onChange(style)}
+              className="peer sr-only"
+            />
+            <span className="inline-flex items-center rounded-full border-[2.5px] border-ink/20 bg-white px-4 py-2 font-display font-bold text-sm text-ink transition-colors hover:border-ink peer-checked:border-ink peer-checked:bg-cobalt peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-cobalt">
+              {CLOCK_STYLE_LABELS[style]}
+            </span>
+          </label>
+        ))}
+      </div>
+      <p className="mt-2 text-sm text-ink/65 leading-relaxed">{CLOCK_STYLE_NOTE}</p>
+    </fieldset>
   );
 }
 
@@ -434,7 +516,7 @@ function Switch({
 /* ------------------------------------------------------------------ */
 
 export function RoutineBuilderShare({ builder }: { builder: RoutinePlanState }) {
-  const { kit, plan, shareUrl } = builder;
+  const { kit, plan, clockStyle, shareUrl } = builder;
   const [copied, setCopied] = useState(false);
   const [canShare] = useState(
     () => typeof navigator !== 'undefined' && typeof navigator.share === 'function',
@@ -445,6 +527,32 @@ export function RoutineBuilderShare({ builder }: { builder: RoutinePlanState }) 
   const rest = plan.steps.some((code) => !stepOf(kit, code)?.app);
 
   useEffect(() => () => window.clearTimeout(copiedTimer.current), []);
+
+  // One count per print dialog, whichever way it opens (the button under the
+  // sheet, the toolbar button, Ctrl+P, the browser menu), and only where the
+  // clock styles exist (Claude F1). It counts dialogs opened, not pages that
+  // came out of the printer (Astra UHR-04). How the sheet looks, never what
+  // is on it.
+  const printInfo = useRef({ kit, plan, clockStyle });
+  printInfo.current = { kit, plan, clockStyle };
+  useEffect(() => {
+    if (!kit.clockFaces) return;
+    let last = -Infinity;
+    const onBeforePrint = () => {
+      const now = Date.now();
+      // Some browsers fire twice for one dialog.
+      if (now - last < 1000) return;
+      last = now;
+      const info = printInfo.current;
+      trackEvent('Vorlage Drucken', {
+        vorlage: info.kit.id,
+        weg: 'baukasten',
+        uhr: kitPrintClockProp(info.kit, info.plan, info.clockStyle),
+      });
+    };
+    window.addEventListener('beforeprint', onBeforePrint);
+    return () => window.removeEventListener('beforeprint', onBeforePrint);
+  }, [kit.clockFaces]);
 
   async function handleCopy() {
     if (!(await copyText(shareUrl))) return;

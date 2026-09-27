@@ -291,6 +291,32 @@
   border-right: 2px dashed rgba(4, 8, 18, 0.35);
   border-radius: 19.5px 0 0 19.5px;
 }
+/* Clock face (morning builder, "Als Uhr" and "Beides"): its own column
+ * before the picture, far from the ring the child colours in. Sized to fit
+ * inside a row, so a row never grows because of it. Rows without a face
+ * keep the column empty. */
+.rs-clock {
+  flex: none;
+  display: block;
+  width: 88px;
+  height: 88px;
+}
+.rs-page--compact .rs-clock {
+  width: 66px;
+  height: 66px;
+}
+/* The time in words for screen readers when only the face shows it. */
+.rs-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 
 /* Five or six steps */
 .rs-page--compact .rs-steps {
@@ -483,6 +509,14 @@
     width: 68px;
     height: 68px;
   }
+  .rs-page .rs-clock {
+    width: 76px;
+    height: 76px;
+  }
+  .rs-page--compact .rs-clock {
+    width: 60px;
+    height: 60px;
+  }
   .rs-page--big .rs-row {
     min-height: 150px;
   }
@@ -603,6 +637,18 @@
   .rs-page--compact .rs-label {
     font-size: 18px;
   }
+  /* Phone preview: the face stays small so the words keep their width. */
+  .rs-page .rs-clock {
+    width: 40px;
+    height: 40px;
+  }
+  .rs-page--compact .rs-clock {
+    width: 34px;
+    height: 34px;
+  }
+  .rs-page--clocks .rs-row {
+    gap: 8px;
+  }
   .rs-page--big .rs-row {
     min-height: 108px;
     padding-right: 16px;
@@ -642,4 +688,51 @@
     flex-direction: column;
     gap: 2px;
   }
+}
+
+/* Time to leave as a face in the done band ("Als Uhr", "Beides"), with an
+ * open door beside it: at this time we go out. */
+.rs-done-leave {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+.rs-done-leave-img {
+  display: block;
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+}
+.rs-done .rs-done-clock {
+  flex: none;
+  width: 84px;
+  height: 84px;
+}
+@container rs-sheet (max-width: 760px) {
+  .rs-done .rs-done-clock {
+    width: 72px;
+    height: 72px;
+  }
+}
+@container rs-sheet (max-width: 520px) {
+  .rs-done .rs-done-clock {
+    width: 44px;
+    height: 44px;
+  }
+  .rs-done-leave {
+    gap: 4px;
+  }
+  .rs-done-leave-img {
+    width: 38px;
+    height: 38px;
+  }
+}
+/* A row whose time stays the same: a small arrow down instead of a face. */
+.rs-clock--none .rs-next {
+  display: block;
+  width: 50%;
+  height: 50%;
+  margin: 25%;
 }

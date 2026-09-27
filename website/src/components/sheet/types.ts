@@ -10,6 +10,11 @@ export interface SheetStep {
   hint?: string;
   /** Clock time the step starts, e.g. "7:05". Printed where the blank "___ Uhr" line would be. */
   time?: string;
+  /**
+   * Clock time for a drawn clock face beside the step, e.g. "7:05" (morning
+   * builder only). Without `time` the row keeps the time for screen readers.
+   */
+  clock?: string;
   /** No picture: an empty dashed box the child draws the step into. */
   draw?: boolean;
 }
