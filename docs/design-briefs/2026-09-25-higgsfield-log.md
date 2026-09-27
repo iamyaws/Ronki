@@ -172,3 +172,11 @@ Marc, the same evening: still images go through Astra (Codex image generation on
 ## Astra pass 1: afternoon pictures through Codex image generation (27 Sep 2026, website session)
 
 First still image through Astra instead of Higgsfield (Marc, 26 Sep: "why do we use higgsfield for image gen if we can use astra directly?"). Brief and log: `C:\Users\öööö\ronki\launch\astra-art\brief-2026-09-27-afternoon.md`; references: two earlier task sheets as local PNGs. One 2 x 2 sheet on white (school building with a bell, family house, armchair with a knitted blanket, playground slide), 1254 px square, on style at the first try, no credits. Cut with `scripts/cut-task-sheet.py --grid 2x2`. Used now: `school.webp` for "Schule aus" on the Nachmittagsplan; house, armchair and slide kept in `launch/astra-art/` for later.
+
+## Astra pass 2: homework moments (27 Sep 2026, website session)
+
+Brief: `C:\Users\öööö\ronki\launch\astra-art\brief-2026-09-27-knackpunkt.md`. One 2 x 2 sheet (pencil with eraser, hourglass, cushion with blanket, children's headphones), no credits. Used on the Nachmittagsplan: `eraser.webp`, `hourglass.webp`, `cushion.webp`. `headphones.webp` now used for "Hörspiel" on the Abend mit zwei Kindern.
+
+## Astra pass 3: star, moon and two evening pictures (27 Sep 2026, website session)
+
+Brief: `C:\Users\öööö\ronki\launch\astra-art\brief-2026-09-27-stern-mond.md`; references: the two earlier task sheets plus Astra passes 1 and 2. One 2 x 2 sheet (chunky yellow star, sky-blue crescent moon, an adult hand holding a child's hand, two toothbrushes in one cup), 1254 px square, on style at the first try, no credits. Cut with `scripts/cut-task-sheet.py --grid 2x2`: `star.webp` and `moon.webp` are the two children's symbols on the Abend mit zwei Kindern (no names), `hands.webp` marks the steps that need the adult, the toothbrush cup is not shipped (unused, Claude review F8) and stays on the sheet. Sheet saved as `launch/astra-art/astra-sheet-stern-mond.png`.

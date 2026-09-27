@@ -5,12 +5,12 @@ import { AppRoutes } from '../src/routes';
 import { ARTICLES } from '../src/data/ratgeber-articles';
 import prerenderSource from '../vite-plugin-prerender-meta.ts?raw';
 import sitemap from '../public/sitemap.xml?raw';
-import articleSource from '../src/pages/ratgeber/HausaufgabenStreitErsteKlasse.tsx?raw';
+import articleSource from '../src/pages/ratgeber/AbendroutineZweiKinder.tsx?raw';
 
-const PATH = '/ratgeber/hausaufgaben-streit-erste-klasse';
-const H1 = 'Hausaufgaben-Streit in der 1. Klasse: erst ankommen, dann ein fester Rahmen';
+const PATH = '/ratgeber/abendroutine-zwei-kinder';
+const H1 = 'Abendroutine mit zwei Kindern: wer braucht wann deine Hilfe?';
 
-describe('Hausaufgaben-Streit article', () => {
+describe('Abendroutine mit zwei Kindern article', () => {
   it('serves the article on its route with the crawler title and description', async () => {
     render(
       <MemoryRouter initialEntries={[PATH]}>
@@ -26,18 +26,21 @@ describe('Hausaufgaben-Streit article', () => {
     expect(prerenderSource).toContain(description!);
   });
 
-  it('is listed under Einschulung and in the sitemap', () => {
-    const entry = ARTICLES.find((a) => a.slug === 'hausaufgaben-streit-erste-klasse');
-    expect(entry?.category).toBe('Einschulung');
+  it('is listed under Abendroutine and in the sitemap', () => {
+    const entry = ARTICLES.find((a) => a.slug === 'abendroutine-zwei-kinder');
+    expect(entry?.category).toBe('Abendroutine');
     expect(entry?.title).toBe(H1);
     expect(sitemap).toContain(`<loc>https://www.ronki.de${PATH}</loc>`);
   });
 
-  it('links the tool, names its sources and carries no em-dash or homework time norm', () => {
-    expect(articleSource).toContain('to="/tools/nachmittagsplan"');
-    expect(articleSource).toContain('kinderaerzte-im-netz.de');
-    expect(articleSource).toContain('Tut Kindern gut!');
-    expect(articleSource).not.toContain('\u2014');
-    expect(articleSource).not.toMatch(/Minuten (Deutsch|Mathe)|pro Klassenstufe/);
+  it('links the tool and its neighbours, names its sources and promises no sleep times', () => {
+    expect(articleSource).toContain('to="/tools/abend-mit-zwei-kindern"');
+    expect(articleSource).toContain('to="/vorlagen/abendroutine"');
+    expect(articleSource).toContain('to="/tools/schlafens-rechner"');
+    expect(articleSource).toContain('to="/ratgeber/zaehneputzen-ohne-streit"');
+    expect(articleSource).toContain('kindergesundheit-info.de');
+    expect(articleSource).toContain('dgkj.de');
+    expect(articleSource).not.toContain('—');
+    expect(articleSource).not.toMatch(/Stunden Schlaf|schläft nach \d+ Minuten|Feierabend um/);
   });
 });

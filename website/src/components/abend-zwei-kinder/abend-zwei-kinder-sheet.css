@@ -1,0 +1,338 @@
+/*
+ * Abend mit zwei Kindern sheet, on top of the routine sheet (../sheet/sheet.css).
+ *
+ * One A4 page (fixed by .rs-sheet--a4): a short head with Ronki, the
+ * adult's overview "Unser Abend" (a time column and one column per child,
+ * read top to bottom like the evening), then a dashed cut line and one card
+ * per child in the evening template look.
+ *
+ * Same print rules as sheet.css: white ground, ink outlines, no shadows.
+ * The overview has no rings on purpose; the rings live on the cards only.
+ */
+
+.az-sheet .az-page {
+  padding: 20px 34px 14px;
+}
+.az-sheet .rs-wordmark {
+  margin-bottom: 10px;
+}
+.az-sheet .rs-title {
+  margin-top: 8px;
+  font-size: 36px;
+}
+.az-sheet .rs-desc {
+  max-width: 470px;
+  margin-top: 6px;
+}
+.az-sheet .rs-host {
+  width: 104px;
+  margin: -4px -4px 0 0;
+}
+.az-sheet .rs-host--quiet .rs-tick {
+  left: -26px;
+  top: 30px;
+}
+
+/* Overview ------------------------------------------------------------- */
+.az-over {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  margin-top: 12px;
+  padding: 10px 14px 8px;
+  border: 2.5px solid #040812;
+  border-radius: 20px;
+  /* Anything that does not fit is clipped inside the overview, where
+   * scripts/og-abend-zwei-kinder.mjs --check sees it. */
+  overflow: hidden;
+}
+.az-over-head,
+.az-row {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) minmax(0, 1fr);
+  column-gap: 12px;
+}
+.az-over-head {
+  position: relative;
+  flex: none;
+  align-items: center;
+  padding-bottom: 6px;
+  border-bottom: 2px solid #040812;
+}
+.az-col-head {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.az-col-head .rs-pic {
+  width: 34px;
+  height: 34px;
+}
+.az-col-text {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.az-col-name {
+  font-family: 'Fredoka', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 1.05;
+  color: #040812;
+}
+.az-col-aus {
+  font-family: 'Fredoka', system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.15;
+  color: #0544b0;
+  white-space: nowrap;
+}
+.az-rows {
+  flex: 1 1 auto;
+  min-height: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+.az-row {
+  align-items: start;
+  padding: 1.5px 0;
+  border-bottom: 2px dotted rgba(4, 8, 18, 0.22);
+  break-inside: avoid;
+}
+.az-row:last-child {
+  border-bottom: 0;
+}
+.az-time {
+  padding-top: 5px;
+  font-family: 'Fredoka', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1;
+  color: #0544b0;
+  white-space: nowrap;
+}
+.az-cell {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.az-cell--both {
+  grid-column: 2 / span 2;
+  align-items: center;
+}
+.az-item {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 1px 4px 1px 0;
+  border-radius: 8px;
+}
+.az-item .rs-pic {
+  width: 23px;
+  height: 23px;
+}
+.az-item .rs-draw {
+  border-radius: 7px;
+}
+.az-label {
+  min-width: 0;
+  font-family: 'Fredoka', system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 14.5px;
+  line-height: 1.1;
+  color: #040812;
+  overflow-wrap: anywhere;
+}
+.az-needs {
+  flex: none;
+  display: block;
+  width: 21px;
+  height: 21px;
+  object-fit: contain;
+}
+.az-tag {
+  flex: none;
+  padding: 2px 8px 1px;
+  background: #b9e3fc;
+  border-radius: 6px;
+  font-family: 'Gochi Hand', 'Comic Sans MS', cursive;
+  font-size: 15px;
+  line-height: 1.1;
+  color: #040812;
+}
+/* A together step at the same time for both: one line across both columns. */
+.az-cell--both .az-item {
+  padding: 0 6px 0 2px;
+  border: 2px solid #040812;
+  border-radius: 12px;
+}
+/* Preview on the page only: this step does not work yet. */
+.az-item[data-clash] {
+  outline: 2px dashed #0544b0;
+  outline-offset: 1px;
+}
+.az-clash {
+  flex: none;
+  padding: 1px 6px 0;
+  background: #fdd134;
+  border-radius: 6px;
+  font-family: 'Gochi Hand', 'Comic Sans MS', cursive;
+  font-size: 14px;
+  line-height: 1.1;
+  color: #040812;
+}
+.az-legend {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0;
+  transform: translateY(calc(-50% - 3px));
+  font-family: 'Fredoka', system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 1;
+  color: #40444d;
+}
+.az-legend img {
+  display: block;
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+/* Cut line and the children's cards ---------------------------------------- */
+.az-cut {
+  position: relative;
+  flex: none;
+  height: 0;
+  margin: 16px -34px 0;
+  border-top: 2px dashed rgba(4, 8, 18, 0.5);
+}
+.az-scissors {
+  position: absolute;
+  top: -12px;
+  left: 30px;
+  width: 22px;
+  height: 22px;
+  padding: 0 2px;
+  background: #ffffff;
+}
+.az-cards {
+  flex: none;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+.az-card {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 9px 11px 11px;
+  border: 2.5px solid #040812;
+  border-radius: 22px;
+  overflow: hidden;
+  break-inside: avoid;
+}
+.az-card-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.az-card-head .rs-pic {
+  width: 34px;
+  height: 34px;
+}
+.az-card-title {
+  margin: 0;
+  font-family: 'Fredoka', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: #040812;
+}
+.az-card-steps {
+  list-style: none;
+  margin: 7px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.az-card-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 2px 8px 2px 5px;
+  border: 2px solid #040812;
+  border-radius: 14px;
+  break-inside: avoid;
+}
+.az-card-row .rs-pic {
+  width: 38px;
+  height: 38px;
+}
+.az-card-row .rs-draw {
+  border-radius: 10px;
+}
+.az-card-body {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.az-card-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 6px;
+}
+.az-card-label {
+  min-width: 0;
+  font-family: 'Fredoka', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 15.5px;
+  line-height: 1.1;
+  color: #040812;
+  overflow-wrap: anywhere;
+}
+.az-card-hint {
+  font-size: 10.5px;
+  line-height: 1.25;
+  color: #40444d;
+}
+.az-needs-space {
+  flex: none;
+  width: 22px;
+}
+.az-ring {
+  width: 26px;
+  height: 26px;
+  margin-left: 0;
+  border-width: 3px;
+}
+.az-band {
+  margin: 7px 0 0;
+  padding: 6px 12px 5px;
+  background: #b9e3fc;
+  border-radius: 14px;
+  font-family: 'Gochi Hand', 'Comic Sans MS', cursive;
+  font-size: 19px;
+  line-height: 1.1;
+  text-align: center;
+  color: #040812;
+}

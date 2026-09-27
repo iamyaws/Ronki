@@ -26,7 +26,7 @@ export default function ToolsHub() {
     <PainterlyShell>
       <PageMeta
         title="Werkzeuge für Eltern: Ronki"
-        description="Kostenlose Werkzeuge für Eltern: App-Check, Schlafens-Rechner, Familien-Medien-Charter, Konsolen-Check, Ranzen-Packplan und Nachmittagsplan."
+        description="Kostenlose Werkzeuge für Eltern: App-Check, Schlafens-Rechner, Medien-Charter, Konsolen-Check, Ranzen-Packplan, Nachmittagsplan und Abend mit zwei Kindern."
         canonicalPath="/tools"
       />
 
@@ -119,6 +119,17 @@ export default function ToolsHub() {
               description="Schule aus, Termine, Hausaufgaben: Du legst euren echten Nachmittag auf ein Blatt. Was nicht zusammenpasst, siehst du, bevor du druckst."
               meta="5 Min · ein A4-Blatt + Wochenplan für Oma, Opa oder den Hort"
             />
+            <ToolCard
+              index={6}
+              reduced={reduced}
+              tone="mustard"
+              eyebrow="Abend mit zwei Kindern"
+              to="/tools/abend-mit-zwei-kindern"
+              title="Wer braucht wann deine Hilfe?"
+              description="Zwei Kinder, zwei Abende, und du bist einmal da. Du legst beide Abende nebeneinander und siehst, wann dich beide zugleich brauchen, bevor du druckst."
+              meta="5 Min · ein A4-Blatt, unten eine Karte pro Kind"
+              cta="Abend mit zwei Kindern planen"
+            />
           </ul>
         </div>
       </section>
@@ -209,6 +220,7 @@ function ToolCard({
   title,
   description,
   meta,
+  cta = 'Werkzeug öffnen',
 }: {
   index: number;
   reduced: boolean | null;
@@ -218,6 +230,8 @@ function ToolCard({
   title: string;
   description: string;
   meta: string;
+  /** The words on the card's button. */
+  cta?: string;
 }) {
   const t = TONE_STYLES[tone];
   return (
@@ -251,7 +265,7 @@ function ToolCard({
         </p>
         <p className={`text-xs ${t.meta} mb-5 tabular-nums`}>{meta}</p>
         <span className={`inline-flex items-center gap-1.5 text-sm ${t.cta} font-semibold group-hover:gap-2 transition-all`}>
-          Werkzeug öffnen
+          {cta}
           <ArrowRight className="transition-transform group-hover:translate-x-0.5" />
         </span>
       </Link>
@@ -281,7 +295,7 @@ function ClosingBlock({ reduced }: { reduced: boolean | null }) {
         Vermisst du was?
       </p>
       <p className="font-display font-semibold text-base sm:text-lg text-cream leading-relaxed max-w-prose">
-        Diese sechs sind der Anfang. Wenn dir ein Werkzeug fehlt, das eine
+        Diese sieben sind der Anfang. Wenn dir ein Werkzeug fehlt, das eine
         Eltern-Entscheidung leichter macht, schreib mir kurz. Ich bau die
         Werkzeuge selbst, eins nach dem anderen.
       </p>

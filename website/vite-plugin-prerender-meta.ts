@@ -168,6 +168,13 @@ const ROUTES: RouteMeta[] = [
     ogImage: '/og-tool-nachmittagsplan.jpg',
   },
   {
+    path: '/ratgeber/abendroutine-zwei-kinder',
+    title: 'Abendroutine mit zwei Kindern: wer braucht wann deine Hilfe? · Ratgeber · Ronki',
+    description:
+      'Zwei Kinder, zwei Schlafenszeiten, ein Erwachsener? So legst du den Abend so, dass dich nicht beide gleichzeitig brauchen. Mit kostenlosem Abendplan.',
+    ogImage: '/og-tool-abend-zwei-kinder.jpg',
+  },
+  {
     path: '/tools/ranzen-packplan',
     title: 'Ranzen-Packplan: Bildkarten für jeden Schultag · Ronki',
     description:
@@ -180,6 +187,13 @@ const ROUTES: RouteMeta[] = [
     description:
       'Schule aus, ankommen, Termine, Hausaufgaben: Leg euren Nachmittag auf ein A4-Blatt und sieh, was nicht zusammenpasst. Kostenlos, ohne Anmeldung.',
     ogImage: '/og-tool-nachmittagsplan.jpg',
+  },
+  {
+    path: '/tools/abend-mit-zwei-kindern',
+    title: 'Abend mit zwei Kindern: wer braucht wann deine Hilfe? · Ronki',
+    description:
+      'Zwei Kinder, ein Erwachsener: Leg beide Abende nebeneinander und sieh, wann dich beide zugleich brauchen. Ein A4-Blatt, kostenlos, ohne Anmeldung.',
+    ogImage: '/og-tool-abend-zwei-kinder.jpg',
   },
   {
     path: '/impressum',

@@ -606,8 +606,8 @@ describe('Nachmittagsplan wiring', () => {
     const links = screen.getAllByRole('link').filter((a) => a.getAttribute('href') === PAGE_PATH);
     expect(links).toHaveLength(1);
     const cards = container.querySelectorAll('ul > li a[href^="/tools/"]');
-    expect(cards).toHaveLength(6);
-    expect(container.textContent).toContain('Diese sechs sind der Anfang.');
+    expect(cards).toHaveLength(7);
+    expect(container.textContent).toContain('Diese sieben sind der Anfang.');
     const description = document.querySelector('meta[name="description"]')?.getAttribute('content') ?? '';
     expect(description).not.toContain('Aktuell: der App-Check');
     expect(description).toContain('Nachmittagsplan');
